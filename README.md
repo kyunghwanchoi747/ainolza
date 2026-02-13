@@ -1,101 +1,62 @@
-# Payload Cloudflare Template
+# 내 지식 카페 (Neaver Cafe 스타일 플랫폼)
 
-[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/payloadcms/payload/tree/main/templates/with-cloudflare-d1)
+## 프로젝트 개요
+- 나만의 인사이트/칼럼 작성 및 공개
+- 프로그램(파일) 배포 (구매자 전용 다운로드)
+- 강의 판매 + 구매자 전용 영상 시청 (Cloudflare Stream)
+- 회원들끼리 소통하는 커뮤니티 공간 (게시판, 댓글, 좋아요)
+- 멤버십 기반 지식 공유 플랫폼 (네이버 카페 느낌)
 
-**This can only be deployed on Paid Workers right now due to size limits.** This template comes configured with the bare minimum to get started on anything you need.
+기술 스택: Cloudflare Pages + Workers + D1 + R2 + Stream + Payload CMS + 아임포트 결제
 
-## Quick start
+## 바이브코딩 로드맵 (항상 이 순서 지키기)
 
-This template can be deployed directly to Cloudflare Workers by clicking the button to take you to the setup screen.
+1. Payload CMS + Cloudflare D1 템플릿 deploy
+   - npx create-payload-app@latest . --template with-cloudflare-d1
 
-From there you can connect your code to a git provider such Github or Gitlab, name your Workers, D1 Database and R2 Bucket as well as attach any additional environment variables or services you need.
+2. Collection 세팅 (관리자 대시보드)
+   - Posts (칼럼/인사이트)
+   - Programs (파일 배포, R2)
+   - Courses (강의, Stream 영상)
+   - CommunityPosts (커뮤니티 게시판)
 
-## Quick Start - local setup
+3. Access Control & 인증
+   - 구매자만 영상/파일 접근 가능 (JWT + signed URL)
 
-To spin up this template locally, follow these steps:
+4. 결제 연동
+   - 아임포트 (국내 PG + PayPal 해외)
+   - webhook → Workers에서 구매 상태 업데이트
 
-### Clone
+5. 영상 & 파일 보호
+   - Cloudflare Stream signed URL (24시간 유효)
+   - R2 presigned URL (프로그램 다운로드)
 
-After you click the `Deploy` button above, you'll want to have standalone copy of this repo on your machine. Cloudflare will connect your app to a git provider such as Github and you can access your code from there.
+6. 커뮤니티 기능
+   - 댓글, 좋아요, 알림 (D1 기반)
 
-### Local Development
+7. SES 메일 트리거
+   - 구매 완료, 새 칼럼 알림
 
-## How it works
+8. 프론트 UI (Pages)
+   - 홈, 칼럼 목록, 커뮤니티, 내 구매/강의 페이지
 
-Out of the box, using [`Wrangler`](https://developers.cloudflare.com/workers/wrangler/) will automatically create local bindings for you to connect to the remote services and it can even create a local mock of the services you're using with Cloudflare.
+9. 배포 & 도메인 전환
+   - wrangler pages deploy
+   - wrangler deploy
+   - 가비아 CNAME → Pages.dev 도메인
 
-We've pre-configured Payload for you with the following:
+10. 테스트 & 롤아웃
+    - 로컬: npm run dev + wrangler dev
+    - 전환 후 301 리다이렉트 설정
 
-### Collections
+## AI 도구 사용 전략
+- Gemini CLI: 80% (프로젝트 생성, 코드 뚝딱)
+- Claude Code: 15% (세밀 로직, 보안, 최적화)
+- Grok CLI: 5% (vibe 아이디어, 빠른 프로토타입)
 
-See the [Collections](https://payloadcms.com/docs/configuration/collections) docs for details on how to extend this functionality.
+## 다음 할 일 (오늘 체크리스트)
+- [x] Payload CMS deploy 완료
+- [x] 첫 칼럼 Collection 만들기
+- [ ] 관리자 대시보드 접속 테스트 (/admin)
 
-- #### Users (Authentication)
-
-  Users are auth-enabled collections that have access to the admin panel.
-
-  For additional help, see the official [Auth Example](https://github.com/payloadcms/payload/tree/main/examples/auth) or the [Authentication](https://payloadcms.com/docs/authentication/overview#authentication-overview) docs.
-
-- #### Media
-
-  This is the uploads enabled collection.
-
-### Image Storage (R2)
-
-Images will be served from an R2 bucket which you can then further configure to use a CDN to serve for your frontend directly.
-
-### D1 Database
-
-The Worker will have direct access to a D1 SQLite database which Wrangler can connect locally to, just note that you won't have a connection string as you would typically with other providers.
-
-You can enable read replicas by adding `readReplicas: 'first-primary'` in the DB adapter and then enabling it on your D1 Cloudflare dashboard. Read more about this feature on [our docs](https://payloadcms.com/docs/database/sqlite#d1-read-replicas).
-
-## Working with Cloudflare
-
-Firstly, after installing dependencies locally you need to authenticate with Wrangler by running:
-
-```bash
-pnpm wrangler login
-```
-
-This will take you to Cloudflare to login and then you can use the Wrangler CLI locally for anything, use `pnpm wrangler help` to see all available options.
-
-Wrangler is pretty smart so it will automatically bind your services for local development just by running `pnpm dev`.
-
-## Deployments
-
-When you're ready to deploy, first make sure you have created your migrations:
-
-```bash
-pnpm payload migrate:create
-```
-
-Then run the following command:
-
-```bash
-pnpm run deploy
-```
-
-This will spin up Wrangler in `production` mode, run any created migrations, build the app and then deploy the bundle up to Cloudflare.
-
-That's it! You can if you wish move these steps into your CI pipeline as well.
-
-## Enabling logs
-
-By default logs are not enabled for your API, we've made this decision because it does run against your quota so we've left it opt-in. But you can easily enable logs in one click in the Cloudflare panel, [see docs](https://developers.cloudflare.com/workers/observability/logs/workers-logs/#enable-workers-logs).
-
-## Known issues
-
-### GraphQL
-
-We are currently waiting on some issues with GraphQL to be [fixed upstream in Workers](https://github.com/cloudflare/workerd/issues/5175) so full support for GraphQL is not currently guaranteed when deployed.
-
-### Worker size limits
-
-We currently recommend deploying this template to the Paid Workers plan due to bundle [size limits](https://developers.cloudflare.com/workers/platform/limits/#worker-size) of 3mb. We're actively trying to reduce our bundle footprint over time to better meet this metric.
-
-This also applies to your own code, in the case of importing a lot of libraries you may find yourself limited by the bundle.
-
-## Questions
-
-If you have any issues or questions, reach out to us on [Discord](https://discord.com/invite/payload) or start a [GitHub discussion](https://github.com/payloadcms/payload/discussions).
+막히면 Gemini 먼저 물어보고, 세밀한 건 Claude로!
