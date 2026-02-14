@@ -28,6 +28,7 @@ jobs:
       
       - name: Generate types
         run: npm run generate:types
+        continue-on-error: true
       
       - name: Deploy database
         run: npm run deploy:database
@@ -35,9 +36,12 @@ jobs:
       
       - name: Build with Next.js
         run: npm run build
+        env:
+          NODE_ENV: production
       
       - name: Build with OpenNext
         run: npx opennextjs-cloudflare build
       
       - name: Deploy to Cloudflare
-        run: npx opennextjs-cloudflare deploy
+        run: npx wrangler deploy --config wrangler.jsonc
+
