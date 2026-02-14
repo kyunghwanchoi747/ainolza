@@ -18,8 +18,8 @@
   "d1_databases": [
     {
       "binding": "D1",
-      "database_id": "DATABASE_ID",
-      "database_name": "my-app",
+      "database_id": "500db49b-960f-4ab2-be5c-cca08de0fba1",
+      "database_name": "ainolzadb",
       "remote": true,
     },
   ],
@@ -75,4 +75,26 @@
   //     ]
   //   }
   // }
+
+  // Production environment
+  "env": {
+    "production": {
+      "name": "my-app",
+      "services": [],
+      "d1_databases": [
+        {
+          "binding": "D1",
+          "database_id": "500db49b-960f-4ab2-be5c-cca08de0fba1",
+          "database_name": "ainolzadb",
+          "remote": true,
+        },
+      ],
+      "r2_buckets": [
+        {
+          "binding": "R2",
+          "bucket_name": "my-app",
+        },
+      ],
+    },
+  },
 }

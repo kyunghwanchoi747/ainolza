@@ -73,6 +73,10 @@ export interface Config {
     programs: Program;
     courses: Course;
     'community-posts': CommunityPost;
+    orders: Order;
+    categories: Category;
+    comments: Comment;
+    inquiries: Inquiry;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -86,6 +90,10 @@ export interface Config {
     programs: ProgramsSelect<false> | ProgramsSelect<true>;
     courses: CoursesSelect<false> | CoursesSelect<true>;
     'community-posts': CommunityPostsSelect<false> | CommunityPostsSelect<true>;
+    orders: OrdersSelect<false> | OrdersSelect<true>;
+    categories: CategoriesSelect<false> | CategoriesSelect<true>;
+    comments: CommentsSelect<false> | CommentsSelect<true>;
+    inquiries: InquiriesSelect<false> | InquiriesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -95,8 +103,12 @@ export interface Config {
     defaultIDType: number;
   };
   fallbackLocale: null;
-  globals: {};
-  globalsSelect: {};
+  globals: {
+    hero: Hero;
+  };
+  globalsSelect: {
+    hero: HeroSelect<false> | HeroSelect<true>;
+  };
   locale: null;
   user: User;
   jobs: {
@@ -128,6 +140,15 @@ export interface UserAuthOperations {
  */
 export interface User {
   id: number;
+  /**
+   * 닉네임을 설정해 주세요.
+   */
+  nickname?: string | null;
+  profileImage?: (number | null) | Media;
+  notificationSettings?: {
+    comments?: boolean | null;
+    marketing?: boolean | null;
+  };
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -201,6 +222,8 @@ export interface Program {
   title: string;
   description?: string | null;
   file: number | Media;
+  link?: string | null;
+  category?: string | null;
   price: number;
   updatedAt: string;
   createdAt: string;
@@ -215,6 +238,14 @@ export interface Course {
   description?: string | null;
   thumbnail?: (number | null) | Media;
   streamId?: string | null;
+  duration?: string | null;
+  level?: ('Beginner' | 'Intermediate' | 'Advanced') | null;
+  tags?:
+    | {
+        tag?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   price: number;
   updatedAt: string;
   createdAt: string;
@@ -243,6 +274,94 @@ export interface CommunityPost {
   };
   author: number | User;
   likes?: number | null;
+  /**
+   * 게시물을 상단에 고정합니다
+   */
+  isPinned?: boolean | null;
+  /**
+   * 자동으로 계산됨
+   */
+  commentsCount?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orders".
+ */
+export interface Order {
+  id: number;
+  customer: number | User;
+  items: (
+    | {
+        relationTo: 'programs';
+        value: number | Program;
+      }
+    | {
+        relationTo: 'courses';
+        value: number | Course;
+      }
+  )[];
+  status: 'pending' | 'paid' | 'cancelled';
+  amount: number;
+  /**
+   * PG transaction ID (e.g., Portone)
+   */
+  paymentID?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories".
+ */
+export interface Category {
+  id: number;
+  title: string;
+  slug: string;
+  type: 'shop' | 'community';
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "comments".
+ */
+export interface Comment {
+  id: number;
+  text: string;
+  user: number | User;
+  content:
+    | {
+        relationTo: 'community-posts';
+        value: number | CommunityPost;
+      }
+    | {
+        relationTo: 'courses';
+        value: number | Course;
+      }
+    | {
+        relationTo: 'programs';
+        value: number | Program;
+      };
+  parentComment?: (number | null) | Comment;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "inquiries".
+ */
+export interface Inquiry {
+  id: number;
+  subject: string;
+  message: string;
+  user: number | User;
+  status?: ('pending' | 'answered') | null;
+  /**
+   * 관리자 답변 내용입니다.
+   */
+  answer?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -293,6 +412,22 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'community-posts';
         value: number | CommunityPost;
+      } | null)
+    | ({
+        relationTo: 'orders';
+        value: number | Order;
+      } | null)
+    | ({
+        relationTo: 'categories';
+        value: number | Category;
+      } | null)
+    | ({
+        relationTo: 'comments';
+        value: number | Comment;
+      } | null)
+    | ({
+        relationTo: 'inquiries';
+        value: number | Inquiry;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -341,6 +476,14 @@ export interface PayloadMigration {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  nickname?: T;
+  profileImage?: T;
+  notificationSettings?:
+    | T
+    | {
+        comments?: T;
+        marketing?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -395,6 +538,8 @@ export interface ProgramsSelect<T extends boolean = true> {
   title?: T;
   description?: T;
   file?: T;
+  link?: T;
+  category?: T;
   price?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -408,6 +553,14 @@ export interface CoursesSelect<T extends boolean = true> {
   description?: T;
   thumbnail?: T;
   streamId?: T;
+  duration?: T;
+  level?: T;
+  tags?:
+    | T
+    | {
+        tag?: T;
+        id?: T;
+      };
   price?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -421,6 +574,57 @@ export interface CommunityPostsSelect<T extends boolean = true> {
   content?: T;
   author?: T;
   likes?: T;
+  isPinned?: T;
+  commentsCount?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orders_select".
+ */
+export interface OrdersSelect<T extends boolean = true> {
+  customer?: T;
+  items?: T;
+  status?: T;
+  amount?: T;
+  paymentID?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories_select".
+ */
+export interface CategoriesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  type?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "comments_select".
+ */
+export interface CommentsSelect<T extends boolean = true> {
+  text?: T;
+  user?: T;
+  content?: T;
+  parentComment?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "inquiries_select".
+ */
+export interface InquiriesSelect<T extends boolean = true> {
+  subject?: T;
+  message?: T;
+  user?: T;
+  status?: T;
+  answer?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -463,6 +667,30 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hero".
+ */
+export interface Hero {
+  id: number;
+  headline: string;
+  subhead?: string | null;
+  backgroundImage?: (number | null) | Media;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hero_select".
+ */
+export interface HeroSelect<T extends boolean = true> {
+  headline?: T;
+  subhead?: T;
+  backgroundImage?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 :root {
   --font-mono: 'Roboto Mono', monospace;
 }
@@ -26,7 +28,7 @@ body {
   line-height: 32px;
 
   margin: 0;
-  color: rgb(1000, 1000, 1000);
+  color: #ffffff;
 
   @media (max-width: 1024px) {
     font-size: 15px;
@@ -72,8 +74,6 @@ p {
 }
 
 a {
-  color: currentColor;
-
   &:focus {
     opacity: 0.8;
     outline: none;

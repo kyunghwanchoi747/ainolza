@@ -7,6 +7,8 @@ import { fileURLToPath } from 'url'
 import { CloudflareContext, getCloudflareContext } from '@opennextjs/cloudflare'
 import { GetPlatformProxyOptions } from 'wrangler'
 import { r2Storage } from '@payloadcms/storage-r2'
+import { seoPlugin } from '@payloadcms/plugin-seo'
+import { searchPlugin } from '@payloadcms/plugin-search'
 
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
@@ -14,7 +16,11 @@ import { Posts } from './collections/Posts'
 import { Programs } from './collections/Programs'
 import { Courses } from './collections/Courses'
 import { CommunityPosts } from './collections/CommunityPosts'
-import migrations from './db/migrations'
+import { Orders } from './collections/Orders'
+import { Categories } from './collections/Categories'
+import { Comments } from './collections/Comments'
+import { Inquiries } from './collections/Inquiries'
+import { Hero } from './globals/Hero'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -23,10 +29,26 @@ const realpath = (value: string) => (fs.existsSync(value) ? fs.realpathSync(valu
 const isCLI = process.argv.some((value) => realpath(value).endsWith(path.join('payload', 'bin.js')))
 const isProduction = process.env.NODE_ENV === 'production'
 
-const cloudflare =
-  isCLI || !isProduction
-    ? await getCloudflareContextFromWrangler()
-    : await getCloudflareContext({ async: true })
+console.log('--- Initializing Payload Config ---')
+console.log('isCLI:', isCLI)
+console.log('isProduction:', isProduction)
+
+let cloudflare: CloudflareContext
+
+if (isCLI || !isProduction) {
+  const globalAny: any = global
+  if (!globalAny.cloudflare) {
+    console.log('Fetching Cloudflare Context from Wrangler...')
+    globalAny.cloudflare = await getCloudflareContextFromWrangler()
+    console.log('Cloudflare Context Fetched.')
+  } else {
+    console.log('Using Cached Cloudflare Context.')
+  }
+  cloudflare = globalAny.cloudflare
+} else {
+  console.log('Using Production Cloudflare Context.')
+  cloudflare = await getCloudflareContext({ async: true })
+}
 
 export default buildConfig({
   admin: {
@@ -35,9 +57,21 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, Posts, Programs, Courses, CommunityPosts],
+  collections: [
+    Users,
+    Media,
+    Posts,
+    Programs,
+    Courses,
+    CommunityPosts,
+    Orders,
+    Categories,
+    Comments,
+    Inquiries,
+  ],
+  globals: [Hero],
   editor: lexicalEditor(),
-  secret: process.env.PAYLOAD_SECRET || '',
+  secret: process.env.PAYLOAD_SECRET || 'YOUR_SECRET_HERE_FOR_DEV',
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
@@ -45,10 +79,18 @@ export default buildConfig({
     binding: cloudflare.env.D1,
   }),
   plugins: [
+    /*
     r2Storage({
       bucket: cloudflare.env.R2,
       collections: { media: true },
     }),
+    seoPlugin({
+      collections: ['posts', 'courses', 'programs', 'community-posts', 'categories'],
+      uploadsCollection: 'media',
+      generateTitle: ({ doc }: any) => `AI Nolja - ${doc?.title || 'Home'}`,
+      generateDescription: ({ doc }: any) => doc?.description,
+    }),
+    */
   ],
 })
 

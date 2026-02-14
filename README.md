@@ -20,8 +20,9 @@
    - Courses (강의, Stream 영상)
    - CommunityPosts (커뮤니티 게시판)
 
-3. Access Control & 인증
+- [x] Access Control & 인증
    - 구매자만 영상/파일 접근 가능 (JWT + signed URL)
+   - Orders 컬렉션 추가 완료 
 
 4. 결제 연동
    - 아임포트 (국내 PG + PayPal 해외)

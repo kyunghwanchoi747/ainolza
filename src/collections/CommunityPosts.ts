@@ -33,5 +33,22 @@ export const CommunityPosts: CollectionConfig = {
         readOnly: true,
       },
     },
+    {
+      name: 'isPinned',
+      type: 'checkbox',
+      defaultValue: false,
+      admin: {
+        description: '게시물을 상단에 고정합니다',
+      },
+    },
+    {
+      name: 'commentsCount',
+      type: 'number',
+      defaultValue: 0,
+      admin: {
+        readOnly: true,
+        description: '자동으로 계산됨',
+      },
+    },
   ],
 }

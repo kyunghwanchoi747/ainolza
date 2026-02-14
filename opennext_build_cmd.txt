@@ -1,0 +1,12 @@
+
+┌─────────────────────────────┐
+│ OpenNext — Cloudflare build │
+└─────────────────────────────┘
+
+WARN OpenNext is not fully compatible with Windows.
+WARN For optimal performance, it is recommended to use Windows Subsystem for Linux (WSL).
+WARN While OpenNext may function on Windows, it could encounter unpredictable failures during runtime.
+App directory: C:\Users\USER\Desktop\AI놀자 홈페이지 이전
+Next.js version : 15.4.11
+@opennextjs/cloudflare version: 1.16.4
+@opennextjs/aws version: 3.9.16
