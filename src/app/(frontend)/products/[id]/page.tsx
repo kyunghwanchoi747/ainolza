@@ -14,26 +14,28 @@ import {
 } from 'lucide-react'
 
 export default async function ProgramDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params
-  const payloadConfig = await config
-  const payload = await getPayload({ config: payloadConfig })
+  try {
+    const { id } = await params
+    const payload = await getPayload({ config })
 
-  const [program, comments] = await Promise.all([
-    payload.findByID({
-      collection: 'programs',
-      id,
-    }),
-    payload.find({
-      collection: 'comments',
-      where: { content: { equals: id } },
-      sort: '-createdAt',
-      depth: 1,
-    }),
-  ])
+    const [program, commentsResult] = await Promise.all([
+      payload.findByID({
+        collection: 'programs',
+        id,
+      }),
+      payload.find({
+        collection: 'comments',
+        where: { content: { equals: id } },
+        sort: '-createdAt',
+        depth: 1,
+      }),
+    ])
 
-  if (!program) {
-    return <div>Program not found</div>
-  }
+    if (!program) {
+      return <div>Program not found</div>
+    }
+    
+    const comments = commentsResult.docs || []
 
   const hasAccess = !!program.file
 
@@ -220,6 +222,20 @@ export default async function ProgramDetailPage({ params }: { params: Promise<{ 
           </aside>
         </div>
       </div>
+      </div>
     </div>
   )
+  } catch (error) {
+    console.error('Error loading program:', error)
+    return (
+      <div className="min-h-screen bg-black pt-20">
+        <div className="container mx-auto px-6 py-12">
+          <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-8 text-center">
+            <h1 className="text-2xl font-bold text-red-400 mb-2">상품 로드 실패</h1>
+            <p className="text-gray-400">상품을 불러올 수 없습니다. 잠시 후 다시 시도해주세요.</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
 }
