@@ -50,6 +50,34 @@
     - 로컬: npm run dev + wrangler dev
     - 전환 후 301 리다이렉트 설정
 
+## 📋 배포 현황 & 도메인 전환 계획
+
+### 현재 상황
+- **도메인**: ainolja.com (아임웹에서 관리 중)
+- **기존 웹사이트**: 아임웹 호스팅 (운영 중)
+- **새 웹사이트**: Cloudflare Pages + Workers + D1에서 구축 중
+- **상태**: 기존 도메인 유지한 채로 새 웹 구축 → 완료 후 도메인 전환 예정
+
+### 배포 방법 (Windows에서 유효)
+1. **GitHub Actions 자동 배포** (권장)
+   ```bash
+   # 코드 변경 후 push만 하면 자동 배포됨
+   git add .
+   git commit -m "변경사항"
+   git push origin master
+   ```
+   
+2. **GitHub Secrets 설정 필요**
+   - `CLOUDFLARE_API_TOKEN`: Cloudflare API 토큰
+   - `CLOUDFLARE_ACCOUNT_ID`: 500db49b960f4ab2be5ccca08de0fba1
+
+### 향후 도메인 전환 절차
+1. 새 웹사이트 완전히 검증 (모든 기능 테스트)
+2. Cloudflare에 도메인 추가 (https://dash.cloudflare.com)
+3. 아임웹에서 네임서버 변경
+4. DNS 전파 대기 (24-48시간)
+5. 새 웹사이트가 ainolja.com에서 서빙됨
+
 ## AI 도구 사용 전략
 - Gemini CLI: 80% (프로젝트 생성, 코드 뚝딱)
 - Claude Code: 15% (세밀 로직, 보안, 최적화)
