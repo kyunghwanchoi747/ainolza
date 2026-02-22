@@ -2,6 +2,32 @@ import type { CollectionConfig } from 'payload'
 
 export const Orders: CollectionConfig = {
   slug: 'orders',
+  hooks: {
+    afterChange: [
+      async ({ doc, operation, req }) => {
+        if (operation !== 'create') return
+        try {
+          const customerName =
+            typeof doc.customer === 'object'
+              ? (doc.customer?.nickname || doc.customer?.email || '고객')
+              : '고객'
+          await req.payload.create({
+            collection: 'notifications',
+            data: {
+              type: 'new_order',
+              title: '신규 주문',
+              body: `${customerName}님이 ${(doc.amount ?? 0).toLocaleString()}원 주문했어요.`,
+              isRead: false,
+              relatedId: String(doc.id),
+              href: '/manager/shopping/orders',
+            },
+          })
+        } catch (err) {
+          console.error('[Notifications] new_order 알림 생성 실패:', err)
+        }
+      },
+    ],
+  },
   admin: {
     useAsTitle: 'id',
     group: '브랜드 운영',

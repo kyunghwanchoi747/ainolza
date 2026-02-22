@@ -80,6 +80,8 @@ export interface Config {
     categories: Category;
     inquiries: Inquiry;
     'site-stats': SiteStat;
+    notifications: Notification;
+    pages: Page;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -100,6 +102,8 @@ export interface Config {
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     inquiries: InquiriesSelect<false> | InquiriesSelect<true>;
     'site-stats': SiteStatsSelect<false> | SiteStatsSelect<true>;
+    notifications: NotificationsSelect<false> | NotificationsSelect<true>;
+    pages: PagesSelect<false> | PagesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -493,6 +497,51 @@ export interface SiteStat {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "notifications".
+ */
+export interface Notification {
+  id: number;
+  type: 'user_signup' | 'new_order' | 'new_inquiry';
+  title: string;
+  body?: string | null;
+  isRead?: boolean | null;
+  relatedId?: string | null;
+  href?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages".
+ */
+export interface Page {
+  id: number;
+  title: string;
+  /**
+   * 예: about, landing-2024 (영문, 하이픈 허용)
+   */
+  slug: string;
+  status?: ('draft' | 'published') | null;
+  seoTitle?: string | null;
+  seoDescription?: string | null;
+  seoKeywords?: string | null;
+  /**
+   * 디자인 모드에서 자동으로 관리됩니다.
+   */
+  puckData?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -566,6 +615,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'site-stats';
         value: number | SiteStat;
+      } | null)
+    | ({
+        relationTo: 'notifications';
+        value: number | Notification;
+      } | null)
+    | ({
+        relationTo: 'pages';
+        value: number | Page;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -831,6 +888,35 @@ export interface SiteStatsSelect<T extends boolean = true> {
   pageViews?: T;
   newOrders?: T;
   revenue?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "notifications_select".
+ */
+export interface NotificationsSelect<T extends boolean = true> {
+  type?: T;
+  title?: T;
+  body?: T;
+  isRead?: T;
+  relatedId?: T;
+  href?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages_select".
+ */
+export interface PagesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  status?: T;
+  seoTitle?: T;
+  seoDescription?: T;
+  seoKeywords?: T;
+  puckData?: T;
   updatedAt?: T;
   createdAt?: T;
 }

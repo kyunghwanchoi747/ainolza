@@ -1,6 +1,7 @@
 import { getPayload } from '@/lib/payload'
 import Link from 'next/link'
 import { ArrowLeft, Clock, User, Lock, MessageSquare } from 'lucide-react'
+import { AddToCartButton } from '@/components/AddToCartButton'
 
 export default async function CourseDetailPage({ params }: { params: Promise<{ id: string }> }) {
   try {
@@ -77,10 +78,16 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                       <p className="text-gray-400 mb-6 font-medium">
                         이 강의를 시청하려면 구매가 필요합니다.
                       </p>
-                      <button className="rounded-xl bg-blue-600 px-8 py-3 text-sm font-bold text-white hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/20">
-                        강의 구매하기 (
-                        {course.price ? `${course.price.toLocaleString()}원` : '무료'})
-                      </button>
+                      <AddToCartButton
+                        item={{
+                          id: String(course.id),
+                          productType: 'courses',
+                          title: course.title,
+                          price: course.price ?? 0,
+                        }}
+                        label={`강의 구매하기 (${course.price ? `${course.price.toLocaleString()}원` : '무료'})`}
+                        className="rounded-xl bg-blue-600 px-8 py-3 text-sm font-bold text-white hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/20 flex items-center gap-2"
+                      />
                     </div>
                   </div>
                 )}
@@ -204,9 +211,24 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                   </div>
                 </div>
 
-                <button className="mt-8 w-full rounded-xl bg-white py-3 text-sm font-black text-black hover:scale-105 transition-transform active:scale-95">
-                  {hasAccess ? '수강 중인 강의입니다' : '지금 수강 신청하기'}
-                </button>
+                {hasAccess ? (
+                  <button className="mt-8 w-full rounded-xl bg-white py-3 text-sm font-black text-black cursor-default">
+                    수강 중인 강의입니다
+                  </button>
+                ) : (
+                  <div className="mt-8">
+                    <AddToCartButton
+                      item={{
+                        id: String(course.id),
+                        productType: 'courses',
+                        title: course.title,
+                        price: course.price ?? 0,
+                      }}
+                      label="지금 수강 신청하기"
+                      className="w-full rounded-xl bg-white py-3 text-sm font-black text-black hover:scale-105 transition-transform active:scale-95 flex items-center justify-center gap-2"
+                    />
+                  </div>
+                )}
               </div>
             </aside>
           </div>

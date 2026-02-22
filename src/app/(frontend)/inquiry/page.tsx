@@ -1,7 +1,34 @@
 import React from 'react'
-import { HelpCircle, Mail, Send, CheckCircle2 } from 'lucide-react'
+import { HelpCircle, Mail, CheckCircle2 } from 'lucide-react'
+import { getPayload } from '@/lib/payload'
+import { Render } from '@puckeditor/core'
+import type { Data } from '@puckeditor/core'
+import { puckConfig } from '@/lib/puck/config'
+import '@puckeditor/core/dist/index.css'
+import { InquiryForm } from '@/components/InquiryForm'
 
-export default function InquiryPage() {
+async function getPageBanner(slug: string) {
+  try {
+    const payload = await getPayload()
+    const result = await (payload as any).find({
+      collection: 'pages',
+      where: { slug: { equals: slug }, status: { equals: 'published' } },
+      limit: 1,
+    })
+    return result.docs[0] ?? null
+  } catch {
+    return null
+  }
+}
+
+export default async function InquiryPage() {
+  const puckPage = await getPageBanner('inquiry')
+
+  // 문의하기는 정적 페이지라 Puck으로 전체 대체 가능
+  if (puckPage?.puckData) {
+    return <Render config={puckConfig} data={puckPage.puckData as Data} />
+  }
+
   return (
     <div className="min-h-screen bg-black">
       <div className="container mx-auto px-6 py-16">
@@ -61,49 +88,7 @@ export default function InquiryPage() {
 
             {/* Inquiry Form */}
             <div className="lg:col-span-2">
-              <form className="rounded-[3rem] border border-white/10 bg-white/5 p-10 shadow-2xl space-y-8">
-                <div className="space-y-4">
-                  <label className="text-xs font-black uppercase tracking-widest text-gray-500 ml-2">
-                    문의 유형
-                  </label>
-                  <select className="w-full rounded-2xl border border-white/10 bg-black/50 px-6 py-4 text-sm text-white focus:border-blue-500 focus:outline-none transition-colors appearance-none">
-                    <option>강의 관련 문의</option>
-                    <option>결제/환불 문의</option>
-                    <option>커뮤니티 이용 문의</option>
-                    <option>기타 일반 문의</option>
-                  </select>
-                </div>
-
-                <div className="space-y-4">
-                  <label className="text-xs font-black uppercase tracking-widest text-gray-500 ml-2">
-                    문의 제목
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="제목을 입력해 주세요"
-                    className="w-full rounded-2xl border border-white/10 bg-black/50 px-6 py-4 text-sm text-white focus:border-blue-500 focus:outline-none transition-colors"
-                  />
-                </div>
-
-                <div className="space-y-4">
-                  <label className="text-xs font-black uppercase tracking-widest text-gray-500 ml-2">
-                    문의 내용
-                  </label>
-                  <textarea
-                    rows={6}
-                    placeholder="상세 내용을 입력해 주세요. (가급적 구체적으로 적어주시면 빠른 답변이 가능합니다.)"
-                    className="w-full rounded-3xl border border-white/10 bg-black/50 px-6 py-4 text-sm text-white focus:border-blue-500 focus:outline-none transition-colors resize-none"
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  className="flex w-full items-center justify-center gap-2 rounded-2xl bg-white py-5 text-sm font-black text-black transition-all hover:scale-[1.02] active:scale-[0.98]"
-                >
-                  <Send className="h-4 w-4" />
-                  문의 내용 전송하기
-                </button>
-              </form>
+              <InquiryForm />
             </div>
           </div>
         </div>

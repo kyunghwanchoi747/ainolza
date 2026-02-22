@@ -2,39 +2,62 @@ import { getPayload } from '@/lib/payload'
 import Link from 'next/link'
 import { PlayCircle, Clock, Search, BookOpen, User } from 'lucide-react'
 import type { Course } from '@/payload-types'
+import { Render } from '@puckeditor/core'
+import type { Data } from '@puckeditor/core'
+import { puckConfig } from '@/lib/puck/config'
+import '@puckeditor/core/dist/index.css'
 
-export default async function CoursesPage() {
+async function getPageBanner(slug: string) {
   try {
     const payload = await getPayload()
+    const result = await (payload as any).find({
+      collection: 'pages',
+      where: { slug: { equals: slug }, status: { equals: 'published' } },
+      limit: 1,
+    })
+    return result.docs[0] ?? null
+  } catch {
+    return null
+  }
+}
 
+export default async function CoursesPage() {
+  const banner = await getPageBanner('courses')
+
+  try {
+    const payload = await getPayload()
     const { docs: courses } = await payload.find({ collection: 'courses' })
 
     return (
       <div className="min-h-screen bg-black">
-        {/* Search & Intro */}
-        <section className="border-b border-white/10 bg-white/5 py-12">
-          <div className="container mx-auto px-6">
-            <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
-              <div>
-                <h1 className="text-4xl font-black tracking-tight text-white">AI 놀자 강의실</h1>
-                <p className="mt-2 text-gray-400">나의 속도에 맞춰 성장하는 AI 실무 러닝 플랫폼</p>
-              </div>
-              <div className="flex w-full max-w-md items-center gap-2 rounded-2xl border border-white/10 bg-black/50 px-4 py-2">
-                <Search className="h-5 w-5 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="어떤 기술을 배우고 싶으신가요?"
-                  className="w-full bg-transparent py-2 text-sm text-white focus:outline-none"
-                />
+        {/* 배너: Puck 또는 기본 헤더 */}
+        {banner?.puckData ? (
+          <Render config={puckConfig} data={banner.puckData as Data} />
+        ) : (
+          <section className="border-b border-white/10 bg-white/5 py-12">
+            <div className="container mx-auto px-6">
+              <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
+                <div>
+                  <h1 className="text-4xl font-black tracking-tight text-white">AI 놀자 강의실</h1>
+                  <p className="mt-2 text-gray-400">나의 속도에 맞춰 성장하는 AI 실무 러닝 플랫폼</p>
+                </div>
+                <div className="flex w-full max-w-md items-center gap-2 rounded-2xl border border-white/10 bg-black/50 px-4 py-2">
+                  <Search className="h-5 w-5 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="어떤 기술을 배우고 싶으신가요?"
+                    className="w-full bg-transparent py-2 text-sm text-white focus:outline-none"
+                  />
+                </div>
               </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
 
         {/* Main Content */}
         <div className="container mx-auto px-6 py-12">
           <div className="flex flex-col lg:flex-row gap-8">
-            {/* Sidebar / Categories */}
+            {/* Sidebar */}
             <aside className="w-full lg:w-64 space-y-6">
               <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
                 <h3 className="flex items-center gap-2 font-bold text-white mb-4">
@@ -83,18 +106,14 @@ export default async function CoursesPage() {
                         <h2 className="text-xl font-bold leading-tight group-hover:text-blue-400 transition-colors">
                           {course.title}
                         </h2>
-                        <p className="mt-2 text-sm text-gray-400 line-clamp-2">
-                          {course.description}
-                        </p>
+                        <p className="mt-2 text-sm text-gray-400 line-clamp-2">{course.description}</p>
 
                         <div className="mt-6 flex items-center justify-between border-t border-white/5 pt-6">
                           <div className="flex items-center gap-2">
                             <div className="h-8 w-8 rounded-full bg-blue-600/20 flex items-center justify-center">
                               <User className="h-4 w-4 text-blue-400" />
                             </div>
-                            <span className="text-xs font-medium text-gray-300">
-                              AI Nolja Instructor
-                            </span>
+                            <span className="text-xs font-medium text-gray-300">AI Nolja Instructor</span>
                           </div>
                           <Link
                             href={`/courses/${course.id}`}

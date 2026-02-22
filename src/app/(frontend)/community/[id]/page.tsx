@@ -34,7 +34,14 @@ export default async function CommunityPostPage({ params }: { params: Promise<{ 
     })
     const comments = commentsResult.docs || []
 
-    const categories: { docs: any[] } = { docs: [] }
+    let categories: { docs: any[] } = { docs: [] }
+    try {
+      const catResult = await payload.find({
+        collection: 'categories',
+        where: { type: { equals: 'community' } },
+      })
+      categories = { docs: catResult.docs }
+    } catch {}
 
     return (
       <div className="min-h-screen bg-black">

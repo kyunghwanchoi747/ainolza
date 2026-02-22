@@ -3,7 +3,7 @@ export interface NavItem {
   label: string
   href?: string
   icon: string
-  badge?: 'pendingOrders' | 'pendingInquiries' | 'customerCount'
+  badge?: 'pendingOrders' | 'pendingInquiries' | 'customerCount' | 'unreadNotifications'
   isNew?: boolean
   external?: boolean
   children?: NavItem[]
@@ -23,6 +23,19 @@ export const MANAGER_NAV: NavGroup[] = [
         label: '대시보드',
         href: '/manager',
         icon: 'LayoutDashboard',
+      },
+      {
+        id: 'design',
+        label: '디자인 모드',
+        href: '/manager/design',
+        icon: 'Paintbrush',
+      },
+      {
+        id: 'notifications',
+        label: '알림',
+        href: '/manager/notifications',
+        icon: 'Bell',
+        badge: 'unreadNotifications',
       },
       {
         id: 'customers',

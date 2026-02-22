@@ -5,11 +5,11 @@ import {
   Download,
   FileText,
   Lock,
-  ShoppingCart,
   CheckCircle,
   MessageSquare,
   User,
 } from 'lucide-react'
+import { AddToCartButton } from '@/components/AddToCartButton'
 
 export default async function ProgramDetailPage({ params }: { params: Promise<{ id: string }> }) {
   try {
@@ -210,10 +210,14 @@ export default async function ProgramDetailPage({ params }: { params: Promise<{ 
                     </button>
                   )
                 ) : (
-                  <button className="flex w-full items-center justify-center gap-2 rounded-xl bg-white py-4 text-sm font-black text-black hover:bg-gray-100 transition-colors shadow-xl">
-                    <ShoppingCart className="h-5 w-5" />
-                    구매하기
-                  </button>
+                  <AddToCartButton
+                    item={{
+                      id: String(program.id),
+                      productType: 'programs',
+                      title: program.title,
+                      price: program.price ?? 0,
+                    }}
+                  />
                 )}
 
                 {!hasAccess && (

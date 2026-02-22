@@ -14,7 +14,7 @@ async function getNavItems() {
       return nav.items.map((item: any) => ({
         name: item.label,
         href: item.link,
-        icon: item.icon || 'Rocket', // Pass string instead of component
+        icon: item.icon || 'Rocket',
       }))
     }
   } catch (err) {
@@ -30,7 +30,7 @@ async function getNavItems() {
   ]
 }
 
-export async function Header({ user }: { user?: any }) {
+export async function Header() {
   const navItems = await getNavItems()
-  return <HeaderClient user={user} navItems={navItems} />
+  return <HeaderClient navItems={navItems} />
 }

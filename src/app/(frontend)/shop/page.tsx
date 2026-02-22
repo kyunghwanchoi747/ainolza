@@ -1,18 +1,36 @@
 import { getPayload } from '@/lib/payload'
 import Link from 'next/link'
-import { Search, SlidersHorizontal, ShoppingCart } from 'lucide-react'
+import { Search, SlidersHorizontal } from 'lucide-react'
 import type { Category, Course, Program } from '@/payload-types'
+import { Render } from '@puckeditor/core'
+import type { Data } from '@puckeditor/core'
+import { puckConfig } from '@/lib/puck/config'
+import '@puckeditor/core/dist/index.css'
+import { AddToCartButton } from '@/components/AddToCartButton'
+
+async function getPageBanner(slug: string) {
+  try {
+    const payload = await getPayload()
+    const result = await (payload as any).find({
+      collection: 'pages',
+      where: { slug: { equals: slug }, status: { equals: 'published' } },
+      limit: 1,
+    })
+    return result.docs[0] ?? null
+  } catch {
+    return null
+  }
+}
 
 export default async function ShopPage() {
+  const banner = await getPageBanner('store')
+
   try {
     const payload = await getPayload()
 
-    // Fetch categories specifically for the shop
     const { docs: categoryDocs } = await payload.find({
       collection: 'categories',
-      where: {
-        type: { equals: 'shop' },
-      },
+      where: { type: { equals: 'shop' } },
     })
 
     const { docs: courseDocs } = await payload.find({ collection: 'courses' })
@@ -26,45 +44,49 @@ export default async function ShopPage() {
 
     return (
       <div className="min-h-screen bg-black">
-        {/* Header & Filter Section */}
-        <section className="border-b border-white/10 bg-white/5 py-12">
-          <div className="container mx-auto px-6">
-            <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
-              <div>
-                <h1 className="text-4xl font-black tracking-tight text-white">AI 놀자 스토어</h1>
-                <p className="mt-2 text-gray-400">
-                  당신의 성장을 도울 선별된 강의와 도구를 만나보세요.
-                </p>
+        {/* 배너: Puck 또는 기본 헤더 */}
+        {banner?.puckData ? (
+          <Render config={puckConfig} data={banner.puckData as Data} />
+        ) : (
+          <section className="border-b border-white/10 bg-white/5 py-12">
+            <div className="container mx-auto px-6">
+              <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
+                <div>
+                  <h1 className="text-4xl font-black tracking-tight text-white">AI 놀자 스토어</h1>
+                  <p className="mt-2 text-gray-400">
+                    당신의 성장을 도울 선별된 강의와 도구를 만나보세요.
+                  </p>
+                </div>
+                <div className="flex w-full max-w-md items-center gap-2 rounded-2xl border border-white/10 bg-black/50 px-4 py-2">
+                  <Search className="h-5 w-5 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="어떤 지식을 찾으시나요?"
+                    className="w-full bg-transparent py-2 text-sm text-white focus:outline-none"
+                  />
+                </div>
               </div>
-              <div className="flex w-full max-w-md items-center gap-2 rounded-2xl border border-white/10 bg-black/50 px-4 py-2">
-                <Search className="h-5 w-5 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="어떤 지식을 찾으시나요?"
-                  className="w-full bg-transparent py-2 text-sm text-white focus:outline-none"
-                />
-              </div>
-            </div>
 
-            <div className="mt-8 flex flex-wrap gap-3">
-              <button className="rounded-full bg-blue-600 px-6 py-2 text-sm font-bold text-white shadow-lg shadow-blue-500/20">
-                전체
-              </button>
-              {categoryDocs.map((cat: Category) => (
-                <button
-                  key={cat.id}
-                  className="rounded-full border border-white/10 bg-white/5 px-6 py-2 text-sm font-medium text-white transition-all hover:bg-white/10 hover:border-white/20"
-                >
-                  {cat.title}
+              <div className="mt-8 flex flex-wrap gap-3">
+                <button className="rounded-full bg-blue-600 px-6 py-2 text-sm font-bold text-white shadow-lg shadow-blue-500/20">
+                  전체
                 </button>
-              ))}
-              <button className="ml-auto flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-white/10">
-                <SlidersHorizontal className="h-4 w-4" />
-                필터
-              </button>
+                {categoryDocs.map((cat: Category) => (
+                  <button
+                    key={cat.id}
+                    className="rounded-full border border-white/10 bg-white/5 px-6 py-2 text-sm font-medium text-white transition-all hover:bg-white/10 hover:border-white/20"
+                  >
+                    {cat.title}
+                  </button>
+                ))}
+                <button className="ml-auto flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-white/10">
+                  <SlidersHorizontal className="h-4 w-4" />
+                  필터
+                </button>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
 
         {/* Product List Section */}
         <section className="container mx-auto px-6 py-12">
@@ -80,7 +102,6 @@ export default async function ShopPage() {
                   }
                   className="group relative flex flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-white/5 transition-all hover:border-blue-500/50 hover:bg-white/10"
                 >
-                  {/* Badges */}
                   <div className="absolute left-4 top-4 z-10 flex gap-2">
                     <span className="rounded-full bg-blue-600 px-3 py-1 text-[10px] font-black uppercase tracking-tighter text-white">
                       BEST
@@ -114,9 +135,16 @@ export default async function ShopPage() {
                           {product.price === 0 ? '무료' : `${product.price.toLocaleString()}원`}
                         </span>
                       </div>
-                      <button className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-black transition-all hover:scale-110 hover:bg-blue-600 hover:text-white group-active:scale-95">
-                        <ShoppingCart className="h-5 w-5" />
-                      </button>
+                      <AddToCartButton
+                        item={{
+                          id: String(product.id),
+                          productType: product.productType === 'course' ? 'courses' : 'programs',
+                          title: product.title,
+                          price: product.price ?? 0,
+                        }}
+                        className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-black transition-all hover:scale-110 hover:bg-blue-600 hover:text-white group-active:scale-95"
+                        label=""
+                      />
                     </div>
                   </div>
                 </Link>

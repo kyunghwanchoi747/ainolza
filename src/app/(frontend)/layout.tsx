@@ -2,6 +2,7 @@ import React from 'react'
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
 import { StatsTracker } from '@/components/StatsTracker'
+import { CartProvider } from '@/components/CartProvider'
 import './styles.css'
 
 export const metadata = {
@@ -9,17 +10,18 @@ export const metadata = {
   title: 'AI 놀자',
 }
 
-export default async function RootLayout(props: { children: React.ReactNode }) {
+export default function RootLayout(props: { children: React.ReactNode }) {
   const { children } = props
-  const user: null = null // Temporarily disabling auth check for performance
 
   return (
     <html lang="ko">
       <body className="bg-black text-white antialiased">
-        <StatsTracker />
-        <Header user={user} />
-        <main className="min-h-screen pt-20">{children}</main>
-        <Footer />
+        <CartProvider>
+          <StatsTracker />
+          <Header />
+          <main className="min-h-screen pt-20">{children}</main>
+          <Footer />
+        </CartProvider>
       </body>
     </html>
   )

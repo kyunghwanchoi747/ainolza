@@ -25,6 +25,8 @@ import { MainNav } from './globals/MainNav'
 
 import { Products } from './collections/Products'
 import { Reviews } from './collections/Reviews'
+import { Notifications } from './collections/Notifications'
+import { Pages } from './collections/Pages'
 import { SEOSettings } from './globals/SEOSettings'
 import { PaymentSettings } from './globals/PaymentSettings'
 import { ShopSettings } from './globals/ShopSettings'
@@ -97,6 +99,8 @@ export default buildConfig({
     Categories,
     Inquiries,
     SiteStats,
+    Notifications,
+    Pages,
   ],
   globals: [Hero, MainNav, ShopSettings, SEOSettings, PaymentSettings, MessageSettings],
   editor: lexicalEditor(),

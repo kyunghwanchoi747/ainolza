@@ -1,8 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { PanelLeftClose, PanelLeftOpen } from 'lucide-react'
+import { PanelLeftClose, PanelLeftOpen, ExternalLink } from 'lucide-react'
 import { motion } from 'framer-motion'
+import Link from 'next/link'
 import { cn } from '@/lib/manager/cn'
 import { MANAGER_NAV } from '@/lib/manager/navigation'
 import { SidebarGroup } from './SidebarGroup'
@@ -11,9 +12,10 @@ import { SidebarCollapsible } from './SidebarCollapsible'
 
 interface SidebarProps {
   badges?: Record<string, number>
+  siteTitle?: string
 }
 
-export function Sidebar({ badges }: SidebarProps) {
+export function Sidebar({ badges, siteTitle = 'AI놀자' }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false)
 
   return (
@@ -30,12 +32,28 @@ export function Sidebar({ badges }: SidebarProps) {
         )}
       >
         {!collapsed && (
-          <div className="flex items-center gap-2 min-w-0">
+          <Link
+            href="/"
+            target="_blank"
+            className="group flex items-center gap-2 min-w-0 rounded-lg px-1 py-1 hover:bg-slate-50 transition-colors"
+            title="홈페이지 보기"
+          >
             <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center shrink-0">
               <span className="text-white text-xs font-bold">AI</span>
             </div>
-            <span className="font-semibold text-slate-800 truncate text-sm">AI놀자</span>
-          </div>
+            <span className="font-semibold text-slate-800 truncate text-sm">{siteTitle}</span>
+            <ExternalLink size={11} className="shrink-0 text-slate-300 group-hover:text-blue-500 transition-colors" />
+          </Link>
+        )}
+        {collapsed && (
+          <Link
+            href="/"
+            target="_blank"
+            className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center shrink-0 hover:bg-blue-700 transition-colors"
+            title="홈페이지 보기"
+          >
+            <span className="text-white text-xs font-bold">AI</span>
+          </Link>
         )}
         <button
           onClick={() => setCollapsed((v) => !v)}

@@ -3,8 +3,28 @@ import Link from 'next/link'
 import { MessageSquare, Search, User } from 'lucide-react'
 import type { CommunityPost } from '@/payload-types'
 import { CommunitySidebar } from '@/components/CommunitySidebar'
+import { Render } from '@puckeditor/core'
+import type { Data } from '@puckeditor/core'
+import { puckConfig } from '@/lib/puck/config'
+import '@puckeditor/core/dist/index.css'
+
+async function getPageBanner(slug: string) {
+  try {
+    const payload = await getPayload()
+    const result = await (payload as any).find({
+      collection: 'pages',
+      where: { slug: { equals: slug }, status: { equals: 'published' } },
+      limit: 1,
+    })
+    return result.docs[0] ?? null
+  } catch {
+    return null
+  }
+}
 
 export default async function CommunityPage() {
+  const banner = await getPageBanner('community')
+
   try {
     const payload = await getPayload()
 
@@ -20,28 +40,30 @@ export default async function CommunityPage() {
 
     return (
       <div className="min-h-screen bg-black">
-        {/* Community Hero */}
-        <section className="border-b border-white/10 bg-white/5 py-8">
-          <div className="container mx-auto px-6">
-            <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-              <h1 className="text-3xl font-black text-white">커뮤니티 광장</h1>
-              <div className="flex w-full max-w-md items-center gap-2 rounded-xl border border-white/10 bg-black/50 px-4 py-2">
-                <Search className="h-4 w-4 text-gray-500" />
-                <input
-                  type="text"
-                  placeholder="관심 있는 주제를 검색해 보세요"
-                  className="w-full bg-transparent text-sm text-white focus:outline-none"
-                />
+        {/* 배너: Puck 또는 기본 헤더 */}
+        {banner?.puckData ? (
+          <Render config={puckConfig} data={banner.puckData as Data} />
+        ) : (
+          <section className="border-b border-white/10 bg-white/5 py-8">
+            <div className="container mx-auto px-6">
+              <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
+                <h1 className="text-3xl font-black text-white">커뮤니티 광장</h1>
+                <div className="flex w-full max-w-md items-center gap-2 rounded-xl border border-white/10 bg-black/50 px-4 py-2">
+                  <Search className="h-4 w-4 text-gray-500" />
+                  <input
+                    type="text"
+                    placeholder="관심 있는 주제를 검색해 보세요"
+                    className="w-full bg-transparent text-sm text-white focus:outline-none"
+                  />
+                </div>
               </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
 
         <div className="container mx-auto flex flex-col gap-8 px-6 py-10 lg:flex-row">
-          {/* Sidebar (Cafe Style) */}
           <CommunitySidebar categories={{ docs: categoryDocs }} />
 
-          {/* Main Content */}
           <main className="flex-grow">
             <div className="rounded-[2.5rem] border border-white/10 bg-white/5 overflow-hidden shadow-2xl">
               <div className="overflow-x-auto">
@@ -125,9 +147,7 @@ export default async function CommunityPage() {
         <div className="container mx-auto px-6 py-12">
           <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-8 text-center">
             <h1 className="text-2xl font-bold text-red-400 mb-2">커뮤니티 로드 실패</h1>
-            <p className="text-gray-400">
-              커뮤니티를 불러올 수 없습니다. 잠시 후 다시 시도해주세요.
-            </p>
+            <p className="text-gray-400">커뮤니티를 불러올 수 없습니다. 잠시 후 다시 시도해주세요.</p>
           </div>
         </div>
       </div>

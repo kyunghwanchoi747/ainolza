@@ -11,6 +11,8 @@ const statusMap: Record<string, { label: string; className: string }> = {
   returned: { label: '반품', className: 'bg-orange-100 text-orange-700' },
   // Products
   published: { label: '판매중', className: 'bg-green-100 text-green-700' },
+  sold_out: { label: '품절', className: 'bg-orange-100 text-orange-700' },
+  hidden: { label: '숨김', className: 'bg-slate-100 text-slate-500' },
   draft: { label: '임시저장', className: 'bg-slate-100 text-slate-600' },
   // Inquiries
   answered: { label: '답변완료', className: 'bg-green-100 text-green-700' },

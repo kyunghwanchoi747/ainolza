@@ -2,6 +2,28 @@ import type { CollectionConfig } from 'payload'
 
 export const Users: CollectionConfig = {
   slug: 'users',
+  hooks: {
+    afterChange: [
+      async ({ doc, operation, req }) => {
+        if (operation !== 'create') return
+        try {
+          await req.payload.create({
+            collection: 'notifications',
+            data: {
+              type: 'user_signup',
+              title: '회원가입',
+              body: `${doc.nickname || doc.email}님이 회원이 되셨어요. ${doc.email}`,
+              isRead: false,
+              relatedId: String(doc.id),
+              href: '/manager/customers',
+            },
+          })
+        } catch (err) {
+          console.error('[Notifications] user_signup 알림 생성 실패:', err)
+        }
+      },
+    ],
+  },
   admin: {
     useAsTitle: 'nickname', // Using nickname as title for better recognition in lists
     group: '브랜드 운영',
