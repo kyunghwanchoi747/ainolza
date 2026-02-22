@@ -1,18 +1,16 @@
-import React from 'react'
-import { getPayload } from 'payload'
-import config from '@/payload.config'
+import { getPayload } from '@/lib/payload'
 import Link from 'next/link'
 import { PlayCircle, Clock, Search, BookOpen, User } from 'lucide-react'
 import type { Course } from '@/payload-types'
 
 export default async function CoursesPage() {
   try {
-    const payload = await getPayload({ config })
+    const payload = await getPayload()
 
     const { docs: courses } = await payload.find({ collection: 'courses' })
 
     return (
-      <div className="min-h-screen bg-black pt-20">
+      <div className="min-h-screen bg-black">
         {/* Search & Intro */}
         <section className="border-b border-white/10 bg-white/5 py-12">
           <div className="container mx-auto px-6">
@@ -124,7 +122,7 @@ export default async function CoursesPage() {
   } catch (error) {
     console.error('Error loading courses:', error)
     return (
-      <div className="min-h-screen bg-black pt-20">
+      <div className="min-h-screen bg-black">
         <div className="container mx-auto px-6 py-12">
           <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-8 text-center">
             <h1 className="text-2xl font-bold text-red-400 mb-2">강의 로드 실패</h1>

@@ -1,13 +1,11 @@
-import React from 'react'
-import { getPayload } from 'payload'
-import config from '@/payload.config'
+import { getPayload } from '@/lib/payload'
 import Link from 'next/link'
 import { Search, SlidersHorizontal, ShoppingCart } from 'lucide-react'
 import type { Category, Course, Program } from '@/payload-types'
 
 export default async function ShopPage() {
   try {
-    const payload = await getPayload({ config })
+    const payload = await getPayload()
 
     // Fetch categories specifically for the shop
     const { docs: categoryDocs } = await payload.find({
@@ -22,12 +20,12 @@ export default async function ShopPage() {
 
     type Product = (Course & { productType: 'course' }) | (Program & { productType: 'program' })
     const allProducts: Product[] = [
-      ...courseDocs.map((d) => ({ ...d, productType: 'course' as const })),
-      ...programDocs.map((d) => ({ ...d, productType: 'program' as const })),
+      ...courseDocs.map((d: any) => ({ ...d, productType: 'course' as const })),
+      ...programDocs.map((d: any) => ({ ...d, productType: 'program' as const })),
     ]
 
     return (
-      <div className="min-h-screen bg-black pt-20">
+      <div className="min-h-screen bg-black">
         {/* Header & Filter Section */}
         <section className="border-b border-white/10 bg-white/5 py-12">
           <div className="container mx-auto px-6">
@@ -140,7 +138,7 @@ export default async function ShopPage() {
   } catch (error) {
     console.error('Error loading shop products:', error)
     return (
-      <div className="min-h-screen bg-black pt-20">
+      <div className="min-h-screen bg-black">
         <div className="container mx-auto px-6 py-12">
           <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-8 text-center">
             <h1 className="text-2xl font-bold text-red-400 mb-2">스토어 로드 실패</h1>

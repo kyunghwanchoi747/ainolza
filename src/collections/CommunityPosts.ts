@@ -4,6 +4,7 @@ export const CommunityPosts: CollectionConfig = {
   slug: 'community-posts',
   admin: {
     useAsTitle: 'title',
+    group: '콘텐츠',
   },
   access: {
     read: () => true,

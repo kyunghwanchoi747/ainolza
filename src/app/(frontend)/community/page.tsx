@@ -1,6 +1,4 @@
-import React from 'react'
-import { getPayload } from 'payload'
-import config from '@/payload.config'
+import { getPayload } from '@/lib/payload'
 import Link from 'next/link'
 import { MessageSquare, Search, User } from 'lucide-react'
 import type { CommunityPost } from '@/payload-types'
@@ -8,7 +6,7 @@ import { CommunitySidebar } from '@/components/CommunitySidebar'
 
 export default async function CommunityPage() {
   try {
-    const payload = await getPayload({ config })
+    const payload = await getPayload()
 
     const { docs: categoryDocs } = await payload.find({
       collection: 'categories',
@@ -21,7 +19,7 @@ export default async function CommunityPage() {
     })
 
     return (
-      <div className="min-h-screen bg-black pt-20">
+      <div className="min-h-screen bg-black">
         {/* Community Hero */}
         <section className="border-b border-white/10 bg-white/5 py-8">
           <div className="container mx-auto px-6">
@@ -123,7 +121,7 @@ export default async function CommunityPage() {
   } catch (error) {
     console.error('Error loading community posts:', error)
     return (
-      <div className="min-h-screen bg-black pt-20">
+      <div className="min-h-screen bg-black">
         <div className="container mx-auto px-6 py-12">
           <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-8 text-center">
             <h1 className="text-2xl font-bold text-red-400 mb-2">커뮤니티 로드 실패</h1>

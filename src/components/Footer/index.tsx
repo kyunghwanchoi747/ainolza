@@ -1,6 +1,6 @@
 import React from 'react'
 import Link from 'next/link'
-import { BrandLogo } from '../Header'
+import { BrandLogo } from '../BrandLogo'
 
 export function Footer() {
   return (
@@ -9,7 +9,9 @@ export function Footer() {
         <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
           <Link href="/" className="flex items-center space-x-3 group">
             <BrandLogo />
-            <span className="text-lg font-bold text-white group-hover:text-blue-400 transition-colors">AI 놀자</span>
+            <span className="text-lg font-bold text-white group-hover:text-blue-400 transition-colors">
+              AI 놀자
+            </span>
           </Link>
           <p className="text-sm text-gray-400">
             © {new Date().getFullYear()} AI 놀자. All rights reserved.

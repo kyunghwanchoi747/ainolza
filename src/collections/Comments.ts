@@ -3,7 +3,8 @@ import type { CollectionConfig } from 'payload'
 export const Comments: CollectionConfig = {
   slug: 'comments',
   admin: {
-    useAsTitle: 'text',
+    useAsTitle: 'content',
+    group: '콘텐츠',
   },
   access: {
     read: () => true,

@@ -1,27 +1,43 @@
-import React from 'react'
-import { getPayload } from 'payload'
-import config from '@/payload.config'
+import { getPayload } from '@/lib/payload'
 import Link from 'next/link'
-import { MessageSquare, User, Calendar, Eye, ThumbsUp, ArrowLeft } from 'lucide-react'
+import { MessageSquare, User, ThumbsUp, ArrowLeft } from 'lucide-react'
 import { CommunitySidebar } from '@/components/CommunitySidebar'
 import { RichText } from '@payloadcms/richtext-lexical/react'
 
 export default async function CommunityPostPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const payload = await getPayload({ config })
 
-  const post = await payload.findByID({
-    collection: 'community-posts',
-    id,
-  }).catch(() => null)
+  try {
+    const payload = await getPayload()
 
-  if (!post) {
-    return <div className="pt-20 min-h-screen">게시물을 찾을 수 없습니다.</div>
-  }
+    let post: any = null
+    try {
+      post = await payload.findByID({
+        collection: 'community-posts',
+        id,
+      })
+    } catch (err) {
+      console.error('Post not found:', id)
+    }
 
-  const categories = { docs: [] }
+    if (!post) {
+      return <div className="min-h-screen bg-black text-white p-20">게시물을 찾을 수 없습니다.</div>
+    }
+
+    // Fetch comments for this post
+    const commentsResult = await payload.find({
+      collection: 'comments',
+      where: {
+        'doc.value': { equals: id },
+      },
+      sort: '-createdAt',
+    })
+    const comments = commentsResult.docs || []
+
+    const categories: { docs: any[] } = { docs: [] }
+
     return (
-      <div className="min-h-screen bg-black pt-20">
+      <div className="min-h-screen bg-black">
         <div className="container mx-auto flex flex-col gap-8 px-6 py-10 lg:flex-row">
           {/* Sidebar */}
           <CommunitySidebar categories={categories} />
@@ -76,7 +92,6 @@ export default async function CommunityPostPage({ params }: { params: Promise<{ 
                   </div>
 
                   <div className="flex items-center gap-4 text-gray-500">
-                    {/* Likes Placeholder */}
                     <div className="flex items-center gap-1">
                       <ThumbsUp className="h-4 w-4" />
                       <span className="text-xs font-bold">{post.likes || 0}</span>
@@ -94,7 +109,7 @@ export default async function CommunityPostPage({ params }: { params: Promise<{ 
               <section className="border-t border-white/10 pt-10">
                 <h3 className="text-xl font-black text-white mb-6 flex items-center gap-2">
                   <MessageSquare className="h-5 w-5 text-blue-500" />
-                  댓글 <span className="text-blue-500">({comments.totalDocs})</span>
+                  댓글 <span className="text-blue-500">({comments.length})</span>
                 </h3>
 
                 {/* Comment Input Placeholder */}
@@ -150,26 +165,11 @@ export default async function CommunityPostPage({ params }: { params: Promise<{ 
           </main>
         </div>
       </div>
-    </div>
-  )
-  } catch (error) {
-    console.error('Error loading community post:', error)
-    return (
-      <div className="min-h-screen bg-black pt-20">
-        <div className="container mx-auto px-6 py-12">
-          <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-8 text-center">
-            <h1 className="text-2xl font-bold text-red-400 mb-2">게시물 로드 실패</h1>
-            <p className="text-gray-400">게시물을 불러올 수 없습니다. 잠시 후 다시 시도해주세요.</p>
-          </div>
-        </div>
-      </div>
     )
-  }
-}
   } catch (error) {
     console.error('Error loading community post:', error)
     return (
-      <div className="min-h-screen bg-black pt-20">
+      <div className="min-h-screen bg-black">
         <div className="container mx-auto px-6 py-12">
           <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-8 text-center">
             <h1 className="text-2xl font-bold text-red-400 mb-2">게시물 로드 실패</h1>

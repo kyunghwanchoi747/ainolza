@@ -1,6 +1,7 @@
 import React from 'react'
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
+import { StatsTracker } from '@/components/StatsTracker'
 import './styles.css'
 
 export const metadata = {
@@ -15,6 +16,7 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
   return (
     <html lang="ko">
       <body className="bg-black text-white antialiased">
+        <StatsTracker />
         <Header user={user} />
         <main className="min-h-screen pt-20">{children}</main>
         <Footer />

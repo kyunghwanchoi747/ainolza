@@ -1,13 +1,11 @@
-import React from 'react'
-import { getPayload } from 'payload'
-import config from '@/payload.config'
+import { getPayload } from '@/lib/payload'
 import Link from 'next/link'
-import { ArrowLeft, Clock, User, PlayCircle, Lock, MessageSquare } from 'lucide-react'
+import { ArrowLeft, Clock, User, Lock, MessageSquare } from 'lucide-react'
 
 export default async function CourseDetailPage({ params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
-    const payload = await getPayload({ config })
+    const payload = await getPayload()
 
     const [course, commentsResult] = await Promise.all([
       payload.findByID({
@@ -16,14 +14,20 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
       }),
       payload.find({
         collection: 'comments',
-        where: { content: { equals: id } },
+        where: {
+          'doc.value': { equals: id },
+        },
         sort: '-createdAt',
         depth: 1,
       }),
     ])
 
     if (!course) {
-      return <div>Course not found</div>
+      return (
+        <div className="min-h-screen bg-black text-white p-20 text-center">
+          강의를 찾을 수 없습니다.
+        </div>
+      )
     }
 
     const comments = commentsResult.docs || []
@@ -31,7 +35,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
     const hasAccess = !!course.streamId
 
     return (
-      <div className="min-h-screen bg-black pt-20">
+      <div className="min-h-screen bg-black">
         <div className="container mx-auto px-6 py-10">
           {/* Back Button */}
           <Link
@@ -114,14 +118,6 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
               {/* Description Tab Content */}
               <div className="prose prose-invert prose-lg max-w-none mb-16">
                 <h3 className="text-xl font-bold text-white mb-4">강의 소개</h3>
-                {/* RichText for description if it was checking field type, but schema says type: 'textarea'
-                  Wait, Courses schema says:
-                  {
-                    name: 'description',
-                    type: 'textarea',
-                  },
-                  So it is just text string, not RichText.
-               */}
                 <p className="text-gray-300 whitespace-pre-line leading-relaxed">
                   {course.description}
                 </p>
@@ -131,7 +127,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
               <section className="border-t border-white/10 pt-10">
                 <h3 className="text-xl font-black text-white mb-6 flex items-center gap-2">
                   <MessageSquare className="h-5 w-5 text-blue-500" />
-                  수강 문의 및 댓글 <span className="text-blue-500">({comments.totalDocs})</span>
+                  수강 문의 및 댓글 <span className="text-blue-500">({comments.length})</span>
                 </h3>
 
                 {/* Comment Input Placeholder */}
@@ -158,7 +154,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
 
                 {/* Comments List */}
                 <div className="space-y-6">
-                  {comments.docs.map((comment: any) => (
+                  {comments.map((comment: any) => (
                     <div key={comment.id} className="flex gap-4">
                       <div className="h-10 w-10 shrink-0 rounded-full bg-white/10 flex items-center justify-center">
                         <User className="h-5 w-5 text-gray-400" />
@@ -176,7 +172,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
                       </div>
                     </div>
                   ))}
-                  {comments.docs.length === 0 && (
+                  {comments.length === 0 && (
                     <p className="text-center text-gray-600 py-4 text-sm">
                       첫 번째 문의를 남겨보세요!
                     </p>
@@ -220,7 +216,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
   } catch (error) {
     console.error('Error loading course:', error)
     return (
-      <div className="min-h-screen bg-black pt-20">
+      <div className="min-h-screen bg-black">
         <div className="container mx-auto px-6 py-12">
           <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-8 text-center">
             <h1 className="text-2xl font-bold text-red-400 mb-2">강의 로드 실패</h1>

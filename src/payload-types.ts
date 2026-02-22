@@ -69,14 +69,17 @@ export interface Config {
   collections: {
     users: User;
     media: Media;
-    posts: Post;
+    products: Product;
+    reviews: Review;
+    orders: Order;
     programs: Program;
     courses: Course;
+    posts: Post;
     'community-posts': CommunityPost;
-    orders: Order;
-    categories: Category;
     comments: Comment;
+    categories: Category;
     inquiries: Inquiry;
+    'site-stats': SiteStat;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -86,14 +89,17 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
-    posts: PostsSelect<false> | PostsSelect<true>;
+    products: ProductsSelect<false> | ProductsSelect<true>;
+    reviews: ReviewsSelect<false> | ReviewsSelect<true>;
+    orders: OrdersSelect<false> | OrdersSelect<true>;
     programs: ProgramsSelect<false> | ProgramsSelect<true>;
     courses: CoursesSelect<false> | CoursesSelect<true>;
+    posts: PostsSelect<false> | PostsSelect<true>;
     'community-posts': CommunityPostsSelect<false> | CommunityPostsSelect<true>;
-    orders: OrdersSelect<false> | OrdersSelect<true>;
-    categories: CategoriesSelect<false> | CategoriesSelect<true>;
     comments: CommentsSelect<false> | CommentsSelect<true>;
+    categories: CategoriesSelect<false> | CategoriesSelect<true>;
     inquiries: InquiriesSelect<false> | InquiriesSelect<true>;
+    'site-stats': SiteStatsSelect<false> | SiteStatsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -105,9 +111,19 @@ export interface Config {
   fallbackLocale: null;
   globals: {
     hero: Hero;
+    'main-nav': MainNav;
+    'shop-settings': ShopSetting;
+    'seo-settings': SeoSetting;
+    'payment-settings': PaymentSetting;
+    'message-settings': MessageSetting;
   };
   globalsSelect: {
     hero: HeroSelect<false> | HeroSelect<true>;
+    'main-nav': MainNavSelect<false> | MainNavSelect<true>;
+    'shop-settings': ShopSettingsSelect<false> | ShopSettingsSelect<true>;
+    'seo-settings': SeoSettingsSelect<false> | SeoSettingsSelect<true>;
+    'payment-settings': PaymentSettingsSelect<false> | PaymentSettingsSelect<true>;
+    'message-settings': MessageSettingsSelect<false> | MessageSettingsSelect<true>;
   };
   locale: null;
   user: User;
@@ -144,7 +160,15 @@ export interface User {
    * 닉네임을 설정해 주세요.
    */
   nickname?: string | null;
+  userType: 'general' | 'vip' | 'admin';
+  group?: ('none' | 'batch1' | 'pdf_buyer') | null;
+  points?: number | null;
+  purchaseAmount?: number | null;
   profileImage?: (number | null) | Media;
+  /**
+   * 관리자들끼리 공유할 메모를 남겨주세요.
+   */
+  memo?: string | null;
   notificationSettings?: {
     comments?: boolean | null;
     marketing?: boolean | null;
@@ -187,13 +211,16 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts".
+ * via the `definition` "products".
  */
-export interface Post {
+export interface Product {
   id: number;
   title: string;
-  category: 'column' | 'insight';
-  content?: {
+  price: number;
+  stock: number;
+  category?: (number | null) | Category;
+  images?: (number | Media)[] | null;
+  description?: {
     root: {
       type: string;
       children: {
@@ -208,8 +235,45 @@ export interface Post {
     };
     [k: string]: unknown;
   } | null;
-  author: number | User;
-  publishedDate?: string | null;
+  status: 'published' | 'sold_out' | 'hidden';
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories".
+ */
+export interface Category {
+  id: number;
+  title: string;
+  slug: string;
+  type: 'shop' | 'community';
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reviews".
+ */
+export interface Review {
+  id: number;
+  user: number | User;
+  product:
+    | {
+        relationTo: 'products';
+        value: number | Product;
+      }
+    | {
+        relationTo: 'programs';
+        value: number | Program;
+      }
+    | {
+        relationTo: 'courses';
+        value: number | Course;
+      };
+  rating: number;
+  content: string;
+  images?: (number | Media)[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -252,6 +316,77 @@ export interface Course {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orders".
+ */
+export interface Order {
+  id: string;
+  customer: number | User;
+  items?:
+    | {
+        product:
+          | {
+              relationTo: 'products';
+              value: number | Product;
+            }
+          | {
+              relationTo: 'programs';
+              value: number | Program;
+            }
+          | {
+              relationTo: 'courses';
+              value: number | Course;
+            };
+        quantity: number;
+        price: number;
+        id?: string | null;
+      }[]
+    | null;
+  status: 'pending' | 'paid' | 'preparing' | 'shipping' | 'delivered' | 'cancelled' | 'returned';
+  amount: number;
+  shippingInfo?: {
+    receiverName?: string | null;
+    receiverPhone?: string | null;
+    address?: string | null;
+    memo?: string | null;
+    trackingNumber?: string | null;
+  };
+  paymentInfo?: {
+    method?: ('card' | 'vbank' | 'trans' | 'samsungpay' | 'kakaopay') | null;
+    transactionID?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts".
+ */
+export interface Post {
+  id: number;
+  title: string;
+  category: 'column' | 'insight';
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  author: number | User;
+  publishedDate?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "community-posts".
  */
 export interface CommunityPost {
@@ -282,44 +417,6 @@ export interface CommunityPost {
    * 자동으로 계산됨
    */
   commentsCount?: number | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "orders".
- */
-export interface Order {
-  id: number;
-  customer: number | User;
-  items: (
-    | {
-        relationTo: 'programs';
-        value: number | Program;
-      }
-    | {
-        relationTo: 'courses';
-        value: number | Course;
-      }
-  )[];
-  status: 'pending' | 'paid' | 'cancelled';
-  amount: number;
-  /**
-   * PG transaction ID (e.g., Portone)
-   */
-  paymentID?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories".
- */
-export interface Category {
-  id: number;
-  title: string;
-  slug: string;
-  type: 'shop' | 'community';
   updatedAt: string;
   createdAt: string;
 }
@@ -367,6 +464,35 @@ export interface Inquiry {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-stats".
+ */
+export interface SiteStat {
+  id: number;
+  /**
+   * Statistics date (YYYY-MM-DD)
+   */
+  date: string;
+  /**
+   * Number of unique visitors
+   */
+  visitors?: number | null;
+  /**
+   * Total page views
+   */
+  pageViews?: number | null;
+  /**
+   * Number of new orders today
+   */
+  newOrders?: number | null;
+  /**
+   * Total revenue today
+   */
+  revenue?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -398,8 +524,16 @@ export interface PayloadLockedDocument {
         value: number | Media;
       } | null)
     | ({
-        relationTo: 'posts';
-        value: number | Post;
+        relationTo: 'products';
+        value: number | Product;
+      } | null)
+    | ({
+        relationTo: 'reviews';
+        value: number | Review;
+      } | null)
+    | ({
+        relationTo: 'orders';
+        value: string | Order;
       } | null)
     | ({
         relationTo: 'programs';
@@ -410,24 +544,28 @@ export interface PayloadLockedDocument {
         value: number | Course;
       } | null)
     | ({
+        relationTo: 'posts';
+        value: number | Post;
+      } | null)
+    | ({
         relationTo: 'community-posts';
         value: number | CommunityPost;
-      } | null)
-    | ({
-        relationTo: 'orders';
-        value: number | Order;
-      } | null)
-    | ({
-        relationTo: 'categories';
-        value: number | Category;
       } | null)
     | ({
         relationTo: 'comments';
         value: number | Comment;
       } | null)
     | ({
+        relationTo: 'categories';
+        value: number | Category;
+      } | null)
+    | ({
         relationTo: 'inquiries';
         value: number | Inquiry;
+      } | null)
+    | ({
+        relationTo: 'site-stats';
+        value: number | SiteStat;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -477,7 +615,12 @@ export interface PayloadMigration {
  */
 export interface UsersSelect<T extends boolean = true> {
   nickname?: T;
+  userType?: T;
+  group?: T;
+  points?: T;
+  purchaseAmount?: T;
   profileImage?: T;
+  memo?: T;
   notificationSettings?:
     | T
     | {
@@ -519,14 +662,64 @@ export interface MediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts_select".
+ * via the `definition` "products_select".
  */
-export interface PostsSelect<T extends boolean = true> {
+export interface ProductsSelect<T extends boolean = true> {
   title?: T;
+  price?: T;
+  stock?: T;
   category?: T;
+  images?: T;
+  description?: T;
+  status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reviews_select".
+ */
+export interface ReviewsSelect<T extends boolean = true> {
+  user?: T;
+  product?: T;
+  rating?: T;
   content?: T;
-  author?: T;
-  publishedDate?: T;
+  images?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orders_select".
+ */
+export interface OrdersSelect<T extends boolean = true> {
+  id?: T;
+  customer?: T;
+  items?:
+    | T
+    | {
+        product?: T;
+        quantity?: T;
+        price?: T;
+        id?: T;
+      };
+  status?: T;
+  amount?: T;
+  shippingInfo?:
+    | T
+    | {
+        receiverName?: T;
+        receiverPhone?: T;
+        address?: T;
+        memo?: T;
+        trackingNumber?: T;
+      };
+  paymentInfo?:
+    | T
+    | {
+        method?: T;
+        transactionID?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -567,6 +760,19 @@ export interface CoursesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts_select".
+ */
+export interface PostsSelect<T extends boolean = true> {
+  title?: T;
+  category?: T;
+  content?: T;
+  author?: T;
+  publishedDate?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "community-posts_select".
  */
 export interface CommunityPostsSelect<T extends boolean = true> {
@@ -576,30 +782,6 @@ export interface CommunityPostsSelect<T extends boolean = true> {
   likes?: T;
   isPinned?: T;
   commentsCount?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "orders_select".
- */
-export interface OrdersSelect<T extends boolean = true> {
-  customer?: T;
-  items?: T;
-  status?: T;
-  amount?: T;
-  paymentID?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories_select".
- */
-export interface CategoriesSelect<T extends boolean = true> {
-  title?: T;
-  slug?: T;
-  type?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -617,6 +799,17 @@ export interface CommentsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories_select".
+ */
+export interface CategoriesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  type?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "inquiries_select".
  */
 export interface InquiriesSelect<T extends boolean = true> {
@@ -625,6 +818,19 @@ export interface InquiriesSelect<T extends boolean = true> {
   user?: T;
   status?: T;
   answer?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-stats_select".
+ */
+export interface SiteStatsSelect<T extends boolean = true> {
+  date?: T;
+  visitors?: T;
+  pageViews?: T;
+  newOrders?: T;
+  revenue?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -674,9 +880,107 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  */
 export interface Hero {
   id: number;
-  headline: string;
-  subhead?: string | null;
+  title: string;
+  subtitle?: string | null;
+  primaryButton?: {
+    label?: string | null;
+    link?: string | null;
+  };
+  secondaryButton?: {
+    label?: string | null;
+    link?: string | null;
+  };
   backgroundImage?: (number | null) | Media;
+  stats?:
+    | {
+        label: string;
+        value: string;
+        icon?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  ctaTitle?: string | null;
+  ctaSubtitle?: string | null;
+  ctaButton?: {
+    label?: string | null;
+    link?: string | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "main-nav".
+ */
+export interface MainNav {
+  id: number;
+  items: {
+    label: string;
+    link: string;
+    icon?: ('Rocket' | 'ShoppingBag' | 'BookOpen' | 'MessageSquare' | 'HelpCircle') | null;
+    id?: string | null;
+  }[];
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "shop-settings".
+ */
+export interface ShopSetting {
+  id: number;
+  currency?: string | null;
+  baseShippingFee?: number | null;
+  freeShippingThreshold?: number | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "seo-settings".
+ */
+export interface SeoSetting {
+  id: number;
+  title?: string | null;
+  description?: string | null;
+  keywords?: string | null;
+  aeo_geo?: {
+    semanticData?: string | null;
+    voiceSearch?: boolean | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payment-settings".
+ */
+export interface PaymentSetting {
+  id: number;
+  provider?: ('toss' | 'inicis' | 'portone') | null;
+  mid?: string | null;
+  apiKey?: string | null;
+  testMode?: boolean | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "message-settings".
+ */
+export interface MessageSetting {
+  id: number;
+  notificationTalk?: {
+    enabled?: boolean | null;
+    senderKey?: string | null;
+  };
+  templates?:
+    | {
+        name?: string | null;
+        content?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -685,9 +989,119 @@ export interface Hero {
  * via the `definition` "hero_select".
  */
 export interface HeroSelect<T extends boolean = true> {
-  headline?: T;
-  subhead?: T;
+  title?: T;
+  subtitle?: T;
+  primaryButton?:
+    | T
+    | {
+        label?: T;
+        link?: T;
+      };
+  secondaryButton?:
+    | T
+    | {
+        label?: T;
+        link?: T;
+      };
   backgroundImage?: T;
+  stats?:
+    | T
+    | {
+        label?: T;
+        value?: T;
+        icon?: T;
+        id?: T;
+      };
+  ctaTitle?: T;
+  ctaSubtitle?: T;
+  ctaButton?:
+    | T
+    | {
+        label?: T;
+        link?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "main-nav_select".
+ */
+export interface MainNavSelect<T extends boolean = true> {
+  items?:
+    | T
+    | {
+        label?: T;
+        link?: T;
+        icon?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "shop-settings_select".
+ */
+export interface ShopSettingsSelect<T extends boolean = true> {
+  currency?: T;
+  baseShippingFee?: T;
+  freeShippingThreshold?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "seo-settings_select".
+ */
+export interface SeoSettingsSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  keywords?: T;
+  aeo_geo?:
+    | T
+    | {
+        semanticData?: T;
+        voiceSearch?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payment-settings_select".
+ */
+export interface PaymentSettingsSelect<T extends boolean = true> {
+  provider?: T;
+  mid?: T;
+  apiKey?: T;
+  testMode?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "message-settings_select".
+ */
+export interface MessageSettingsSelect<T extends boolean = true> {
+  notificationTalk?:
+    | T
+    | {
+        enabled?: T;
+        senderKey?: T;
+      };
+  templates?:
+    | T
+    | {
+        name?: T;
+        content?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

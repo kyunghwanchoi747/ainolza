@@ -2,7 +2,7 @@ import type { CollectionConfig, FieldAccess } from 'payload'
 
 const checkHasPurchase: FieldAccess = async ({ req: { user, payload }, id }) => {
   if (!user || !id) return false
-  
+
   const targetId = typeof id === 'string' ? parseInt(id, 10) : id
 
   const orders = await payload.find({
@@ -11,9 +11,9 @@ const checkHasPurchase: FieldAccess = async ({ req: { user, payload }, id }) => 
       and: [
         { customer: { equals: user.id } },
         { status: { equals: 'paid' } },
-        { items: { contains: targetId } }
-      ]
-    }
+        { items: { contains: targetId } },
+      ],
+    },
   })
 
   return orders.totalDocs > 0
@@ -23,6 +23,8 @@ export const Courses: CollectionConfig = {
   slug: 'courses',
   admin: {
     useAsTitle: 'title',
+    group: '브랜드 운영',
+    defaultColumns: ['title', 'category', 'price', 'updatedAt'],
   },
   access: {
     read: () => true, // Metadata is public
@@ -47,8 +49,8 @@ export const Courses: CollectionConfig = {
       type: 'text',
       label: 'Cloudflare Stream ID',
       access: {
-        read: checkHasPurchase
-      }
+        read: checkHasPurchase,
+      },
     },
     {
       name: 'duration',
