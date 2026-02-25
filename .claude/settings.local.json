@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run build:*)",
+      "Bash(npx tsx:*)",
+      "Bash(ls:*)",
+      "Bash(find:*)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\USER\\Desktop\\AI놀자 홈페이지 이전\\src\\app\\(manager)\\manager\\design",
+      "c:\\Users\\USER\\Desktop\\AI놀자 홈페이지 이전\\src\\app\\api\\manager\\pages",
+      "c:\\Users\\USER\\Desktop\\AI놀자 홈페이지 이전\\src\\app\\(frontend)\\p"
+    ]
+  }
+}
