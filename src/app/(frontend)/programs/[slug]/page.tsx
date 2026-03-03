@@ -5,6 +5,8 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Download } from 'lucide-react'
 
+export const dynamic = 'force-dynamic'
+
 const platformLabels: Record<string, string> = {
   windows: 'Windows',
   mac: 'Mac',

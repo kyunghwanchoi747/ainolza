@@ -1,6 +1,8 @@
 import { getPayloadClient } from '@/lib/payload'
 import { ProductFormClient } from '@/components/manager/product-form-client'
 
+export const dynamic = 'force-dynamic'
+
 export default async function NewProductPage() {
   let categories: { id: string; name: string; slug: string }[] = []
 

@@ -1,6 +1,8 @@
 import { getPayloadClient } from '@/lib/payload'
 import { ProgramsListClient } from '@/components/manager/programs-list-client'
 
+export const dynamic = 'force-dynamic'
+
 export default async function ProgramsPage() {
   let programs: any[] = []
 

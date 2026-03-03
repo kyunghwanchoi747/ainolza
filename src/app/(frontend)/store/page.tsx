@@ -2,6 +2,8 @@ import Link from 'next/link'
 import { getPayloadClient } from '@/lib/payload'
 import { Badge } from '@/components/ui/badge'
 
+export const dynamic = 'force-dynamic'
+
 export default async function StorePage() {
   const payload = await getPayloadClient()
   const result = await payload.find({

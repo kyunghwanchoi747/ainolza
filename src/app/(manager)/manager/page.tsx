@@ -16,6 +16,8 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { getPayloadClient } from '@/lib/payload'
 
+export const dynamic = 'force-dynamic'
+
 export default async function ManagerDashboard() {
   let pageCount = 0
   let publishedPageCount = 0

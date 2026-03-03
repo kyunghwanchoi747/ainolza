@@ -3,6 +3,8 @@ import { getPayloadClient } from '@/lib/payload'
 import { Badge } from '@/components/ui/badge'
 import { Download } from 'lucide-react'
 
+export const dynamic = 'force-dynamic'
+
 const platformLabels: Record<string, string> = {
   windows: 'Windows',
   mac: 'Mac',

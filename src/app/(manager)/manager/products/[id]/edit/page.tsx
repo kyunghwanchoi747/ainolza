@@ -2,6 +2,8 @@ import { notFound } from 'next/navigation'
 import { getPayloadClient } from '@/lib/payload'
 import { ProductFormClient } from '@/components/manager/product-form-client'
 
+export const dynamic = 'force-dynamic'
+
 interface EditProductPageProps {
   params: Promise<{ id: string }>
 }

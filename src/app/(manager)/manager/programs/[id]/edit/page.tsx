@@ -2,6 +2,8 @@ import { getPayloadClient } from '@/lib/payload'
 import { ProgramFormClient } from '@/components/manager/program-form-client'
 import { notFound } from 'next/navigation'
 
+export const dynamic = 'force-dynamic'
+
 export default async function EditProgramPage({
   params,
 }: {

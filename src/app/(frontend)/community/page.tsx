@@ -4,6 +4,8 @@ import { Badge } from '@/components/ui/badge'
 
 import { Pin, Eye, MessageSquare } from 'lucide-react'
 
+export const dynamic = 'force-dynamic'
+
 const categoryLabels: Record<string, string> = {
   free: '자유',
   question: '질문',

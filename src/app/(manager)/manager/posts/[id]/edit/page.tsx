@@ -2,6 +2,8 @@ import { getPayloadClient } from '@/lib/payload'
 import { PostFormClient } from '@/components/manager/post-form-client'
 import { notFound } from 'next/navigation'
 
+export const dynamic = 'force-dynamic'
+
 export default async function EditPostPage({
   params,
 }: {

@@ -5,6 +5,8 @@ import { Badge } from '@/components/ui/badge'
 import { Eye } from 'lucide-react'
 import { CommentSection } from '@/components/frontend/comment-section'
 
+export const dynamic = 'force-dynamic'
+
 const categoryLabels: Record<string, string> = {
   free: '자유',
   question: '질문',

@@ -1,6 +1,8 @@
 import { getPayloadClient } from '@/lib/payload'
 import { PostsListClient } from '@/components/manager/posts-list-client'
 
+export const dynamic = 'force-dynamic'
+
 export default async function PostsPage() {
   let posts: {
     id: string

@@ -1,6 +1,8 @@
 import { getPayloadClient } from '@/lib/payload'
 import { notFound } from 'next/navigation'
 
+export const dynamic = 'force-dynamic'
+
 export default async function DesignPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
   const payload = await getPayloadClient()

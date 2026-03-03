@@ -1,6 +1,8 @@
 import { getPayloadClient } from '@/lib/payload'
 import { ProductsListClient } from '@/components/manager/products-list-client'
 
+export const dynamic = 'force-dynamic'
+
 export default async function ProductsPage() {
   let products: {
     id: string

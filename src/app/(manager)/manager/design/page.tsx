@@ -1,6 +1,8 @@
 import { getPayloadClient } from '@/lib/payload'
 import { DesignListClient } from '@/components/manager/design-list-client'
 
+export const dynamic = 'force-dynamic'
+
 interface DesignPage {
   id: string
   title: string
