@@ -1,8 +1,7 @@
 import fs from 'fs'
 import path from 'path'
-import { buildConfig } from 'payload'
+import { buildConfig, DatabaseAdapterResult } from 'payload'
 import { sqliteD1Adapter } from '@payloadcms/db-d1-sqlite'
-import { sqliteAdapter } from '@payloadcms/db-sqlite'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { fileURLToPath } from 'url'
 import { CloudflareContext, getCloudflareContext } from '@opennextjs/cloudflare'
@@ -29,15 +28,12 @@ const isCLI = process.argv.some((value) => {
 })
 const isProduction = process.env.NODE_ENV === 'production'
 const isBuildPhase = process.env.BUILD_PHASE === 'true'
-
-// Build phase (CI): use SQLite (empty DB, all pages are dynamic anyway)
-// CLI (payload migrate): use D1 via wrangler proxy
-// Production runtime: use D1 via Cloudflare context
 const useD1 = !isBuildPhase && (isProduction || isCLI)
 
-let cloudflare: CloudflareContext | undefined
+let dbAdapter: DatabaseAdapterResult
 
 if (useD1) {
+  let cloudflare: CloudflareContext
   if (isCLI || !isProduction) {
     const globalAny: any = global
     if (!globalAny.cloudflare) {
@@ -47,6 +43,11 @@ if (useD1) {
   } else {
     cloudflare = await getCloudflareContext({ async: true })
   }
+  dbAdapter = sqliteD1Adapter({ binding: cloudflare.env.D1 })
+} else {
+  // Dynamic import to avoid bundling @libsql/client in Workers
+  const { sqliteAdapter } = await import(/* webpackIgnore: true */ '@payloadcms/db-sqlite')
+  dbAdapter = sqliteAdapter({ client: { url: 'file:./dev.db' } })
 }
 
 function getCloudflareContextFromWrangler(): Promise<CloudflareContext> {
@@ -69,9 +70,7 @@ export default buildConfig({
   collections: [Users, Media, DesignPages, Products, ProductCategories, Posts, Comments, Programs],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || 'dev-secret-change-in-production',
-  db: useD1 && cloudflare
-    ? sqliteD1Adapter({ binding: cloudflare.env.D1 })
-    : sqliteAdapter({ client: { url: 'file:./dev.db' } }),
+  db: dbAdapter,
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
