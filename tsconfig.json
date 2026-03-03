@@ -41,6 +41,7 @@
   ],
   "exclude": [
     "node_modules",
-    "ai-nolja"
+    "ai-nolja",
+    "AI놀자 홈페이지 이전"
   ],
 }
