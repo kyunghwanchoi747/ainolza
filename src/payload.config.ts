@@ -28,7 +28,12 @@ const isCLI = process.argv.some((value) => {
   return rp ? rp.endsWith(path.join('payload', 'bin.js')) : false
 })
 const isProduction = process.env.NODE_ENV === 'production'
-const useD1 = isProduction || isCLI
+const isBuildPhase = process.env.BUILD_PHASE === 'true'
+
+// Build phase (CI): use SQLite (empty DB, all pages are dynamic anyway)
+// CLI (payload migrate): use D1 via wrangler proxy
+// Production runtime: use D1 via Cloudflare context
+const useD1 = !isBuildPhase && (isProduction || isCLI)
 
 let cloudflare: CloudflareContext | undefined
 

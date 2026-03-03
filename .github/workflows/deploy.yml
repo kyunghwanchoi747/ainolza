@@ -28,6 +28,7 @@ jobs:
         run: npx opennextjs-cloudflare build
         env:
           NODE_OPTIONS: "--no-deprecation --max-old-space-size=8000"
+          BUILD_PHASE: "true"
 
       - name: Deploy to Cloudflare Workers
         run: npx wrangler deploy --config wrangler.jsonc
