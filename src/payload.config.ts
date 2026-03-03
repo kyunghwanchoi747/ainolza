@@ -1,6 +1,6 @@
 import fs from 'fs'
 import path from 'path'
-import { buildConfig, DatabaseAdapterResult } from 'payload'
+import { buildConfig } from 'payload'
 import { sqliteD1Adapter } from '@payloadcms/db-d1-sqlite'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { fileURLToPath } from 'url'
@@ -30,7 +30,7 @@ const isProduction = process.env.NODE_ENV === 'production'
 const isBuildPhase = process.env.BUILD_PHASE === 'true'
 const useD1 = !isBuildPhase && (isProduction || isCLI)
 
-let dbAdapter: DatabaseAdapterResult
+let dbAdapter: any
 
 if (useD1) {
   let cloudflare: CloudflareContext
