@@ -28,25 +28,28 @@ const isCLI = process.argv.some((value) => {
 })
 const isProduction = process.env.NODE_ENV === 'production'
 const isBuildPhase = process.env.BUILD_PHASE === 'true'
-const useD1 = !isBuildPhase && (isProduction || isCLI)
 
 let dbAdapter: any
 
-if (useD1) {
-  let cloudflare: CloudflareContext
-  if (isCLI || !isProduction) {
-    const globalAny: any = global
-    if (!globalAny.cloudflare) {
-      globalAny.cloudflare = await getCloudflareContextFromWrangler()
-    }
-    cloudflare = globalAny.cloudflare
-  } else {
-    cloudflare = await getCloudflareContext({ async: true })
-  }
+if (isBuildPhase) {
+  // CI build phase: use D1 adapter with mock binding.
+  // All pages are force-dynamic so no actual DB queries run during build.
+  dbAdapter = sqliteD1Adapter({ binding: {} as any })
+} else if (isProduction) {
+  // Cloudflare Workers runtime: use real D1 binding
+  const cloudflare = await getCloudflareContext({ async: true })
   dbAdapter = sqliteD1Adapter({ binding: cloudflare.env.D1 })
+} else if (isCLI) {
+  // Payload CLI (migrate, etc): use D1 via wrangler proxy
+  const globalAny: any = global
+  if (!globalAny.cloudflare) {
+    globalAny.cloudflare = await getCloudflareContextFromWrangler()
+  }
+  dbAdapter = sqliteD1Adapter({ binding: (globalAny.cloudflare as CloudflareContext).env.D1 })
 } else {
-  // Dynamic import to avoid bundling @libsql/client in Workers
-  const { sqliteAdapter } = await import(/* webpackIgnore: true */ '@payloadcms/db-sqlite')
+  // Local dev: use SQLite. Computed string prevents esbuild from resolving this.
+  const sqlitePkg = ['@payloadcms', 'db-sqlite'].join('/')
+  const { sqliteAdapter } = await import(/* webpackIgnore: true */ sqlitePkg)
   dbAdapter = sqliteAdapter({ client: { url: 'file:./dev.db' } })
 }
 

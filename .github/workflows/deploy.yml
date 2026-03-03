@@ -24,6 +24,9 @@ jobs:
       - name: Install dependencies
         run: npm install --legacy-peer-deps
 
+      - name: Remove SQLite packages (not needed for D1 production)
+        run: rm -rf node_modules/@payloadcms/db-sqlite node_modules/@libsql
+
       - name: Build with OpenNext
         run: npx opennextjs-cloudflare build
         env:
