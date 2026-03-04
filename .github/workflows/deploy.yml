@@ -34,8 +34,8 @@ jobs:
           NODE_OPTIONS: "--no-deprecation --max-old-space-size=8000"
           BUILD_PHASE: "true"
 
-      - name: Debug - Check Wrangler Auth
-        run: npx wrangler whoami && npx wrangler deploy --config wrangler.jsonc --dry-run 2>&1 || true
+      - name: Prepare Pages deploy
+        run: cp .open-next/worker.js .open-next/assets/_worker.js
 
-      - name: Deploy to Cloudflare Workers
-        run: npx wrangler deploy --config wrangler.jsonc
+      - name: Deploy to Cloudflare Pages
+        run: npx wrangler pages deploy .open-next/assets --project-name ainolza --branch master
