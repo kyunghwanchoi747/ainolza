@@ -44,7 +44,7 @@ const mainNavItems: NavItem[] = [
 ]
 
 const bottomNavItems: NavItem[] = [
-  { href: '/manager/settings', label: '설정', icon: Settings, disabled: true },
+  { href: '/manager/settings', label: '설정', icon: Settings },
 ]
 
 export function ManagerSidebar({ collapsed, onToggle }: SidebarProps) {

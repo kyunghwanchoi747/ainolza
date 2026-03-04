@@ -91,6 +91,10 @@ export function CommandSearch({ open, onOpenChange }: CommandSearchProps) {
             프로그램 관리
             <CommandShortcut>G R</CommandShortcut>
           </CommandItem>
+          <CommandItem onSelect={() => runCommand(() => router.push('/manager/settings'))}>
+            <Settings className="mr-2 h-4 w-4" />
+            사이트 설정
+          </CommandItem>
         </CommandGroup>
 
         <CommandSeparator />

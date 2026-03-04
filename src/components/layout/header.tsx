@@ -7,7 +7,12 @@ import { Menu, X, Rocket } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "next-themes";
 
-const navItems = [
+interface NavItem {
+    name: string;
+    href: string;
+}
+
+const FALLBACK_NAV: NavItem[] = [
     { name: "커뮤니티", href: "/community" },
     { name: "스토어", href: "/store" },
     { name: "프로그램", href: "/programs" },
@@ -15,8 +20,24 @@ const navItems = [
 
 export function Header() {
     const [isOpen, setIsOpen] = React.useState(false);
+    const [navItems, setNavItems] = React.useState<NavItem[]>(FALLBACK_NAV);
     const pathname = usePathname();
     const { theme, setTheme } = useTheme();
+
+    React.useEffect(() => {
+        fetch("/api/site-config")
+            .then((res) => res.json())
+            .then((data: any) => {
+                if (data.navigation?.length) {
+                    const items = data.navigation
+                        .filter((n: any) => n.enabled && n.type !== "home")
+                        .sort((a: any, b: any) => (a.order || 0) - (b.order || 0))
+                        .map((n: any) => ({ name: n.label, href: n.path }));
+                    if (items.length > 0) setNavItems(items);
+                }
+            })
+            .catch(() => {});
+    }, []);
 
     return (
         <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -31,7 +52,7 @@ export function Header() {
                         <Link
                             key={item.href}
                             href={item.href}
-                            className={`transition-colors hover:text-foreground/80 ${pathname === item.href ? "text-foreground" : "text-foreground/60"}`}
+                            className={`transition-colors hover:text-foreground/80 ${pathname === item.href || pathname.startsWith(item.href + "/") ? "text-foreground" : "text-foreground/60"}`}
                         >
                             {item.name}
                         </Link>

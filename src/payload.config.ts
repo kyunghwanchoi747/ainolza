@@ -15,6 +15,7 @@ import { ProductCategories } from './collections/ProductCategories'
 import { Posts } from './collections/Posts'
 import { Comments } from './collections/Comments'
 import { Programs } from './collections/Programs'
+import { SiteSettings } from './collections/SiteSettings'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -70,7 +71,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, DesignPages, Products, ProductCategories, Posts, Comments, Programs],
+  collections: [Users, Media, DesignPages, Products, ProductCategories, Posts, Comments, Programs, SiteSettings],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || 'dev-secret-change-in-production',
   db: dbAdapter,
