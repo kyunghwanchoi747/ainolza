@@ -8,10 +8,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "next-themes";
 
 const navItems = [
-    { name: "최신 AI 트렌드", href: "/trends" },
-    { name: "Gemini 튜토리얼", href: "/gemini" },
-    { name: "바이브 코딩", href: "/vibe-coding" },
-    { name: "프롬프트", href: "/prompt" },
     { name: "커뮤니티", href: "/community" },
     { name: "스토어", href: "/store" },
     { name: "프로그램", href: "/programs" },
@@ -52,7 +48,7 @@ export function Header() {
                     </button>
 
                     <Link
-                        href="/login"
+                        href="/manager"
                         className="hidden md:inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90"
                     >
                         로그인
@@ -84,7 +80,7 @@ export function Header() {
                                 </Link>
                             ))}
                             <Link
-                                href="/login"
+                                href="/manager"
                                 className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90"
                                 onClick={() => setIsOpen(false)}
                             >
