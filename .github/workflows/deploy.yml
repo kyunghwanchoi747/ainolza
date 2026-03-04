@@ -33,8 +33,5 @@ jobs:
           NODE_OPTIONS: "--no-deprecation --max-old-space-size=8000"
           BUILD_PHASE: "true"
 
-      - name: Prepare Pages deploy
-        run: cp .open-next/worker.js .open-next/assets/_worker.js
-
-      - name: Deploy to Cloudflare Pages
-        run: npx wrangler pages deploy .open-next/assets --project-name ainolza --branch master
+      - name: Deploy to Cloudflare Workers
+        run: npx wrangler deploy --config wrangler.jsonc
