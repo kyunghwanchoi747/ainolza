@@ -1,4 +1,5 @@
 import './globals.css'
+import ClickToComponentWrapper from '@/components/click-to-component-wrapper'
 
 export const metadata = {
   title: "AI 놀자 - Director's Cut",
@@ -8,7 +9,10 @@ export const metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ko" suppressHydrationWarning>
-      <body>{children}</body>
+      <body>
+        <ClickToComponentWrapper />
+        {children}
+      </body>
     </html>
   )
 }

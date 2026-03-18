@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import {
   Brain,
-  Cpu,
   Sparkles,
   Play,
   ArrowRight,
@@ -29,108 +28,94 @@ const testimonials = [
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-[#050505] text-white font-sans selection:bg-white/20 overflow-x-hidden">
-      {/* 1. Navigation */}
-      <nav className="fixed top-0 w-full z-[100] border-b border-white/5 bg-[#050505]/80 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
-              <Cpu className="text-black w-5 h-5" />
-            </div>
-            <span className="text-lg font-bold tracking-tighter">AI놀자</span>
-          </Link>
-
-          <div className="hidden md:flex items-center gap-8 text-[13px] font-medium text-white/60">
-            <Link href="/programs" className="hover:text-white transition-colors">프로그램</Link>
-            <Link href="/community" className="hover:text-white transition-colors">커뮤니티</Link>
-            <Link href="/store" className="hover:text-white transition-colors">스토어</Link>
-            <Link href="#contact" className="hover:text-white transition-colors">문의하기</Link>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <Link href="/manager" className="text-[13px] font-medium text-white/80 hover:text-white transition-colors">
-              Login
-            </Link>
-            <Link
-              href="/manager"
-              className="px-4 py-2 bg-white text-black text-[13px] font-bold rounded-lg hover:bg-white/90 transition-all"
-            >
-              시작하기
-            </Link>
-          </div>
-        </div>
-      </nav>
-
       {/* 2. Hero Section */}
-      <section className="relative pt-40 pb-20 flex flex-col items-center text-center px-6">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[600px] bg-gradient-to-b from-white/5 to-transparent blur-3xl -z-10" />
+      {/* 2. Hero Section */}
+      <section className="relative min-h-screen flex items-center px-6">
+        <div className="max-w-7xl mx-auto w-full grid lg:grid-cols-2 gap-12 items-center pt-20">
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="max-w-4xl mx-auto"
-        >
-          <h1 className="text-6xl md:text-[100px] font-medium leading-[1.05] tracking-tight mb-8">
-            Every great future <br /> starts with AI놀자
-          </h1>
-          <p className="text-xl md:text-2xl text-white/50 mb-12 font-light">
-            인공지능과 함께하는 새로운 교육의 시작. <br className="hidden md:block" />
-            상상을 현실로 만드는 AI 교육 플랫폼입니다.
-          </p>
-
-          <div className="flex flex-wrap justify-center gap-4 mb-20">
-            <Link
-              href="/manager"
-              className="px-8 py-4 bg-white text-black font-bold rounded-xl hover:scale-105 transition-all text-sm"
-            >
-              무료 체험 신청
-            </Link>
-            <button className="px-8 py-4 bg-white/5 border border-white/10 font-bold rounded-xl hover:bg-white/10 transition-all text-sm flex items-center gap-2">
-              <Play className="w-4 h-4 fill-current" /> 영상 보기
-            </button>
-          </div>
-        </motion.div>
-
-        {/* Spline 3D Robot */}
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.2 }}
-          className="w-full max-w-6xl aspect-video rounded-[32px] border border-white/10 bg-black/40 overflow-hidden relative shadow-2xl shadow-white/5"
-        >
-          <div className="absolute top-0 w-full h-12 bg-white/5 border-b border-white/5 flex items-center px-6 gap-2 z-10">
-            <div className="w-3 h-3 rounded-full bg-white/10" />
-            <div className="w-3 h-3 rounded-full bg-white/10" />
-            <div className="w-3 h-3 rounded-full bg-white/10" />
-            <div className="ml-4 px-3 py-1 bg-white/5 rounded-md text-[10px] text-white/30 border border-white/5">
-              ainolza.pages.dev
+          {/* 왼쪽: 텍스트 */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+            <h1 className="text-6xl md:text-[80px] font-medium leading-[1.05] tracking-tight mb-6">
+              Play with AI,<br />
+              <span className="text-white/30">Create the</span><br />
+              Future
+            </h1>
+            <p className="text-xl text-white/50 mb-10 font-light">
+              인공지능과 함께하는 새로운 교육의 시작.<br />
+              상상을 현실로 만드는 AI 교육 플랫폼입니다.
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <Link
+                href="/manager"
+                className="px-8 py-4 bg-white text-black font-bold rounded-xl hover:scale-105 transition-all text-sm"
+              >
+                무료 체험 신청
+              </Link>
+              <button className="px-8 py-4 bg-white/5 border border-white/10 font-bold rounded-xl hover:bg-white/10 transition-all text-sm flex items-center gap-2">
+                <Play className="w-4 h-4 fill-current" /> 영상 보기
+              </button>
             </div>
-          </div>
-          <iframe
-            src="https://my.spline.design/genkubgreetingrobot-sjuzDgdM6kAGKTcjnEYJNH5Z/"
-            frameBorder="0"
-            width="100%"
-            height="100%"
-            className="pt-12"
-            title="AI놀자 3D Robot"
-            loading="lazy"
-          />
-        </motion.div>
+          </motion.div>
+
+          {/* 오른쪽: 로봇 */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1, delay: 0.2 }}
+            className="relative h-[600px] w-full"
+          >
+            <iframe
+              src="https://my.spline.design/genkubgreetingrobot-BP4W5XoFVqOUjHRhuGq2j0VL/"
+              frameBorder="0"
+              width="100%"
+              height="100%"
+              title="AI놀자 3D Robot"
+            />
+          </motion.div>
+
+        </div>
       </section>
 
       {/* 3. Social Proof */}
       <section className="py-24 border-y border-white/5">
         <div className="max-w-7xl mx-auto px-6 text-center">
-          <p className="text-sm text-white/40 mb-12 uppercase tracking-[0.2em] font-medium">
-            500개 이상의 학교와 기관이 선택한 AI 교육 플랫폼
+          <p className="text-xl text-white/40 mb-12 uppercase tracking-[0.2em] font-medium">
+            강연 및 교육 수강생 1,000+명
           </p>
           <div className="flex flex-wrap justify-center items-center gap-x-16 gap-y-10 opacity-30 grayscale contrast-125">
-            <div className="text-2xl font-bold italic">서울대학교</div>
-            <div className="text-2xl font-bold italic">KAIST</div>
-            <div className="text-2xl font-bold italic">Google Edu</div>
-            <div className="text-2xl font-bold italic">Microsoft</div>
-            <div className="text-2xl font-bold italic">Apple School</div>
+            <div className="text-2xl font-bold italic">바이브 코딩 클래스</div>
+            <div className="text-2xl font-bold italic">AI 관련 도서 2권 출판</div>
+            <div className="text-2xl font-bold italic">방송 출연</div>
+            <div className="text-2xl font-bold italic">신문사 칼럼</div>
+            <div className="text-2xl font-bold italic">자서전 작업</div>
           </div>
+        </div>
+      </section>
+      {/* 프로그램 섹션 */}
+      <section className="py-24 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-end justify-between mb-12">
+            <div>
+              <p className="text-sm text-white/40 uppercase tracking-[0.2em] mb-3">Programs</p>
+              <h2 className="text-4xl md:text-5xl font-medium tracking-tight">현재 운영중인 프로그램</h2>
+            </div>
+            <Link href="/programs" className="text-sm text-white/50 hover:text-white transition-colors border border-white/10 px-4 py-2 rounded-lg">
+              전체 보기 →
+            </Link>
+          </div>
+          <Link href="/programs" className="group block rounded-2xl overflow-hidden border border-white/10 hover:border-white/30 transition-all">
+            <div className="aspect-video overflow-hidden">
+              <img
+                src="/programs/바이브코딩상세1.png"
+                alt="바이브 코딩 클래스"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+            </div>
+          </Link>
         </div>
       </section>
 
@@ -340,72 +325,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 10. Footer */}
-      <footer className="pt-40 pb-20 px-6 relative border-t border-white/5 overflow-hidden">
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 text-[25vw] font-black text-white/[0.02] leading-none select-none pointer-events-none whitespace-nowrap">
-          AI놀자
-        </div>
-
-        <div className="max-w-7xl mx-auto relative z-10">
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-12 mb-40">
-            <div className="col-span-2">
-              <Link href="/" className="flex items-center gap-2 mb-8">
-                <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
-                  <Cpu className="text-black w-5 h-5" />
-                </div>
-                <span className="text-xl font-bold tracking-tighter">AI놀자</span>
-              </Link>
-              <p className="text-sm text-white/40 max-w-xs leading-relaxed">
-                미래를 여는 AI 교육의 시작. <br />
-                우리는 모든 아이들이 AI와 함께 꿈꾸는 세상을 만듭니다.
-              </p>
-            </div>
-
-            <div className="space-y-6">
-              <h6 className="text-xs font-bold uppercase tracking-widest text-white/40">서비스</h6>
-              <ul className="space-y-4 text-sm text-white/60">
-                <li><Link href="/programs" className="hover:text-white transition-colors">프로그램</Link></li>
-                <li><Link href="/store" className="hover:text-white transition-colors">스토어</Link></li>
-                <li><Link href="/community" className="hover:text-white transition-colors">커뮤니티</Link></li>
-              </ul>
-            </div>
-
-            <div className="space-y-6">
-              <h6 className="text-xs font-bold uppercase tracking-widest text-white/40">회사</h6>
-              <ul className="space-y-4 text-sm text-white/60">
-                <li><a href="#" className="hover:text-white transition-colors">소개</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">채용</a></li>
-                <li><a href="#contact" className="hover:text-white transition-colors">문의</a></li>
-              </ul>
-            </div>
-
-            <div className="space-y-6">
-              <h6 className="text-xs font-bold uppercase tracking-widest text-white/40">소셜</h6>
-              <ul className="space-y-4 text-sm text-white/60">
-                <li><a href="#" className="hover:text-white transition-colors">Twitter</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Instagram</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">YouTube</a></li>
-              </ul>
-            </div>
-
-            <div className="space-y-6">
-              <h6 className="text-xs font-bold uppercase tracking-widest text-white/40">법적 고지</h6>
-              <ul className="space-y-4 text-sm text-white/60">
-                <li><a href="#" className="hover:text-white transition-colors">개인정보처리방침</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">이용약관</a></li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="flex flex-col md:flex-row justify-between items-center gap-8 pt-12 border-t border-white/5 text-[10px] uppercase tracking-widest text-white/20 font-bold">
-            <p>&copy; 2026 AI놀자. All rights reserved.</p>
-            <div className="flex gap-8">
-              <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
-              <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
-            </div>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
