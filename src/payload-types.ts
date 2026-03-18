@@ -75,6 +75,7 @@ export interface Config {
     posts: Post;
     comments: Comment;
     programs: Program;
+    'site-settings': SiteSetting;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -90,6 +91,7 @@ export interface Config {
     posts: PostsSelect<false> | PostsSelect<true>;
     comments: CommentsSelect<false> | CommentsSelect<true>;
     programs: ProgramsSelect<false> | ProgramsSelect<true>;
+    'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -274,6 +276,40 @@ export interface Program {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings".
+ */
+export interface SiteSetting {
+  id: number;
+  siteName?: string | null;
+  /**
+   * 홈페이지 URL 경로 (예: /home)
+   */
+  homePath?: string | null;
+  navigation?:
+    | {
+        /**
+         * 메뉴 표시 이름
+         */
+        label: string;
+        /**
+         * URL 경로 (예: /store, /contents)
+         */
+        path: string;
+        type: 'home' | 'store' | 'community' | 'programs' | 'custom';
+        /**
+         * 커스텀 페이지 슬러그 (type이 custom일 때만)
+         */
+        customPageSlug?: string | null;
+        enabled?: boolean | null;
+        order?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -327,6 +363,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'programs';
         value: number | Program;
+      } | null)
+    | ({
+        relationTo: 'site-settings';
+        value: number | SiteSetting;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -495,6 +535,27 @@ export interface ProgramsSelect<T extends boolean = true> {
   thumbnail?: T;
   status?: T;
   featured?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings_select".
+ */
+export interface SiteSettingsSelect<T extends boolean = true> {
+  siteName?: T;
+  homePath?: T;
+  navigation?:
+    | T
+    | {
+        label?: T;
+        path?: T;
+        type?: T;
+        customPageSlug?: T;
+        enabled?: T;
+        order?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
