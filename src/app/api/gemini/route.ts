@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: `Gemini API error: ${response.status}`, details: errorText }, { status: response.status });
       }
 
-      const data = await response.json();
+      const data = await response.json() as any;
       const resultText = data.candidates?.[0]?.content?.parts?.[0]?.text;
       if (!resultText) {
         return NextResponse.json({ error: 'Empty response' }, { status: 500 });
