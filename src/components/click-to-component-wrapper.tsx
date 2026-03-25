@@ -99,7 +99,7 @@ export default function ClickToComponentWrapper() {
       if (!source) return
       // 서버에서 전체 경로 받아서 vscode:// URL로 열기
       const res = await fetch(`/api/dev/open-file?file=${encodeURIComponent(source.file)}&line=${source.line}`)
-      const data = await res.json()
+      const data = await res.json() as any
       if (data.path) {
         // path와 line 분리
         const lastColon = data.path.lastIndexOf(':')
