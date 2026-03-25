@@ -42,11 +42,11 @@ export default function ProgramsPage() {
           {/* 섹션 1 */}
           <div>
             <h2 className="text-3xl md:text-4xl font-medium leading-tight mb-8">
-              "아직도 남의 땅에서 농사짓고 계신가요?"
+              {'"'}아직도 남의 땅에서 농사짓고 계신가요?{'"'}
             </h2>
             <div className="space-y-5 text-white/60 text-lg leading-relaxed">
               <p>네이버 블로그, 유튜브... 언제까지 플랫폼의 알고리즘 눈치만 보실 건가요?</p>
-              <p>진정한 온라인 수익화는 <span className="text-white">'나만의 독립된 성(웹사이트)'</span>을 구축하는 것에서 시작합니다.</p>
+              <p>진정한 온라인 수익화는 <span className="text-white">&apos;나만의 독립된 성(웹사이트)&apos;</span>을 구축하는 것에서 시작합니다.</p>
               <p>시행착오 끝에 깨달은 비즈니스 로직, 그 본질을 투명하게 공개합니다.</p>
             </div>
           </div>
@@ -55,12 +55,12 @@ export default function ProgramsPage() {
 
           {/* 섹션 2 */}
           <div>
-            <h2 className="text-2xl md:text-3xl font-medium mb-10">왜 'AI 바이브 코딩'인가?</h2>
+            <h2 className="text-2xl md:text-3xl font-medium mb-10">왜 &apos;AI 바이브 코딩&apos;인가?</h2>
             <div className="space-y-8">
               {[
                 {
                   title: '시니어를 위한 AI',
-                  desc: '경험은 많지만 기술이 두려웠던 분들에게 AI는 최고의 \'플레이어\'가 됩니다.',
+                  desc: '경험은 많지만 기술이 두려웠던 분들에게 AI는 최고의 플레이어가 됩니다.',
                 },
                 {
                   title: '기획만 하세요',
@@ -68,7 +68,7 @@ export default function ProgramsPage() {
                 },
                 {
                   title: '강력한 무기',
-                  desc: '단순히 AI 쓰는 법이 아니라, 실제 돈이 되는 웹을 만드는 \'디렉팅\' 기술을 배웁니다.',
+                  desc: '단순히 AI 쓰는 법이 아니라, 실제 돈이 되는 웹을 만드는 디렉팅 기술을 배웁니다.',
                 },
               ].map((item, i) => (
                 <div key={i} className="flex gap-6 items-start">
@@ -99,7 +99,7 @@ export default function ProgramsPage() {
                 {
                   tag: '02',
                   title: '틈새 전략',
-                  desc: '대형 매체가 다루지 않는 \'지역 정보\'로 꾸준한 트래픽 만들기.',
+                  desc: '대형 매체가 다루지 않는 지역 정보로 꾸준한 트래픽 만들기.',
                 },
                 {
                   tag: '03',
