@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 import {
   Brain,
   Sparkles,
@@ -119,27 +120,63 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 4. Feature Intro */}
-      <section className="py-40 px-6">
-        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-20 items-center">
-          <div>
-            <h2 className="text-5xl md:text-7xl font-medium leading-tight tracking-tight">
-              아이디어 하나로 <br /> AI 프로젝트를 <br /> 시작하세요.
-            </h2>
+
+      {/* AI 실험실 */}
+      <section className="py-24 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-end justify-between mb-4">
+            <div>
+              <p className="text-sm text-white/40 uppercase tracking-[0.2em] mb-3">AI Lab</p>
+              <h2 className="text-4xl md:text-5xl font-medium tracking-tight">놀면서 배우는 AI 실험실</h2>
+            </div>
+            <Image src="/mascot.png" alt="AI놀자 마스코트" width={80} height={80} className="object-contain" />
           </div>
-          <div className="relative">
-            <div className="p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm flex items-center justify-between group cursor-text">
-              <div className="flex items-center gap-4">
-                <Sparkles className="w-5 h-5 text-white/40 group-hover:text-white transition-colors" />
-                <span className="text-white/40 font-light">AI 교육 과정을 설계하고 싶어요...</span>
+          <p className="text-white/40 mb-12 max-w-xl">직접 체험하며 AI를 이해하는 인터랙티브 미니 프로그램.<br />게임처럼 즐기면서 AI의 원리를 배워보세요.</p>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Link href="/labs/prompt-challenge" className="group relative p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-yellow-400/50 hover:bg-yellow-400/5 transition-all flex flex-col gap-4 min-h-[280px]">
+              <div className="absolute top-0 right-0 px-3 py-1 bg-yellow-400 text-black text-[10px] font-bold rounded-bl-2xl rounded-tr-3xl">NEW</div>
+              <div>
+                <h3 className="text-xl font-bold mb-2">프롬프트 챌린지</h3>
+                <p className="text-sm text-white/50">이미지를 보고 AI처럼 묘사해보세요. 프롬프트 작성 실력을 키울 수 있어요.</p>
               </div>
-              <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center">
-                <ArrowRight className="text-black w-4 h-4" />
+              <div className="mt-auto flex items-center gap-2 text-yellow-400 text-sm font-medium">
+                시작하기 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </div>
-            </div>
-            <div className="absolute -top-10 -right-10 p-4 rounded-xl bg-white/10 border border-white/10 backdrop-blur-md text-xs font-medium animate-bounce">
-              ✨ 커리큘럼 자동 생성 중
-            </div>
+            </Link>
+
+            <Link href="/labs/ai-vs-me" className="group relative p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-violet-400/50 hover:bg-violet-400/5 transition-all flex flex-col gap-4 min-h-[280px]">
+              <div className="absolute top-0 right-0 px-3 py-1 bg-white/10 text-white/50 text-[10px] font-bold rounded-bl-2xl rounded-tr-3xl">SOON</div>
+              <div>
+                <h3 className="text-xl font-bold mb-2">AI vs 나</h3>
+                <p className="text-sm text-white/50">같은 질문에 AI와 내가 함께 답변. 사고방식의 차이를 발견해보세요.</p>
+              </div>
+              <div className="mt-auto flex items-center gap-2 text-violet-400 text-sm font-medium">
+                준비중 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </Link>
+
+            <Link href="/labs/prompt-builder" className="group relative p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-emerald-400/50 hover:bg-emerald-400/5 transition-all flex flex-col gap-4 min-h-[280px]">
+              <div className="absolute top-0 right-0 px-3 py-1 bg-white/10 text-white/50 text-[10px] font-bold rounded-bl-2xl rounded-tr-3xl">SOON</div>
+              <div>
+                <h3 className="text-xl font-bold mb-2">프롬프트 빌더</h3>
+                <p className="text-sm text-white/50">요소를 조합해서 완성도 높은 프롬프트를 만들어보세요.</p>
+              </div>
+              <div className="mt-auto flex items-center gap-2 text-emerald-400 text-sm font-medium">
+                준비중 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </Link>
+
+            <Link href="/labs/career-explorer" className="group relative p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-sky-400/50 hover:bg-sky-400/5 transition-all flex flex-col gap-4 min-h-[280px]">
+              <div className="absolute top-0 right-0 px-3 py-1 bg-white/10 text-white/50 text-[10px] font-bold rounded-bl-2xl rounded-tr-3xl">SOON</div>
+              <div>
+                <h3 className="text-xl font-bold mb-2">AI 직업 탐색기</h3>
+                <p className="text-sm text-white/50">내 관심사를 입력하면 AI가 미래 직업과 활용법을 제안해줘요.</p>
+              </div>
+              <div className="mt-auto flex items-center gap-2 text-sky-400 text-sm font-medium">
+                준비중 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </Link>
           </div>
         </div>
       </section>
@@ -152,7 +189,7 @@ export default function LandingPage() {
               AI놀자와 함께 <br /> 미래를 <br /> 만들어가세요.
             </h2>
             <p className="text-xl text-white/40 font-light max-w-md">
-              복잡한 코딩 없이도 인공지능의 원리를 이해하고, 나만의 AI 프로젝트를 완성할 수 있는 혁신적인 도구들을 경험하세요.
+              복잡한 코딩 없이도 인공지능의 원리를 이해하고<br /> 나만의 AI 프로젝트를 완성할 수 있는<br /> 혁신적인 도구들을 경험하세요.
             </p>
           </div>
 

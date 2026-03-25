@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI놀자 프롬프트 챌린지</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background-color: #050505;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        .neon-border {
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3), inset 0 0 10px rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.5);
+        }
+
+        .neon-border-magenta {
+            box-shadow: 0 0 15px rgba(255, 0, 255, 0.3), inset 0 0 10px rgba(255, 0, 255, 0.1);
+            border: 1px solid rgba(255, 0, 255, 0.5);
+        }
+
+        .text-glow {
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+        }
+
+        .speech-bubble {
+            position: relative;
+        }
+        .speech-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 15px 15px 0;
+            border-style: solid;
+            border-color: #1f2937 transparent transparent transparent;
+            display: block;
+            width: 0;
+        }
+
+        @media (min-width: 768px) {
+            .speech-bubble::after {
+                bottom: 20%;
+                left: -15px;
+                transform: translateY(-50%);
+                border-width: 15px 15px 15px 0;
+                border-color: transparent #1f2937 transparent transparent;
+            }
+        }
+
+        .progress-bar {
+            transition: width 0.5s ease-in-out;
+        }
+
+        .loader {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-left-color: #00ffff;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .pop-in {
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
+
+    <header class="w-full max-w-6xl flex justify-between items-center mb-6">
+        <div>
+            <a href="/" class="text-gray-500 text-sm hover:text-white transition-colors mb-2 inline-block">← AI놀자 홈으로</a>
+            <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-500">
+                <i class="fa-solid fa-gamepad mr-2"></i>AI놀자 프롬프트 챌린지
+            </h1>
+            <p class="text-gray-400 text-sm mt-1">상상력을 발휘하여 AI 디렉터가 되어보세요!</p>
+        </div>
+        <div class="text-right">
+            <div class="text-xl font-bold text-glow" id="level-display">LEVEL 1</div>
+            <div class="flex gap-1 mt-2" id="level-dots"></div>
+        </div>
+    </header>
+
+    <main class="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
+
+        <div class="neon-border rounded-2xl overflow-hidden bg-gray-900 relative group flex flex-col">
+            <div class="absolute top-4 left-4 bg-black/60 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold border border-cyan-500/30 text-cyan-300 z-10">
+                <i class="fa-solid fa-image mr-1"></i>Target Image
+            </div>
+            <img id="target-image" src="" alt="AI Generated Image" class="w-full h-80 md:h-[28rem] object-cover transition-transform duration-700 group-hover:scale-105">
+            <div class="absolute top-4 right-4 bg-purple-600/80 px-3 py-1 rounded-full text-xs font-bold text-white z-10" id="difficulty-badge">
+                난이도: 쉬움
+            </div>
+        </div>
+
+        <div class="flex flex-col justify-between neon-border-magenta rounded-2xl bg-gray-900/80 p-6">
+            <div>
+                <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-terminal"></i> 프롬프트 입력창
+                </h2>
+                <p class="text-sm text-gray-300 mb-4 leading-relaxed">
+                    왼쪽의 이미지를 생성하기 위해 AI에게 어떤 프롬프트(명령어)를 내려야 할까요? 핵심 피사체, 배경, 분위기, 색감 등을 상세히 묘사해보세요.
+                </p>
+                <div class="relative">
+                    <textarea id="prompt-input" rows="6" class="w-full bg-black/50 border border-gray-700 rounded-xl p-4 text-white focus:outline-none focus:border-fuchsia-500 focus:ring-2 focus:ring-fuchsia-500/50 resize-none transition-all placeholder-gray-600" placeholder="예: 햇살이 비치는 거실에 앉아있는 귀여운 노란색 고양이..."></textarea>
+                    <div class="absolute bottom-3 right-3 text-xs text-gray-500 font-mono">
+                        <span id="char-count">0</span> / 300
+                    </div>
+                </div>
+
+                <div class="flex gap-2 mt-3">
+                    <button id="btn-custom-hint" class="flex-1 py-2 rounded-lg bg-gray-800 border border-cyan-500/50 text-cyan-300 text-sm font-bold hover:bg-gray-700 transition-colors flex justify-center items-center gap-1">
+                        ✨ 맞춤 힌트 받기
+                    </button>
+                    <button id="btn-enhance" class="flex-1 py-2 rounded-lg bg-gray-800 border border-fuchsia-500/50 text-fuchsia-300 text-sm font-bold hover:bg-gray-700 transition-colors flex justify-center items-center gap-1">
+                        ✨ 프롬프트 마법사
+                    </button>
+                </div>
+            </div>
+
+            <div class="mt-6 flex flex-col gap-4">
+                <button id="submit-btn" class="w-full py-4 rounded-xl bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 hover:to-purple-500 font-bold text-lg shadow-[0_0_15px_rgba(192,38,211,0.5)] transition-all hover:scale-[1.02] active:scale-95 flex justify-center items-center gap-2">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> 채점하기
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <div class="w-full max-w-6xl mt-8 flex flex-col md:flex-row items-center md:items-start gap-6">
+        <div class="w-24 h-24 shrink-0 rounded-full border-2 border-cyan-400 p-1 bg-gray-800 shadow-[0_0_20px_rgba(0,255,255,0.2)]">
+            <img src="/mascot.png" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=ainolza&backgroundColor=1f2937'" alt="AI놀자 마스코트" class="w-full h-full object-cover rounded-full">
+        </div>
+
+        <div class="speech-bubble bg-gray-800 text-gray-200 p-4 md:p-5 rounded-2xl border border-gray-700 shadow-lg flex-1 md:mt-4 w-full text-center md:text-left">
+            <h3 class="font-bold text-cyan-400 text-sm mb-1"><i class="fa-regular fa-lightbulb mr-1"></i> AI 디렉터 힌트</h3>
+            <p id="mascot-hint" class="text-sm md:text-base leading-relaxed break-keep">
+                반갑습니다! 첫 번째 레벨이네요. 사진에 보이는 가장 중요한 대상이 무엇인지 먼저 적어보세요!
+            </p>
+        </div>
+    </div>
+
+    <div id="result-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+        <div class="bg-gray-900 border border-gray-700 rounded-2xl p-8 max-w-md w-full mx-4 text-center pop-in shadow-[0_0_30px_rgba(0,0,0,1)] relative overflow-hidden">
+            <div id="modal-bg-glow" class="absolute inset-0 opacity-20 pointer-events-none transition-colors duration-300"></div>
+
+            <div class="relative z-10">
+                <div id="result-icon" class="text-6xl mb-4"></div>
+                <h2 id="result-title" class="text-2xl font-bold mb-2">결과</h2>
+
+                <div class="flex justify-center my-6">
+                    <div class="relative w-32 h-32">
+                        <svg class="w-full h-full" viewBox="0 0 36 36">
+                            <path class="text-gray-700" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                            <path id="score-circle" class="text-cyan-400 progress-bar" stroke-dasharray="0, 100" stroke-width="3" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                        </svg>
+                        <div class="absolute inset-0 flex items-center justify-center flex-col">
+                            <span id="score-text" class="text-3xl font-bold">0</span>
+                            <span class="text-xs text-gray-400">% 일치</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="feedback-text" class="text-gray-300 text-sm mb-6 bg-black/40 p-4 rounded-xl text-left border border-gray-800 break-keep leading-relaxed">
+                    피드백이 여기에 표시됩니다.
+                </div>
+
+                <button id="next-action-btn" class="w-full py-3 rounded-xl font-bold text-white transition-all transform hover:scale-105 active:scale-95">
+                    다음 레벨로!
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API 키는 서버에서 관리 (/api/gemini)
+
+        const levels = [
+            {
+                level: 1,
+                difficulty: "초급 (Level 1)",
+                image: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                targetPrompt: "밝은 실내를 배경으로 귀여운 주황색 줄무늬 고양이가 호기심 어린 눈빛으로 카메라를 올려다보고 있다.",
+                hint: "사진의 주인공인 '고양이'의 색깔과 표정, 그리고 전체적인 분위기를 묘사해보세요."
+            },
+            {
+                level: 2,
+                difficulty: "초중급 (Level 2)",
+                image: "https://images.unsplash.com/photo-1515630278258-407f66498911?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                targetPrompt: "보라색과 파란색 네온사인이 화려하게 빛나는 미래지향적인 사이버펑크 도시의 밤거리.",
+                hint: "색감(네온, 보라, 파랑)과 장소의 느낌(미래 도시, 사이버펑크, 밤)을 텍스트로 잘 표현하는 것이 핵심입니다."
+            },
+            {
+                level: 3,
+                difficulty: "중급 (Level 3)",
+                image: "https://images.unsplash.com/photo-1497935586351-b67a49e012bf?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                targetPrompt: "따뜻한 햇살이 비치는 나무 테이블 위에 놓인 라떼 아트가 있는 커피 한 잔과 낡은 책.",
+                hint: "단순히 '커피'가 아니라, 주변에 있는 소품(테이블, 책)과 빛의 느낌(따뜻함, 햇살)까지 묘사해야 점수가 올라가요!"
+            },
+            {
+                level: 4,
+                difficulty: "고급 (Level 4)",
+                image: "https://images.unsplash.com/photo-1541873676-a18131494184?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                targetPrompt: "하얀 우주복을 입은 우주비행사가 푸른 지구가 배경으로 보이는 어두운 우주 공간을 유영하고 있다.",
+                hint: "인물(우주비행사)의 행동과 뒷배경(지구, 우주)의 관계를 명확하게 지시해주세요. 감독이 되었다고 상상해보세요."
+            },
+            {
+                level: 5,
+                difficulty: "마스터 (Level 5)",
+                image: "https://images.unsplash.com/photo-1534447677768-be436bb09401?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                targetPrompt: "안개가 자욱한 어두운 숲 속 중앙에 빛나는 마법의 문이 있고, 신비롭고 판타지적인 분위기가 느껴진다.",
+                hint: "마지막 관문입니다! 물리적인 사물뿐만 아니라 '신비롭다', '판타지' 같은 추상적인 분위기를 프롬프트에 녹여보세요."
+            }
+        ];
+
+        let currentLevelIndex = 0;
+        const passScore = 60;
+
+        const elLevelDisplay = document.getElementById('level-display');
+        const elLevelDots = document.getElementById('level-dots');
+        const elTargetImage = document.getElementById('target-image');
+        const elDifficultyBadge = document.getElementById('difficulty-badge');
+        const elPromptInput = document.getElementById('prompt-input');
+        const elCharCount = document.getElementById('char-count');
+        const elSubmitBtn = document.getElementById('submit-btn');
+        const elMascotHint = document.getElementById('mascot-hint');
+        const elBtnCustomHint = document.getElementById('btn-custom-hint');
+        const elBtnEnhance = document.getElementById('btn-enhance');
+        const elModal = document.getElementById('result-modal');
+        const elModalBgGlow = document.getElementById('modal-bg-glow');
+        const elResultIcon = document.getElementById('result-icon');
+        const elResultTitle = document.getElementById('result-title');
+        const elScoreCircle = document.getElementById('score-circle');
+        const elScoreText = document.getElementById('score-text');
+        const elFeedbackText = document.getElementById('feedback-text');
+        const elNextActionBtn = document.getElementById('next-action-btn');
+
+        function initGame() {
+            renderLevel();
+            setupEventListeners();
+        }
+
+        function renderLevel() {
+            const levelData = levels[currentLevelIndex];
+            elLevelDisplay.textContent = `LEVEL ${levelData.level}`;
+            elTargetImage.src = levelData.image;
+            elDifficultyBadge.textContent = levelData.difficulty;
+            elMascotHint.innerHTML = levelData.hint;
+            elPromptInput.value = '';
+            elCharCount.textContent = '0';
+
+            elLevelDots.innerHTML = '';
+            for (let i = 0; i < levels.length; i++) {
+                const dot = document.createElement('div');
+                dot.className = `w-3 h-3 rounded-full ${i < currentLevelIndex ? 'bg-cyan-400 shadow-[0_0_8px_cyan]' : i === currentLevelIndex ? 'bg-fuchsia-500 animate-pulse' : 'bg-gray-700'}`;
+                elLevelDots.appendChild(dot);
+            }
+        }
+
+        function setupEventListeners() {
+            elPromptInput.addEventListener('input', (e) => {
+                const length = e.target.value.length;
+                elCharCount.textContent = length;
+                if(length > 300) {
+                    e.target.value = e.target.value.substring(0, 300);
+                    elCharCount.textContent = 300;
+                }
+            });
+            elSubmitBtn.addEventListener('click', handleSubmit);
+            elBtnCustomHint.addEventListener('click', handleCustomHint);
+            elBtnEnhance.addEventListener('click', handleEnhancePrompt);
+        }
+
+        async function handleSubmit() {
+            const userInput = elPromptInput.value.trim();
+            if (!userInput) { alertCustom("프롬프트를 입력해주세요!"); return; }
+            if (userInput.length < 10) { alertCustom("조금 더 상세하게 적어볼까요? (최소 10자 이상)"); return; }
+
+            const originalBtnHtml = elSubmitBtn.innerHTML;
+            elSubmitBtn.innerHTML = '<span class="loader"></span> AI가 채점 중...';
+            elSubmitBtn.disabled = true;
+            elSubmitBtn.classList.add('opacity-70', 'cursor-not-allowed');
+
+            try {
+                const result = await evaluatePromptWithGemini(userInput, levels[currentLevelIndex].targetPrompt);
+                showResultModal(result.score, result.feedback);
+            } catch (error) {
+                console.error("평가 오류:", error);
+                alertCustom("AI 채점 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+            } finally {
+                elSubmitBtn.innerHTML = originalBtnHtml;
+                elSubmitBtn.disabled = false;
+                elSubmitBtn.classList.remove('opacity-70', 'cursor-not-allowed');
+            }
+        }
+
+        function alertCustom(msg) {
+            elFeedbackText.textContent = msg;
+            elResultIcon.innerHTML = '⚠️';
+            elResultTitle.textContent = "알림";
+            elResultTitle.className = "text-2xl font-bold mb-2 text-yellow-400";
+            elScoreCircle.setAttribute('stroke-dasharray', `0, 100`);
+            elScoreText.textContent = "-";
+            elNextActionBtn.textContent = "확인";
+            elNextActionBtn.className = "w-full py-3 rounded-xl font-bold text-black bg-yellow-400 hover:bg-yellow-500";
+            elNextActionBtn.onclick = closeModal;
+            elModal.classList.remove('hidden');
+        }
+
+        async function handleCustomHint() {
+            const userInput = elPromptInput.value.trim();
+            const targetPrompt = levels[currentLevelIndex].targetPrompt;
+            const originalText = elBtnCustomHint.innerHTML;
+            elBtnCustomHint.innerHTML = '<span class="loader" style="width:16px;height:16px;border-width:2px;"></span> 생각중...';
+            elBtnCustomHint.disabled = true;
+            try {
+                const systemPrompt = `당신은 'AI놀자'의 친절한 마스코트 힌트 요정입니다. 사용자가 작성중인 프롬프트와 정답(목표) 프롬프트를 비교해서, 사용자가 놓치고 있는 핵심 단어(색상, 배경, 사물, 분위기 등)에 대한 '간접적인' 힌트를 주세요. 절대 정답 단어를 직접 말하지 말고, 질문형이나 비유를 통해 생각하게 만드세요. 한국어로 친절하고 발랄하게 1~2문장으로 답해주세요.`;
+                const userQuery = `정답 프롬프트: "${targetPrompt}"\n현재 사용자 입력: "${userInput || '(아직 입력 안함)'}"`;
+                const responseText = await callGeminiTextAPI(systemPrompt, userQuery);
+                typeText(elMascotHint, responseText);
+            } catch (error) {
+                elMascotHint.textContent = "앗, 힌트를 가져오는데 문제가 생겼어요. 다시 시도해볼래요?";
+            } finally {
+                elBtnCustomHint.innerHTML = originalText;
+                elBtnCustomHint.disabled = false;
+            }
+        }
+
+        async function handleEnhancePrompt() {
+            const userInput = elPromptInput.value.trim();
+            if (!userInput) { alertCustom("마법을 부리려면 기준이 될 단어나 문장을 조금이라도 적어주세요!"); return; }
+            const originalText = elBtnEnhance.innerHTML;
+            elBtnEnhance.innerHTML = '<span class="loader" style="width:16px;height:16px;border-width:2px;border-left-color:#ff00ff;"></span> 마법 부리는 중...';
+            elBtnEnhance.disabled = true;
+            try {
+                const systemPrompt = `당신은 최고 수준의 AI 이미지 프롬프트 엔지니어입니다. 사용자가 작성한 간단한 문장을 바탕으로, 고품질 이미지를 생성할 수 있는 상세하고 예술적이며 생동감 넘치는 프롬프트로 확장해주세요. 빛, 구도, 분위기, 재질 등의 묘사를 화려하게 추가하세요. 반드시 한국어로 자연스럽게 작성하고, 부가 설명이나 따옴표 없이 오직 확장된 프롬프트 결과물 텍스트만 출력하세요. (최대 250자)`;
+                const userQuery = `사용자 입력: "${userInput}"`;
+                const responseText = await callGeminiTextAPI(systemPrompt, userQuery);
+                elPromptInput.value = responseText.replace(/"/g, '').trim().substring(0, 300);
+                elCharCount.textContent = elPromptInput.value.length;
+                typeText(elMascotHint, "쨘! ✨ 프롬프트 마법사가 문장을 멋지게 꾸며줬어요. 어떤 점이 달라졌는지 확인해볼까요?");
+            } catch (error) {
+                alertCustom("마법 주문이 꼬였어요. 잠시 후 다시 시도해주세요!");
+            } finally {
+                elBtnEnhance.innerHTML = originalText;
+                elBtnEnhance.disabled = false;
+            }
+        }
+
+        async function callGeminiTextAPI(systemPrompt, userQuery) {
+            const response = await fetch('/api/gemini', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ systemPrompt, userQuery, jsonMode: false })
+            });
+            if (!response.ok) throw new Error(`API error: ${response.status}`);
+            const data = await response.json();
+            return data.result;
+        }
+
+        function typeText(element, text) {
+            element.innerHTML = '';
+            let i = 0;
+            const interval = setInterval(() => {
+                element.innerHTML += text.charAt(i);
+                i++;
+                if (i > text.length - 1) clearInterval(interval);
+            }, 30);
+        }
+
+        async function evaluatePromptWithGemini(userPrompt, targetPrompt) {
+            const systemPrompt = `당신은 'AI놀자' 브랜드의 친절하고 전문적인 AI 프롬프트 평가 디렉터입니다. 사용자가 제공된 이미지를 얼마나 잘 묘사하는 프롬프트를 작성했는지 평가해야 합니다. 목표 프롬프트(정답의 기준)와 사용자의 프롬프트를 비교하여 시각적 묘사 요소(핵심 피사체, 배경, 색감, 분위기 등)가 얼마나 일치하는지 유사도를 0~100 사이의 정수로 평가하세요. 응답은 반드시 아래 JSON 스키마를 따르는 JSON 객체 하나만 반환해야 합니다. { "score": 점수 (정수, 0~100), "feedback": "사용자의 프롬프트에서 잘한 점과 누락된 핵심 시각적 요소(예: 색상, 뒷배경, 구체적인 사물 등)를 짚어주는 친절한 한국어 피드백 (2~3문장)" }`;
+            const userQuery = `목표 프롬프트: "${targetPrompt}"\n사용자 프롬프트: "${userPrompt}"`;
+            const response = await fetch('/api/gemini', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ systemPrompt, userQuery, jsonMode: true })
+            });
+            if (!response.ok) throw new Error(`API error: ${response.status}`);
+            const data = await response.json();
+            return JSON.parse(data.result);
+        }
+
+        function showResultModal(score, feedback) {
+            elModal.classList.remove('hidden');
+            const isPass = score >= passScore;
+            let currentScore = 0;
+            const scoreInterval = setInterval(() => {
+                if(currentScore >= score) {
+                    clearInterval(scoreInterval);
+                    elScoreText.textContent = score;
+                    elScoreCircle.setAttribute('stroke-dasharray', `${score}, 100`);
+                } else {
+                    currentScore += Math.ceil((score - currentScore) / 5) || 1;
+                    elScoreText.textContent = currentScore;
+                    elScoreCircle.setAttribute('stroke-dasharray', `${currentScore}, 100`);
+                }
+            }, 30);
+
+            elFeedbackText.textContent = feedback;
+
+            if (isPass) {
+                elResultIcon.innerHTML = '🎉';
+                elResultTitle.textContent = "SUCCESS!";
+                elResultTitle.className = "text-3xl font-bold mb-2 text-green-400 text-glow";
+                elScoreCircle.className = "text-green-400 progress-bar";
+                elModalBgGlow.className = "absolute inset-0 opacity-20 pointer-events-none bg-green-500";
+                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#00ffff', '#ff00ff', '#00ff00'] });
+
+                if (currentLevelIndex < levels.length - 1) {
+                    elNextActionBtn.textContent = "다음 레벨 도전!";
+                    elNextActionBtn.className = "w-full py-3 rounded-xl font-bold text-white bg-gradient-to-r from-green-500 to-emerald-600 shadow-[0_0_15px_rgba(16,185,129,0.5)]";
+                    elNextActionBtn.onclick = () => { currentLevelIndex++; closeModal(); renderLevel(); };
+                } else {
+                    elNextActionBtn.textContent = "AI 디렉터 마스터! 처음부터 다시하기";
+                    elNextActionBtn.className = "w-full py-3 rounded-xl font-bold text-white bg-gradient-to-r from-cyan-500 to-blue-600";
+                    elNextActionBtn.onclick = () => { currentLevelIndex = 0; closeModal(); renderLevel(); confetti({ particleCount: 200, spread: 100, origin: { y: 0.5 } }); };
+                }
+            } else {
+                elResultIcon.innerHTML = '🤔';
+                elResultTitle.textContent = "조금 더 다듬어봐요!";
+                elResultTitle.className = "text-2xl font-bold mb-2 text-red-400";
+                elScoreCircle.className = "text-red-400 progress-bar";
+                elModalBgGlow.className = "absolute inset-0 opacity-10 pointer-events-none bg-red-500";
+                elNextActionBtn.textContent = "피드백 반영해서 다시 시도";
+                elNextActionBtn.className = "w-full py-3 rounded-xl font-bold text-white bg-gray-700 hover:bg-gray-600 border border-gray-600";
+                elNextActionBtn.onclick = closeModal;
+            }
+        }
+
+        function closeModal() {
+            elModal.classList.add('hidden');
+            elScoreCircle.setAttribute('stroke-dasharray', '0, 100');
+            elScoreText.textContent = "0";
+        }
+
+        initGame();
+    </script>
+</body>
+</html>
