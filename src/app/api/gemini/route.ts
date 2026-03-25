@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    const body = await request.json() as { systemPrompt: string; userQuery: string; jsonMode: boolean };
     const { systemPrompt, userQuery, jsonMode } = body;
 
     // Cloudflare Workers AI 환경인지 확인
