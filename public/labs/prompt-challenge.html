@@ -57,10 +57,6 @@
             }
         }
 
-        .progress-bar {
-            transition: width 0.5s ease-in-out;
-        }
-
         .loader {
             border: 4px solid rgba(255, 255, 255, 0.1);
             border-left-color: #00ffff;
@@ -78,124 +74,230 @@
         }
 
         .pop-in {
-            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
 
         @keyframes popIn {
-            0% { transform: scale(0.5); opacity: 0; }
+            0% { transform: scale(0.85); opacity: 0; }
             100% { transform: scale(1); opacity: 1; }
         }
+
+        /* 루브릭 바 애니메이션 */
+        .rubric-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+            width: 0%;
+        }
+
+        /* 탭 전환 (모바일) */
+        .tab-content { display: none; }
+        .tab-content.active { display: flex; }
+
+        /* 모바일 탭 버튼 활성 상태 */
+        .tab-btn.active {
+            background: rgba(139, 92, 246, 0.3);
+            border-color: rgba(139, 92, 246, 0.7);
+            color: white;
+        }
+
+        /* 이전 프롬프트 */
+        .prev-prompt-ghost {
+            background: rgba(255,255,255,0.03);
+            border: 1px dashed rgba(255,255,255,0.15);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 12px;
+            color: rgba(255,255,255,0.3);
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+
+        /* 점수 원형 */
+        .score-circle-wrap {
+            position: relative;
+            width: 100px;
+            height: 100px;
+        }
+        .score-circle-wrap svg {
+            width: 100%;
+            height: 100%;
+        }
+        .score-center {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 스크롤바 스타일 */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #111; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-center p-4">
+<body class="min-h-screen flex flex-col items-center p-3 sm:p-4 pb-10">
 
-    <header class="w-full max-w-6xl flex justify-between items-center mb-6">
+    <!-- 헤더 -->
+    <header class="w-full max-w-6xl flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-2">
         <div>
-            <a href="/" class="text-gray-500 text-sm hover:text-white transition-colors mb-2 inline-block">← AI놀자 홈으로</a>
-            <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-500">
+            <a href="/" class="text-gray-500 text-sm hover:text-white transition-colors mb-1 inline-block">← AI놀자 홈으로</a>
+            <h1 class="text-2xl sm:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-500">
                 <i class="fa-solid fa-gamepad mr-2"></i>AI놀자 프롬프트 챌린지
             </h1>
-            <p class="text-gray-400 text-sm mt-1">상상력을 발휘하여 AI 디렉터가 되어보세요!</p>
+            <p class="text-gray-400 text-xs sm:text-sm mt-1">이미지를 보고 AI에게 어떤 명령을 내려야 할지 맞춰보세요!</p>
         </div>
-        <div class="text-right">
-            <div class="text-xl font-bold text-glow" id="level-display">LEVEL 1</div>
-            <div class="flex gap-1 mt-2" id="level-dots"></div>
+        <div class="flex items-center gap-3 sm:flex-col sm:items-end sm:gap-1">
+            <div class="text-lg sm:text-xl font-bold text-glow" id="level-display">LEVEL 1</div>
+            <div class="flex gap-1" id="level-dots"></div>
         </div>
     </header>
 
-    <main class="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
+    <!-- 모바일 탭 버튼 (md 이상에서 숨김) -->
+    <div class="w-full max-w-6xl flex gap-2 mb-3 md:hidden">
+        <button class="tab-btn active flex-1 py-2 rounded-lg bg-gray-900 border border-gray-700 text-gray-300 text-sm font-bold transition-all" data-tab="image">
+            <i class="fa-solid fa-image mr-1"></i> 이미지 보기
+        </button>
+        <button class="tab-btn flex-1 py-2 rounded-lg bg-gray-900 border border-gray-700 text-gray-300 text-sm font-bold transition-all" data-tab="write">
+            <i class="fa-solid fa-pen mr-1"></i> 프롬프트 작성
+        </button>
+    </div>
 
-        <div class="neon-border rounded-2xl overflow-hidden bg-gray-900 relative group flex flex-col">
-            <div class="absolute top-4 left-4 bg-black/60 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold border border-cyan-500/30 text-cyan-300 z-10">
+    <!-- 메인 그리드 -->
+    <main class="w-full max-w-6xl gap-6 relative z-10" id="main-grid" style="display:grid; grid-template-columns: 1fr;">
+
+        <!-- 이미지 패널 -->
+        <div id="panel-image" class="tab-content active flex-col neon-border rounded-2xl overflow-hidden bg-gray-900 relative group md:flex">
+            <div class="absolute top-3 left-3 bg-black/60 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold border border-cyan-500/30 text-cyan-300 z-10">
                 <i class="fa-solid fa-image mr-1"></i>Target Image
             </div>
-            <img id="target-image" src="" alt="AI Generated Image" class="w-full h-80 md:h-[28rem] object-cover transition-transform duration-700 group-hover:scale-105">
-            <div class="absolute top-4 right-4 bg-purple-600/80 px-3 py-1 rounded-full text-xs font-bold text-white z-10" id="difficulty-badge">
+            <div class="absolute top-3 right-3 bg-purple-600/80 px-3 py-1 rounded-full text-xs font-bold text-white z-10" id="difficulty-badge">
                 난이도: 쉬움
+            </div>
+            <img id="target-image" src="" alt="AI Generated Image" class="w-full h-64 sm:h-80 md:h-full object-cover transition-transform duration-700 group-hover:scale-105" style="min-height:280px; max-height:460px;">
+
+            <!-- 100점 예시 (통과 후 표시) -->
+            <div id="answer-reveal" class="hidden p-4 bg-black/80 border-t border-cyan-500/30">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="text-xs font-bold text-cyan-400"><i class="fa-solid fa-star mr-1"></i>100점 프롬프트 예시</span>
+                    <span class="text-xs text-gray-500">(정답의 기준)</span>
+                </div>
+                <p id="answer-text" class="text-sm text-gray-200 leading-relaxed break-keep"></p>
             </div>
         </div>
 
-        <div class="flex flex-col justify-between neon-border-magenta rounded-2xl bg-gray-900/80 p-6">
+        <!-- 입력 패널 -->
+        <div id="panel-write" class="tab-content active flex-col justify-between neon-border-magenta rounded-2xl bg-gray-900/80 p-4 sm:p-6 md:flex">
             <div>
-                <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+                <h2 class="text-lg sm:text-xl font-bold mb-3 flex items-center gap-2">
                     <i class="fa-solid fa-terminal"></i> 프롬프트 입력창
                 </h2>
-                <p class="text-sm text-gray-300 mb-4 leading-relaxed">
-                    왼쪽의 이미지를 생성하기 위해 AI에게 어떤 프롬프트(명령어)를 내려야 할까요? 핵심 피사체, 배경, 분위기, 색감 등을 상세히 묘사해보세요.
-                </p>
+
+                <!-- 채점 기준 안내 -->
+                <div class="mb-3 p-3 rounded-xl bg-black/30 border border-gray-800 text-xs text-gray-400 leading-relaxed">
+                    <span class="text-purple-400 font-bold">채점 기준:</span>
+                    <span class="ml-1">핵심 피사체(25) + 배경/환경(25) + 색감(25) + 분위기/감성(25)</span>
+                </div>
+
+                <!-- 이전 프롬프트 표시 영역 -->
+                <div id="prev-prompt-area" class="hidden">
+                    <div class="text-xs text-gray-600 mb-1 flex items-center gap-1">
+                        <i class="fa-solid fa-clock-rotate-left"></i> 이전 시도
+                    </div>
+                    <div id="prev-prompt-text" class="prev-prompt-ghost"></div>
+                </div>
+
                 <div class="relative">
-                    <textarea id="prompt-input" rows="6" class="w-full bg-black/50 border border-gray-700 rounded-xl p-4 text-white focus:outline-none focus:border-fuchsia-500 focus:ring-2 focus:ring-fuchsia-500/50 resize-none transition-all placeholder-gray-600" placeholder="예: 햇살이 비치는 거실에 앉아있는 귀여운 노란색 고양이..."></textarea>
+                    <textarea id="prompt-input" rows="5" class="w-full bg-black/50 border border-gray-700 rounded-xl p-3 sm:p-4 text-white text-sm sm:text-base focus:outline-none focus:border-fuchsia-500 focus:ring-2 focus:ring-fuchsia-500/50 resize-none transition-all placeholder-gray-600" placeholder="예: 햇살이 비치는 거실에 앉아있는 귀여운 노란색 고양이..."></textarea>
                     <div class="absolute bottom-3 right-3 text-xs text-gray-500 font-mono">
                         <span id="char-count">0</span> / 300
                     </div>
                 </div>
 
                 <div class="flex gap-2 mt-3">
-                    <button id="btn-custom-hint" class="flex-1 py-2 rounded-lg bg-gray-800 border border-cyan-500/50 text-cyan-300 text-sm font-bold hover:bg-gray-700 transition-colors flex justify-center items-center gap-1">
-                        ✨ 맞춤 힌트 받기
+                    <button id="btn-custom-hint" class="flex-1 py-2 rounded-lg bg-gray-800 border border-cyan-500/50 text-cyan-300 text-xs sm:text-sm font-bold hover:bg-gray-700 transition-colors flex justify-center items-center gap-1">
+                        ✨ 맞춤 힌트
                     </button>
-                    <button id="btn-enhance" class="flex-1 py-2 rounded-lg bg-gray-800 border border-fuchsia-500/50 text-fuchsia-300 text-sm font-bold hover:bg-gray-700 transition-colors flex justify-center items-center gap-1">
+                    <button id="btn-enhance" class="flex-1 py-2 rounded-lg bg-gray-800 border border-fuchsia-500/50 text-fuchsia-300 text-xs sm:text-sm font-bold hover:bg-gray-700 transition-colors flex justify-center items-center gap-1">
                         ✨ 프롬프트 마법사
+                    </button>
+                    <button id="btn-show-answer" class="hidden py-2 px-3 rounded-lg bg-gray-800 border border-yellow-500/50 text-yellow-300 text-xs sm:text-sm font-bold hover:bg-gray-700 transition-colors flex justify-center items-center gap-1 whitespace-nowrap">
+                        <i class="fa-solid fa-eye"></i> 정답
                     </button>
                 </div>
             </div>
 
-            <div class="mt-6 flex flex-col gap-4">
-                <button id="submit-btn" class="w-full py-4 rounded-xl bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 hover:to-purple-500 font-bold text-lg shadow-[0_0_15px_rgba(192,38,211,0.5)] transition-all hover:scale-[1.02] active:scale-95 flex justify-center items-center gap-2">
+            <div class="mt-4">
+                <button id="submit-btn" class="w-full py-3 sm:py-4 rounded-xl bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 hover:to-purple-500 font-bold text-base sm:text-lg shadow-[0_0_15px_rgba(192,38,211,0.5)] transition-all hover:scale-[1.02] active:scale-95 flex justify-center items-center gap-2">
                     <i class="fa-solid fa-wand-magic-sparkles"></i> 채점하기
                 </button>
             </div>
         </div>
     </main>
 
-    <div class="w-full max-w-6xl mt-8 flex flex-col md:flex-row items-center md:items-start gap-6">
-        <div class="w-24 h-24 shrink-0 rounded-full border-2 border-cyan-400 p-1 bg-gray-800 shadow-[0_0_20px_rgba(0,255,255,0.2)]">
+    <!-- 마스코트 힌트 -->
+    <div class="w-full max-w-6xl mt-5 flex flex-col md:flex-row items-center md:items-start gap-4">
+        <div class="w-16 h-16 sm:w-20 sm:h-20 shrink-0 rounded-full border-2 border-cyan-400 p-1 bg-gray-800 shadow-[0_0_20px_rgba(0,255,255,0.2)]">
             <img src="/mascot.png" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=ainolza&backgroundColor=1f2937'" alt="AI놀자 마스코트" class="w-full h-full object-cover rounded-full">
         </div>
-
-        <div class="speech-bubble bg-gray-800 text-gray-200 p-4 md:p-5 rounded-2xl border border-gray-700 shadow-lg flex-1 md:mt-4 w-full text-center md:text-left">
-            <h3 class="font-bold text-cyan-400 text-sm mb-1"><i class="fa-regular fa-lightbulb mr-1"></i> AI 디렉터 힌트</h3>
-            <p id="mascot-hint" class="text-sm md:text-base leading-relaxed break-keep">
-                반갑습니다! 첫 번째 레벨이네요. 사진에 보이는 가장 중요한 대상이 무엇인지 먼저 적어보세요!
+        <div class="speech-bubble bg-gray-800 text-gray-200 p-3 sm:p-5 rounded-2xl border border-gray-700 shadow-lg flex-1 md:mt-3 w-full text-center md:text-left">
+            <h3 class="font-bold text-cyan-400 text-xs sm:text-sm mb-1"><i class="fa-regular fa-lightbulb mr-1"></i> AI 디렉터 힌트</h3>
+            <p id="mascot-hint" class="text-sm leading-relaxed break-keep">
+                반갑습니다! 사진에 보이는 가장 중요한 대상이 무엇인지 먼저 적어보세요!
             </p>
         </div>
     </div>
 
-    <div id="result-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center hidden">
-        <div class="bg-gray-900 border border-gray-700 rounded-2xl p-8 max-w-md w-full mx-4 text-center pop-in shadow-[0_0_30px_rgba(0,0,0,1)] relative overflow-hidden">
+    <!-- 결과 모달 -->
+    <div id="result-modal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center hidden p-3">
+        <div class="bg-gray-900 border border-gray-700 rounded-2xl p-5 sm:p-8 max-w-lg w-full text-center pop-in shadow-[0_0_30px_rgba(0,0,0,1)] relative overflow-hidden max-h-[92vh] overflow-y-auto">
             <div id="modal-bg-glow" class="absolute inset-0 opacity-20 pointer-events-none transition-colors duration-300"></div>
 
             <div class="relative z-10">
-                <div id="result-icon" class="text-6xl mb-4"></div>
-                <h2 id="result-title" class="text-2xl font-bold mb-2">결과</h2>
-
-                <div class="flex justify-center my-6">
-                    <div class="relative w-32 h-32">
-                        <svg class="w-full h-full" viewBox="0 0 36 36">
+                <!-- 상단: 아이콘 + 점수 가로 배치 -->
+                <div class="flex items-center justify-center gap-5 mb-4">
+                    <div id="result-icon" class="text-5xl"></div>
+                    <div class="score-circle-wrap">
+                        <svg viewBox="0 0 36 36">
                             <path class="text-gray-700" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-                            <path id="score-circle" class="text-cyan-400 progress-bar" stroke-dasharray="0, 100" stroke-width="3" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                            <path id="score-circle" stroke-dasharray="0, 100" stroke-width="3" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
                         </svg>
-                        <div class="absolute inset-0 flex items-center justify-center flex-col">
-                            <span id="score-text" class="text-3xl font-bold">0</span>
-                            <span class="text-xs text-gray-400">% 일치</span>
+                        <div class="score-center">
+                            <span id="score-text" class="text-2xl font-bold">0</span>
+                            <span class="text-xs text-gray-400">점</span>
                         </div>
+                    </div>
+                    <div>
+                        <h2 id="result-title" class="text-xl font-bold leading-tight">결과</h2>
+                        <div id="pass-label" class="text-xs mt-1 text-gray-500">합격 기준: 60점</div>
                     </div>
                 </div>
 
-                <div id="feedback-text" class="text-gray-300 text-sm mb-6 bg-black/40 p-4 rounded-xl text-left border border-gray-800 break-keep leading-relaxed">
-                    피드백이 여기에 표시됩니다.
+                <!-- 루브릭 채점표 -->
+                <div id="rubric-section" class="mb-4 bg-black/40 rounded-xl p-4 border border-gray-800 text-left">
+                    <div class="text-xs font-bold text-gray-400 mb-3 flex items-center gap-1">
+                        <i class="fa-solid fa-chart-bar"></i> 카테고리별 점수
+                    </div>
+                    <div class="space-y-2" id="rubric-bars"></div>
                 </div>
 
-                <button id="next-action-btn" class="w-full py-3 rounded-xl font-bold text-white transition-all transform hover:scale-105 active:scale-95">
-                    다음 레벨로!
-                </button>
+                <!-- AI 피드백 -->
+                <div id="feedback-text" class="text-gray-300 text-sm mb-5 bg-black/40 p-3 rounded-xl text-left border border-gray-800 break-keep leading-relaxed"></div>
+
+                <!-- 액션 버튼들 -->
+                <div class="flex flex-col gap-2">
+                    <button id="next-action-btn" class="w-full py-3 rounded-xl font-bold text-white transition-all transform hover:scale-105 active:scale-95"></button>
+                    <button id="show-answer-modal-btn" class="hidden w-full py-2 rounded-xl font-bold text-yellow-300 bg-gray-800 border border-yellow-500/40 hover:bg-gray-700 text-sm transition-all">
+                        <i class="fa-solid fa-lightbulb mr-1"></i> 100점 프롬프트 보기
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // API 키는 서버에서 관리 (/api/gemini)
-
         const levels = [
             {
                 level: 1,
@@ -235,8 +337,11 @@
         ];
 
         let currentLevelIndex = 0;
+        let failCount = 0;
+        let lastPrompt = '';
         const passScore = 60;
 
+        // DOM 요소
         const elLevelDisplay = document.getElementById('level-display');
         const elLevelDots = document.getElementById('level-dots');
         const elTargetImage = document.getElementById('target-image');
@@ -247,6 +352,7 @@
         const elMascotHint = document.getElementById('mascot-hint');
         const elBtnCustomHint = document.getElementById('btn-custom-hint');
         const elBtnEnhance = document.getElementById('btn-enhance');
+        const elBtnShowAnswer = document.getElementById('btn-show-answer');
         const elModal = document.getElementById('result-modal');
         const elModalBgGlow = document.getElementById('modal-bg-glow');
         const elResultIcon = document.getElementById('result-icon');
@@ -255,10 +361,54 @@
         const elScoreText = document.getElementById('score-text');
         const elFeedbackText = document.getElementById('feedback-text');
         const elNextActionBtn = document.getElementById('next-action-btn');
+        const elShowAnswerModalBtn = document.getElementById('show-answer-modal-btn');
+        const elAnswerReveal = document.getElementById('answer-reveal');
+        const elAnswerText = document.getElementById('answer-text');
+        const elPrevPromptArea = document.getElementById('prev-prompt-area');
+        const elPrevPromptText = document.getElementById('prev-prompt-text');
+        const elMainGrid = document.getElementById('main-grid');
 
         function initGame() {
+            setupTabEvents();
+            setupGridLayout();
             renderLevel();
             setupEventListeners();
+        }
+
+        function setupGridLayout() {
+            if (window.innerWidth >= 768) {
+                elMainGrid.style.gridTemplateColumns = '1fr 1fr';
+                document.querySelectorAll('.tab-content').forEach(el => {
+                    el.classList.add('active');
+                    el.style.display = 'flex';
+                });
+            }
+        }
+
+        function setupTabEvents() {
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    const target = btn.dataset.tab;
+                    document.getElementById('panel-image').style.display = target === 'image' ? 'flex' : 'none';
+                    document.getElementById('panel-write').style.display = target === 'write' ? 'flex' : 'none';
+                });
+            });
+
+            window.addEventListener('resize', () => {
+                if (window.innerWidth >= 768) {
+                    elMainGrid.style.gridTemplateColumns = '1fr 1fr';
+                    document.getElementById('panel-image').style.display = 'flex';
+                    document.getElementById('panel-write').style.display = 'flex';
+                } else {
+                    elMainGrid.style.gridTemplateColumns = '1fr';
+                    const activeTab = document.querySelector('.tab-btn.active')?.dataset.tab || 'image';
+                    document.getElementById('panel-image').style.display = activeTab === 'image' ? 'flex' : 'none';
+                    document.getElementById('panel-write').style.display = activeTab === 'write' ? 'flex' : 'none';
+                }
+            });
         }
 
         function renderLevel() {
@@ -269,11 +419,16 @@
             elMascotHint.innerHTML = levelData.hint;
             elPromptInput.value = '';
             elCharCount.textContent = '0';
+            failCount = 0;
+            lastPrompt = '';
+            elPrevPromptArea.classList.add('hidden');
+            elAnswerReveal.classList.add('hidden');
+            elBtnShowAnswer.classList.add('hidden');
 
             elLevelDots.innerHTML = '';
             for (let i = 0; i < levels.length; i++) {
                 const dot = document.createElement('div');
-                dot.className = `w-3 h-3 rounded-full ${i < currentLevelIndex ? 'bg-cyan-400 shadow-[0_0_8px_cyan]' : i === currentLevelIndex ? 'bg-fuchsia-500 animate-pulse' : 'bg-gray-700'}`;
+                dot.className = `w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full ${i < currentLevelIndex ? 'bg-cyan-400 shadow-[0_0_8px_cyan]' : i === currentLevelIndex ? 'bg-fuchsia-500 animate-pulse' : 'bg-gray-700'}`;
                 elLevelDots.appendChild(dot);
             }
         }
@@ -282,7 +437,7 @@
             elPromptInput.addEventListener('input', (e) => {
                 const length = e.target.value.length;
                 elCharCount.textContent = length;
-                if(length > 300) {
+                if (length > 300) {
                     e.target.value = e.target.value.substring(0, 300);
                     elCharCount.textContent = 300;
                 }
@@ -290,6 +445,24 @@
             elSubmitBtn.addEventListener('click', handleSubmit);
             elBtnCustomHint.addEventListener('click', handleCustomHint);
             elBtnEnhance.addEventListener('click', handleEnhancePrompt);
+            elBtnShowAnswer.addEventListener('click', showAnswer);
+            elShowAnswerModalBtn.addEventListener('click', () => {
+                closeModal();
+                showAnswer();
+            });
+        }
+
+        function showAnswer() {
+            const targetPrompt = levels[currentLevelIndex].targetPrompt;
+            elAnswerText.textContent = targetPrompt;
+            elAnswerReveal.classList.remove('hidden');
+            // 모바일이면 이미지 탭으로 이동
+            if (window.innerWidth < 768) {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelector('[data-tab="image"]').classList.add('active');
+                document.getElementById('panel-image').style.display = 'flex';
+                document.getElementById('panel-write').style.display = 'none';
+            }
         }
 
         async function handleSubmit() {
@@ -304,7 +477,8 @@
 
             try {
                 const result = await evaluatePromptWithGemini(userInput, levels[currentLevelIndex].targetPrompt);
-                showResultModal(result.score, result.feedback);
+                lastPrompt = userInput;
+                showResultModal(result.score, result.feedback, result.rubric);
             } catch (error) {
                 console.error("평가 오류:", error);
                 alertCustom("AI 채점 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
@@ -319,12 +493,16 @@
             elFeedbackText.textContent = msg;
             elResultIcon.innerHTML = '⚠️';
             elResultTitle.textContent = "알림";
-            elResultTitle.className = "text-2xl font-bold mb-2 text-yellow-400";
-            elScoreCircle.setAttribute('stroke-dasharray', `0, 100`);
+            elResultTitle.className = "text-xl font-bold leading-tight text-yellow-400";
+            document.getElementById('pass-label').textContent = '';
+            elScoreCircle.setAttribute('stroke-dasharray', '0, 100');
+            elScoreCircle.className = 'text-gray-500';
             elScoreText.textContent = "-";
+            document.getElementById('rubric-section').classList.add('hidden');
             elNextActionBtn.textContent = "확인";
             elNextActionBtn.className = "w-full py-3 rounded-xl font-bold text-black bg-yellow-400 hover:bg-yellow-500";
             elNextActionBtn.onclick = closeModal;
+            elShowAnswerModalBtn.classList.add('hidden');
             elModal.classList.remove('hidden');
         }
 
@@ -332,7 +510,7 @@
             const userInput = elPromptInput.value.trim();
             const targetPrompt = levels[currentLevelIndex].targetPrompt;
             const originalText = elBtnCustomHint.innerHTML;
-            elBtnCustomHint.innerHTML = '<span class="loader" style="width:16px;height:16px;border-width:2px;"></span> 생각중...';
+            elBtnCustomHint.innerHTML = '<span class="loader" style="width:14px;height:14px;border-width:2px;"></span>';
             elBtnCustomHint.disabled = true;
             try {
                 const systemPrompt = `당신은 'AI놀자'의 친절한 마스코트 힌트 요정입니다. 사용자가 작성중인 프롬프트와 정답(목표) 프롬프트를 비교해서, 사용자가 놓치고 있는 핵심 단어(색상, 배경, 사물, 분위기 등)에 대한 '간접적인' 힌트를 주세요. 절대 정답 단어를 직접 말하지 말고, 질문형이나 비유를 통해 생각하게 만드세요. 한국어로 친절하고 발랄하게 1~2문장으로 답해주세요.`;
@@ -351,7 +529,7 @@
             const userInput = elPromptInput.value.trim();
             if (!userInput) { alertCustom("마법을 부리려면 기준이 될 단어나 문장을 조금이라도 적어주세요!"); return; }
             const originalText = elBtnEnhance.innerHTML;
-            elBtnEnhance.innerHTML = '<span class="loader" style="width:16px;height:16px;border-width:2px;border-left-color:#ff00ff;"></span> 마법 부리는 중...';
+            elBtnEnhance.innerHTML = '<span class="loader" style="width:14px;height:14px;border-width:2px;border-left-color:#ff00ff;"></span>';
             elBtnEnhance.disabled = true;
             try {
                 const systemPrompt = `당신은 최고 수준의 AI 이미지 프롬프트 엔지니어입니다. 사용자가 작성한 간단한 문장을 바탕으로, 고품질 이미지를 생성할 수 있는 상세하고 예술적이며 생동감 넘치는 프롬프트로 확장해주세요. 빛, 구도, 분위기, 재질 등의 묘사를 화려하게 추가하세요. 반드시 한국어로 자연스럽게 작성하고, 부가 설명이나 따옴표 없이 오직 확장된 프롬프트 결과물 텍스트만 출력하세요. (최대 250자)`;
@@ -386,11 +564,27 @@
                 element.innerHTML += text.charAt(i);
                 i++;
                 if (i > text.length - 1) clearInterval(interval);
-            }, 30);
+            }, 25);
         }
 
         async function evaluatePromptWithGemini(userPrompt, targetPrompt) {
-            const systemPrompt = `당신은 'AI놀자' 브랜드의 친절하고 전문적인 AI 프롬프트 평가 디렉터입니다. 사용자가 제공된 이미지를 얼마나 잘 묘사하는 프롬프트를 작성했는지 평가해야 합니다. 목표 프롬프트(정답의 기준)와 사용자의 프롬프트를 비교하여 시각적 묘사 요소(핵심 피사체, 배경, 색감, 분위기 등)가 얼마나 일치하는지 유사도를 0~100 사이의 정수로 평가하세요. 응답은 반드시 아래 JSON 스키마를 따르는 JSON 객체 하나만 반환해야 합니다. { "score": 점수 (정수, 0~100), "feedback": "사용자의 프롬프트에서 잘한 점과 누락된 핵심 시각적 요소(예: 색상, 뒷배경, 구체적인 사물 등)를 짚어주는 친절한 한국어 피드백 (2~3문장)" }`;
+            const systemPrompt = `당신은 'AI놀자' 브랜드의 친절하고 전문적인 AI 프롬프트 평가 디렉터입니다.
+사용자가 제공된 이미지를 얼마나 잘 묘사하는 프롬프트를 작성했는지 평가해야 합니다.
+목표 프롬프트(정답의 기준)와 사용자의 프롬프트를 비교하여 아래 4개 카테고리로 나누어 채점하세요.
+
+각 카테고리는 0~25점입니다. 총점은 4개 카테고리 합산입니다.
+
+반드시 아래 JSON 스키마를 따르는 JSON 객체 하나만 반환하세요. 다른 텍스트는 절대 포함하지 마세요.
+{
+  "score": 총점(정수, 0~100),
+  "rubric": {
+    "subject": 핵심 피사체 점수(0~25),
+    "background": 배경/환경 점수(0~25),
+    "color": 색감 점수(0~25),
+    "mood": 분위기/감성 점수(0~25)
+  },
+  "feedback": "잘한 점과 아쉬운 점을 구체적으로 짚어주는 친절한 한국어 피드백 2~3문장. 어떤 단어/요소를 추가하면 점수가 오를지 힌트 포함."
+}`;
             const userQuery = `목표 프롬프트: "${targetPrompt}"\n사용자 프롬프트: "${userPrompt}"`;
             const response = await fetch('/api/gemini', {
                 method: 'POST',
@@ -402,12 +596,53 @@
             return JSON.parse(data.result);
         }
 
-        function showResultModal(score, feedback) {
+        function renderRubric(rubric) {
+            const section = document.getElementById('rubric-section');
+            section.classList.remove('hidden');
+            const barsEl = document.getElementById('rubric-bars');
+            barsEl.innerHTML = '';
+
+            const categories = [
+                { key: 'subject',    label: '핵심 피사체', icon: 'fa-cat',        color: 'bg-cyan-400' },
+                { key: 'background', label: '배경/환경',   icon: 'fa-mountain',   color: 'bg-blue-400' },
+                { key: 'color',      label: '색감 표현',   icon: 'fa-palette',    color: 'bg-purple-400' },
+                { key: 'mood',       label: '분위기/감성', icon: 'fa-wind',       color: 'bg-pink-400' },
+            ];
+
+            categories.forEach(cat => {
+                const score = rubric?.[cat.key] ?? 0;
+                const pct = (score / 25) * 100;
+                const row = document.createElement('div');
+                row.innerHTML = `
+                    <div class="flex items-center gap-2 mb-1">
+                        <i class="fa-solid ${cat.icon} text-xs w-3 text-gray-500"></i>
+                        <span class="text-xs text-gray-300 w-20 shrink-0">${cat.label}</span>
+                        <div class="flex-1 h-2 bg-gray-800 rounded-full overflow-hidden">
+                            <div class="rubric-bar-fill ${cat.color}" data-pct="${pct}"></div>
+                        </div>
+                        <span class="text-xs font-bold w-10 text-right ${score >= 20 ? 'text-green-400' : score >= 12 ? 'text-yellow-400' : 'text-red-400'}">${score}/25</span>
+                    </div>`;
+                barsEl.appendChild(row);
+            });
+
+            // 애니메이션 트리거
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    document.querySelectorAll('.rubric-bar-fill').forEach(bar => {
+                        bar.style.width = bar.dataset.pct + '%';
+                    });
+                });
+            });
+        }
+
+        function showResultModal(score, feedback, rubric) {
             elModal.classList.remove('hidden');
             const isPass = score >= passScore;
+
+            // 점수 애니메이션
             let currentScore = 0;
             const scoreInterval = setInterval(() => {
-                if(currentScore >= score) {
+                if (currentScore >= score) {
                     clearInterval(scoreInterval);
                     elScoreText.textContent = score;
                     elScoreCircle.setAttribute('stroke-dasharray', `${score}, 100`);
@@ -418,34 +653,68 @@
                 }
             }, 30);
 
+            // 루브릭 렌더
+            renderRubric(rubric);
+
             elFeedbackText.textContent = feedback;
+            document.getElementById('pass-label').textContent = `합격 기준: ${passScore}점`;
 
             if (isPass) {
                 elResultIcon.innerHTML = '🎉';
                 elResultTitle.textContent = "SUCCESS!";
-                elResultTitle.className = "text-3xl font-bold mb-2 text-green-400 text-glow";
-                elScoreCircle.className = "text-green-400 progress-bar";
+                elResultTitle.className = "text-xl font-bold leading-tight text-green-400";
+                elScoreCircle.className = "text-green-400";
                 elModalBgGlow.className = "absolute inset-0 opacity-20 pointer-events-none bg-green-500";
                 confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#00ffff', '#ff00ff', '#00ff00'] });
+
+                // 통과 시 정답 공개 버튼 표시
+                elShowAnswerModalBtn.classList.remove('hidden');
+                elShowAnswerModalBtn.classList.add('flex');
 
                 if (currentLevelIndex < levels.length - 1) {
                     elNextActionBtn.textContent = "다음 레벨 도전!";
                     elNextActionBtn.className = "w-full py-3 rounded-xl font-bold text-white bg-gradient-to-r from-green-500 to-emerald-600 shadow-[0_0_15px_rgba(16,185,129,0.5)]";
                     elNextActionBtn.onclick = () => { currentLevelIndex++; closeModal(); renderLevel(); };
                 } else {
-                    elNextActionBtn.textContent = "AI 디렉터 마스터! 처음부터 다시하기";
+                    elNextActionBtn.textContent = "AI 디렉터 마스터! 🏆 처음부터 다시하기";
                     elNextActionBtn.className = "w-full py-3 rounded-xl font-bold text-white bg-gradient-to-r from-cyan-500 to-blue-600";
                     elNextActionBtn.onclick = () => { currentLevelIndex = 0; closeModal(); renderLevel(); confetti({ particleCount: 200, spread: 100, origin: { y: 0.5 } }); };
                 }
             } else {
+                failCount++;
                 elResultIcon.innerHTML = '🤔';
                 elResultTitle.textContent = "조금 더 다듬어봐요!";
-                elResultTitle.className = "text-2xl font-bold mb-2 text-red-400";
-                elScoreCircle.className = "text-red-400 progress-bar";
-                elModalBgGlow.className = "absolute inset-0 opacity-10 pointer-events-none bg-red-500";
+                elResultTitle.className = "text-xl font-bold leading-tight text-orange-400";
+                elScoreCircle.className = "text-orange-400";
+                elModalBgGlow.className = "absolute inset-0 opacity-10 pointer-events-none bg-orange-500";
+
                 elNextActionBtn.textContent = "피드백 반영해서 다시 시도";
                 elNextActionBtn.className = "w-full py-3 rounded-xl font-bold text-white bg-gray-700 hover:bg-gray-600 border border-gray-600";
-                elNextActionBtn.onclick = closeModal;
+                elNextActionBtn.onclick = () => {
+                    // 이전 프롬프트 보여주기
+                    if (lastPrompt) {
+                        elPrevPromptText.textContent = lastPrompt;
+                        elPrevPromptArea.classList.remove('hidden');
+                    }
+                    closeModal();
+                    // 모바일이면 쓰기 탭으로 이동
+                    if (window.innerWidth < 768) {
+                        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                        document.querySelector('[data-tab="write"]').classList.add('active');
+                        document.getElementById('panel-image').style.display = 'none';
+                        document.getElementById('panel-write').style.display = 'flex';
+                    }
+                };
+
+                // 2회 이상 실패 시 정답 보기 버튼 표시
+                if (failCount >= 2) {
+                    elShowAnswerModalBtn.classList.remove('hidden');
+                    elShowAnswerModalBtn.classList.add('flex');
+                    elBtnShowAnswer.classList.remove('hidden');
+                } else {
+                    elShowAnswerModalBtn.classList.add('hidden');
+                    elBtnShowAnswer.classList.add('hidden');
+                }
             }
         }
 
