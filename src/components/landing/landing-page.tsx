@@ -102,6 +102,27 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* 오늘의 AI 퀴즈 배너 */}
+      <section className="py-12 px-6">
+        <Link href="/labs/daily-quiz.html" className="block max-w-7xl mx-auto group">
+          <div className="p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/20 hover:border-yellow-500/40 transition-all flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-2xl bg-yellow-400/20 flex items-center justify-center text-2xl shrink-0">
+                &#128218;
+              </div>
+              <div>
+                <div className="text-xs text-yellow-400 font-bold uppercase tracking-widest mb-1">Daily</div>
+                <h3 className="text-xl sm:text-2xl font-bold">오늘의 AI 퀴즈</h3>
+                <p className="text-sm text-foreground/40 mt-1">매일 1문제! 출석 도장도 모으고 AI 상식도 쌓아보세요.</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 text-yellow-400 font-bold text-sm shrink-0">
+              오늘의 문제 풀기 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </div>
+          </div>
+        </Link>
+      </section>
+
       {/* AI 실험실 */}
       <section className="py-24 px-6">
         <div className="max-w-7xl mx-auto">
