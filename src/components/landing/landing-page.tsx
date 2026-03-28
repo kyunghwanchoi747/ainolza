@@ -134,7 +134,7 @@ export default function LandingPage() {
           <p className="text-white/40 mb-12 max-w-xl">직접 체험하며 AI를 이해하는 인터랙티브 미니 프로그램.<br />게임처럼 즐기면서 AI의 원리를 배워보세요.</p>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Link href="/labs/prompt-challenge" className="group relative p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-yellow-400/50 hover:bg-yellow-400/5 transition-all flex flex-col gap-4 min-h-[280px]">
+            <Link href="/labs/prompt-challenge.html" className="group relative p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-yellow-400/50 hover:bg-yellow-400/5 transition-all flex flex-col gap-4 min-h-[280px]">
               <div className="absolute top-0 right-0 px-3 py-1 bg-yellow-400 text-black text-[10px] font-bold rounded-bl-2xl rounded-tr-3xl">NEW</div>
               <div>
                 <h3 className="text-xl font-bold mb-2">프롬프트 챌린지</h3>
