@@ -46,15 +46,22 @@ export default function LandingPage() {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1, delay: 0.2 }}
-            className="relative h-[600px] w-full"
+            className="relative w-full flex items-center justify-center"
           >
-            <iframe
-              src="https://my.spline.design/genkubgreetingrobot-BP4W5XoFVqOUjHRhuGq2j0VL/"
-              frameBorder="0"
-              width="100%"
-              height="100%"
-              title="AI놀자 3D Robot"
-            />
+            {/* 모바일: 마스코트 이미지 */}
+            <div className="lg:hidden">
+              <Image src="/mascot.png" alt="AI놀자 마스코트" width={300} height={300} className="object-contain" priority />
+            </div>
+            {/* 데스크탑: 3D 로봇 */}
+            <div className="hidden lg:block w-full h-[600px]">
+              <iframe
+                src="https://my.spline.design/genkubgreetingrobot-BP4W5XoFVqOUjHRhuGq2j0VL/"
+                width="100%"
+                height="100%"
+                title="AI놀자 3D Robot"
+                loading="lazy"
+              />
+            </div>
           </motion.div>
 
         </div>
