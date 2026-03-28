@@ -78,14 +78,14 @@ function Modal({ title, content, onClose }: { title: string; content: string; on
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-[#111] border border-white/10 rounded-2xl w-full max-w-2xl max-h-[80vh] flex flex-col">
-        <div className="flex items-center justify-between p-6 border-b border-white/10">
-          <h2 className="text-lg font-medium text-white">{title}</h2>
-          <button onClick={onClose} className="text-white/40 hover:text-white transition-colors">
+      <div className="relative bg-background border border-foreground/10 rounded-2xl w-full max-w-2xl max-h-[80vh] flex flex-col">
+        <div className="flex items-center justify-between p-6 border-b border-foreground/10">
+          <h2 className="text-lg font-medium text-foreground">{title}</h2>
+          <button onClick={onClose} className="text-foreground/40 hover:text-foreground transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
-        <div className="overflow-y-auto p-6 text-sm text-white/60 leading-relaxed whitespace-pre-line">
+        <div className="overflow-y-auto p-6 text-sm text-foreground/60 leading-relaxed whitespace-pre-line">
           {content}
         </div>
       </div>
@@ -104,57 +104,57 @@ export function SiteFooter() {
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-12 mb-16">
             <div className="col-span-2">
               <Link href="/" className="flex items-center gap-2 mb-6">
-  <span className="text-xl font-bold tracking-tighter text-white">AI놀자</span>
+  <span className="text-xl font-bold tracking-tighter text-foreground">AI놀자</span>
 </Link>
 
-              <p className="text-sm text-white/40 max-w-xs leading-relaxed">
+              <p className="text-sm text-foreground/40 max-w-xs leading-relaxed">
                 미래를 여는 AI 교육의 시작. <br />
                 우리는 모든 아이들이 AI와 함께 꿈꾸는 세상을 만듭니다.
               </p>
             </div>
 
             <div className="space-y-4">
-              <h6 className="text-xs font-bold uppercase tracking-widest text-white/40">서비스</h6>
-              <ul className="space-y-3 text-sm text-white/60">
-                <li><Link href="/programs" className="hover:text-white transition-colors">프로그램</Link></li>
-                <li><Link href="/store" className="hover:text-white transition-colors">스토어</Link></li>
-                <li><Link href="/community" className="hover:text-white transition-colors">커뮤니티</Link></li>
+              <h6 className="text-xs font-bold uppercase tracking-widest text-foreground/40">서비스</h6>
+              <ul className="space-y-3 text-sm text-foreground/60">
+                <li><Link href="/programs" className="hover:text-foreground transition-colors">프로그램</Link></li>
+                <li><Link href="/store" className="hover:text-foreground transition-colors">스토어</Link></li>
+                <li><Link href="/community" className="hover:text-foreground transition-colors">커뮤니티</Link></li>
               </ul>
             </div>
 
             <div className="space-y-4">
-              <h6 className="text-xs font-bold uppercase tracking-widest text-white/40">회사</h6>
-              <ul className="space-y-3 text-sm text-white/60">
-                <li><a href="https://www.notion.so/229cd6961b4180fabd19f6c8ce7ca699?source=copy_link" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">소개</a></li>
+              <h6 className="text-xs font-bold uppercase tracking-widest text-foreground/40">회사</h6>
+              <ul className="space-y-3 text-sm text-foreground/60">
+                <li><a href="https://www.notion.so/229cd6961b4180fabd19f6c8ce7ca699?source=copy_link" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">소개</a></li>
 
-                <li><a href="#" className="hover:text-white transition-colors">채용</a></li>
-                <li><a href="https://open.kakao.com/o/s7kkWTfh" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">문의</a></li>
-
-              </ul>
-            </div>
-
-            <div className="space-y-4">
-              <h6 className="text-xs font-bold uppercase tracking-widest text-white/40">소셜</h6>
-              <ul className="space-y-3 text-sm text-white/60">
-                <li><a href="https://www.threads.com/@ainolza.kr" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Threads</a></li>
-
-                <li><a href="https://www.instagram.com/ainolza.kr/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Instagram</a></li>
-
-                <li><a href="https://www.youtube.com/@AINOLZA" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">YouTube</a></li>
+                <li><a href="#" className="hover:text-foreground transition-colors">채용</a></li>
+                <li><a href="https://open.kakao.com/o/s7kkWTfh" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">문의</a></li>
 
               </ul>
             </div>
 
             <div className="space-y-4">
-              <h6 className="text-xs font-bold uppercase tracking-widest text-white/40">법적 고지</h6>
-              <ul className="space-y-3 text-sm text-white/60">
+              <h6 className="text-xs font-bold uppercase tracking-widest text-foreground/40">소셜</h6>
+              <ul className="space-y-3 text-sm text-foreground/60">
+                <li><a href="https://www.threads.com/@ainolza.kr" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">Threads</a></li>
+
+                <li><a href="https://www.instagram.com/ainolza.kr/" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">Instagram</a></li>
+
+                <li><a href="https://www.youtube.com/@AINOLZA" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">YouTube</a></li>
+
+              </ul>
+            </div>
+
+            <div className="space-y-4">
+              <h6 className="text-xs font-bold uppercase tracking-widest text-foreground/40">법적 고지</h6>
+              <ul className="space-y-3 text-sm text-foreground/60">
                 <li>
-                  <button onClick={() => setModal('privacy')} className="hover:text-white transition-colors text-left">
+                  <button onClick={() => setModal('privacy')} className="hover:text-foreground transition-colors text-left">
                     개인정보처리방침
                   </button>
                 </li>
                 <li>
-                  <button onClick={() => setModal('terms')} className="hover:text-white transition-colors text-left">
+                  <button onClick={() => setModal('terms')} className="hover:text-foreground transition-colors text-left">
                     이용약관
                   </button>
                 </li>
@@ -163,18 +163,18 @@ export function SiteFooter() {
           </div>
 
           {/* 사업자 정보 */}
-          <div className="text-xs text-white/20 leading-relaxed space-y-1 mb-8">
+          <div className="text-xs text-foreground/20 leading-relaxed space-y-1 mb-8">
             <p>에이아이놀자 (AI놀자) 대표자: 최경환 | 개인정보관리책임자: 최경환 | 이메일: ainolza@naver.com</p>
             <p>사업자 등록번호: 317-52-01191 | 통신판매신고번호: 2025-성남분당A-0508</p>
             <p>연락처: 070-8028-2616 | 주소: 경기도 성남시 분당구 판교백현로 65, 3층(백현동)</p>
           </div>
 
           {/* 하단 카피라이트 */}
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4 pt-8 border-t border-white/5 text-[10px] uppercase tracking-widest text-white/20 font-bold">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4 pt-8 border-t border-foreground/5 text-[10px] uppercase tracking-widest text-foreground/20 font-bold">
             <p>&copy; 2026 AI놀자. All rights reserved.</p>
             <div className="flex gap-6">
-              <button onClick={() => setModal('privacy')} className="hover:text-white/50 transition-colors">Privacy Policy</button>
-              <button onClick={() => setModal('terms')} className="hover:text-white/50 transition-colors">Terms of Service</button>
+              <button onClick={() => setModal('privacy')} className="hover:text-foreground/50 transition-colors">Privacy Policy</button>
+              <button onClick={() => setModal('terms')} className="hover:text-foreground/50 transition-colors">Terms of Service</button>
             </div>
           </div>
         </div>
