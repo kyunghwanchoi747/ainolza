@@ -31,7 +31,7 @@ export default function LandingPage() {
             </p>
             <div className="flex flex-wrap gap-4">
               <Link
-                href="/manager"
+                href="/programs"
                 className="px-8 py-4 bg-foreground text-background font-bold rounded-xl hover:scale-105 transition-all text-sm"
               >
                 무료 체험 신청
@@ -194,7 +194,7 @@ export default function LandingPage() {
           >
             <div className="absolute -inset-1 bg-foreground/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
             <Link
-              href="/manager"
+              href="/programs"
               className="relative inline-block px-12 py-6 bg-foreground text-background text-xl font-bold rounded-2xl shadow-2xl shadow-foreground/10"
             >
               지금 시작하기

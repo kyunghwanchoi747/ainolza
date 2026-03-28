@@ -48,11 +48,11 @@ export function Header() {
                         <Sun className="h-4 w-4 hidden dark:block" />
                         <Moon className="h-4 w-4 block dark:hidden" />
                     </button>
-                    <Link href="/manager" className="hidden md:block text-[13px] font-medium text-foreground/80 hover:text-foreground transition-colors">
+                    <Link href="/programs" className="hidden md:block text-[13px] font-medium text-foreground/80 hover:text-foreground transition-colors">
                         Login
                     </Link>
                     <Link
-                        href="/manager"
+                        href="/programs"
                         className="hidden md:block px-4 py-2 bg-foreground text-background text-[13px] font-bold rounded-lg hover:opacity-90 transition-all"
                     >
                         시작하기
@@ -72,7 +72,7 @@ export function Header() {
                         </Link>
                     ))}
                     <Link href="https://open.kakao.com/o/s7kkWTfh" target="_blank" rel="noopener noreferrer" className="text-sm text-foreground/60 hover:text-foreground" onClick={() => setIsOpen(false)}>문의하기</Link>
-                    <Link href="/manager" className="text-sm font-bold text-foreground" onClick={() => setIsOpen(false)}>시작하기</Link>
+                    <Link href="/programs" className="text-sm font-bold text-foreground" onClick={() => setIsOpen(false)}>시작하기</Link>
                 </div>
             )}
         </header>
