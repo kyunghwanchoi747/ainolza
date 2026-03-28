@@ -42,15 +42,12 @@ export function Header() {
                 <div className="flex items-center gap-3">
                     <button
                         onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                        className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+                        className="p-2 rounded-lg hover:bg-foreground/10 transition-colors"
                         aria-label="테마 변경"
                     >
                         <Sun className="h-4 w-4 hidden dark:block" />
                         <Moon className="h-4 w-4 block dark:hidden" />
                     </button>
-                    <Link href="/programs" className="hidden md:block text-[13px] font-medium text-foreground/80 hover:text-foreground transition-colors">
-                        Login
-                    </Link>
                     <Link
                         href="/programs"
                         className="hidden md:block px-4 py-2 bg-foreground text-background text-[13px] font-bold rounded-lg hover:opacity-90 transition-all"
