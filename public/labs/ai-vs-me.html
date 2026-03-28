@@ -112,12 +112,15 @@
             <h2 class="text-3xl font-bold mb-4">AI vs 나 완료!</h2>
             <p class="text-gray-400 mb-2">10개 질문에 모두 답변했습니다.</p>
             <p class="text-gray-500 text-sm mb-8">AI와 나의 사고방식 차이를 느꼈나요?</p>
-            <div class="flex flex-col gap-3 max-w-xs mx-auto">
+            <div id="share-area" class="max-w-sm mx-auto"></div>
+            <div class="flex flex-col gap-3 max-w-xs mx-auto mt-4">
                 <button onclick="restartGame()" class="py-3 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 font-bold text-sm">처음부터 다시하기</button>
                 <a href="/" class="py-3 rounded-xl bg-gray-800 border border-gray-600 font-bold text-sm text-center">홈으로 돌아가기</a>
             </div>
+            <div id="cta-area" class="max-w-sm mx-auto"></div>
         </div>
     </main>
+    <script src="/labs/shared.js"></script>
 
     <!-- 마스코트 -->
     <div class="w-full max-w-4xl mt-6 flex items-center gap-4">
@@ -212,6 +215,13 @@
             if (currentIndex >= questions.length) {
                 elPhaseCompare.classList.add('hidden');
                 elPhaseResult.classList.remove('hidden');
+                // 공유 + CTA
+                const shareArea = document.getElementById('share-area');
+                const ctaArea = document.getElementById('cta-area');
+                shareArea.innerHTML = '';
+                ctaArea.innerHTML = '';
+                createShareButtons(shareArea, { gameName: 'AI vs 나', score: '10문제 완료', subtitle: 'AI와 사고방식 비교', badgeText: 'AI 토론왕' });
+                createCTABanner(ctaArea);
             } else {
                 renderQuestion();
             }

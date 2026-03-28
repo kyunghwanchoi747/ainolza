@@ -91,10 +91,12 @@
                     <div class="text-xs text-gray-500">틀림</div>
                 </div>
             </div>
-            <div class="flex flex-col gap-3 max-w-xs mx-auto">
+            <div id="share-area" class="max-w-sm mx-auto"></div>
+            <div class="flex flex-col gap-3 max-w-xs mx-auto mt-4">
                 <button onclick="startGame()" class="py-3 rounded-xl bg-gradient-to-r from-rose-500 to-violet-500 font-bold text-sm">다시 도전</button>
                 <a href="/" class="py-3 rounded-xl bg-gray-800 border border-gray-600 font-bold text-sm text-center text-gray-300">홈으로</a>
             </div>
+            <div id="cta-area" class="max-w-sm mx-auto"></div>
         </div>
     </main>
 
@@ -234,9 +236,18 @@
                 document.getElementById('result-title').textContent = 'AI가 이겼어요!';
                 document.getElementById('result-msg').textContent = `정답률 ${pct}% — AI가 만든 글이 진짜처럼 느껴지죠?`;
             }
+
+            const title = document.getElementById('result-title').textContent;
+            const shareArea = document.getElementById('share-area');
+            const ctaArea = document.getElementById('cta-area');
+            shareArea.innerHTML = '';
+            ctaArea.innerHTML = '';
+            createShareButtons(shareArea, { gameName: 'AI일까? 사람일까?', score: `${correct}/${items.length}`, subtitle: `정답률 ${pct}%`, badgeText: title });
+            createCTABanner(ctaArea);
         }
 
         startGame();
     </script>
+    <script src="/labs/shared.js"></script>
 </body>
 </html>

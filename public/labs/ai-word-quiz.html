@@ -95,12 +95,17 @@
                 </div>
             </div>
 
-            <div class="flex flex-col gap-3 max-w-xs mx-auto">
+            <div id="share-area" class="max-w-sm mx-auto"></div>
+
+            <div class="flex flex-col gap-3 max-w-xs mx-auto mt-4">
                 <button onclick="restartGame()" class="py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 font-bold text-sm text-black">다시 도전하기</button>
                 <a href="/" class="py-3 rounded-xl bg-gray-800 border border-gray-600 font-bold text-sm text-center text-gray-300">홈으로 돌아가기</a>
             </div>
+
+            <div id="cta-area" class="max-w-sm mx-auto"></div>
         </div>
     </main>
+    <script src="/labs/shared.js"></script>
 
     <!-- 마스코트 -->
     <div class="w-full max-w-2xl mt-6 flex items-center gap-4">
@@ -336,6 +341,15 @@
                 document.getElementById('result-title').textContent = 'AI 입문자!';
                 document.getElementById('result-msg').textContent = '걱정 마세요. 다시 도전하면서 배워가요!';
             }
+
+            // 공유 + CTA
+            const title = document.getElementById('result-title').textContent;
+            const shareArea = document.getElementById('share-area');
+            const ctaArea = document.getElementById('cta-area');
+            shareArea.innerHTML = '';
+            ctaArea.innerHTML = '';
+            createShareButtons(shareArea, { gameName: 'AI 단어 퀴즈', score: score + '점', subtitle: `정답률 ${pct}%`, badgeText: title });
+            createCTABanner(ctaArea);
         }
 
         function restartGame() { startGame(); }
