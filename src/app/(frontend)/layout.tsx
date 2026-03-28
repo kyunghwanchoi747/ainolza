@@ -4,7 +4,7 @@ import { SiteFooter } from '../../components/layout/site-footer'
 
 export default function FrontendLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="font-pretendard antialiased bg-[#050505] text-foreground flex flex-col min-h-screen">
+    <div className="font-pretendard antialiased bg-background text-foreground flex flex-col min-h-screen">
       <ThemeProvider
         attribute="class"
         defaultTheme="dark"

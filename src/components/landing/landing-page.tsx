@@ -10,7 +10,7 @@ import {
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-[#050505] text-white font-sans selection:bg-white/20 overflow-x-hidden">
+    <div className="min-h-screen bg-background text-foreground font-sans selection:bg-foreground/20 overflow-x-hidden">
       {/* 2. Hero Section */}
       {/* 2. Hero Section */}
       <section className="relative min-h-screen flex items-center px-6">
@@ -92,9 +92,11 @@ export default function LandingPage() {
           </div>
           <Link href="/programs" className="group block rounded-2xl overflow-hidden border border-white/10 hover:border-white/30 transition-all">
             <div className="aspect-video overflow-hidden">
-              <img
+              <Image
                 src="/programs/바이브코딩상세1.png"
                 alt="바이브 코딩 클래스"
+                width={1200}
+                height={675}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               />
             </div>
