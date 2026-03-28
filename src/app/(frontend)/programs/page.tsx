@@ -7,16 +7,16 @@ export const dynamic = 'force-dynamic'
 
 export default function ProgramsPage() {
   return (
-    <div className="bg-[#050505] text-white min-h-screen">
+    <div className="bg-background text-foreground min-h-screen">
 
       {/* 히어로 */}
-      <section className="pt-24 pb-16 px-6 border-b border-white/10">
+      <section className="pt-24 pb-16 px-6 border-b border-foreground/10">
         <div className="max-w-3xl mx-auto">
-          <p className="text-sm text-white/40 uppercase tracking-[0.2em] mb-4">Program</p>
+          <p className="text-sm text-foreground/40 uppercase tracking-[0.2em] mb-4">Program</p>
           <h1 className="text-5xl md:text-7xl font-medium tracking-tight leading-tight mb-6">
             AI 바이브<br />코딩 클래스
           </h1>
-          <p className="text-white/50 text-lg">나만의 독립된 웹사이트를 AI로 직접 만드는 실전 과정</p>
+          <p className="text-foreground/50 text-lg">나만의 독립된 웹사이트를 AI로 직접 만드는 실전 과정</p>
         </div>
       </section>
 
@@ -24,7 +24,7 @@ export default function ProgramsPage() {
       <section className="py-16 px-6">
         <div className="max-w-3xl mx-auto flex flex-col gap-4">
           {[1, 2, 3, 4].map((n) => (
-            <div key={n} className="w-full rounded-2xl overflow-hidden border border-white/10">
+            <div key={n} className="w-full rounded-2xl overflow-hidden border border-foreground/10">
               <img
                 src={`/programs/바이브코딩상세${n}.png`}
                 alt={`바이브 코딩 클래스 ${n}`}
@@ -44,14 +44,14 @@ export default function ProgramsPage() {
             <h2 className="text-3xl md:text-4xl font-medium leading-tight mb-8">
               {'"'}아직도 남의 땅에서 농사짓고 계신가요?{'"'}
             </h2>
-            <div className="space-y-5 text-white/60 text-lg leading-relaxed">
+            <div className="space-y-5 text-foreground/60 text-lg leading-relaxed">
               <p>네이버 블로그, 유튜브... 언제까지 플랫폼의 알고리즘 눈치만 보실 건가요?</p>
-              <p>진정한 온라인 수익화는 <span className="text-white">&apos;나만의 독립된 성(웹사이트)&apos;</span>을 구축하는 것에서 시작합니다.</p>
+              <p>진정한 온라인 수익화는 <span className="text-foreground">&apos;나만의 독립된 성(웹사이트)&apos;</span>을 구축하는 것에서 시작합니다.</p>
               <p>시행착오 끝에 깨달은 비즈니스 로직, 그 본질을 투명하게 공개합니다.</p>
             </div>
           </div>
 
-          <div className="border-t border-white/10" />
+          <div className="border-t border-foreground/10" />
 
           {/* 섹션 2 */}
           <div>
@@ -72,19 +72,19 @@ export default function ProgramsPage() {
                 },
               ].map((item, i) => (
                 <div key={i} className="flex gap-6 items-start">
-                  <div className="w-8 h-8 rounded-full border border-white/20 flex items-center justify-center text-sm text-white/40 shrink-0 mt-1">
+                  <div className="w-8 h-8 rounded-full border border-foreground/20 flex items-center justify-center text-sm text-foreground/40 shrink-0 mt-1">
                     {i + 1}
                   </div>
                   <div>
-                    <h3 className="text-white font-medium text-lg mb-2">{item.title}</h3>
-                    <p className="text-white/50 leading-relaxed">{item.desc}</p>
+                    <h3 className="text-foreground font-medium text-lg mb-2">{item.title}</h3>
+                    <p className="text-foreground/50 leading-relaxed">{item.desc}</p>
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="border-t border-white/10" />
+          <div className="border-t border-foreground/10" />
 
           {/* 섹션 3 */}
           <div>
@@ -112,11 +112,11 @@ export default function ProgramsPage() {
                   desc: '구글 애드센스 연동 및 실질적인 현금 흐름 창출.',
                 },
               ].map((item, i) => (
-                <div key={i} className="flex gap-6 p-6 rounded-2xl border border-white/10 hover:border-white/20 transition-colors">
-                  <span className="text-white/20 text-sm font-mono shrink-0">{item.tag}</span>
+                <div key={i} className="flex gap-6 p-6 rounded-2xl border border-foreground/10 hover:border-foreground/20 transition-colors">
+                  <span className="text-foreground/20 text-sm font-mono shrink-0">{item.tag}</span>
                   <div>
-                    <h3 className="text-white font-medium mb-1">{item.title}</h3>
-                    <p className="text-white/50 text-sm leading-relaxed">{item.desc}</p>
+                    <h3 className="text-foreground font-medium mb-1">{item.title}</h3>
+                    <p className="text-foreground/50 text-sm leading-relaxed">{item.desc}</p>
                   </div>
                 </div>
               ))}
@@ -127,7 +127,7 @@ export default function ProgramsPage() {
           <div className="text-center pt-8">
             <Link
               href="/manager"
-              className="inline-block px-10 py-5 bg-white text-black font-bold rounded-xl hover:scale-105 transition-all text-base"
+              className="inline-block px-10 py-5 bg-foreground text-background font-bold rounded-xl hover:scale-105 transition-all text-base"
             >
               수강 신청하기
             </Link>
