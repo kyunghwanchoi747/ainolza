@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI vs 나 | AI놀자</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+        body { font-family: 'Pretendard', sans-serif; background: #050505; color: white; }
+        .text-glow { text-shadow: 0 0 10px rgba(139, 92, 246, 0.8); }
+        .loader { border: 3px solid rgba(255,255,255,0.1); border-left-color: #8b5cf6; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .pop-in { animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        @keyframes popIn { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        .card-human { border-color: rgba(59, 130, 246, 0.5); box-shadow: 0 0 15px rgba(59, 130, 246, 0.2); }
+        .card-ai { border-color: rgba(139, 92, 246, 0.5); box-shadow: 0 0 15px rgba(139, 92, 246, 0.2); }
+        .typing-dot { animation: blink 1.4s infinite; }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes blink { 0%, 100% { opacity: 0.2; } 50% { opacity: 1; } }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-3 sm:p-6 pb-10">
+
+    <!-- 헤더 -->
+    <header class="w-full max-w-4xl mb-6">
+        <a href="/" class="text-gray-500 text-sm hover:text-white transition-colors mb-2 inline-block">&larr; AI놀자 홈으로</a>
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
+                    <i class="fa-solid fa-scale-balanced mr-2"></i>AI vs 나
+                </h1>
+                <p class="text-gray-400 text-xs sm:text-sm mt-1">같은 질문, 다른 시각. AI와 나의 생각을 비교해보세요!</p>
+            </div>
+            <div class="text-right">
+                <div class="text-sm font-bold text-glow" id="question-counter">1 / 10</div>
+                <div class="text-xs text-gray-500" id="category-badge">상식</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 메인 -->
+    <main class="w-full max-w-4xl flex-1" id="game-area">
+
+        <!-- 질문 카드 -->
+        <div class="text-center mb-8 p-6 rounded-2xl bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-purple-500/20">
+            <div class="text-xs text-purple-400 font-bold uppercase tracking-widest mb-3" id="q-category">상식</div>
+            <h2 class="text-xl sm:text-2xl font-bold leading-relaxed break-keep" id="q-text">질문이 여기에 표시됩니다.</h2>
+        </div>
+
+        <!-- 답변 입력 (phase 1) -->
+        <div id="phase-input" class="">
+            <div class="mb-4">
+                <label class="text-sm font-medium text-blue-400 mb-2 flex items-center gap-2">
+                    <i class="fa-solid fa-user"></i> 나의 답변
+                </label>
+                <textarea id="user-answer" rows="4" class="w-full bg-gray-900 border border-blue-500/30 rounded-xl p-4 text-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 resize-none transition-all placeholder-gray-600 text-sm sm:text-base" placeholder="나의 생각을 자유롭게 적어보세요..."></textarea>
+            </div>
+            <button id="submit-btn" class="w-full py-4 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 font-bold text-base shadow-lg transition-all hover:scale-[1.02] active:scale-95 flex justify-center items-center gap-2">
+                <i class="fa-solid fa-paper-plane"></i> 제출하고 AI 답변 보기
+            </button>
+        </div>
+
+        <!-- 비교 화면 (phase 2) -->
+        <div id="phase-compare" class="hidden pop-in">
+            <div class="grid md:grid-cols-2 gap-4 mb-6">
+                <!-- 나의 답변 -->
+                <div class="card-human rounded-2xl border bg-gray-900/80 p-5">
+                    <div class="flex items-center gap-2 mb-3">
+                        <div class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center">
+                            <i class="fa-solid fa-user text-blue-400 text-sm"></i>
+                        </div>
+                        <span class="text-sm font-bold text-blue-400">나의 답변</span>
+                    </div>
+                    <p id="display-user-answer" class="text-sm text-gray-200 leading-relaxed break-keep"></p>
+                </div>
+
+                <!-- AI 답변 -->
+                <div class="card-ai rounded-2xl border bg-gray-900/80 p-5">
+                    <div class="flex items-center gap-2 mb-3">
+                        <div class="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center">
+                            <i class="fa-solid fa-robot text-purple-400 text-sm"></i>
+                        </div>
+                        <span class="text-sm font-bold text-purple-400">AI의 답변</span>
+                    </div>
+                    <p id="display-ai-answer" class="text-sm text-gray-200 leading-relaxed break-keep">
+                        <span class="typing-dot inline-block w-2 h-2 bg-purple-400 rounded-full"></span>
+                        <span class="typing-dot inline-block w-2 h-2 bg-purple-400 rounded-full"></span>
+                        <span class="typing-dot inline-block w-2 h-2 bg-purple-400 rounded-full"></span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- AI 분석 -->
+            <div id="analysis-section" class="hidden mb-6 p-5 rounded-2xl bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700">
+                <div class="text-xs font-bold text-yellow-400 mb-3 flex items-center gap-1">
+                    <i class="fa-solid fa-magnifying-glass-chart"></i> AI 분석: 나 vs AI 비교
+                </div>
+                <p id="analysis-text" class="text-sm text-gray-300 leading-relaxed break-keep"></p>
+            </div>
+
+            <button id="next-btn" class="w-full py-3 rounded-xl bg-gray-800 hover:bg-gray-700 border border-gray-600 font-bold text-sm transition-all flex justify-center items-center gap-2">
+                다음 질문 <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
+
+        <!-- 최종 결과 (phase 3) -->
+        <div id="phase-result" class="hidden pop-in text-center py-12">
+            <div class="text-6xl mb-6">&#127942;</div>
+            <h2 class="text-3xl font-bold mb-4">AI vs 나 완료!</h2>
+            <p class="text-gray-400 mb-2">10개 질문에 모두 답변했습니다.</p>
+            <p class="text-gray-500 text-sm mb-8">AI와 나의 사고방식 차이를 느꼈나요?</p>
+            <div class="flex flex-col gap-3 max-w-xs mx-auto">
+                <button onclick="restartGame()" class="py-3 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 font-bold text-sm">처음부터 다시하기</button>
+                <a href="/" class="py-3 rounded-xl bg-gray-800 border border-gray-600 font-bold text-sm text-center">홈으로 돌아가기</a>
+            </div>
+        </div>
+    </main>
+
+    <!-- 마스코트 -->
+    <div class="w-full max-w-4xl mt-6 flex items-center gap-4">
+        <div class="w-14 h-14 shrink-0 rounded-full border-2 border-purple-400 p-0.5 bg-gray-800">
+            <img src="/mascot.png" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=ainolza'" alt="마스코트" class="w-full h-full object-cover rounded-full">
+        </div>
+        <div class="bg-gray-800 text-gray-200 p-3 rounded-2xl border border-gray-700 flex-1 text-sm">
+            <span id="mascot-msg">같은 질문인데도 사람과 AI의 답이 다를 수 있어요. 어떤 차이가 있는지 살펴보세요!</span>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            { category: "상식", text: "비가 오는 날에 기분이 좋아지는 사람과 나빠지는 사람이 있는 이유는 무엇일까요?", mascot: "감성적인 질문이에요! 과학적 이유와 개인적 경험을 모두 생각해보세요." },
+            { category: "창의력", text: "만약 동물들이 말을 할 수 있다면 가장 먼저 무엇을 말할까요?", mascot: "정답이 없는 질문이에요. 자유롭게 상상해보세요!" },
+            { category: "논리", text: "학교에서 시험을 없앤다면 어떤 일이 벌어질까요?", mascot: "긍정적인 면과 부정적인 면을 모두 생각해보세요." },
+            { category: "감성", text: "인생에서 가장 소중한 것은 무엇이라고 생각하나요?", mascot: "이건 정말 개인적인 질문이에요. AI와 얼마나 다를지 기대되네요!" },
+            { category: "상식", text: "왜 어른들은 시간이 빨리 간다고 느끼고, 아이들은 느리게 느낄까요?", mascot: "심리학과 뇌과학의 영역이에요. 자기만의 경험을 떠올려보세요." },
+            { category: "창의력", text: "100년 후의 학교는 어떤 모습일까요?", mascot: "기술 발전, 사회 변화를 상상해보세요. AI는 어떻게 답할까요?" },
+            { category: "논리", text: "SNS가 사라진다면 사람들의 생활은 어떻게 변할까요?", mascot: "SNS의 좋은 점과 나쁜 점을 모두 생각해보세요." },
+            { category: "감성", text: "실패가 성공보다 더 값진 경험이 될 수 있을까요?", mascot: "자신의 경험을 떠올리며 답해보세요." },
+            { category: "창의력", text: "AI가 그린 그림과 사람이 그린 그림 중 어떤 것이 더 예술적일까요?", mascot: "예술의 정의가 무엇인지부터 생각해보면 재밌어요!" },
+            { category: "논리", text: "모든 사람이 똑같은 능력을 가진다면 세상은 더 공평해질까요?", mascot: "마지막 질문이에요! 깊이 생각해보세요." },
+        ];
+
+        let currentIndex = 0;
+
+        const elQuestionCounter = document.getElementById('question-counter');
+        const elCategoryBadge = document.getElementById('category-badge');
+        const elQCategory = document.getElementById('q-category');
+        const elQText = document.getElementById('q-text');
+        const elUserAnswer = document.getElementById('user-answer');
+        const elSubmitBtn = document.getElementById('submit-btn');
+        const elPhaseInput = document.getElementById('phase-input');
+        const elPhaseCompare = document.getElementById('phase-compare');
+        const elPhaseResult = document.getElementById('phase-result');
+        const elDisplayUserAnswer = document.getElementById('display-user-answer');
+        const elDisplayAiAnswer = document.getElementById('display-ai-answer');
+        const elAnalysisSection = document.getElementById('analysis-section');
+        const elAnalysisText = document.getElementById('analysis-text');
+        const elNextBtn = document.getElementById('next-btn');
+        const elMascotMsg = document.getElementById('mascot-msg');
+
+        function renderQuestion() {
+            const q = questions[currentIndex];
+            elQuestionCounter.textContent = `${currentIndex + 1} / ${questions.length}`;
+            elCategoryBadge.textContent = q.category;
+            elQCategory.textContent = q.category;
+            elQText.textContent = q.text;
+            elMascotMsg.textContent = q.mascot;
+            elUserAnswer.value = '';
+            elPhaseInput.classList.remove('hidden');
+            elPhaseCompare.classList.add('hidden');
+            elPhaseResult.classList.add('hidden');
+            elAnalysisSection.classList.add('hidden');
+        }
+
+        elSubmitBtn.addEventListener('click', async () => {
+            const userAnswer = elUserAnswer.value.trim();
+            if (!userAnswer) { alert('답변을 입력해주세요!'); return; }
+            if (userAnswer.length < 5) { alert('조금 더 자세히 적어주세요! (최소 5자)'); return; }
+
+            // 제출 후 비교 화면으로
+            elPhaseInput.classList.add('hidden');
+            elPhaseCompare.classList.remove('hidden');
+            elDisplayUserAnswer.textContent = userAnswer;
+            elDisplayAiAnswer.innerHTML = '<span class="typing-dot inline-block w-2 h-2 bg-purple-400 rounded-full"></span><span class="typing-dot inline-block w-2 h-2 bg-purple-400 rounded-full"></span><span class="typing-dot inline-block w-2 h-2 bg-purple-400 rounded-full"></span>';
+
+            try {
+                // AI 답변 요청
+                const aiAnswer = await callAPI(
+                    `당신은 일반 시민의 관점에서 자연스럽고 솔직하게 답변하는 AI입니다. 전문적이거나 딱딱하지 않게, 한국어로 2~3문장 이내로 간결하게 답하세요. 자신의 의견처럼 말하세요.`,
+                    questions[currentIndex].text
+                );
+                elDisplayAiAnswer.textContent = aiAnswer;
+
+                // 분석 요청
+                const analysis = await callAPI(
+                    `당신은 'AI놀자'의 교육 분석가입니다. 같은 질문에 대한 사람의 답변과 AI의 답변을 비교 분석하세요. 두 답변의 공통점과 차이점을 짚고, AI와 사람의 사고방식 차이가 무엇인지 교육적으로 설명하세요. 한국어로 3~4문장으로 답하세요.`,
+                    `질문: "${questions[currentIndex].text}"\n사람 답변: "${userAnswer}"\nAI 답변: "${aiAnswer}"`
+                );
+                elAnalysisText.textContent = analysis;
+                elAnalysisSection.classList.remove('hidden');
+
+            } catch (err) {
+                elDisplayAiAnswer.textContent = 'AI 응답을 가져오는데 실패했습니다. 다음 질문으로 넘어가주세요.';
+            }
+        });
+
+        elNextBtn.addEventListener('click', () => {
+            currentIndex++;
+            if (currentIndex >= questions.length) {
+                elPhaseCompare.classList.add('hidden');
+                elPhaseResult.classList.remove('hidden');
+            } else {
+                renderQuestion();
+            }
+        });
+
+        function restartGame() {
+            currentIndex = 0;
+            renderQuestion();
+        }
+
+        async function callAPI(systemPrompt, userQuery) {
+            const response = await fetch('/api/gemini', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ systemPrompt, userQuery, jsonMode: false })
+            });
+            if (!response.ok) throw new Error(`API error: ${response.status}`);
+            const data = await response.json();
+            return data.result;
+        }
+
+        renderQuestion();
+    </script>
+</body>
+</html>

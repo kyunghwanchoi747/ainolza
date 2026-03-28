@@ -126,16 +126,16 @@ export default function LandingPage() {
               </div>
             </Link>
 
-            <div className="group relative p-8 rounded-3xl bg-foreground/5 border border-foreground/10 flex flex-col gap-4 min-h-[280px] opacity-60">
-              <div className="absolute top-0 right-0 px-3 py-1 bg-foreground/10 text-foreground/50 text-[10px] font-bold rounded-bl-2xl rounded-tr-3xl">SOON</div>
+            <Link href="/labs/ai-vs-me.html" className="group relative p-8 rounded-3xl bg-foreground/5 border border-foreground/10 hover:border-violet-400/50 hover:bg-violet-400/5 transition-all flex flex-col gap-4 min-h-[280px]">
+              <div className="absolute top-0 right-0 px-3 py-1 bg-violet-400 text-black text-[10px] font-bold rounded-bl-2xl rounded-tr-3xl">NEW</div>
               <div>
                 <h3 className="text-xl font-bold mb-2">AI vs 나</h3>
                 <p className="text-sm text-foreground/50">같은 질문에 AI와 내가 함께 답변. 사고방식의 차이를 발견해보세요.</p>
               </div>
               <div className="mt-auto flex items-center gap-2 text-violet-400 text-sm font-medium">
-                준비중 <ArrowRight className="w-4 h-4" />
+                시작하기 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </div>
-            </div>
+            </Link>
 
             <div className="group relative p-8 rounded-3xl bg-foreground/5 border border-foreground/10 flex flex-col gap-4 min-h-[280px] opacity-60">
               <div className="absolute top-0 right-0 px-3 py-1 bg-foreground/10 text-foreground/50 text-[10px] font-bold rounded-bl-2xl rounded-tr-3xl">SOON</div>
