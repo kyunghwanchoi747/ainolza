@@ -137,27 +137,27 @@ export default function LandingPage() {
               </div>
             </Link>
 
-            <div className="group relative p-8 rounded-3xl bg-foreground/5 border border-foreground/10 flex flex-col gap-4 min-h-[280px] opacity-60">
-              <div className="absolute top-0 right-0 px-3 py-1 bg-foreground/10 text-foreground/50 text-[10px] font-bold rounded-bl-2xl rounded-tr-3xl">SOON</div>
+            <Link href="/labs/prompt-builder.html" className="group relative p-8 rounded-3xl bg-foreground/5 border border-foreground/10 hover:border-emerald-400/50 hover:bg-emerald-400/5 transition-all flex flex-col gap-4 min-h-[280px]">
+              <div className="absolute top-0 right-0 px-3 py-1 bg-emerald-400 text-black text-[10px] font-bold rounded-bl-2xl rounded-tr-3xl">NEW</div>
               <div>
                 <h3 className="text-xl font-bold mb-2">프롬프트 빌더</h3>
                 <p className="text-sm text-foreground/50">요소를 조합해서 완성도 높은 프롬프트를 만들어보세요.</p>
               </div>
               <div className="mt-auto flex items-center gap-2 text-emerald-400 text-sm font-medium">
-                준비중 <ArrowRight className="w-4 h-4" />
+                시작하기 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </div>
-            </div>
+            </Link>
 
-            <div className="group relative p-8 rounded-3xl bg-foreground/5 border border-foreground/10 flex flex-col gap-4 min-h-[280px] opacity-60">
-              <div className="absolute top-0 right-0 px-3 py-1 bg-foreground/10 text-foreground/50 text-[10px] font-bold rounded-bl-2xl rounded-tr-3xl">SOON</div>
+            <Link href="/labs/career-explorer.html" className="group relative p-8 rounded-3xl bg-foreground/5 border border-foreground/10 hover:border-sky-400/50 hover:bg-sky-400/5 transition-all flex flex-col gap-4 min-h-[280px]">
+              <div className="absolute top-0 right-0 px-3 py-1 bg-sky-400 text-black text-[10px] font-bold rounded-bl-2xl rounded-tr-3xl">NEW</div>
               <div>
                 <h3 className="text-xl font-bold mb-2">AI 직업 탐색기</h3>
                 <p className="text-sm text-foreground/50">내 관심사를 입력하면 AI가 미래 직업과 활용법을 제안해줘요.</p>
               </div>
               <div className="mt-auto flex items-center gap-2 text-sky-400 text-sm font-medium">
-                준비중 <ArrowRight className="w-4 h-4" />
+                시작하기 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </div>
-            </div>
+            </Link>
           </div>
         </div>
       </section>

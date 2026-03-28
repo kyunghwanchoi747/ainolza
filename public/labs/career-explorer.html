@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 직업 탐색기 | AI놀자</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+        body { font-family: 'Pretendard', sans-serif; background: #050505; color: white; }
+        .loader { border: 3px solid rgba(255,255,255,0.1); border-left-color: #38bdf8; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .fade-in { animation: fadeIn 0.5s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .career-card { transition: all 0.3s; }
+        .career-card:hover { transform: translateY(-4px); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-3 sm:p-6 pb-10">
+
+    <header class="w-full max-w-3xl mb-8">
+        <a href="/" class="text-gray-500 text-sm hover:text-white transition-colors mb-2 inline-block">&larr; AI놀자 홈으로</a>
+        <h1 class="text-2xl sm:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-sky-400 to-indigo-500">
+            <i class="fa-solid fa-rocket mr-2"></i>AI 직업 탐색기
+        </h1>
+        <p class="text-gray-400 text-xs sm:text-sm mt-1">내 관심사를 입력하면 AI가 미래 직업과 활용법을 제안해줘요!</p>
+    </header>
+
+    <main class="w-full max-w-3xl">
+
+        <!-- 입력 -->
+        <div id="input-section" class="">
+            <div class="p-6 rounded-2xl bg-gradient-to-br from-sky-500/10 to-indigo-500/10 border border-sky-500/20 mb-6">
+                <label class="text-sm font-bold text-sky-400 mb-3 block">나의 관심사, 좋아하는 것, 잘하는 것을 알려주세요</label>
+                <textarea id="interests-input" rows="4" class="w-full bg-black/30 border border-sky-500/20 rounded-xl p-4 text-white focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/30 resize-none transition-all placeholder-gray-600 text-sm sm:text-base" placeholder="예: 그림 그리기, 음악, 게임, 동물, 요리, 운동, 수학..."></textarea>
+
+                <div class="flex flex-wrap gap-2 mt-3">
+                    <span class="text-xs text-gray-500">빠른 선택:</span>
+                    <button class="quick-tag px-2 py-1 rounded-lg bg-gray-800 border border-gray-700 text-xs text-gray-400 hover:border-sky-400 hover:text-sky-300 transition-all" data-value="그림/디자인">그림/디자인</button>
+                    <button class="quick-tag px-2 py-1 rounded-lg bg-gray-800 border border-gray-700 text-xs text-gray-400 hover:border-sky-400 hover:text-sky-300 transition-all" data-value="음악/영상">음악/영상</button>
+                    <button class="quick-tag px-2 py-1 rounded-lg bg-gray-800 border border-gray-700 text-xs text-gray-400 hover:border-sky-400 hover:text-sky-300 transition-all" data-value="글쓰기/스토리">글쓰기</button>
+                    <button class="quick-tag px-2 py-1 rounded-lg bg-gray-800 border border-gray-700 text-xs text-gray-400 hover:border-sky-400 hover:text-sky-300 transition-all" data-value="수학/과학">수학/과학</button>
+                    <button class="quick-tag px-2 py-1 rounded-lg bg-gray-800 border border-gray-700 text-xs text-gray-400 hover:border-sky-400 hover:text-sky-300 transition-all" data-value="사람 만나기/소통">소통</button>
+                    <button class="quick-tag px-2 py-1 rounded-lg bg-gray-800 border border-gray-700 text-xs text-gray-400 hover:border-sky-400 hover:text-sky-300 transition-all" data-value="요리/음식">요리</button>
+                    <button class="quick-tag px-2 py-1 rounded-lg bg-gray-800 border border-gray-700 text-xs text-gray-400 hover:border-sky-400 hover:text-sky-300 transition-all" data-value="게임/IT">게임/IT</button>
+                    <button class="quick-tag px-2 py-1 rounded-lg bg-gray-800 border border-gray-700 text-xs text-gray-400 hover:border-sky-400 hover:text-sky-300 transition-all" data-value="운동/건강">운동</button>
+                </div>
+            </div>
+
+            <button id="explore-btn" class="w-full py-4 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 font-bold text-base shadow-lg transition-all hover:scale-[1.02] active:scale-95 flex justify-center items-center gap-2">
+                <i class="fa-solid fa-compass"></i> AI에게 직업 탐색 요청하기
+            </button>
+        </div>
+
+        <!-- 결과 -->
+        <div id="result-section" class="hidden fade-in">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-bold">AI가 추천하는 미래 직업</h2>
+                <button onclick="resetExplorer()" class="text-xs text-gray-500 hover:text-white transition-colors px-3 py-1 rounded-lg bg-gray-800">
+                    <i class="fa-solid fa-rotate-left mr-1"></i>다시 탐색
+                </button>
+            </div>
+            <div id="careers-grid" class="space-y-4"></div>
+
+            <!-- AI 종합 조언 -->
+            <div id="advice-section" class="mt-8 p-5 rounded-2xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-indigo-500/20">
+                <div class="text-sm font-bold text-indigo-400 mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-user-graduate"></i> AI 커리어 코치의 조언
+                </div>
+                <p id="advice-text" class="text-sm text-gray-300 leading-relaxed break-keep"></p>
+            </div>
+        </div>
+    </main>
+
+    <!-- 마스코트 -->
+    <div class="w-full max-w-3xl mt-6 flex items-center gap-4">
+        <div class="w-14 h-14 shrink-0 rounded-full border-2 border-sky-400 p-0.5 bg-gray-800">
+            <img src="/mascot.png" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=ainolza'" alt="마스코트" class="w-full h-full object-cover rounded-full">
+        </div>
+        <div class="bg-gray-800 text-gray-200 p-3 rounded-2xl border border-gray-700 flex-1 text-sm">
+            <span id="mascot-msg">좋아하는 것, 잘하는 것을 입력하면 AI가 딱 맞는 미래 직업을 찾아드려요!</span>
+        </div>
+    </div>
+
+    <script>
+        const input = document.getElementById('interests-input');
+        const exploreBtn = document.getElementById('explore-btn');
+        const inputSection = document.getElementById('input-section');
+        const resultSection = document.getElementById('result-section');
+        const careersGrid = document.getElementById('careers-grid');
+        const adviceText = document.getElementById('advice-text');
+        const mascotMsg = document.getElementById('mascot-msg');
+
+        // 빠른 태그 클릭
+        document.querySelectorAll('.quick-tag').forEach(tag => {
+            tag.addEventListener('click', () => {
+                const val = tag.dataset.value;
+                const current = input.value.trim();
+                if (current && !current.endsWith(', ')) {
+                    input.value = current + ', ' + val;
+                } else {
+                    input.value = current + val;
+                }
+                tag.classList.add('border-sky-400', 'text-sky-300', 'bg-sky-500/10');
+            });
+        });
+
+        exploreBtn.addEventListener('click', async () => {
+            const interests = input.value.trim();
+            if (!interests) { alert('관심사를 입력해주세요!'); return; }
+            if (interests.length < 2) { alert('조금 더 구체적으로 적어주세요!'); return; }
+
+            const original = exploreBtn.innerHTML;
+            exploreBtn.innerHTML = '<span class="loader"></span> AI가 분석하는 중...';
+            exploreBtn.disabled = true;
+
+            try {
+                const response = await fetch('/api/gemini', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        systemPrompt: `당신은 'AI놀자'의 AI 커리어 코치입니다. 사용자의 관심사를 분석하여 AI 시대에 유망한 미래 직업 5개를 추천하세요.
+
+반드시 아래 JSON 형식으로만 응답하세요:
+{
+  "careers": [
+    {
+      "title": "직업명",
+      "emoji": "관련 이모지 1개",
+      "description": "이 직업이 하는 일 (1문장)",
+      "ai_usage": "이 직업에서 AI를 활용하는 방법 (1문장)",
+      "fit_reason": "사용자의 관심사와 어울리는 이유 (1문장)"
+    }
+  ],
+  "advice": "사용자에게 전하는 커리어 종합 조언 (2~3문장, 격려와 구체적 첫 걸음 제안 포함)"
+}`,
+                        userQuery: `나의 관심사: ${interests}`,
+                        jsonMode: true
+                    })
+                });
+
+                const data = await response.json();
+                const result = JSON.parse(data.result);
+
+                // 직업 카드 렌더링
+                careersGrid.innerHTML = '';
+                const colors = ['sky', 'indigo', 'purple', 'pink', 'emerald'];
+                result.careers.forEach((career, i) => {
+                    const color = colors[i % colors.length];
+                    const card = document.createElement('div');
+                    card.className = `career-card p-5 rounded-2xl bg-gray-900 border border-${color}-500/20 hover:border-${color}-500/40`;
+                    card.innerHTML = `
+                        <div class="flex items-start gap-4">
+                            <div class="text-3xl">${career.emoji}</div>
+                            <div class="flex-1">
+                                <h3 class="font-bold text-lg mb-1">${career.title}</h3>
+                                <p class="text-sm text-gray-400 mb-3">${career.description}</p>
+                                <div class="space-y-2">
+                                    <div class="flex items-start gap-2">
+                                        <span class="text-xs font-bold text-${color}-400 shrink-0 mt-0.5"><i class="fa-solid fa-robot"></i> AI 활용</span>
+                                        <span class="text-xs text-gray-300">${career.ai_usage}</span>
+                                    </div>
+                                    <div class="flex items-start gap-2">
+                                        <span class="text-xs font-bold text-yellow-400 shrink-0 mt-0.5"><i class="fa-solid fa-heart"></i> 적합도</span>
+                                        <span class="text-xs text-gray-300">${career.fit_reason}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`;
+                    careersGrid.appendChild(card);
+                });
+
+                adviceText.textContent = result.advice;
+                mascotMsg.textContent = '결과가 나왔어요! 마음에 드는 직업이 있나요? 다른 관심사로도 탐색해보세요!';
+
+                inputSection.classList.add('hidden');
+                resultSection.classList.remove('hidden');
+
+            } catch (err) {
+                console.error(err);
+                alert('AI 분석에 실패했습니다. 다시 시도해주세요.');
+            } finally {
+                exploreBtn.innerHTML = original;
+                exploreBtn.disabled = false;
+            }
+        });
+
+        function resetExplorer() {
+            resultSection.classList.add('hidden');
+            inputSection.classList.remove('hidden');
+            input.value = '';
+            document.querySelectorAll('.quick-tag').forEach(t => {
+                t.classList.remove('border-sky-400', 'text-sky-300', 'bg-sky-500/10');
+            });
+            mascotMsg.textContent = '좋아하는 것, 잘하는 것을 입력하면 AI가 딱 맞는 미래 직업을 찾아드려요!';
+        }
+    </script>
+</body>
+</html>

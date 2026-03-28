@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>프롬프트 빌더 | AI놀자</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+        body { font-family: 'Pretendard', sans-serif; background: #050505; color: white; }
+        .chip { cursor: pointer; transition: all 0.2s; }
+        .chip:hover { transform: scale(1.05); }
+        .chip.selected { ring: 2px; }
+        .loader { border: 3px solid rgba(255,255,255,0.1); border-left-color: #10b981; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .fade-in { animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-3 sm:p-6 pb-10">
+
+    <header class="w-full max-w-4xl mb-6">
+        <a href="/" class="text-gray-500 text-sm hover:text-white transition-colors mb-2 inline-block">&larr; AI놀자 홈으로</a>
+        <h1 class="text-2xl sm:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-cyan-500">
+            <i class="fa-solid fa-puzzle-piece mr-2"></i>프롬프트 빌더
+        </h1>
+        <p class="text-gray-400 text-xs sm:text-sm mt-1">요소를 조합해서 나만의 프롬프트를 만들어보세요!</p>
+    </header>
+
+    <main class="w-full max-w-4xl grid md:grid-cols-2 gap-6">
+
+        <!-- 왼쪽: 요소 선택 -->
+        <div class="space-y-6">
+
+            <!-- 주제 -->
+            <div>
+                <label class="text-sm font-bold text-emerald-400 mb-2 block"><i class="fa-solid fa-star mr-1"></i> 주제</label>
+                <div class="flex flex-wrap gap-2" id="subject-chips">
+                    <button class="chip px-3 py-1.5 rounded-full bg-gray-800 border border-gray-700 text-sm text-gray-300 hover:border-emerald-400" data-group="subject" data-value="고양이">고양이</button>
+                    <button class="chip px-3 py-1.5 rounded-full bg-gray-800 border border-gray-700 text-sm text-gray-300 hover:border-emerald-400" data-group="subject" data-value="도시 풍경">도시 풍경</button>
+                    <button class="chip px-3 py-1.5 rounded-full bg-gray-800 border border-gray-700 text-sm text-gray-300 hover:border-emerald-400" data-group="subject" data-value="우주비행사">우주비행사</button>
+                    <button class="chip px-3 py-1.5 rounded-full bg-gray-800 border border-gray-700 text-sm text-gray-300 hover:border-emerald-400" data-group="subject" data-value="숲속 오두막">숲속 오두막</button>
+                    <button class="chip px-3 py-1.5 rounded-full bg-gray-800 border border-gray-700 text-sm text-gray-300 hover:border-emerald-400" data-group="subject" data-value="해변">해변</button>
+                    <button class="chip px-3 py-1.5 rounded-full bg-gray-800 border border-gray-700 text-sm text-gray-300 hover:border-emerald-400" data-group="subject" data-value="카페">카페</button>
+                </div>
+                <input type="text" id="subject-custom" class="mt-2 w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500" placeholder="또는 직접 입력...">
+            </div>
+
+            <!-- 스타일 -->
+            <div>
+                <label class="text-sm font-bold text-cyan-400 mb-2 block"><i class="fa-solid fa-palette mr-1"></i> 스타일</label>
+                <div class="flex flex-wrap gap-2" id="style-chips">
+                    <button class="chip px-3 py-1.5 rounded-full bg-gray-800 border border-gray-700 text-sm text-gray-300 hover:border-cyan-400" data-group="style" data-value="사실적인 사진">사실적인 사진</button>
+                    <button class="chip px-3 py-1.5 rounded-full bg-gray-800 border border-gray-700 text-sm text-gray-300 hover:border-cyan-400" data-group="style" data-value="수채화">수채화</button>
+                    <button class="chip px-3 py-1.5 rounded-full bg-gray-800 border border-gray-700 text-sm text-gray-300 hover:border-cyan-400" data-group="style" data-value="픽셀 아트">픽셀 아트</button>
+                    <button class="chip px-3 py-1.5 rounded-full bg-gray-800 border border-gray-700 text-sm text-gray-300 hover:border-cyan-400" data-group="style" data-value="애니메이션">애니메이션</button>
+                    <button class="chip px-3 py-1.5 rounded-full bg-gray-800 border border-gray-700 text-sm text-gray-300 hover:border-cyan-400" data-group="style" data-value="유화">유화</button>
+                    <button class="chip px-3 py-1.5 rounded-full bg-gray-800 border border-gray-700 text-sm text-gray-300 hover:border-cyan-400" data-group="style" data-value="3D 렌더링">3D 렌더링</button>
+                </div>
+            </div>
+
+            <!-- 분위기 -->
+            <div>
+                <label class="text-sm font-bold text-purple-400 mb-2 block"><i class="fa-solid fa-cloud-moon mr-1"></i> 분위기</label>
+                <div class="flex flex-wrap gap-2" id="mood-chips">
+                    <button class="chip px-3 py-1.5 rounded-full bg-gray-800 border border-gray-700 text-sm text-gray-300 hover:border-purple-400" data-group="mood" data-value="따뜻하고 아늑한">따뜻한</button>
+                    <button class="chip px-3 py-1.5 rounded-full bg-gray-800 border border-gray-700 text-sm text-gray-300 hover:border-purple-400" data-group="mood" data-value="신비롭고 몽환적인">신비로운</button>
+                    <button class="chip px-3 py-1.5 rounded-full bg-gray-800 border border-gray-700 text-sm text-gray-300 hover:border-purple-400" data-group="mood" data-value="미래지향적이고 사이버펑크">사이버펑크</button>
+                    <button class="chip px-3 py-1.5 rounded-full bg-gray-800 border border-gray-700 text-sm text-gray-300 hover:border-purple-400" data-group="mood" data-value="평화롭고 고요한">평화로운</button>
+                    <button class="chip px-3 py-1.5 rounded-full bg-gray-800 border border-gray-700 text-sm text-gray-300 hover:border-purple-400" data-group="mood" data-value="역동적이고 에너지 넘치는">역동적인</button>
+                    <button class="chip px-3 py-1.5 rounded-full bg-gray-800 border border-gray-700 text-sm text-gray-300 hover:border-purple-400" data-group="mood" data-value="어둡고 미스터리한">미스터리</button>
+                </div>
+            </div>
+
+            <!-- 색감 -->
+            <div>
+                <label class="text-sm font-bold text-pink-400 mb-2 block"><i class="fa-solid fa-droplet mr-1"></i> 색감</label>
+                <div class="flex flex-wrap gap-2" id="color-chips">
+                    <button class="chip px-3 py-1.5 rounded-full bg-gray-800 border border-gray-700 text-sm text-gray-300 hover:border-pink-400" data-group="color" data-value="따뜻한 주황빛과 노란빛">따뜻한 톤</button>
+                    <button class="chip px-3 py-1.5 rounded-full bg-gray-800 border border-gray-700 text-sm text-gray-300 hover:border-pink-400" data-group="color" data-value="차가운 파란빛과 보라빛">차가운 톤</button>
+                    <button class="chip px-3 py-1.5 rounded-full bg-gray-800 border border-gray-700 text-sm text-gray-300 hover:border-pink-400" data-group="color" data-value="네온 컬러의 화려한">네온</button>
+                    <button class="chip px-3 py-1.5 rounded-full bg-gray-800 border border-gray-700 text-sm text-gray-300 hover:border-pink-400" data-group="color" data-value="흑백의 모노톤">모노톤</button>
+                    <button class="chip px-3 py-1.5 rounded-full bg-gray-800 border border-gray-700 text-sm text-gray-300 hover:border-pink-400" data-group="color" data-value="파스텔 톤의 부드러운">파스텔</button>
+                </div>
+            </div>
+
+            <!-- 구도 -->
+            <div>
+                <label class="text-sm font-bold text-yellow-400 mb-2 block"><i class="fa-solid fa-crop mr-1"></i> 구도/시점</label>
+                <div class="flex flex-wrap gap-2" id="comp-chips">
+                    <button class="chip px-3 py-1.5 rounded-full bg-gray-800 border border-gray-700 text-sm text-gray-300 hover:border-yellow-400" data-group="comp" data-value="클로즈업">클로즈업</button>
+                    <button class="chip px-3 py-1.5 rounded-full bg-gray-800 border border-gray-700 text-sm text-gray-300 hover:border-yellow-400" data-group="comp" data-value="와이드 앵글 전경">와이드샷</button>
+                    <button class="chip px-3 py-1.5 rounded-full bg-gray-800 border border-gray-700 text-sm text-gray-300 hover:border-yellow-400" data-group="comp" data-value="위에서 내려다보는 탑뷰">탑뷰</button>
+                    <button class="chip px-3 py-1.5 rounded-full bg-gray-800 border border-gray-700 text-sm text-gray-300 hover:border-yellow-400" data-group="comp" data-value="아래에서 올려다보는 로우앵글">로우앵글</button>
+                    <button class="chip px-3 py-1.5 rounded-full bg-gray-800 border border-gray-700 text-sm text-gray-300 hover:border-yellow-400" data-group="comp" data-value="대칭 구도의 중앙 배치">대칭</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 오른쪽: 결과 -->
+        <div class="flex flex-col gap-4">
+            <!-- 실시간 프롬프트 -->
+            <div class="p-5 rounded-2xl bg-gray-900 border border-emerald-500/30 flex-1">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-sm font-bold text-emerald-400"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i> 조합된 프롬프트</span>
+                    <button onclick="copyPrompt()" class="text-xs text-gray-500 hover:text-white transition-colors px-2 py-1 rounded bg-gray-800">
+                        <i class="fa-regular fa-copy mr-1"></i>복사
+                    </button>
+                </div>
+                <p id="live-prompt" class="text-sm text-gray-300 leading-relaxed min-h-[80px] break-keep">
+                    위에서 요소를 선택하면 프롬프트가 자동으로 만들어집니다.
+                </p>
+            </div>
+
+            <!-- AI 강화 -->
+            <button id="enhance-btn" class="w-full py-4 rounded-xl bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 font-bold text-base shadow-lg transition-all hover:scale-[1.02] active:scale-95 flex justify-center items-center gap-2">
+                <i class="fa-solid fa-magic"></i> AI로 프롬프트 다듬기
+            </button>
+
+            <!-- AI 강화 결과 -->
+            <div id="enhanced-area" class="hidden fade-in p-5 rounded-2xl bg-gray-900 border border-cyan-500/30">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-sm font-bold text-cyan-400"><i class="fa-solid fa-sparkles mr-1"></i> AI가 다듬은 프롬프트</span>
+                    <button onclick="copyEnhanced()" class="text-xs text-gray-500 hover:text-white transition-colors px-2 py-1 rounded bg-gray-800">
+                        <i class="fa-regular fa-copy mr-1"></i>복사
+                    </button>
+                </div>
+                <p id="enhanced-prompt" class="text-sm text-gray-200 leading-relaxed break-keep"></p>
+            </div>
+
+            <!-- 프롬프트 팁 -->
+            <div class="p-4 rounded-xl bg-gray-800/50 border border-gray-700">
+                <div class="text-xs font-bold text-yellow-400 mb-2"><i class="fa-solid fa-lightbulb mr-1"></i> 프롬프트 작성 팁</div>
+                <ul class="text-xs text-gray-400 space-y-1 leading-relaxed">
+                    <li>&#8226; <b class="text-gray-300">주제</b>를 구체적으로 → "고양이" 보다 "창가에 앉은 주황색 고양이"</li>
+                    <li>&#8226; <b class="text-gray-300">스타일</b>을 명시하면 결과가 크게 달라져요</li>
+                    <li>&#8226; <b class="text-gray-300">분위기</b>와 <b class="text-gray-300">색감</b>을 조합하면 감성이 살아요</li>
+                    <li>&#8226; <b class="text-gray-300">구도</b>는 같은 장면도 완전히 다르게 만들어요</li>
+                </ul>
+            </div>
+
+            <!-- 초기화 -->
+            <button onclick="resetAll()" class="w-full py-2 rounded-xl bg-gray-800 hover:bg-gray-700 border border-gray-700 text-sm text-gray-400 transition-all">
+                <i class="fa-solid fa-rotate-left mr-1"></i> 초기화
+            </button>
+        </div>
+    </main>
+
+    <script>
+        const selections = { subject: '', style: '', mood: '', color: '', comp: '' };
+        const groupColors = { subject: 'emerald', style: 'cyan', mood: 'purple', color: 'pink', comp: 'yellow' };
+
+        // 칩 클릭 이벤트
+        document.querySelectorAll('.chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                const group = chip.dataset.group;
+                const value = chip.dataset.value;
+                const color = groupColors[group];
+
+                // 같은 그룹에서 선택 해제
+                document.querySelectorAll(`.chip[data-group="${group}"]`).forEach(c => {
+                    c.classList.remove(`border-${color}-400`, 'text-white', `bg-${color}-500/20`);
+                    c.classList.add('border-gray-700', 'text-gray-300');
+                });
+
+                // 토글 (같은 걸 다시 클릭하면 해제)
+                if (selections[group] === value) {
+                    selections[group] = '';
+                } else {
+                    selections[group] = value;
+                    chip.classList.remove('border-gray-700', 'text-gray-300');
+                    chip.classList.add(`border-${color}-400`, 'text-white', `bg-${color}-500/20`);
+                }
+
+                updatePrompt();
+            });
+        });
+
+        // 직접 입력
+        document.getElementById('subject-custom').addEventListener('input', (e) => {
+            if (e.target.value.trim()) {
+                selections.subject = e.target.value.trim();
+                // 칩 선택 해제
+                document.querySelectorAll('.chip[data-group="subject"]').forEach(c => {
+                    c.classList.remove('border-emerald-400', 'text-white', 'bg-emerald-500/20');
+                    c.classList.add('border-gray-700', 'text-gray-300');
+                });
+            } else {
+                selections.subject = '';
+            }
+            updatePrompt();
+        });
+
+        function updatePrompt() {
+            const parts = [];
+            if (selections.style) parts.push(`${selections.style} 스타일의`);
+            if (selections.mood) parts.push(`${selections.mood} 분위기의`);
+            if (selections.subject) parts.push(selections.subject);
+            if (selections.color) parts.push(`${selections.color} 색감`);
+            if (selections.comp) parts.push(`${selections.comp} 구도`);
+
+            const el = document.getElementById('live-prompt');
+            if (parts.length === 0) {
+                el.textContent = '위에서 요소를 선택하면 프롬프트가 자동으로 만들어집니다.';
+                el.className = 'text-sm text-gray-500 leading-relaxed min-h-[80px] break-keep';
+            } else {
+                el.textContent = parts.join(', ') + '.';
+                el.className = 'text-sm text-gray-200 leading-relaxed min-h-[80px] break-keep';
+            }
+            // 강화 결과 숨기기
+            document.getElementById('enhanced-area').classList.add('hidden');
+        }
+
+        // AI 강화
+        document.getElementById('enhance-btn').addEventListener('click', async () => {
+            const prompt = document.getElementById('live-prompt').textContent;
+            if (prompt.includes('위에서 요소를')) { alert('먼저 요소를 선택해주세요!'); return; }
+
+            const btn = document.getElementById('enhance-btn');
+            const original = btn.innerHTML;
+            btn.innerHTML = '<span class="loader"></span> AI가 다듬는 중...';
+            btn.disabled = true;
+
+            try {
+                const result = await fetch('/api/gemini', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        systemPrompt: '당신은 최고의 AI 이미지 프롬프트 전문가입니다. 사용자가 조합한 키워드를 바탕으로, 고품질 이미지를 생성할 수 있는 자연스럽고 상세하며 예술적인 한국어 프롬프트를 작성하세요. 빛, 질감, 디테일을 추가하여 생동감있게 만드세요. 프롬프트 결과만 출력하세요. (200자 이내)',
+                        userQuery: `키워드 조합: ${prompt}`,
+                        jsonMode: false
+                    })
+                });
+                const data = await result.json();
+                document.getElementById('enhanced-prompt').textContent = data.result;
+                document.getElementById('enhanced-area').classList.remove('hidden');
+            } catch (err) {
+                alert('AI 요청에 실패했습니다. 다시 시도해주세요.');
+            } finally {
+                btn.innerHTML = original;
+                btn.disabled = false;
+            }
+        });
+
+        function copyPrompt() {
+            const text = document.getElementById('live-prompt').textContent;
+            navigator.clipboard.writeText(text);
+            alert('프롬프트가 복사되었습니다!');
+        }
+
+        function copyEnhanced() {
+            const text = document.getElementById('enhanced-prompt').textContent;
+            navigator.clipboard.writeText(text);
+            alert('프롬프트가 복사되었습니다!');
+        }
+
+        function resetAll() {
+            Object.keys(selections).forEach(k => selections[k] = '');
+            document.querySelectorAll('.chip').forEach(c => {
+                c.classList.remove('border-emerald-400', 'border-cyan-400', 'border-purple-400', 'border-pink-400', 'border-yellow-400', 'text-white', 'bg-emerald-500/20', 'bg-cyan-500/20', 'bg-purple-500/20', 'bg-pink-500/20', 'bg-yellow-500/20');
+                c.classList.add('border-gray-700', 'text-gray-300');
+            });
+            document.getElementById('subject-custom').value = '';
+            document.getElementById('enhanced-area').classList.add('hidden');
+            updatePrompt();
+        }
+    </script>
+</body>
+</html>
