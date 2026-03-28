@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 단어 퀴즈 | AI놀자</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+        body { font-family: 'Pretendard', sans-serif; background: #050505; color: white; }
+        .shake { animation: shake 0.5s; }
+        @keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-10px)} 40%{transform:translateX(10px)} 60%{transform:translateX(-5px)} 80%{transform:translateX(5px)} }
+        .pop-in { animation: popIn 0.4s cubic-bezier(0.175,0.885,0.32,1.275) forwards; }
+        @keyframes popIn { 0%{transform:scale(0.9);opacity:0} 100%{transform:scale(1);opacity:1} }
+        .option-btn { transition: all 0.2s; }
+        .option-btn:hover { transform: scale(1.02); }
+        .option-btn.correct { background: rgba(34,197,94,0.2) !important; border-color: rgba(34,197,94,0.7) !important; color: #22c55e !important; }
+        .option-btn.wrong { background: rgba(239,68,68,0.2) !important; border-color: rgba(239,68,68,0.7) !important; color: #ef4444 !important; }
+        .option-btn.disabled { pointer-events: none; opacity: 0.6; }
+        .timer-bar { transition: width 0.1s linear; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-3 sm:p-6 pb-10">
+
+    <header class="w-full max-w-2xl mb-6">
+        <a href="/" class="text-gray-500 text-sm hover:text-white transition-colors mb-2 inline-block">&larr; AI놀자 홈으로</a>
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-amber-400 to-orange-500">
+                    <i class="fa-solid fa-brain mr-2"></i>AI 단어 퀴즈
+                </h1>
+                <p class="text-gray-400 text-xs sm:text-sm mt-1">AI 용어를 배우면서 두뇌도 훈련하세요!</p>
+            </div>
+            <div class="text-right">
+                <div class="flex items-center gap-3">
+                    <div class="text-sm"><i class="fa-solid fa-heart text-red-400"></i> <span id="lives">3</span></div>
+                    <div class="text-sm font-bold text-amber-400" id="score-display">0점</div>
+                </div>
+                <div class="text-xs text-gray-500 mt-1" id="progress">1 / 20</div>
+            </div>
+        </div>
+        <!-- 타이머 바 -->
+        <div class="w-full h-1.5 bg-gray-800 rounded-full mt-3 overflow-hidden">
+            <div id="timer-bar" class="timer-bar h-full bg-gradient-to-r from-amber-400 to-orange-500 rounded-full" style="width:100%"></div>
+        </div>
+    </header>
+
+    <main class="w-full max-w-2xl flex-1" id="game-area">
+
+        <!-- 퀴즈 화면 -->
+        <div id="quiz-screen">
+            <!-- 설명 카드 -->
+            <div class="p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20 mb-6 text-center">
+                <div class="text-xs text-amber-400 font-bold uppercase tracking-widest mb-2" id="q-category">기초</div>
+                <p class="text-lg sm:text-xl font-medium leading-relaxed break-keep" id="q-description">설명이 여기에 표시됩니다.</p>
+            </div>
+
+            <!-- 보기 4개 -->
+            <div class="grid grid-cols-2 gap-3" id="options-grid"></div>
+
+            <!-- 정답 해설 -->
+            <div id="explanation" class="hidden mt-4 p-4 rounded-xl bg-gray-900 border border-gray-700 text-sm text-gray-300 leading-relaxed break-keep">
+                <div class="text-xs font-bold text-amber-400 mb-2"><i class="fa-solid fa-lightbulb mr-1"></i> 알아두세요!</div>
+                <p id="explanation-text"></p>
+            </div>
+
+            <!-- 다음 버튼 -->
+            <button id="next-btn" class="hidden w-full mt-4 py-3 rounded-xl bg-gray-800 hover:bg-gray-700 border border-gray-600 font-bold text-sm transition-all">
+                다음 문제 <i class="fa-solid fa-arrow-right ml-1"></i>
+            </button>
+        </div>
+
+        <!-- 결과 화면 -->
+        <div id="result-screen" class="hidden pop-in text-center py-10">
+            <div class="text-6xl mb-4" id="result-emoji"></div>
+            <h2 class="text-3xl font-bold mb-2" id="result-title"></h2>
+            <p class="text-gray-400 mb-1" id="result-score"></p>
+            <p class="text-gray-500 text-sm mb-6" id="result-msg"></p>
+
+            <!-- 점수 요약 -->
+            <div class="grid grid-cols-3 gap-4 max-w-sm mx-auto mb-8">
+                <div class="p-4 rounded-xl bg-gray-900 border border-gray-700">
+                    <div class="text-2xl font-bold text-green-400" id="stat-correct">0</div>
+                    <div class="text-xs text-gray-500">정답</div>
+                </div>
+                <div class="p-4 rounded-xl bg-gray-900 border border-gray-700">
+                    <div class="text-2xl font-bold text-red-400" id="stat-wrong">0</div>
+                    <div class="text-xs text-gray-500">오답</div>
+                </div>
+                <div class="p-4 rounded-xl bg-gray-900 border border-gray-700">
+                    <div class="text-2xl font-bold text-amber-400" id="stat-streak">0</div>
+                    <div class="text-xs text-gray-500">최고 연속</div>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-3 max-w-xs mx-auto">
+                <button onclick="restartGame()" class="py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 font-bold text-sm text-black">다시 도전하기</button>
+                <a href="/" class="py-3 rounded-xl bg-gray-800 border border-gray-600 font-bold text-sm text-center text-gray-300">홈으로 돌아가기</a>
+            </div>
+        </div>
+    </main>
+
+    <!-- 마스코트 -->
+    <div class="w-full max-w-2xl mt-6 flex items-center gap-4">
+        <div class="w-14 h-14 shrink-0 rounded-full border-2 border-amber-400 p-0.5 bg-gray-800">
+            <img src="/mascot.png" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=ainolza'" alt="마스코트" class="w-full h-full object-cover rounded-full">
+        </div>
+        <div class="bg-gray-800 text-gray-200 p-3 rounded-2xl border border-gray-700 flex-1 text-sm">
+            <span id="mascot-msg">AI 용어를 맞춰보세요! 15초 안에 답을 골라야 해요. 하트 3개가 다 떨어지면 끝!</span>
+        </div>
+    </div>
+
+    <script>
+        const allQuestions = [
+            // 기초
+            { category: "기초", description: "사람이 하는 일을 기계가 대신 할 수 있도록 만든 기술", answer: "인공지능", options: ["인공지능", "블록체인", "메타버스", "빅데이터"], explanation: "인공지능(AI)은 사람의 학습, 추론, 판단 능력을 컴퓨터로 구현한 기술이에요." },
+            { category: "기초", description: "AI에게 원하는 결과를 얻기 위해 입력하는 명령어나 지시문", answer: "프롬프트", options: ["프롬프트", "알고리즘", "데이터셋", "파라미터"], explanation: "프롬프트(Prompt)는 AI에게 내리는 명령어예요. 잘 쓰면 더 좋은 결과를 얻을 수 있어요!" },
+            { category: "기초", description: "텍스트로 대화할 수 있는 AI 서비스로, OpenAI가 만들었어요", answer: "ChatGPT", options: ["ChatGPT", "Midjourney", "Stable Diffusion", "DALL-E"], explanation: "ChatGPT는 OpenAI가 2022년에 공개한 대화형 AI로, 전 세계적으로 AI 열풍을 일으켰어요." },
+            { category: "기초", description: "AI가 텍스트 설명을 읽고 그에 맞는 그림을 만들어내는 기술", answer: "이미지 생성 AI", options: ["이미지 생성 AI", "음성 인식", "자연어 처리", "강화 학습"], explanation: "Midjourney, DALL-E, Stable Diffusion 등이 대표적인 이미지 생성 AI예요." },
+            { category: "기초", description: "사람의 말이나 글을 컴퓨터가 이해하고 처리하는 기술", answer: "자연어 처리", options: ["자연어 처리", "컴퓨터 비전", "로보틱스", "클라우드"], explanation: "NLP(Natural Language Processing)라고도 해요. 번역, 요약, 대화 등에 사용됩니다." },
+
+            // 중급
+            { category: "중급", description: "AI 모델을 원하는 용도에 맞게 추가 학습시키는 과정", answer: "파인튜닝", options: ["파인튜닝", "프롬프팅", "크롤링", "디버깅"], explanation: "파인튜닝(Fine-tuning)은 이미 학습된 AI를 특정 분야에 맞게 재학습시키는 거예요." },
+            { category: "중급", description: "AI가 만든 콘텐츠(글, 그림, 음악 등)를 통칭하는 말", answer: "생성형 AI", options: ["생성형 AI", "분석형 AI", "예측형 AI", "자율형 AI"], explanation: "Generative AI라고도 해요. ChatGPT, Midjourney 모두 생성형 AI입니다." },
+            { category: "중급", description: "AI가 실제와 구분하기 어려운 가짜 영상을 만드는 기술", answer: "딥페이크", options: ["딥페이크", "딥러닝", "메타데이터", "렌더링"], explanation: "딥페이크(Deepfake)는 딥러닝을 이용해 얼굴이나 목소리를 합성하는 기술이에요. 악용 주의!" },
+            { category: "중급", description: "방대한 텍스트 데이터로 학습된 거대한 AI 언어 모델", answer: "LLM", options: ["LLM", "CNN", "GAN", "API"], explanation: "LLM(Large Language Model)은 GPT-4, Claude, Gemini 같은 대규모 언어 모델을 말해요." },
+            { category: "중급", description: "AI에게 몇 가지 예시를 보여주고 패턴을 파악하게 하는 기법", answer: "퓨샷 학습", options: ["퓨샷 학습", "전이 학습", "비지도 학습", "강화 학습"], explanation: "Few-shot Learning은 적은 예시만으로 AI가 학습하는 방법이에요. 프롬프트에 예시를 넣는 것도 이에 해당해요." },
+
+            // 활용
+            { category: "활용", description: "코드를 직접 쓰지 않고 AI에게 설명해서 프로그램을 만드는 방식", answer: "바이브 코딩", options: ["바이브 코딩", "페어 코딩", "클린 코딩", "리팩토링"], explanation: "바이브 코딩(Vibe Coding)은 AI에게 원하는 것을 설명하면 AI가 코드를 작성해주는 새로운 개발 방식이에요!" },
+            { category: "활용", description: "AI를 활용해서 효과적인 명령어를 설계하는 직업/기술", answer: "프롬프트 엔지니어링", options: ["프롬프트 엔지니어링", "데이터 분석", "웹 개발", "UX 디자인"], explanation: "프롬프트 엔지니어링은 AI 시대의 핵심 역량! AI에게 정확한 지시를 내리는 기술이에요." },
+            { category: "활용", description: "반복적인 업무를 AI가 자동으로 처리하도록 설정하는 것", answer: "AI 자동화", options: ["AI 자동화", "AI 분석", "AI 진단", "AI 추천"], explanation: "메일 분류, 보고서 작성, 데이터 정리 등을 AI가 자동으로 처리할 수 있어요." },
+            { category: "활용", description: "여러 AI 도구를 연결해서 하나의 작업 흐름을 만드는 것", answer: "AI 워크플로우", options: ["AI 워크플로우", "AI 파이프라인", "AI 클러스터", "AI 앙상블"], explanation: "예: 이메일 수신 → AI가 요약 → 슬랙에 전달 → 자동 답장 같은 흐름이에요." },
+            { category: "활용", description: "웹사이트에 광고를 달아서 방문자 수에 따라 수익을 얻는 것", answer: "애드센스", options: ["애드센스", "애드워즈", "애널리틱스", "애드몹"], explanation: "구글 애드센스는 웹사이트에 광고를 게재하고 클릭/노출에 따라 수익을 얻는 서비스예요." },
+
+            // 트렌드
+            { category: "트렌드", description: "AI가 스스로 도구를 사용하고 계획을 세워 작업을 수행하는 AI", answer: "AI 에이전트", options: ["AI 에이전트", "AI 어시스턴트", "AI 봇", "AI 튜터"], explanation: "AI Agent는 단순 답변을 넘어 스스로 판단하고 행동하는 차세대 AI 기술이에요." },
+            { category: "트렌드", description: "텍스트, 이미지, 음성 등 여러 종류의 데이터를 동시에 이해하는 AI", answer: "멀티모달 AI", options: ["멀티모달 AI", "싱글모달 AI", "크로스모달 AI", "트랜스모달 AI"], explanation: "GPT-4V, Gemini 등이 멀티모달 AI예요. 사진을 보고 설명하거나, 음성을 듣고 답할 수 있어요." },
+            { category: "트렌드", description: "직접 서버를 구매하지 않고 인터넷을 통해 컴퓨팅 자원을 빌려 쓰는 것", answer: "클라우드", options: ["클라우드", "서버리스", "엣지", "온프레미스"], explanation: "AWS, Google Cloud, Cloudflare 등이 대표적인 클라우드 서비스예요." },
+            { category: "트렌드", description: "AI가 만든 콘텐츠에 '이것은 AI가 만들었다'라고 표시하는 것", answer: "AI 워터마크", options: ["AI 워터마크", "AI 필터", "AI 태그", "AI 라벨"], explanation: "AI 생성물의 진위를 구별하기 위해 보이지 않는 표시를 넣는 기술이에요." },
+            { category: "트렌드", description: "소스 코드를 누구나 볼 수 있고 자유롭게 사용할 수 있는 소프트웨어", answer: "오픈소스", options: ["오픈소스", "프리웨어", "쉐어웨어", "라이선스웨어"], explanation: "Llama, Stable Diffusion 등이 오픈소스 AI예요. 누구나 무료로 사용하고 수정할 수 있어요." },
+        ];
+
+        let questions = [];
+        let currentIndex = 0;
+        let score = 0;
+        let lives = 3;
+        let streak = 0;
+        let maxStreak = 0;
+        let correctCount = 0;
+        let wrongCount = 0;
+        let timerInterval = null;
+        let timeLeft = 15;
+
+        const elLives = document.getElementById('lives');
+        const elScoreDisplay = document.getElementById('score-display');
+        const elProgress = document.getElementById('progress');
+        const elTimerBar = document.getElementById('timer-bar');
+        const elQCategory = document.getElementById('q-category');
+        const elQDescription = document.getElementById('q-description');
+        const elOptionsGrid = document.getElementById('options-grid');
+        const elExplanation = document.getElementById('explanation');
+        const elExplanationText = document.getElementById('explanation-text');
+        const elNextBtn = document.getElementById('next-btn');
+        const elQuizScreen = document.getElementById('quiz-screen');
+        const elResultScreen = document.getElementById('result-screen');
+        const elMascotMsg = document.getElementById('mascot-msg');
+
+        function shuffle(arr) {
+            const a = [...arr];
+            for (let i = a.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [a[i], a[j]] = [a[j], a[i]];
+            }
+            return a;
+        }
+
+        function startGame() {
+            questions = shuffle(allQuestions).slice(0, 20);
+            currentIndex = 0;
+            score = 0;
+            lives = 3;
+            streak = 0;
+            maxStreak = 0;
+            correctCount = 0;
+            wrongCount = 0;
+            elLives.textContent = lives;
+            elScoreDisplay.textContent = '0점';
+            elQuizScreen.classList.remove('hidden');
+            elResultScreen.classList.add('hidden');
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            if (currentIndex >= questions.length || lives <= 0) {
+                showResult();
+                return;
+            }
+
+            const q = questions[currentIndex];
+            elProgress.textContent = `${currentIndex + 1} / ${questions.length}`;
+            elQCategory.textContent = q.category;
+            elQDescription.textContent = q.description;
+            elExplanation.classList.add('hidden');
+            elNextBtn.classList.add('hidden');
+
+            // 보기 셔플
+            const shuffledOptions = shuffle(q.options);
+            elOptionsGrid.innerHTML = '';
+            shuffledOptions.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn p-4 rounded-xl bg-gray-900 border border-gray-700 text-sm sm:text-base font-medium hover:border-amber-400 hover:bg-amber-400/5 text-center break-keep';
+                btn.textContent = opt;
+                btn.onclick = () => selectAnswer(btn, opt, q);
+                elOptionsGrid.appendChild(btn);
+            });
+
+            // 타이머 시작
+            startTimer();
+
+            // 마스코트 메시지
+            const msgs = ["이 단어 아시나요?", "15초 안에 골라보세요!", "힌트: 설명을 잘 읽어보세요!", "자신감을 가져보세요!", "천천히 생각해도 괜찮아요!"];
+            elMascotMsg.textContent = msgs[Math.floor(Math.random() * msgs.length)];
+        }
+
+        function startTimer() {
+            timeLeft = 15;
+            elTimerBar.style.width = '100%';
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeLeft -= 0.1;
+                const pct = (timeLeft / 15) * 100;
+                elTimerBar.style.width = Math.max(0, pct) + '%';
+                if (pct < 30) {
+                    elTimerBar.className = 'timer-bar h-full bg-red-500 rounded-full';
+                } else if (pct < 60) {
+                    elTimerBar.className = 'timer-bar h-full bg-yellow-500 rounded-full';
+                } else {
+                    elTimerBar.className = 'timer-bar h-full bg-gradient-to-r from-amber-400 to-orange-500 rounded-full';
+                }
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    timeUp();
+                }
+            }, 100);
+        }
+
+        function timeUp() {
+            lives--;
+            wrongCount++;
+            streak = 0;
+            elLives.textContent = lives;
+
+            // 모든 버튼 비활성화 + 정답 표시
+            const q = questions[currentIndex];
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.classList.add('disabled');
+                if (btn.textContent === q.answer) btn.classList.add('correct');
+            });
+
+            elMascotMsg.textContent = "시간 초과! 정답은 '" + q.answer + "'이에요.";
+            elExplanationText.textContent = q.explanation;
+            elExplanation.classList.remove('hidden');
+            elNextBtn.classList.remove('hidden');
+        }
+
+        function selectAnswer(btn, selected, q) {
+            clearInterval(timerInterval);
+            const isCorrect = selected === q.answer;
+
+            // 모든 버튼 비활성화
+            document.querySelectorAll('.option-btn').forEach(b => {
+                b.classList.add('disabled');
+                if (b.textContent === q.answer) b.classList.add('correct');
+            });
+
+            if (isCorrect) {
+                btn.classList.add('correct');
+                const bonus = Math.ceil(timeLeft) * 5;
+                score += 10 + bonus;
+                correctCount++;
+                streak++;
+                if (streak > maxStreak) maxStreak = streak;
+                elMascotMsg.textContent = streak >= 3 ? `${streak}연속 정답! 대단해요!` : "정답! 잘하고 있어요!";
+                if (streak >= 5) confetti({ particleCount: 30, spread: 60, origin: { y: 0.7 } });
+            } else {
+                btn.classList.add('wrong');
+                btn.parentElement.classList.add('shake');
+                lives--;
+                wrongCount++;
+                streak = 0;
+                elLives.textContent = lives;
+                elMascotMsg.textContent = "아쉬워요! 정답은 '" + q.answer + "'이에요.";
+            }
+
+            elScoreDisplay.textContent = score + '점';
+            elExplanationText.textContent = q.explanation;
+            elExplanation.classList.remove('hidden');
+            elNextBtn.classList.remove('hidden');
+        }
+
+        elNextBtn.addEventListener('click', () => {
+            currentIndex++;
+            renderQuestion();
+        });
+
+        function showResult() {
+            clearInterval(timerInterval);
+            elQuizScreen.classList.add('hidden');
+            elResultScreen.classList.remove('hidden');
+
+            document.getElementById('stat-correct').textContent = correctCount;
+            document.getElementById('stat-wrong').textContent = wrongCount;
+            document.getElementById('stat-streak').textContent = maxStreak;
+
+            const pct = Math.round((correctCount / (correctCount + wrongCount)) * 100) || 0;
+            document.getElementById('result-score').textContent = `총점: ${score}점 (정답률 ${pct}%)`;
+
+            if (pct >= 90) {
+                document.getElementById('result-emoji').textContent = '🏆';
+                document.getElementById('result-title').textContent = 'AI 마스터!';
+                document.getElementById('result-msg').textContent = '놀라운 실력이에요. AI 전문가 수준!';
+                confetti({ particleCount: 150, spread: 100, origin: { y: 0.6 } });
+            } else if (pct >= 70) {
+                document.getElementById('result-emoji').textContent = '🎉';
+                document.getElementById('result-title').textContent = 'AI 고수!';
+                document.getElementById('result-msg').textContent = 'AI 용어를 꽤 잘 알고 있어요!';
+            } else if (pct >= 50) {
+                document.getElementById('result-emoji').textContent = '💪';
+                document.getElementById('result-title').textContent = 'AI 중수!';
+                document.getElementById('result-msg').textContent = '조금만 더 공부하면 고수가 될 수 있어요!';
+            } else {
+                document.getElementById('result-emoji').textContent = '📚';
+                document.getElementById('result-title').textContent = 'AI 입문자!';
+                document.getElementById('result-msg').textContent = '걱정 마세요. 다시 도전하면서 배워가요!';
+            }
+        }
+
+        function restartGame() { startGame(); }
+        startGame();
+    </script>
+</body>
+</html>

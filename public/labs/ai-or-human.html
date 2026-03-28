@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI일까? 사람일까? | AI놀자</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+        body { font-family: 'Pretendard', sans-serif; background: #050505; color: white; }
+        .pop-in { animation: popIn 0.4s cubic-bezier(0.175,0.885,0.32,1.275) forwards; }
+        @keyframes popIn { 0%{transform:scale(0.9);opacity:0} 100%{transform:scale(1);opacity:1} }
+        .choice-btn { transition: all 0.3s; }
+        .choice-btn:hover { transform: scale(1.03); }
+        .choice-btn.correct { box-shadow: 0 0 20px rgba(34,197,94,0.4); border-color: #22c55e !important; }
+        .choice-btn.wrong { box-shadow: 0 0 20px rgba(239,68,68,0.4); border-color: #ef4444 !important; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-3 sm:p-6 pb-10">
+
+    <header class="w-full max-w-3xl mb-6">
+        <a href="/" class="text-gray-500 text-sm hover:text-white transition-colors mb-2 inline-block">&larr; AI놀자 홈으로</a>
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-rose-400 to-violet-500">
+                    <i class="fa-solid fa-eye mr-2"></i>AI일까? 사람일까?
+                </h1>
+                <p class="text-gray-400 text-xs sm:text-sm mt-1">이 글/그림을 만든 건 AI일까요, 사람일까요?</p>
+            </div>
+            <div class="text-right">
+                <div class="text-sm font-bold text-rose-400" id="score-display">0 / 0</div>
+                <div class="text-xs text-gray-500" id="progress">1 / 15</div>
+            </div>
+        </div>
+    </header>
+
+    <main class="w-full max-w-3xl flex-1">
+
+        <!-- 퀴즈 화면 -->
+        <div id="quiz-screen">
+            <!-- 콘텐츠 표시 -->
+            <div class="p-6 sm:p-8 rounded-2xl bg-gray-900 border border-gray-700 mb-6 min-h-[200px]">
+                <div class="text-xs text-gray-500 mb-3 flex items-center gap-2">
+                    <span id="content-type-badge" class="px-2 py-0.5 rounded bg-gray-800 border border-gray-700">글</span>
+                    <span id="content-category"></span>
+                </div>
+                <div id="content-display" class="text-base sm:text-lg leading-relaxed break-keep text-gray-200"></div>
+            </div>
+
+            <!-- 선택 버튼 -->
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <button id="btn-ai" class="choice-btn p-6 rounded-2xl bg-gradient-to-br from-violet-500/10 to-purple-500/10 border-2 border-violet-500/30 hover:border-violet-400 text-center">
+                    <div class="text-3xl mb-2"><i class="fa-solid fa-robot"></i></div>
+                    <div class="font-bold text-lg text-violet-400">AI가 만듦</div>
+                    <div class="text-xs text-gray-500 mt-1">인공지능이 생성</div>
+                </button>
+                <button id="btn-human" class="choice-btn p-6 rounded-2xl bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border-2 border-blue-500/30 hover:border-blue-400 text-center">
+                    <div class="text-3xl mb-2"><i class="fa-solid fa-user"></i></div>
+                    <div class="font-bold text-lg text-blue-400">사람이 만듦</div>
+                    <div class="text-xs text-gray-500 mt-1">실제 사람이 작성</div>
+                </button>
+            </div>
+
+            <!-- 결과 + 해설 -->
+            <div id="answer-section" class="hidden pop-in">
+                <div id="answer-banner" class="p-4 rounded-xl mb-4 text-center font-bold text-lg"></div>
+                <div class="p-4 rounded-xl bg-gray-900 border border-gray-700 mb-4">
+                    <div class="text-xs font-bold text-yellow-400 mb-2"><i class="fa-solid fa-lightbulb mr-1"></i> 구별 포인트</div>
+                    <p id="answer-explanation" class="text-sm text-gray-300 leading-relaxed break-keep"></p>
+                </div>
+                <button id="next-btn" class="w-full py-3 rounded-xl bg-gray-800 hover:bg-gray-700 border border-gray-600 font-bold text-sm">
+                    다음 문제 <i class="fa-solid fa-arrow-right ml-1"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- 최종 결과 -->
+        <div id="result-screen" class="hidden pop-in text-center py-10">
+            <div class="text-6xl mb-4" id="result-emoji"></div>
+            <h2 class="text-3xl font-bold mb-2" id="result-title"></h2>
+            <p class="text-gray-400 mb-6" id="result-msg"></p>
+            <div class="grid grid-cols-2 gap-4 max-w-xs mx-auto mb-8">
+                <div class="p-4 rounded-xl bg-gray-900 border border-gray-700">
+                    <div class="text-2xl font-bold text-green-400" id="stat-correct">0</div>
+                    <div class="text-xs text-gray-500">맞춤</div>
+                </div>
+                <div class="p-4 rounded-xl bg-gray-900 border border-gray-700">
+                    <div class="text-2xl font-bold text-red-400" id="stat-wrong">0</div>
+                    <div class="text-xs text-gray-500">틀림</div>
+                </div>
+            </div>
+            <div class="flex flex-col gap-3 max-w-xs mx-auto">
+                <button onclick="startGame()" class="py-3 rounded-xl bg-gradient-to-r from-rose-500 to-violet-500 font-bold text-sm">다시 도전</button>
+                <a href="/" class="py-3 rounded-xl bg-gray-800 border border-gray-600 font-bold text-sm text-center text-gray-300">홈으로</a>
+            </div>
+        </div>
+    </main>
+
+    <!-- 마스코트 -->
+    <div class="w-full max-w-3xl mt-6 flex items-center gap-4">
+        <div class="w-14 h-14 shrink-0 rounded-full border-2 border-rose-400 p-0.5 bg-gray-800">
+            <img src="/mascot.png" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=ainolza'" alt="마스코트" class="w-full h-full object-cover rounded-full">
+        </div>
+        <div class="bg-gray-800 text-gray-200 p-3 rounded-2xl border border-gray-700 flex-1 text-sm">
+            <span id="mascot-msg">AI가 만든 건지 사람이 만든 건지 구별해보세요! 생각보다 어려울 거예요.</span>
+        </div>
+    </div>
+
+    <script>
+        const allItems = [
+            // AI가 생성한 글
+            { type: "글", category: "시", content: "새벽 창가에 맺힌 이슬처럼\n당신의 이름을 부르면\n세상 모든 꽃잎이 떨리듯\n내 마음도 함께 물들어갑니다", isAI: true, explanation: "AI 시는 은유와 비유가 풍부하지만 '개인적 경험'이 부족해요. 감정이 너무 균일하고 예쁘게만 쓰여있으면 AI일 확률이 높아요." },
+            { type: "글", category: "뉴스", content: "최근 연구에 따르면 AI 기술의 발전은 2030년까지 전 세계 GDP를 14% 증가시킬 것으로 예측됩니다. 특히 의료, 금융, 교육 분야에서 혁신적인 변화가 예상되며, 새로운 일자리 창출도 기대되고 있습니다.", isAI: true, explanation: "AI 뉴스는 문장이 매끄럽고 구조적이지만 '취재원'이 모호해요. '최근 연구에 따르면'처럼 출처 없는 인용이 특징이에요." },
+            { type: "글", category: "일기", content: "오늘은 정말 특별한 하루였다. 아침에 카페에서 커피를 마시며 창밖을 바라보았다. 따뜻한 햇살이 얼굴에 닿을 때, 삶의 소중한 순간들을 느꼈다. 내일도 이런 평화로운 하루가 되었으면 좋겠다.", isAI: true, explanation: "AI 일기는 지나치게 긍정적이고 '구체적 디테일'이 없어요. 실제 일기에는 '미세먼지 때문에 짜증'같은 현실적 감정이 나와요." },
+            { type: "글", category: "레시피", content: "김치볶음밥 황금 레시피: 차가운 밥 2공기, 김치 1컵(잘게 썰기), 참기름 1큰술, 고추장 1큰술. 팬에 참기름을 두르고 김치를 볶다가 밥을 넣고 고추장을 풀어 센 불에 볶아주세요. 마지막에 달걀 프라이를 올리면 완성!", isAI: false, explanation: "실제 레시피는 구체적인 양과 순서가 있고 '센 불에 볶아주세요'같은 생활 표현이 자연스러워요. AI는 보통 더 격식있게 써요." },
+
+            // 사람이 쓴 글
+            { type: "글", category: "일기", content: "아 진짜 오늘 미친듯이 바빴다. 점심도 못 먹고 회의 3개 연속이었는데 마지막 회의에서 부장님이 갑자기 프로젝트 방향을 바꾸자고 해서 멘탈 나갈뻔... 퇴근하고 편의점에서 삼각김밥 두 개 사먹음. 내일은 좀 나았으면.", isAI: false, explanation: "실제 사람의 글은 '아 진짜', '멘탈 나갈뻔' 같은 구어체, 불규칙한 문장, 구체적 상황(삼각김밥 두 개)이 특징이에요." },
+            { type: "글", category: "리뷰", content: "이 식당 분위기는 좋은데 음식은 좀... 파스타가 너무 짜고 양도 적었어요. 가격 대비 별로. 근데 직원분은 진짜 친절했음. 다음엔 다른 메뉴 시켜볼 듯", isAI: false, explanation: "실제 리뷰는 장단점이 섞이고, '좀...', '별로', '시켜볼 듯' 같은 자연스러운 구어체가 나와요. AI는 보통 더 정돈된 문장을 써요." },
+            { type: "글", category: "시", content: "할머니의 손은\n못 박힌 대문처럼 거칠었다\n그 손으로 빚은 수제비를\n나는 아직도 기억한다\n비 오는 날이면", isAI: false, explanation: "사람의 시는 '못 박힌 대문' 같은 독특한 비유와 개인적 기억(할머니의 수제비)이 담겨있어요. AI는 이런 구체적 추억을 잘 못 만들어요." },
+            { type: "글", category: "에세이", content: "인공지능은 현대 사회에서 가장 혁신적인 기술 중 하나로 자리잡았습니다. 교육, 의료, 예술 등 다양한 분야에서 AI의 활용은 무한한 가능성을 보여주고 있으며, 우리의 일상을 더욱 풍요롭게 만들어가고 있습니다.", isAI: true, explanation: "너무 매끄럽고 교과서적인 문장은 AI 특징이에요. '혁신적인', '무한한 가능성', '풍요롭게' — 이런 뻔한 표현이 반복되면 AI 의심!" },
+
+            { type: "글", category: "편지", content: "엄마, 나 요즘 좀 힘든데 말을 못했어. 회사에서 잘 적응하고 있긴 한데 가끔 혼자 밥 먹을 때 좀 외로워. 주말에 집에 갈게. 엄마 된장찌개 먹고 싶다. 사랑해.", isAI: false, explanation: "실제 편지는 감정의 흐름이 자연스럽고 '된장찌개 먹고 싶다'처럼 구체적 소망이 있어요. AI는 이런 일상적 디테일이 약해요." },
+            { type: "글", category: "설명", content: "블록체인은 분산 원장 기술로, 데이터를 여러 컴퓨터에 동시에 저장하여 위변조를 방지하는 시스템입니다. 이 기술은 암호화폐 뿐만 아니라 공급망 관리, 디지털 신원 확인 등 다양한 분야에서 활용되고 있습니다.", isAI: true, explanation: "AI는 기술 설명을 매우 잘해요. 하지만 너무 깔끔하고 교과서적이며, 개인적 견해나 비판이 없는 것이 특징이에요." },
+
+            { type: "글", category: "SNS", content: "오늘 점심에 회사 앞 새로 생긴 칼국수집 가봤는데 대박... 면이 쫄깃하고 국물이 시원해서 국물까지 다 마심 ㅋㅋ 가격도 8천원이면 가성비 미쳤다. 단점은 줄이 김", isAI: false, explanation: "'대박', 'ㅋㅋ', '미쳤다' 같은 SNS 어체, 이모티콘, 줄임말은 AI가 잘 흉내 못 내요. 가격(8천원)같은 구체적 정보도 사람 특유의 디테일이에요." },
+            { type: "글", category: "여행기", content: "제주도의 아침은 바다의 푸른 빛깔로 시작됩니다. 해안 도로를 따라 드라이브하며 바라본 풍경은 마치 한 폭의 수채화와 같았습니다. 특히 성산일출봉에서 바라본 일출은 자연의 위대함을 느끼게 해주었습니다.", isAI: true, explanation: "'한 폭의 수채화', '자연의 위대함' — 이런 진부한 비유는 AI의 전형적 패턴이에요. 실제 여행기는 '주차장 찾느라 30분 헤맸다'같은 리얼함이 있어요." },
+            { type: "글", category: "조언", content: "돈이 안 모이면 일단 가계부부터 써봐. 나도 처음엔 귀찮았는데 한 달만 써보니까 내가 배달음식에 얼마나 쓰는지 알게 되더라고. 커피값 아끼라는 소리 아니고, 어디서 새는지만 파악해도 달라짐.", isAI: false, explanation: "개인 경험 기반('나도 처음엔'), 구어체('써봐', '달라짐'), 현실적 조언이 사람의 특징이에요. AI는 보통 '저축의 중요성'부터 말해요." },
+            { type: "글", category: "동화", content: "옛날 옛적에 작은 마을에 마법의 씨앗을 가진 소녀가 살았습니다. 어느 날 소녀가 씨앗을 정원에 심자, 하룻밤 사이에 하늘까지 닿는 거대한 나무가 자라났습니다. 나무 꼭대기에는 구름으로 만든 성이 있었습니다.", isAI: true, explanation: "AI 동화는 구조가 전형적이에요. '옛날 옛적에' 시작, 마법 요소, 깔끔한 전개. 사람의 동화는 좀 더 엉뚱하거나 디테일이 독특해요." },
+            { type: "글", category: "상담", content: "저는 30대 직장인인데 요즘 번아웃이 심해요. 주말에도 뭘 해야 할지 모르겠고 그냥 누워만 있게 돼요. 친구들 만나면 즐거운데 약속 잡기가 너무 귀찮아요. 이게 우울증인 건지 그냥 피곤한 건지...", isAI: false, explanation: "실제 고민은 모순적인 감정('즐거운데 귀찮다'), 불확실함('인 건지... 건지'), 자기 의심이 특징이에요. AI는 보통 더 정리된 고민을 만들어요." },
+        ];
+
+        let items = [];
+        let currentIndex = 0;
+        let correct = 0;
+        let wrong = 0;
+
+        function shuffle(arr) {
+            const a = [...arr];
+            for (let i = a.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [a[i], a[j]] = [a[j], a[i]];
+            }
+            return a;
+        }
+
+        function startGame() {
+            items = shuffle(allItems).slice(0, 15);
+            currentIndex = 0;
+            correct = 0;
+            wrong = 0;
+            document.getElementById('quiz-screen').classList.remove('hidden');
+            document.getElementById('result-screen').classList.add('hidden');
+            renderItem();
+        }
+
+        function renderItem() {
+            if (currentIndex >= items.length) { showResult(); return; }
+            const item = items[currentIndex];
+            document.getElementById('progress').textContent = `${currentIndex + 1} / ${items.length}`;
+            document.getElementById('score-display').textContent = `${correct} / ${currentIndex}`;
+            document.getElementById('content-type-badge').textContent = item.type;
+            document.getElementById('content-category').textContent = item.category;
+            document.getElementById('content-display').innerHTML = item.content.replace(/\n/g, '<br>');
+            document.getElementById('answer-section').classList.add('hidden');
+            document.getElementById('btn-ai').classList.remove('correct', 'wrong');
+            document.getElementById('btn-human').classList.remove('correct', 'wrong');
+            document.getElementById('btn-ai').style.pointerEvents = 'auto';
+            document.getElementById('btn-human').style.pointerEvents = 'auto';
+
+            const msgs = ["잘 읽어보세요!", "직감을 믿어보세요!", "문체에 주목해보세요!", "감정 표현을 살펴보세요!"];
+            document.getElementById('mascot-msg').textContent = msgs[Math.floor(Math.random() * msgs.length)];
+        }
+
+        function selectChoice(isAIChoice) {
+            const item = items[currentIndex];
+            const isCorrect = isAIChoice === item.isAI;
+            const btnAI = document.getElementById('btn-ai');
+            const btnHuman = document.getElementById('btn-human');
+
+            btnAI.style.pointerEvents = 'none';
+            btnHuman.style.pointerEvents = 'none';
+
+            if (item.isAI) {
+                btnAI.classList.add('correct');
+                if (!isAIChoice) btnHuman.classList.add('wrong');
+            } else {
+                btnHuman.classList.add('correct');
+                if (isAIChoice) btnAI.classList.add('wrong');
+            }
+
+            if (isCorrect) {
+                correct++;
+                document.getElementById('answer-banner').className = 'p-4 rounded-xl mb-4 text-center font-bold text-lg bg-green-500/20 border border-green-500/30 text-green-400';
+                document.getElementById('answer-banner').textContent = '정답! ' + (item.isAI ? 'AI가 만든 글이에요.' : '사람이 쓴 글이에요.');
+                document.getElementById('mascot-msg').textContent = "맞았어요! 감이 좋으시네요!";
+                if (correct % 3 === 0) confetti({ particleCount: 30, spread: 60, origin: { y: 0.7 } });
+            } else {
+                wrong++;
+                document.getElementById('answer-banner').className = 'p-4 rounded-xl mb-4 text-center font-bold text-lg bg-red-500/20 border border-red-500/30 text-red-400';
+                document.getElementById('answer-banner').textContent = '아쉬워요! ' + (item.isAI ? 'AI가 만든 글이었어요.' : '사람이 쓴 글이었어요.');
+                document.getElementById('mascot-msg').textContent = "헷갈리죠? 해설을 읽어보세요!";
+            }
+
+            document.getElementById('score-display').textContent = `${correct} / ${currentIndex + 1}`;
+            document.getElementById('answer-explanation').textContent = item.explanation;
+            document.getElementById('answer-section').classList.remove('hidden');
+        }
+
+        document.getElementById('btn-ai').addEventListener('click', () => selectChoice(true));
+        document.getElementById('btn-human').addEventListener('click', () => selectChoice(false));
+        document.getElementById('next-btn').addEventListener('click', () => { currentIndex++; renderItem(); });
+
+        function showResult() {
+            document.getElementById('quiz-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+            document.getElementById('stat-correct').textContent = correct;
+            document.getElementById('stat-wrong').textContent = wrong;
+
+            const pct = Math.round((correct / items.length) * 100);
+            if (pct >= 80) {
+                document.getElementById('result-emoji').textContent = '🕵️';
+                document.getElementById('result-title').textContent = 'AI 감별사!';
+                document.getElementById('result-msg').textContent = `정답률 ${pct}% — AI와 사람을 잘 구별하시네요!`;
+                confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 } });
+            } else if (pct >= 60) {
+                document.getElementById('result-emoji').textContent = '🤔';
+                document.getElementById('result-title').textContent = '감이 좋아요!';
+                document.getElementById('result-msg').textContent = `정답률 ${pct}% — 조금만 더 연습하면 전문가!`;
+            } else {
+                document.getElementById('result-emoji').textContent = '😅';
+                document.getElementById('result-title').textContent = 'AI가 이겼어요!';
+                document.getElementById('result-msg').textContent = `정답률 ${pct}% — AI가 만든 글이 진짜처럼 느껴지죠?`;
+            }
+        }
+
+        startGame();
+    </script>
+</body>
+</html>

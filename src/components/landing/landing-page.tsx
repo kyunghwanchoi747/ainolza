@@ -114,50 +114,26 @@ export default function LandingPage() {
           </div>
           <p className="text-foreground/40 mb-12 max-w-xl">직접 체험하며 AI를 이해하는 인터랙티브 미니 프로그램.<br />게임처럼 즐기면서 AI의 원리를 배워보세요.</p>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Link href="/labs/prompt-challenge.html" className="group relative p-8 rounded-3xl bg-foreground/5 border border-foreground/10 hover:border-yellow-400/50 hover:bg-yellow-400/5 transition-all flex flex-col gap-4 min-h-[280px]">
-              <div className="absolute top-0 right-0 px-3 py-1 bg-yellow-400 text-black text-[10px] font-bold rounded-bl-2xl rounded-tr-3xl">NEW</div>
-              <div>
-                <h3 className="text-xl font-bold mb-2">프롬프트 챌린지</h3>
-                <p className="text-sm text-foreground/50">이미지를 보고 AI처럼 묘사해보세요. 프롬프트 작성 실력을 키울 수 있어요.</p>
-              </div>
-              <div className="mt-auto flex items-center gap-2 text-yellow-400 text-sm font-medium">
-                시작하기 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </div>
-            </Link>
-
-            <Link href="/labs/ai-vs-me.html" className="group relative p-8 rounded-3xl bg-foreground/5 border border-foreground/10 hover:border-violet-400/50 hover:bg-violet-400/5 transition-all flex flex-col gap-4 min-h-[280px]">
-              <div className="absolute top-0 right-0 px-3 py-1 bg-violet-400 text-black text-[10px] font-bold rounded-bl-2xl rounded-tr-3xl">NEW</div>
-              <div>
-                <h3 className="text-xl font-bold mb-2">AI vs 나</h3>
-                <p className="text-sm text-foreground/50">같은 질문에 AI와 내가 함께 답변. 사고방식의 차이를 발견해보세요.</p>
-              </div>
-              <div className="mt-auto flex items-center gap-2 text-violet-400 text-sm font-medium">
-                시작하기 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </div>
-            </Link>
-
-            <Link href="/labs/prompt-builder.html" className="group relative p-8 rounded-3xl bg-foreground/5 border border-foreground/10 hover:border-emerald-400/50 hover:bg-emerald-400/5 transition-all flex flex-col gap-4 min-h-[280px]">
-              <div className="absolute top-0 right-0 px-3 py-1 bg-emerald-400 text-black text-[10px] font-bold rounded-bl-2xl rounded-tr-3xl">NEW</div>
-              <div>
-                <h3 className="text-xl font-bold mb-2">프롬프트 빌더</h3>
-                <p className="text-sm text-foreground/50">요소를 조합해서 완성도 높은 프롬프트를 만들어보세요.</p>
-              </div>
-              <div className="mt-auto flex items-center gap-2 text-emerald-400 text-sm font-medium">
-                시작하기 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </div>
-            </Link>
-
-            <Link href="/labs/career-explorer.html" className="group relative p-8 rounded-3xl bg-foreground/5 border border-foreground/10 hover:border-sky-400/50 hover:bg-sky-400/5 transition-all flex flex-col gap-4 min-h-[280px]">
-              <div className="absolute top-0 right-0 px-3 py-1 bg-sky-400 text-black text-[10px] font-bold rounded-bl-2xl rounded-tr-3xl">NEW</div>
-              <div>
-                <h3 className="text-xl font-bold mb-2">AI 직업 탐색기</h3>
-                <p className="text-sm text-foreground/50">내 관심사를 입력하면 AI가 미래 직업과 활용법을 제안해줘요.</p>
-              </div>
-              <div className="mt-auto flex items-center gap-2 text-sky-400 text-sm font-medium">
-                시작하기 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </div>
-            </Link>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[
+              { href: "/labs/prompt-challenge.html", title: "프롬프트 챌린지", desc: "이미지를 보고 AI처럼 묘사해보세요. 프롬프트 작성 실력을 키울 수 있어요.", color: "yellow", tag: "인기" },
+              { href: "/labs/ai-vs-me.html", title: "AI vs 나", desc: "같은 질문에 AI와 내가 함께 답변. 사고방식의 차이를 발견해보세요.", color: "violet", tag: "NEW" },
+              { href: "/labs/prompt-builder.html", title: "프롬프트 빌더", desc: "요소를 조합해서 완성도 높은 프롬프트를 만들어보세요.", color: "emerald", tag: "NEW" },
+              { href: "/labs/career-explorer.html", title: "AI 직업 탐색기", desc: "내 관심사를 입력하면 AI가 미래 직업과 활용법을 제안해줘요.", color: "sky", tag: "NEW" },
+              { href: "/labs/ai-word-quiz.html", title: "AI 단어 퀴즈", desc: "AI 용어를 배우면서 두뇌도 훈련! 15초 안에 정답을 맞춰보세요.", color: "amber", tag: "NEW" },
+              { href: "/labs/ai-or-human.html", title: "AI일까? 사람일까?", desc: "이 글을 만든 건 AI일까요, 사람일까요? 감별력을 테스트해보세요.", color: "rose", tag: "NEW" },
+            ].map((item) => (
+              <Link key={item.href} href={item.href} className={`group relative p-8 rounded-3xl bg-foreground/5 border border-foreground/10 hover:border-${item.color}-400/50 hover:bg-${item.color}-400/5 transition-all flex flex-col gap-4 min-h-[240px]`}>
+                <div className={`absolute top-0 right-0 px-3 py-1 bg-${item.color}-400 text-black text-[10px] font-bold rounded-bl-2xl rounded-tr-3xl`}>{item.tag}</div>
+                <div>
+                  <h3 className="text-lg font-bold mb-2">{item.title}</h3>
+                  <p className="text-sm text-foreground/50">{item.desc}</p>
+                </div>
+                <div className={`mt-auto flex items-center gap-2 text-${item.color}-400 text-sm font-medium`}>
+                  시작하기 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </Link>
+            ))}
           </div>
         </div>
       </section>
