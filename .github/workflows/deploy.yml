@@ -33,5 +33,7 @@ jobs:
           NODE_OPTIONS: "--no-deprecation --max-old-space-size=8000"
           BUILD_PHASE: "true"
 
-      - name: Deploy to Cloudflare Workers
+      - name: Deploy to Cloudflare
         run: npx wrangler deploy --config wrangler.jsonc
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
