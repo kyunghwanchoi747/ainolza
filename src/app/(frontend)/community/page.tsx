@@ -48,7 +48,9 @@ export default async function CommunityPage() {
       {sortedPosts.length === 0 ? (
         <div className="text-center py-20">
           <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <p className="text-lg text-muted-foreground">아직 게시글이 없습니다.</p>
+          <p className="text-lg font-medium mb-2">커뮤니티 준비 중입니다</p>
+          <p className="text-sm text-muted-foreground mb-6">곧 AI 학습자들과 자유롭게 소통할 수 있는 공간이 열려요.</p>
+          <a href="https://open.kakao.com/o/s7kkWTfh" target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">카카오 오픈채팅으로 먼저 소통하기 &rarr;</a>
         </div>
       ) : (
         <div className="rounded-lg border divide-y">

@@ -37,7 +37,10 @@ export default async function StorePage() {
 
       {products.length === 0 ? (
         <div className="text-center py-20">
-          <p className="text-lg text-muted-foreground">아직 등록된 상품이 없습니다.</p>
+          <div className="text-5xl mb-4">&#128230;</div>
+          <p className="text-lg font-medium mb-2">스토어 준비 중입니다</p>
+          <p className="text-sm text-muted-foreground mb-6">AI 템플릿, 강의, 전자책 등 다양한 콘텐츠가 곧 등록될 예정이에요.</p>
+          <Link href="/programs" className="text-sm text-primary hover:underline">프로그램 둘러보기 &rarr;</Link>
         </div>
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
