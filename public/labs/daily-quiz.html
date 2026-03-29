@@ -109,40 +109,9 @@
     </div>
 
     <script src="/labs/shared.js"></script>
+    <script src="/labs/quiz-pool.js"></script>
     <script>
-        // 365개 퀴즈 풀 (날짜 기반 자동 선택)
-        const quizPool = [
-            { q: "ChatGPT를 만든 회사는?", options: ["OpenAI", "Google", "Meta", "Microsoft"], answer: "OpenAI", explanation: "ChatGPT는 2022년 11월 OpenAI에서 공개한 대화형 AI입니다. 일론 머스크가 공동 창업했지만 현재는 샘 알트만이 CEO예요." },
-            { q: "AI가 사람의 말을 이해하는 기술을 무엇이라 하나요?", options: ["자연어 처리(NLP)", "컴퓨터 비전", "강화 학습", "딥페이크"], answer: "자연어 처리(NLP)", explanation: "NLP(Natural Language Processing)는 사람의 언어를 컴퓨터가 이해하고 처리하는 기술이에요. 번역, 챗봇, 요약 등에 사용됩니다." },
-            { q: "'프롬프트'란 무엇인가요?", options: ["AI에게 내리는 명령어", "프로그래밍 언어", "AI의 두뇌", "데이터베이스"], answer: "AI에게 내리는 명령어", explanation: "프롬프트(Prompt)는 AI에게 원하는 결과를 얻기 위해 입력하는 지시문이에요. 잘 쓸수록 좋은 결과가 나와요!" },
-            { q: "AI가 가짜 영상을 만드는 기술은?", options: ["딥페이크", "딥러닝", "메타버스", "블록체인"], answer: "딥페이크", explanation: "딥페이크(Deepfake)는 AI가 실제와 구분하기 어려운 가짜 영상을 만드는 기술이에요. 악용 방지가 중요한 이슈입니다." },
-            { q: "구글이 만든 AI 모델의 이름은?", options: ["Gemini", "GPT", "Claude", "Llama"], answer: "Gemini", explanation: "Gemini는 구글 딥마인드에서 만든 멀티모달 AI 모델이에요. 텍스트, 이미지, 코드를 동시에 이해할 수 있어요." },
-            { q: "코드를 직접 쓰지 않고 AI에게 설명해서 프로그램을 만드는 방식은?", options: ["바이브 코딩", "페어 코딩", "클린 코딩", "테스트 코딩"], answer: "바이브 코딩", explanation: "바이브 코딩(Vibe Coding)은 AI에게 원하는 것을 자연어로 설명하면 AI가 코드를 작성해주는 방식이에요." },
-            { q: "LLM은 무엇의 약자인가요?", options: ["Large Language Model", "Long Learning Machine", "Logic Language Module", "Low Latency Memory"], answer: "Large Language Model", explanation: "LLM(대규모 언어 모델)은 방대한 텍스트로 학습된 AI 모델이에요. GPT-4, Claude, Gemini가 대표적이에요." },
-            { q: "AI가 텍스트로 이미지를 만드는 대표적인 서비스는?", options: ["Midjourney", "ChatGPT", "Notion", "Slack"], answer: "Midjourney", explanation: "Midjourney는 텍스트 프롬프트를 입력하면 고품질 이미지를 생성하는 AI 서비스예요." },
-            { q: "웹사이트에 광고를 달아 수익을 얻는 구글 서비스는?", options: ["애드센스", "애드워즈", "애널리틱스", "서치콘솔"], answer: "애드센스", explanation: "구글 애드센스는 웹사이트에 광고를 게재하고 방문자의 클릭/노출에 따라 수익을 얻는 서비스예요." },
-            { q: "AI 에이전트란 무엇인가요?", options: ["스스로 판단하고 행동하는 AI", "AI 개발자", "AI 교육 프로그램", "AI 하드웨어"], answer: "스스로 판단하고 행동하는 AI", explanation: "AI Agent는 단순 답변을 넘어 도구를 사용하고, 계획을 세워 작업을 수행하는 차세대 AI 기술이에요." },
-            { q: "오픈소스 AI의 대표적인 모델은?", options: ["Llama", "GPT-4", "Claude", "Gemini"], answer: "Llama", explanation: "Llama는 Meta(페이스북)가 만든 오픈소스 AI 모델이에요. 누구나 무료로 사용하고 수정할 수 있어요." },
-            { q: "AI가 학습하는 데 사용되는 대량의 정보를 무엇이라 하나요?", options: ["데이터셋", "알고리즘", "파라미터", "프롬프트"], answer: "데이터셋", explanation: "데이터셋(Dataset)은 AI가 학습하는 데 사용되는 정리된 데이터 모음이에요. 좋은 데이터가 좋은 AI를 만들어요." },
-            { q: "Anthropic이 만든 AI의 이름은?", options: ["Claude", "Gemini", "GPT", "Copilot"], answer: "Claude", explanation: "Claude는 Anthropic이 만든 AI 어시스턴트예요. 안전하고 도움이 되는 AI를 목표로 개발되었어요." },
-            { q: "AI가 여러 종류의 데이터(텍스트+이미지+음성)를 동시에 이해하는 것을 무엇이라 하나요?", options: ["멀티모달", "싱글모달", "크로스플랫폼", "하이브리드"], answer: "멀티모달", explanation: "멀티모달(Multimodal) AI는 텍스트, 이미지, 음성 등 여러 형태의 정보를 동시에 이해하고 처리할 수 있어요." },
-            { q: "AI를 특정 분야에 맞게 추가 학습시키는 과정은?", options: ["파인튜닝", "프롬프팅", "크롤링", "스크래핑"], answer: "파인튜닝", explanation: "파인튜닝(Fine-tuning)은 이미 학습된 AI를 의료, 법률 등 특정 분야에 맞게 추가 학습시키는 거예요." },
-            { q: "클라우드 컴퓨팅이란?", options: ["인터넷으로 컴퓨터 자원을 빌려 쓰는 것", "구름 모양 데이터", "날씨 예측 AI", "무선 인터넷"], answer: "인터넷으로 컴퓨터 자원을 빌려 쓰는 것", explanation: "클라우드는 직접 서버를 사지 않고 AWS, Google Cloud 등에서 필요한 만큼 빌려 쓰는 방식이에요." },
-            { q: "생성형 AI(Generative AI)란?", options: ["새로운 콘텐츠를 만들어내는 AI", "데이터를 분석하는 AI", "로봇을 조종하는 AI", "바이러스를 잡는 AI"], answer: "새로운 콘텐츠를 만들어내는 AI", explanation: "생성형 AI는 글, 이미지, 음악, 코드 등 새로운 콘텐츠를 만들어내는 AI예요. ChatGPT, Midjourney가 대표적이에요." },
-            { q: "AI 할루시네이션이란?", options: ["AI가 사실이 아닌 정보를 마치 사실처럼 말하는 것", "AI가 꿈을 꾸는 것", "AI 화면 오류", "AI 과열 현상"], answer: "AI가 사실이 아닌 정보를 마치 사실처럼 말하는 것", explanation: "AI 할루시네이션은 AI가 확신에 찬 어조로 틀린 정보를 말하는 현상이에요. AI를 쓸 때 항상 검증이 필요해요!" },
-            { q: "API란 무엇인가요?", options: ["프로그램끼리 소통하는 방법", "AI 학습 방법", "데이터 저장소", "화면 디자인 도구"], answer: "프로그램끼리 소통하는 방법", explanation: "API(Application Programming Interface)는 서로 다른 프로그램이 데이터를 주고받는 약속된 방법이에요." },
-            { q: "AI 윤리에서 가장 중요한 원칙은?", options: ["편향 없는 공정성", "속도 최적화", "데이터 수집량", "모델 크기"], answer: "편향 없는 공정성", explanation: "AI 윤리에서는 성별, 인종, 나이 등에 대한 편향(bias) 없이 공정하게 작동하는 것이 가장 중요해요." },
-            { q: "AI 워터마크란?", options: ["AI 생성물에 표시를 넣는 기술", "AI 방수 기술", "데이터 보안", "AI 로고"], answer: "AI 생성물에 표시를 넣는 기술", explanation: "AI 워터마크는 AI가 만든 이미지나 글에 보이지 않는 표시를 넣어 진위를 구별하는 기술이에요." },
-            { q: "토큰(Token)이란 AI에서 무엇을 의미하나요?", options: ["AI가 텍스트를 처리하는 최소 단위", "가상화폐", "로그인 인증키", "AI 비용 단위"], answer: "AI가 텍스트를 처리하는 최소 단위", explanation: "AI에서 토큰은 단어나 글자 조각이에요. '인공지능'은 보통 2~3개 토큰으로 나뉘어 처리됩니다." },
-            { q: "RAG란 무엇인가요?", options: ["외부 정보를 검색해서 AI 답변에 활용하는 기술", "AI 게임 방식", "데이터 압축 방법", "AI 학습 속도"], answer: "외부 정보를 검색해서 AI 답변에 활용하는 기술", explanation: "RAG(Retrieval-Augmented Generation)는 AI가 답변 전에 관련 문서를 먼저 검색해서 더 정확한 답을 만드는 기술이에요." },
-            { q: "프롬프트에 예시를 넣어 AI 결과를 개선하는 기법은?", options: ["퓨샷 러닝", "제로샷 러닝", "딥러닝", "전이학습"], answer: "퓨샷 러닝", explanation: "퓨샷 러닝(Few-shot Learning)은 AI에게 몇 가지 예시를 보여주고 패턴을 파악하게 하는 방법이에요." },
-            { q: "NoCode/LowCode란?", options: ["코딩 없이 또는 적은 코딩으로 앱을 만드는 방식", "코드를 숨기는 기술", "코드 압축 방법", "코드 삭제 명령"], answer: "코딩 없이 또는 적은 코딩으로 앱을 만드는 방식", explanation: "NoCode/LowCode는 드래그앤드롭 등으로 코딩 없이 앱이나 웹사이트를 만드는 도구예요. 바이브 코딩과 비슷한 개념!" },
-            { q: "GitHub란?", options: ["코드를 저장하고 공유하는 플랫폼", "AI 모델 학습 도구", "클라우드 서버", "웹 디자인 도구"], answer: "코드를 저장하고 공유하는 플랫폼", explanation: "GitHub는 전 세계 개발자들이 코드를 저장, 공유, 협업하는 플랫폼이에요. AI 오픈소스 프로젝트도 여기서 관리돼요." },
-            { q: "AI 챗봇과 AI 에이전트의 가장 큰 차이는?", options: ["에이전트는 스스로 도구를 사용하고 행동한다", "에이전트가 더 빠르다", "챗봇이 더 똑똑하다", "차이가 없다"], answer: "에이전트는 스스로 도구를 사용하고 행동한다", explanation: "챗봇은 질문에 답하는 수준이지만, AI 에이전트는 웹 검색, 파일 생성 등 도구를 스스로 사용해서 작업을 수행해요." },
-            { q: "Cloudflare는 어떤 서비스인가요?", options: ["웹사이트 보안 및 호스팅 서비스", "AI 모델 학습 도구", "소셜 미디어", "이메일 서비스"], answer: "웹사이트 보안 및 호스팅 서비스", explanation: "Cloudflare는 웹사이트를 빠르고 안전하게 운영할 수 있게 도와주는 서비스예요. 무료로도 사용 가능!" },
-            { q: "AI가 코드를 작성해주는 도구는?", options: ["GitHub Copilot", "GitHub Pages", "GitHub Actions", "GitHub Desktop"], answer: "GitHub Copilot", explanation: "GitHub Copilot은 AI가 코드를 자동으로 제안해주는 도구예요. 주석을 쓰면 AI가 코드를 완성해줍니다." },
-            { q: "SEO란 무엇인가요?", options: ["검색엔진에서 잘 찾아지도록 최적화하는 것", "소셜 미디어 마케팅", "이메일 마케팅", "AI 학습 방법"], answer: "검색엔진에서 잘 찾아지도록 최적화하는 것", explanation: "SEO(Search Engine Optimization)는 구글 같은 검색엔진에서 내 웹사이트가 상위에 노출되도록 최적화하는 작업이에요." },
-        ];
+        // quizPool은 quiz-pool.js에서 로드 (120문제)
 
         const today = new Date();
         const todayStr = today.toISOString().split('T')[0];
