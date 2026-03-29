@@ -31,7 +31,7 @@ export default async function EnrollmentsPage() {
       sort: '-createdAt',
       limit: 100,
     })
-    enrollments = result.docs.map((doc: Record<string, unknown>) => ({
+    enrollments = result.docs.map((doc: any) => ({
       id: String(doc.id),
       name: String(doc.name || ''),
       phone: String(doc.phone || ''),
