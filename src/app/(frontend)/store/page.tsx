@@ -1,92 +1,60 @@
 import Link from 'next/link'
-import { getPayloadClient } from '@/lib/payload'
-import { Badge } from '@/components/ui/badge'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: '스토어',
-  description: 'AI 템플릿, 강의, 전자책 등 다양한 콘텐츠를 만나보세요.',
+  title: '강의/전자책',
+  description: 'AI 바이브 코딩부터 수익화 전략까지. 직접 설계한 콘텐츠를 확인하고 구매하세요.',
 }
 
-export const dynamic = 'force-dynamic'
-
-export default async function StorePage() {
-  const payload = await getPayloadClient()
-  const result = await payload.find({
-    collection: 'products',
-    where: { status: { equals: 'published' } },
-    sort: '-createdAt',
-    limit: 50,
-    depth: 1,
-  })
-
-  const products = result.docs
-  const categories = await payload.find({ collection: 'product-categories', sort: 'order', limit: 100 })
-  const categoryList = categories.docs
-
+export default function StorePage() {
   return (
-    <div className="container max-w-screen-2xl px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">스토어</h1>
-        <p className="text-muted-foreground mt-2">강의, 책, 템플릿 등 다양한 콘텐츠를 만나보세요.</p>
-      </div>
+    <div className="min-h-screen bg-white">
+      <section className="pt-16 pb-20 px-6">
+        <div className="max-w-[1200px] mx-auto">
+          <div className="mb-10">
+            <h1 className="text-4xl font-bold tracking-tight text-[#333]">강의/전자책</h1>
+            <p className="text-[#666] mt-2">AI 활용법부터 수익화 전략, 자동화 시스템 구축까지 직접 설계한 콘텐츠를 확인하고 구매할 수 있습니다.</p>
+          </div>
 
-      {/* Category filter */}
-      {categoryList.length > 0 && (
-        <div className="flex gap-2 mb-8 flex-wrap">
-          <Badge variant="default" className="cursor-pointer">전체</Badge>
-          {categoryList.map((cat: any) => (
-            <Badge key={cat.id} variant="outline" className="cursor-pointer">{cat.name}</Badge>
-          ))}
-        </div>
-      )}
-
-      {products.length === 0 ? (
-        <div className="text-center py-20">
-          <div className="text-5xl mb-4">&#128230;</div>
-          <p className="text-lg font-medium mb-2">스토어 준비 중입니다</p>
-          <p className="text-sm text-muted-foreground mb-6">AI 템플릿, 강의, 전자책 등 다양한 콘텐츠가 곧 등록될 예정이에요.</p>
-          <Link href="/programs" className="text-sm text-primary hover:underline">프로그램 둘러보기 &rarr;</Link>
-        </div>
-      ) : (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {products.map((product: any) => (
-            <Link
-              key={product.id}
-              href={`/store/${product.slug}`}
-              className="group rounded-xl border bg-card overflow-hidden hover:shadow-lg transition-shadow"
-            >
-              {product.thumbnail?.url ? (
-                <div className="aspect-video bg-muted overflow-hidden">
-                  <img
-                    src={product.thumbnail.url}
-                    alt={product.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                  />
-                </div>
-              ) : (
-                <div className="aspect-video bg-muted flex items-center justify-center">
-                  <span className="text-muted-foreground text-sm">이미지 없음</span>
-                </div>
-              )}
+          {/* 상품 카드 */}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Link href="/programs/vibe-coding" className="group rounded-xl border border-[#e5e5e5] overflow-hidden hover:shadow-md transition-all">
+              <div className="aspect-square bg-[#f8f8f8] overflow-hidden">
+                <img src="/programs/바이브코딩상세1.png" alt="바이브 코딩 클래스" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+              </div>
               <div className="p-4">
-                {product.category && (
-                  <Badge variant="secondary" className="mb-2 text-xs">{product.category}</Badge>
-                )}
-                <h3 className="font-semibold text-lg group-hover:text-primary transition-colors line-clamp-1">
-                  {product.title}
-                </h3>
-                {product.description && (
-                  <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{product.description}</p>
-                )}
-                <p className="text-lg font-bold mt-3">
-                  {product.price === 0 ? '무료' : `₩${product.price.toLocaleString()}`}
-                </p>
+                <p className="text-xs text-[#999] mb-1">AI놀자</p>
+                <h3 className="font-medium text-[#333] mb-2 line-clamp-2">AI 바이브 코딩 클래스</h3>
+                <p className="text-[#D4756E] font-bold">390,000원</p>
+                <p className="text-xs text-[#999] line-through">590,000원</p>
               </div>
             </Link>
-          ))}
+
+            {/* 추가 상품 (책 정보 받으면 교체) */}
+            <div className="rounded-xl border border-[#e5e5e5] overflow-hidden opacity-60">
+              <div className="aspect-square bg-[#f8f8f8] flex items-center justify-center">
+                <span className="text-4xl">&#128214;</span>
+              </div>
+              <div className="p-4">
+                <p className="text-xs text-[#999] mb-1">AI놀자</p>
+                <h3 className="font-medium text-[#333] mb-2">전자책 (준비 중)</h3>
+                <p className="text-[#999] text-sm">곧 등록됩니다</p>
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-[#e5e5e5] overflow-hidden opacity-60">
+              <div className="aspect-square bg-[#f8f8f8] flex items-center justify-center">
+                <span className="text-4xl">&#128218;</span>
+              </div>
+              <div className="p-4">
+                <p className="text-xs text-[#999] mb-1">AI놀자</p>
+                <h3 className="font-medium text-[#333] mb-2">전자책 (준비 중)</h3>
+                <p className="text-[#999] text-sm">곧 등록됩니다</p>
+              </div>
+            </div>
+          </div>
         </div>
-      )}
+      </section>
     </div>
   )
 }

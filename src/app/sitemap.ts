@@ -5,6 +5,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: '/', lastModified: new Date(), changeFrequency: 'weekly', priority: 1 },
     { url: '/programs', lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
     { url: '/programs/vibe-coding', lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
+    { url: '/labs', lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
     { url: '/community', lastModified: new Date(), changeFrequency: 'daily', priority: 0.7 },
     { url: '/store', lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
     { url: '/labs/daily-quiz.html', lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
