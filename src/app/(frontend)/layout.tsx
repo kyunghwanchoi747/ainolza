@@ -7,7 +7,7 @@ export default function FrontendLayout({ children }: { children: React.ReactNode
     <div className="font-pretendard antialiased bg-background text-foreground flex flex-col min-h-screen">
       <ThemeProvider
         attribute="class"
-        defaultTheme="dark"
+        defaultTheme="light"
         enableSystem
         disableTransitionOnChange
       >
