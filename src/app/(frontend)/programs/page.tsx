@@ -1,6 +1,12 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowRight } from 'lucide-react'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: '프로그램',
+  description: 'AI놀자에서 운영하는 AI 교육 프로그램. 바이브 코딩 클래스로 나만의 웹사이트를 만들어보세요.',
+}
 
 export default function ProgramsPage() {
   const programs = [

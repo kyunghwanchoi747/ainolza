@@ -1,5 +1,11 @@
 import Link from 'next/link'
 import Image from 'next/image'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'AI 바이브 코딩 클래스',
+  description: '나만의 독립된 웹사이트를 AI로 직접 만드는 실전 과정. 코딩 경험 없이도 4주 만에 웹사이트 완성.',
+}
 
 export default function VibeCodingPage() {
   return (

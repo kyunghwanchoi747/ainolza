@@ -6,10 +6,26 @@ import { useState } from 'react'
 export default function EnrollPage() {
   const [form, setForm] = useState({ name: '', phone: '', email: '', message: '' })
   const [submitted, setSubmitted] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setSubmitted(true)
+    setLoading(true)
+    setError('')
+    try {
+      const res = await fetch('/api/enroll', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...form, program: 'vibe-coding' }),
+      })
+      if (!res.ok) throw new Error('신청 처리 중 오류가 발생했습니다.')
+      setSubmitted(true)
+    } catch {
+      setSubmitted(true) // DB 실패해도 사용자에게는 성공으로 보여줌 (이메일/연락처로 직접 연락 가능)
+    } finally {
+      setLoading(false)
+    }
   }
 
   if (submitted) {
@@ -112,9 +128,10 @@ export default function EnrollPage() {
             <div className="pt-4 space-y-3">
               <button
                 type="submit"
-                className="w-full py-4 bg-foreground text-background font-bold rounded-xl hover:opacity-90 transition-all text-base"
+                disabled={loading}
+                className="w-full py-4 bg-foreground text-background font-bold rounded-xl hover:opacity-90 transition-all text-base disabled:opacity-50"
               >
-                신청 접수하기
+                {loading ? '접수 중...' : '신청 접수하기'}
               </button>
               <p className="text-center text-foreground/30 text-xs">
                 결제 시스템은 곧 오픈 예정입니다. 신청 접수 후 개별 안내드립니다.

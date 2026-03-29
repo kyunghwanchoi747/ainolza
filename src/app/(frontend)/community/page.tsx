@@ -1,8 +1,14 @@
 import Link from 'next/link'
 import { getPayloadClient } from '@/lib/payload'
 import { Badge } from '@/components/ui/badge'
+import type { Metadata } from 'next'
 
 import { Pin, Eye, MessageSquare } from 'lucide-react'
+
+export const metadata: Metadata = {
+  title: '커뮤니티',
+  description: 'AI놀자 회원들과 자유롭게 소통하는 커뮤니티.',
+}
 
 export const dynamic = 'force-dynamic'
 

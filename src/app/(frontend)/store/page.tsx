@@ -1,6 +1,12 @@
 import Link from 'next/link'
 import { getPayloadClient } from '@/lib/payload'
 import { Badge } from '@/components/ui/badge'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: '스토어',
+  description: 'AI 템플릿, 강의, 전자책 등 다양한 콘텐츠를 만나보세요.',
+}
 
 export const dynamic = 'force-dynamic'
 
