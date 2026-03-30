@@ -30,28 +30,17 @@ export default function StorePage() {
               </div>
             </Link>
 
-            {/* 추가 상품 (책 정보 받으면 교체) */}
-            <div className="rounded-xl border border-[#e5e5e5] overflow-hidden opacity-60">
-              <div className="aspect-square bg-[#f8f8f8] flex items-center justify-center">
-                <span className="text-4xl">&#128214;</span>
+            <Link href="/store/personal-intelligence" className="group rounded-xl border border-[#e5e5e5] overflow-hidden hover:shadow-md transition-all">
+              <div className="aspect-square bg-[#f8f8f8] overflow-hidden flex items-center justify-center p-4">
+                <img src="/books/personal-intelligence/1.png" alt="퍼스널 인텔리전스" className="max-h-full object-contain group-hover:scale-105 transition-transform" />
               </div>
               <div className="p-4">
-                <p className="text-xs text-[#999] mb-1">AI놀자</p>
-                <h3 className="font-medium text-[#333] mb-2">전자책 (준비 중)</h3>
-                <p className="text-[#999] text-sm">곧 등록됩니다</p>
+                <p className="text-xs text-[#999] mb-1">전자책 / 종이책</p>
+                <h3 className="font-medium text-[#333] mb-2">퍼스널 인텔리전스</h3>
+                <p className="text-xs text-[#666] mb-2">Google Workspace × Gemini 활용서</p>
+                <p className="text-[#D4756E] font-bold">교보문고 판매 중</p>
               </div>
-            </div>
-
-            <div className="rounded-xl border border-[#e5e5e5] overflow-hidden opacity-60">
-              <div className="aspect-square bg-[#f8f8f8] flex items-center justify-center">
-                <span className="text-4xl">&#128218;</span>
-              </div>
-              <div className="p-4">
-                <p className="text-xs text-[#999] mb-1">AI놀자</p>
-                <h3 className="font-medium text-[#333] mb-2">전자책 (준비 중)</h3>
-                <p className="text-[#999] text-sm">곧 등록됩니다</p>
-              </div>
-            </div>
+            </Link>
           </div>
         </div>
       </section>
