@@ -30,6 +30,18 @@ export default function StorePage() {
               </div>
             </Link>
 
+            <Link href="/store/uncomfortable-ai" className="group rounded-xl border border-[#e5e5e5] overflow-hidden hover:shadow-md transition-all">
+              <div className="aspect-square bg-[#f8f8f8] overflow-hidden flex items-center justify-center p-4">
+                <img src="/books/uncomfortable-ai/cover.png" alt="불편한 AI" className="max-h-full object-contain group-hover:scale-105 transition-transform" />
+              </div>
+              <div className="p-4">
+                <p className="text-xs text-[#999] mb-1">전자책</p>
+                <h3 className="font-medium text-[#333] mb-2">불편한 AI</h3>
+                <p className="text-xs text-[#666] mb-2">평범한 사람을 위한 AI 리터러시</p>
+                <p className="text-[#D4756E] font-bold">교보문고 판매 중</p>
+              </div>
+            </Link>
+
             <Link href="/store/personal-intelligence" className="group rounded-xl border border-[#e5e5e5] overflow-hidden hover:shadow-md transition-all">
               <div className="aspect-square bg-[#f8f8f8] overflow-hidden flex items-center justify-center p-4">
                 <img src="/books/personal-intelligence/1.png" alt="퍼스널 인텔리전스" className="max-h-full object-contain group-hover:scale-105 transition-transform" />
