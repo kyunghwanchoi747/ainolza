@@ -64,3 +64,15 @@ AI놀자 홈페이지 이전/
 script_error.txt
 tsc_errors.txt
 PROGRESS.md
+
+# ===== 개인정보 보호 (절대 커밋 금지) =====
+회원*.zip
+회원*.xls
+회원*.xlsx
+회원*.csv
+*회원*.*
+*member*.*
+*Members*.*
+*.xls
+*.xlsx
+*.csv
