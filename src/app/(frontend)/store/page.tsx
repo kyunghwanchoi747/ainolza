@@ -35,7 +35,7 @@ export default function StorePage() {
                 <img src="/books/uncomfortable-ai/cover.png" alt="불편한 AI" className="max-h-full object-contain group-hover:scale-105 transition-transform" />
               </div>
               <div className="p-4">
-                <p className="text-xs text-[#999] mb-1">전자책</p>
+                <p className="text-xs text-[#999] mb-1">전자책 / 종이책</p>
                 <h3 className="font-medium text-[#333] mb-2">불편한 AI</h3>
                 <p className="text-xs text-[#666] mb-2">평범한 사람을 위한 AI 리터러시</p>
                 <p className="text-[#D4756E] font-bold">교보문고 판매 중</p>
@@ -47,7 +47,7 @@ export default function StorePage() {
                 <img src="/books/personal-intelligence/1.png" alt="퍼스널 인텔리전스" className="max-h-full object-contain group-hover:scale-105 transition-transform" />
               </div>
               <div className="p-4">
-                <p className="text-xs text-[#999] mb-1">전자책 / 종이책</p>
+                <p className="text-xs text-[#999] mb-1">전자책</p>
                 <h3 className="font-medium text-[#333] mb-2">퍼스널 인텔리전스</h3>
                 <p className="text-xs text-[#666] mb-2">Google Workspace × Gemini 활용서</p>
                 <p className="text-[#D4756E] font-bold">교보문고 판매 중</p>

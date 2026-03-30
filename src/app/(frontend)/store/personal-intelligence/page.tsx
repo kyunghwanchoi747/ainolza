@@ -32,7 +32,7 @@ export default function PersonalIntelligencePage() {
 
           {/* 정보 패널 */}
           <div className="flex flex-col justify-center">
-            <p className="text-[#D4756E] text-sm font-medium mb-2">전자책 / 종이책</p>
+            <p className="text-[#D4756E] text-sm font-medium mb-2">전자책</p>
             <h1 className="text-3xl font-bold text-[#333] mb-2">퍼스널 인텔리전스</h1>
             <p className="text-[#666] text-lg mb-1">Personal Intelligence</p>
             <p className="text-[#999] text-sm mb-6">Google Workspace × Gemini 활용서 | 최경환 지음</p>

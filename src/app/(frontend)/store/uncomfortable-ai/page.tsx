@@ -28,7 +28,7 @@ export default function UncomfortableAIPage() {
           </div>
 
           <div className="flex flex-col justify-center">
-            <p className="text-[#D4756E] text-sm font-medium mb-2">전자책</p>
+            <p className="text-[#D4756E] text-sm font-medium mb-2">전자책 / 종이책</p>
             <h1 className="text-3xl font-bold text-[#333] mb-2">불편한 AI</h1>
             <p className="text-[#666] text-lg mb-1">Artificial Intelligence</p>
             <p className="text-[#999] text-sm mb-6">멈출 수 없는 변화 속 평범한 사람을 위한 AI 리터러시 | 최경환 지음</p>
