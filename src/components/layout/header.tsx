@@ -20,8 +20,8 @@ export function Header() {
     useEffect(() => {
         fetch('/api/users/me', { credentials: 'include' })
             .then(res => res.ok ? res.json() : null)
-            .then((data: Record<string, unknown> | null) => {
-                if (data?.user) setUser(data.user as { email: string; name?: string });
+            .then((data: any) => {
+                if (data?.user) setUser(data.user);
             })
             .catch(() => {});
     }, [pathname]);
