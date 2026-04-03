@@ -1,13 +1,33 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 export default function EnrollPage() {
   const [form, setForm] = useState({ name: '', phone: '', email: '', message: '' })
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
   const [_error, setError] = useState('')
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    fetch('/api/users/me', { credentials: 'include' })
+      .then(res => res.ok ? res.json() : null)
+      .then((data: any) => {
+        if (data?.user) {
+          setIsLoggedIn(true)
+          setForm(prev => ({
+            ...prev,
+            name: data.user.name || '',
+            email: data.user.email || '',
+            phone: data.user.phone || '',
+          }))
+        } else {
+          setIsLoggedIn(false)
+        }
+      })
+      .catch(() => setIsLoggedIn(false))
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -26,6 +46,25 @@ export default function EnrollPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  if (isLoggedIn === null) {
+    return <div className="min-h-screen bg-white flex items-center justify-center"><p className="text-[#999]">로딩 중...</p></div>
+  }
+
+  if (isLoggedIn === false) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center px-6">
+        <div className="max-w-[400px] text-center">
+          <h2 className="text-2xl font-bold text-[#333] mb-4">로그인이 필요합니다</h2>
+          <p className="text-[#666] text-sm mb-6">수강 신청을 하려면 먼저 로그인해주세요.</p>
+          <div className="flex flex-col gap-3">
+            <Link href="/login" className="py-3 bg-[#D4756E] text-white font-bold rounded-xl text-center hover:bg-[#c0625b] transition-all">로그인</Link>
+            <Link href="/signup" className="py-3 border border-[#e5e5e5] text-[#333] font-bold rounded-xl text-center hover:bg-[#f8f8f8] transition-all">회원가입</Link>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   if (submitted) {

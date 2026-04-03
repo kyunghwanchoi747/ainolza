@@ -63,15 +63,32 @@ async function getConfig(request: NextRequest): Promise<SiteConfig> {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Skip internal, API, admin, manager, static routes
+  // Skip internal, API, admin, static routes
   if (
     pathname.startsWith('/api') ||
-    pathname.startsWith('/manager') ||
     pathname.startsWith('/admin') ||
     pathname.startsWith('/_next') ||
     pathname.startsWith('/favicon') ||
     pathname.includes('.')
   ) {
+    return NextResponse.next()
+  }
+
+  // /manager → 관리자 전용 (쿠키에 JWT 없으면 로그인 페이지로)
+  if (pathname.startsWith('/manager')) {
+    const token = request.cookies.get('payload-token')?.value
+    if (!token) {
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
+    return NextResponse.next()
+  }
+
+  // /mypage → 로그인 필수
+  if (pathname.startsWith('/mypage')) {
+    const token = request.cookies.get('payload-token')?.value
+    if (!token) {
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
     return NextResponse.next()
   }
 
@@ -116,5 +133,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!api|manager|admin|_next|favicon).*)'],
+  matcher: ['/((?!api|admin|_next|favicon).*)'],
 }

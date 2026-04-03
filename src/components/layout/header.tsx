@@ -55,10 +55,10 @@ export function Header() {
                 <div className="flex items-center gap-3">
                     {user ? (
                         <>
-                            <span className="hidden md:flex items-center gap-1.5 text-[14px] text-[#333]">
+                            <Link href="/mypage" className="hidden md:flex items-center gap-1.5 text-[14px] text-[#333] hover:text-[#D4756E] transition-colors">
                                 <User className="w-4 h-4" />
                                 {user.name || user.email.split('@')[0]}
-                            </span>
+                            </Link>
                             <button
                                 onClick={handleLogout}
                                 className="hidden md:block text-[14px] text-[#999] hover:text-[#333] transition-colors"
@@ -97,12 +97,12 @@ export function Header() {
                     ))}
                     <div className="pt-2 border-t border-[#e5e5e5] text-[14px]">
                         {user ? (
-                            <div className="flex items-center justify-between">
-                                <span className="text-[#333] flex items-center gap-1.5">
+                            <div className="space-y-2">
+                                <Link href="/mypage" className="text-[#333] flex items-center gap-1.5" onClick={() => setIsOpen(false)}>
                                     <User className="w-4 h-4" />
                                     {user.name || user.email.split('@')[0]}
-                                </span>
-                                <button onClick={handleLogout} className="text-[#999]">로그아웃</button>
+                                </Link>
+                                <button onClick={handleLogout} className="text-[#999] text-sm">로그아웃</button>
                             </div>
                         ) : (
                             <div className="flex gap-4 text-[#666]">
