@@ -38,7 +38,7 @@ export default function SignupPage() {
       })
 
       if (!res.ok) {
-        const data = await res.json()
+        const data = await res.json() as { errors?: Array<{ message?: string }> }
         const msg = data?.errors?.[0]?.message || '회원가입에 실패했습니다.'
         setError(msg)
         return
