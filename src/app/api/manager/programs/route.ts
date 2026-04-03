@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayloadClient } from '@/lib/payload'
+import { requireAdmin } from '@/lib/auth'
 
 export async function GET(req: NextRequest) {
   try {
@@ -35,6 +36,8 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const authError = await requireAdmin(req)
+  if (authError) return authError
   try {
     const payload = await getPayloadClient()
     const body: any = await req.json()
@@ -62,6 +65,8 @@ export async function POST(req: NextRequest) {
 }
 
 export async function PUT(req: NextRequest) {
+  const authError = await requireAdmin(req)
+  if (authError) return authError
   try {
     const payload = await getPayloadClient()
     const body: any = await req.json()
@@ -84,6 +89,8 @@ export async function PUT(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
+  const authError = await requireAdmin(req)
+  if (authError) return authError
   try {
     const payload = await getPayloadClient()
     const { searchParams } = new URL(req.url)

@@ -1,5 +1,4 @@
 import './globals.css'
-import ClickToComponentWrapper from '@/components/click-to-component-wrapper'
 
 export const metadata = {
   title: {
@@ -26,7 +25,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ko" suppressHydrationWarning>
       <body>
-        <ClickToComponentWrapper />
         {children}
       </body>
     </html>

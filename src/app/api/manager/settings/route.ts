@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayloadClient } from '@/lib/payload'
+import { requireAdmin } from '@/lib/auth'
 
 const DEFAULT_NAVIGATION = [
   { label: '홈', path: '/home', type: 'home', enabled: true, order: 0 },
@@ -41,6 +42,8 @@ export async function GET() {
 }
 
 export async function PUT(req: NextRequest) {
+  const authError = await requireAdmin(req)
+  if (authError) return authError
   try {
     const payload = await getPayloadClient()
     const body: any = await req.json()
