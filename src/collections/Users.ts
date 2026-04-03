@@ -8,6 +8,16 @@ export const Users: CollectionConfig = {
   auth: true,
   fields: [
     {
+      name: 'name',
+      type: 'text',
+      label: '이름',
+    },
+    {
+      name: 'phone',
+      type: 'text',
+      label: '연락처',
+    },
+    {
       name: 'role',
       type: 'select',
       options: [

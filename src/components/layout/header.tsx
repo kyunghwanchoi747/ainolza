@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X } from "lucide-react";
-import { useState } from "react";
+import { Menu, X, User } from "lucide-react";
+import { useState, useEffect } from "react";
 
 const navItems = [
     { href: '/store', label: '강의/전자책' },
@@ -13,19 +13,32 @@ const navItems = [
 
 export function Header() {
     const [isOpen, setIsOpen] = useState(false);
+    const [user, setUser] = useState<{ email: string; name?: string } | null>(null);
     const pathname = usePathname();
     const isActive = (href: string) => pathname?.startsWith(href);
+
+    useEffect(() => {
+        fetch('/api/users/me', { credentials: 'include' })
+            .then(res => res.ok ? res.json() : null)
+            .then((data: Record<string, unknown> | null) => {
+                if (data?.user) setUser(data.user as { email: string; name?: string });
+            })
+            .catch(() => {});
+    }, [pathname]);
+
+    const handleLogout = async () => {
+        await fetch('/api/users/logout', { method: 'POST', credentials: 'include' });
+        setUser(null);
+        window.location.href = '/';
+    };
 
     return (
         <header className="sticky top-0 z-[100] bg-white border-b border-[#e5e5e5]">
             <div className="max-w-[1200px] mx-auto px-4 h-14 flex items-center justify-between">
-                {/* 로고 */}
                 <div className="flex items-center gap-8">
                     <Link href="/" className="text-xl font-bold tracking-tight text-[#D4756E]">
                         AI놀자
                     </Link>
-
-                    {/* 데스크탑 메뉴 */}
                     <nav className="hidden md:flex items-center gap-6 text-[15px]">
                         {navItems.map(item => (
                             <Link
@@ -39,22 +52,37 @@ export function Header() {
                     </nav>
                 </div>
 
-                {/* 우측 */}
-                <div className="flex items-center gap-4">
-                    <Link href="/programs" className="hidden md:block text-[14px] text-[#666] hover:text-[#333] transition-colors">
-                        로그인
-                    </Link>
-                    <span className="hidden md:block text-[#e5e5e5]">|</span>
-                    <Link href="/programs" className="hidden md:block text-[14px] text-[#666] hover:text-[#333] transition-colors">
-                        회원가입
-                    </Link>
+                <div className="flex items-center gap-3">
+                    {user ? (
+                        <>
+                            <span className="hidden md:flex items-center gap-1.5 text-[14px] text-[#333]">
+                                <User className="w-4 h-4" />
+                                {user.name || user.email.split('@')[0]}
+                            </span>
+                            <button
+                                onClick={handleLogout}
+                                className="hidden md:block text-[14px] text-[#999] hover:text-[#333] transition-colors"
+                            >
+                                로그아웃
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            <Link href="/login" className="hidden md:block text-[14px] text-[#666] hover:text-[#333] transition-colors">
+                                로그인
+                            </Link>
+                            <span className="hidden md:block text-[#e5e5e5]">|</span>
+                            <Link href="/signup" className="hidden md:block text-[14px] text-[#666] hover:text-[#333] transition-colors">
+                                회원가입
+                            </Link>
+                        </>
+                    )}
                     <button className="md:hidden p-2 text-[#333]" onClick={() => setIsOpen(!isOpen)}>
                         {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
                     </button>
                 </div>
             </div>
 
-            {/* 모바일 메뉴 */}
             {isOpen && (
                 <div className="md:hidden border-t border-[#e5e5e5] bg-white px-4 py-3 flex flex-col gap-3">
                     {navItems.map(item => (
@@ -67,9 +95,21 @@ export function Header() {
                             {item.label}
                         </Link>
                     ))}
-                    <div className="flex gap-4 pt-2 border-t border-[#e5e5e5] text-[14px] text-[#666]">
-                        <Link href="/programs" onClick={() => setIsOpen(false)}>로그인</Link>
-                        <Link href="/programs" onClick={() => setIsOpen(false)}>회원가입</Link>
+                    <div className="pt-2 border-t border-[#e5e5e5] text-[14px]">
+                        {user ? (
+                            <div className="flex items-center justify-between">
+                                <span className="text-[#333] flex items-center gap-1.5">
+                                    <User className="w-4 h-4" />
+                                    {user.name || user.email.split('@')[0]}
+                                </span>
+                                <button onClick={handleLogout} className="text-[#999]">로그아웃</button>
+                            </div>
+                        ) : (
+                            <div className="flex gap-4 text-[#666]">
+                                <Link href="/login" onClick={() => setIsOpen(false)}>로그인</Link>
+                                <Link href="/signup" onClick={() => setIsOpen(false)}>회원가입</Link>
+                            </div>
+                        )}
                     </div>
                 </div>
             )}
