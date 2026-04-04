@@ -7,6 +7,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: '/programs/vibe-coding', lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
     { url: '/labs', lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
     { url: '/community', lastModified: new Date(), changeFrequency: 'daily', priority: 0.7 },
+    { url: '/contact', lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
     { url: '/store', lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
     { url: '/labs/daily-quiz.html', lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
     { url: '/labs/prompt-challenge.html', lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },

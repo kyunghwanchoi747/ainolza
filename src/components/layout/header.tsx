@@ -9,6 +9,7 @@ const navItems = [
     { href: '/store', label: '강의/전자책' },
     { href: '/labs', label: 'AI실험실' },
     { href: '/community', label: '후기' },
+    { href: '/contact', label: '문의' },
 ];
 
 export function Header() {

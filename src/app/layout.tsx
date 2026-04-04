@@ -1,4 +1,5 @@
 import './globals.css'
+import { CookieConsent } from '@/components/cookie-consent'
 
 export const metadata = {
   title: {
@@ -26,6 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="ko" suppressHydrationWarning>
       <body>
         {children}
+        <CookieConsent />
       </body>
     </html>
   )
