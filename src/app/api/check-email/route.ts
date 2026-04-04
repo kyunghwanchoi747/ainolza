@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayloadClient } from '@/lib/payload'
+import { rateLimit, getClientIP } from '@/lib/rate-limit'
 
 export async function POST(request: NextRequest) {
+  const ip = getClientIP(request);
+  const { allowed } = rateLimit(`check-email:${ip}`, 30, 60000); // 분당 30회
+  if (!allowed) {
+    return NextResponse.json({ exists: false }, { status: 429 });
+  }
+
   try {
     const { email } = await request.json() as { email: string }
 

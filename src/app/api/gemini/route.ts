@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { rateLimit, getClientIP } from '@/lib/rate-limit';
 
 export async function POST(request: NextRequest) {
+  const ip = getClientIP(request);
+  const { allowed } = rateLimit(`gemini:${ip}`, 20, 60000); // 분당 20회
+  if (!allowed) {
+    return NextResponse.json({ error: '요청이 너무 많습니다. 잠시 후 다시 시도해주세요.' }, { status: 429 });
+  }
+
   try {
     const body = await request.json() as { systemPrompt: string; userQuery: string; jsonMode: boolean };
     const { systemPrompt, userQuery, jsonMode } = body;
