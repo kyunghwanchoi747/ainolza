@@ -15,6 +15,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ClipboardList,
+  ShoppingCart,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -41,6 +42,7 @@ const mainNavItems: NavItem[] = [
   { href: '/manager/products', label: '상품', icon: ShoppingBag, shortcut: 'G S' },
   { href: '/manager/posts', label: '게시판', icon: MessageSquare, shortcut: 'G B' },
   { href: '/manager/programs', label: '프로그램', icon: Download, shortcut: 'G R' },
+  { href: '/manager/orders', label: '주문관리', icon: ShoppingCart, shortcut: 'G O' },
   { href: '/manager/enrollments', label: '수강신청', icon: ClipboardList, shortcut: 'G N' },
   { href: '/manager/analytics', label: '통계', icon: BarChart3, shortcut: 'G A', disabled: true },
 ]
