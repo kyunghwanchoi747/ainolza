@@ -36,7 +36,7 @@ export default function OrderDetailPage() {
         // Payload REST API로 주문 조회
         const res = await fetch(`/api/orders/${params.id}`, { credentials: 'include' })
         if (res.ok) {
-          const data = await res.json()
+          const data = await res.json() as any
           setOrder(data)
           setMemo(data.adminMemo || '')
           setStatus(data.status || 'pending')

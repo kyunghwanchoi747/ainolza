@@ -26,10 +26,8 @@ export default async function ManagerDashboard() {
   let programCount = 0
   let recentPages: any[] = []
 
-  let orderStats: { date: string; orders: number; revenue: number; visitors: string; signups: number }[] = []
+  const orderStats: { date: string; orders: number; revenue: number }[] = []
   let totalRevenue = 0
-  let todayOrders = 0
-  let enrollmentCount = 0
 
   try {
     const payload = await getPayloadClient()
@@ -43,7 +41,7 @@ export default async function ManagerDashboard() {
       payload.find({ collection: 'enrollments', limit: 0 }),
     ])
 
-    enrollmentCount = enrollResult.totalDocs
+    // enrollmentCount available via enrollResult.totalDocs
     const allOrders = ordersResult.docs as any[]
 
     // 최근 7일 기간별 통계
@@ -55,11 +53,11 @@ export default async function ManagerDashboard() {
       const dayOrders = allOrders.filter((o: any) => o.createdAt?.startsWith(dateStr))
       const dayPaid = dayOrders.filter((o: any) => ['paid', 'active', 'completed'].includes(o.status))
       const dayRevenue = dayPaid.reduce((sum: number, o: any) => sum + (o.amount || 0), 0)
-      orderStats.push({ date: dateStr, orders: dayPaid.length, revenue: dayRevenue, visitors: '-', signups: 0 })
+      orderStats.push({ date: dateStr, orders: dayPaid.length, revenue: dayRevenue })
     }
 
     totalRevenue = allOrders.filter((o: any) => ['paid', 'active', 'completed'].includes(o.status)).reduce((sum: number, o: any) => sum + (o.amount || 0), 0)
-    todayOrders = orderStats[0]?.orders || 0
+    // todayOrders available via orderStats[0]
 
     pageCount = pagesResult.totalDocs
     publishedPageCount = (await payload.find({
