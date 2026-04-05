@@ -7,8 +7,20 @@ export const metadata: Metadata = {
 }
 
 export default function PersonalIntelligencePage() {
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Book',
+    name: '퍼스널 인텔리전스',
+    author: { '@type': 'Person', name: '최경환' },
+    publisher: { '@type': 'Organization', name: 'AI놀자' },
+    description: 'Google Workspace와 Gemini를 활용한 실용주의 AI 가이드.',
+    bookFormat: 'EBook',
+    inLanguage: 'ko',
+  }
+
   return (
     <div className="min-h-screen bg-white">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       {/* 상단 */}
       <section className="pt-16 pb-8 px-6">
         <div className="max-w-[900px] mx-auto">

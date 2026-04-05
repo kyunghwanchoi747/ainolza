@@ -7,8 +7,20 @@ export const metadata: Metadata = {
 }
 
 export default function UncomfortableAIPage() {
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Book',
+    name: '불편한 AI',
+    author: { '@type': 'Person', name: '최경환' },
+    publisher: { '@type': 'Organization', name: 'AI놀자' },
+    description: '멈출 수 없는 변화 속 평범한 사람을 위한 AI 리터러시. Now or Never.',
+    bookFormat: 'EBook',
+    inLanguage: 'ko',
+  }
+
   return (
     <div className="min-h-screen bg-white">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <section className="pt-16 pb-8 px-6">
         <div className="max-w-[900px] mx-auto">
           <Link href="/store" className="text-sm text-[#999] hover:text-[#333] transition-colors mb-6 inline-block">

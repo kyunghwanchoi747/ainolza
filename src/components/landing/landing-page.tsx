@@ -16,8 +16,17 @@ const faqItems = [
 export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'AI놀자',
+    description: '놀면서 배우는 AI 교육 플랫폼',
+    url: 'https://ainolza.kr',
+  }
+
   return (
     <div className="min-h-screen bg-white text-[#333] font-sans">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
       {/* 히어로 */}
       <section className="bg-[#2C3E50] text-white py-20 md:py-32 px-6">

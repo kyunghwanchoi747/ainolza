@@ -8,8 +8,20 @@ export const metadata: Metadata = {
 }
 
 export default function VibeCodingPage() {
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Course',
+    name: 'AI 바이브 코딩 클래스',
+    description: '나만의 독립된 웹사이트를 AI로 직접 만드는 실전 과정',
+    provider: { '@type': 'Organization', name: 'AI놀자' },
+    educationalLevel: '초급',
+    inLanguage: 'ko',
+    offers: { '@type': 'Offer', price: '390000', priceCurrency: 'KRW', availability: 'https://schema.org/InStock' },
+  }
+
   return (
     <div className="bg-background text-foreground min-h-screen">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
       {/* 히어로 */}
       <section className="pt-24 pb-16 px-6 border-b border-foreground/10">
