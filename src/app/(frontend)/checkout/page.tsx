@@ -124,10 +124,14 @@ function CheckoutContent() {
             </div>
           </div>
 
-          {/* 결제수단 (PortOne 연동 후 선택 가능) */}
+          {/* 결제수단 */}
           <div className="p-5 rounded-xl border border-[#e5e5e5] mb-6">
             <h3 className="font-bold text-[#333] mb-4">결제수단</h3>
-            <p className="text-sm text-[#999]">결제 시스템 연동 후 카드/계좌이체/카카오페이 등을 선택할 수 있습니다.</p>
+            <div className="grid grid-cols-3 gap-2">
+              <div className="p-3 rounded-lg border-2 border-[#D4756E] bg-[#D4756E]/5 text-center text-sm font-medium text-[#D4756E]">카드</div>
+              <div className="p-3 rounded-lg border border-[#e5e5e5] text-center text-sm text-[#999]">계좌이체</div>
+              <div className="p-3 rounded-lg border border-[#e5e5e5] text-center text-sm text-[#999]">카카오페이</div>
+            </div>
           </div>
 
           {/* 동의 체크박스 */}
@@ -155,9 +159,6 @@ function CheckoutContent() {
             {loading ? '처리 중...' : `${amount.toLocaleString()}원 결제하기`}
           </button>
 
-          <p className="text-center text-xs text-[#999] mt-4">
-            결제 시스템은 곧 오픈 예정입니다. 현재는 주문 접수만 가능합니다.
-          </p>
         </div>
       </section>
     </div>

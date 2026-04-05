@@ -74,7 +74,7 @@ export default function EnrollPage() {
           <div className="text-6xl mb-6">&#10003;</div>
           <h1 className="text-3xl font-bold mb-4">신청이 접수되었습니다</h1>
           <p className="text-foreground/50 mb-2">입력하신 연락처로 상세 안내를 보내드립니다.</p>
-          <p className="text-foreground/40 text-sm mb-8">결제 시스템은 곧 오픈 예정입니다.</p>
+          <p className="text-foreground/40 text-sm mb-8">문의사항은 카카오톡 오픈채팅으로 연락해주세요.</p>
           <Link href="/programs/vibe-coding" className="text-sm text-foreground/50 hover:text-foreground transition-colors underline">
             프로그램 상세로 돌아가기
           </Link>
@@ -173,7 +173,7 @@ export default function EnrollPage() {
                 {loading ? '접수 중...' : '신청 접수하기'}
               </button>
               <p className="text-center text-foreground/30 text-xs">
-                결제 시스템은 곧 오픈 예정입니다. 신청 접수 후 개별 안내드립니다.
+                신청 접수 후 개별 안내드립니다.
               </p>
             </div>
           </form>
