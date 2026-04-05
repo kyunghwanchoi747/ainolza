@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { getPayloadClient } from '@/lib/payload'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -69,8 +70,8 @@ export default async function OrdersManagerPage() {
                 {orders.map((o: any) => {
                   const st = statusLabels[o.status] || statusLabels.pending
                   return (
-                    <tr key={o.id} className="border-b hover:bg-muted/30 transition-colors">
-                      <td className="p-3 font-mono text-xs">{o.orderNumber}</td>
+                    <tr key={o.id} className="border-b hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => window.location.href = `/manager/orders/${o.id}`}>
+                      <td className="p-3 font-mono text-xs text-blue-500 underline">{o.orderNumber}</td>
                       <td className="p-3">{o.buyerName}<br/><span className="text-xs text-muted-foreground">{o.buyerEmail}</span></td>
                       <td className="p-3">{o.productName}</td>
                       <td className="p-3 font-bold">{o.amount?.toLocaleString()}원</td>

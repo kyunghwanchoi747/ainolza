@@ -26,15 +26,40 @@ export default async function ManagerDashboard() {
   let programCount = 0
   let recentPages: any[] = []
 
+  let orderStats: { date: string; orders: number; revenue: number; visitors: string; signups: number }[] = []
+  let totalRevenue = 0
+  let todayOrders = 0
+  let enrollmentCount = 0
+
   try {
     const payload = await getPayloadClient()
 
-    const [pagesResult, productsResult, postsResult, programsResult] = await Promise.all([
+    const [pagesResult, productsResult, postsResult, programsResult, ordersResult, enrollResult] = await Promise.all([
       payload.find({ collection: 'design-pages', sort: '-updatedAt', limit: 5 }),
       payload.find({ collection: 'products', limit: 0 }),
       payload.find({ collection: 'posts', limit: 0 }),
       payload.find({ collection: 'programs', limit: 0 }),
+      payload.find({ collection: 'orders', sort: '-createdAt', limit: 200 }),
+      payload.find({ collection: 'enrollments', limit: 0 }),
     ])
+
+    enrollmentCount = enrollResult.totalDocs
+    const allOrders = ordersResult.docs as any[]
+
+    // 최근 7일 기간별 통계
+    const today = new Date()
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(today)
+      d.setDate(d.getDate() - i)
+      const dateStr = d.toISOString().split('T')[0]
+      const dayOrders = allOrders.filter((o: any) => o.createdAt?.startsWith(dateStr))
+      const dayPaid = dayOrders.filter((o: any) => ['paid', 'active', 'completed'].includes(o.status))
+      const dayRevenue = dayPaid.reduce((sum: number, o: any) => sum + (o.amount || 0), 0)
+      orderStats.push({ date: dateStr, orders: dayPaid.length, revenue: dayRevenue, visitors: '-', signups: 0 })
+    }
+
+    totalRevenue = allOrders.filter((o: any) => ['paid', 'active', 'completed'].includes(o.status)).reduce((sum: number, o: any) => sum + (o.amount || 0), 0)
+    todayOrders = orderStats[0]?.orders || 0
 
     pageCount = pagesResult.totalDocs
     publishedPageCount = (await payload.find({
@@ -211,6 +236,46 @@ export default async function ManagerDashboard() {
           </CardContent>
         </Card>
       </div>
+
+      {/* 기간별 매출 분석 */}
+      <Card>
+        <CardHeader>
+          <CardTitle>기간별 분석</CardTitle>
+          <CardDescription>최근 7일간 주문 및 매출 현황</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b bg-muted/50">
+                  <th className="text-left p-3 font-medium">날짜</th>
+                  <th className="text-right p-3 font-medium">주문수</th>
+                  <th className="text-right p-3 font-medium">매출액</th>
+                </tr>
+              </thead>
+              <tbody>
+                {orderStats.map((s, i) => (
+                  <tr key={i} className={`border-b ${i === 0 ? 'bg-primary/5 font-medium' : ''}`}>
+                    <td className="p-3">{s.date}</td>
+                    <td className="p-3 text-right">{s.orders}</td>
+                    <td className="p-3 text-right font-medium">{s.revenue.toLocaleString()}원</td>
+                  </tr>
+                ))}
+                <tr className="border-t-2 font-bold">
+                  <td className="p-3">최근 7일 합계</td>
+                  <td className="p-3 text-right">{orderStats.reduce((s, o) => s + o.orders, 0)}건</td>
+                  <td className="p-3 text-right text-green-600">{orderStats.reduce((s, o) => s + o.revenue, 0).toLocaleString()}원</td>
+                </tr>
+                <tr className="font-bold">
+                  <td className="p-3">전체 누적</td>
+                  <td className="p-3 text-right"></td>
+                  <td className="p-3 text-right text-green-600">{totalRevenue.toLocaleString()}원</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }
