@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
         orderNumber,
         productName,
         productSlug: productSlug || '',
-        productType: productType || 'class',
+        productType: (productType || 'class') as 'class' | 'ebook' | 'book' | 'bundle',
         amount,
         originalAmount: originalAmount || amount,
         buyerName,

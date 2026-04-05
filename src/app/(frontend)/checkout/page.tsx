@@ -52,7 +52,7 @@ function CheckoutContent() {
         }),
       })
 
-      const orderData = await orderRes.json()
+      const orderData = await orderRes.json() as any
       if (!orderData.ok) {
         alert(orderData.error || '주문 생성에 실패했습니다.')
         setLoading(false)

@@ -77,6 +77,7 @@ export interface Config {
     programs: Program;
     'site-settings': SiteSetting;
     enrollments: Enrollment;
+    orders: Order;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -94,6 +95,7 @@ export interface Config {
     programs: ProgramsSelect<false> | ProgramsSelect<true>;
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
     enrollments: EnrollmentsSelect<false> | EnrollmentsSelect<true>;
+    orders: OrdersSelect<false> | OrdersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -136,6 +138,8 @@ export interface UserAuthOperations {
  */
 export interface User {
   id: number;
+  name?: string | null;
+  phone?: string | null;
   role: 'admin' | 'user';
   updatedAt: string;
   createdAt: string;
@@ -327,6 +331,40 @@ export interface Enrollment {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orders".
+ */
+export interface Order {
+  id: number;
+  orderNumber: string;
+  buyerName: string;
+  buyerEmail: string;
+  buyerPhone?: string | null;
+  user?: (number | null) | User;
+  productName: string;
+  productSlug?: string | null;
+  productType?: ('class' | 'ebook' | 'book' | 'bundle') | null;
+  amount: number;
+  originalAmount?: number | null;
+  payMethod?: ('card' | 'vbank' | 'trans' | 'phone' | 'kakaopay' | 'naverpay' | 'tosspay') | null;
+  status: 'pending' | 'paid' | 'active' | 'completed' | 'refund_requested' | 'refunded' | 'failed' | 'cancelled';
+  impUid?: string | null;
+  merchantUid?: string | null;
+  pgProvider?: string | null;
+  receiptUrl?: string | null;
+  vbankName?: string | null;
+  vbankNum?: string | null;
+  vbankDate?: string | null;
+  refundReason?: string | null;
+  refundedAt?: string | null;
+  refundAmount?: number | null;
+  cashReceiptType?: ('none' | 'income' | 'expense') | null;
+  cashReceiptNumber?: string | null;
+  adminMemo?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -388,6 +426,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'enrollments';
         value: number | Enrollment;
+      } | null)
+    | ({
+        relationTo: 'orders';
+        value: number | Order;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -436,6 +478,8 @@ export interface PayloadMigration {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  name?: T;
+  phone?: T;
   role?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -591,6 +635,39 @@ export interface EnrollmentsSelect<T extends boolean = true> {
   program?: T;
   message?: T;
   status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orders_select".
+ */
+export interface OrdersSelect<T extends boolean = true> {
+  orderNumber?: T;
+  buyerName?: T;
+  buyerEmail?: T;
+  buyerPhone?: T;
+  user?: T;
+  productName?: T;
+  productSlug?: T;
+  productType?: T;
+  amount?: T;
+  originalAmount?: T;
+  payMethod?: T;
+  status?: T;
+  impUid?: T;
+  merchantUid?: T;
+  pgProvider?: T;
+  receiptUrl?: T;
+  vbankName?: T;
+  vbankNum?: T;
+  vbankDate?: T;
+  refundReason?: T;
+  refundedAt?: T;
+  refundAmount?: T;
+  cashReceiptType?: T;
+  cashReceiptNumber?: T;
+  adminMemo?: T;
   updatedAt?: T;
   createdAt?: T;
 }

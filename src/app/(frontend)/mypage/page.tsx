@@ -28,7 +28,7 @@ export default function MyPage() {
       fetch('/api/users/me', { credentials: 'include' }).then(r => r.ok ? r.json() : null),
       fetch('/api/payments', { credentials: 'include' }).then(r => r.ok ? r.json() : null),
     ])
-      .then(([userData, orderData]) => {
+      .then(([userData, orderData]: any[]) => {
         if (userData?.user) {
           setUser(userData.user)
           setOrders(orderData?.orders || [])
