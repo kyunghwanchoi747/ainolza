@@ -52,10 +52,9 @@ export const workerMailerAdapter: EmailAdapter = () => {
       const html = typeof message.html === 'string' ? message.html : undefined
       const text = typeof message.text === 'string' ? message.text : undefined
 
-      // 동적 import — Next.js 빌드 단계에서 cloudflare:sockets 평가를 회피
-      // (worker-mailer는 런타임에만 로드됨)
-      const wmPkg = ['worker', 'mailer'].join('-')
-      const { WorkerMailer } = await import(/* webpackIgnore: true */ wmPkg)
+      // 동적 import (런타임 전용) — Next.js 빌드 단계 평가 회피
+      // worker-mailer는 next.config의 serverExternalPackages에 등록됨
+      const { WorkerMailer } = await import('worker-mailer')
       await WorkerMailer.send(
         {
           host,

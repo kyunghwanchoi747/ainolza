@@ -4,7 +4,7 @@ import { withPayload } from '@payloadcms/next/withPayload'
 const nextConfig = {
   // Packages with Cloudflare Workers (workerd) specific code
   // Read more: https://opennext.js.org/cloudflare/howtos/workerd
-  serverExternalPackages: ['jose', 'pg-cloudflare'],
+  serverExternalPackages: ['jose', 'pg-cloudflare', 'worker-mailer'],
 
   // Your Next.js config here
   webpack: (webpackConfig: any) => {
