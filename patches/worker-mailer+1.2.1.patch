@@ -1,0 +1,22 @@
+diff --git a/node_modules/worker-mailer/package.json b/node_modules/worker-mailer/package.json
+index e203744..532ae2b 100644
+--- a/node_modules/worker-mailer/package.json
++++ b/node_modules/worker-mailer/package.json
+@@ -1,9 +1,16 @@
+ {
+   "name": "worker-mailer",
+   "version": "1.2.1",
+-  "main": "./dist/index.js",
++  "main": "./dist/index.mjs",
+   "module": "./dist/index.mjs",
+   "types": "./dist/index.d.ts",
++  "exports": {
++    ".": {
++      "types": "./dist/index.d.ts",
++      "import": "./dist/index.mjs",
++      "default": "./dist/index.mjs"
++    }
++  },
+   "keywords": [
+     "cloudflare",
+     "workers",
