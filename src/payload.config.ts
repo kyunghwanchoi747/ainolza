@@ -30,7 +30,10 @@ const isCLI = process.argv.some((value) => {
   return rp ? rp.endsWith(path.join('payload', 'bin.js')) : false
 })
 const isProduction = process.env.NODE_ENV === 'production'
-const isBuildPhase = process.env.BUILD_PHASE === 'true'
+// BUILD_PHASE는 CI 빌드에서만 의미가 있음
+// 워커 런타임에서는 globalThis.caches가 존재하므로 이걸로 빌드 환경을 구분
+const isWorkerRuntime = typeof globalThis !== 'undefined' && typeof (globalThis as any).caches !== 'undefined' && typeof (globalThis as any).caches.default !== 'undefined'
+const isBuildPhase = process.env.BUILD_PHASE === 'true' && !isWorkerRuntime
 
 let dbAdapter: any
 
@@ -38,7 +41,7 @@ if (isBuildPhase) {
   // CI build phase: use D1 adapter with mock binding.
   // All pages are force-dynamic so no actual DB queries run during build.
   dbAdapter = sqliteD1Adapter({ binding: {} as any })
-} else if (isProduction) {
+} else if (isProduction || isWorkerRuntime) {
   // Cloudflare Workers runtime: use real D1 binding
   const cloudflare = await getCloudflareContext({ async: true })
   dbAdapter = sqliteD1Adapter({ binding: cloudflare.env.D1 })
