@@ -5,6 +5,7 @@ export const Orders: CollectionConfig = {
   admin: {
     useAsTitle: 'orderNumber',
     defaultColumns: ['orderNumber', 'buyerName', 'productName', 'amount', 'status', 'createdAt'],
+    listSearchableFields: ['orderNumber', 'buyerName', 'buyerEmail', 'buyerPhone', 'productName'],
   },
   fields: [
     { name: 'orderNumber', type: 'text', required: true, unique: true, label: '주문번호' },
