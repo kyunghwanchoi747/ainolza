@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url'
 import { CloudflareContext, getCloudflareContext } from '@opennextjs/cloudflare'
 import { GetPlatformProxyOptions } from 'wrangler'
 
+import { workerMailerAdapter } from './lib/email-adapter'
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
 import { DesignPages } from './collections/DesignPages'
@@ -80,6 +81,7 @@ export default buildConfig({
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || 'dev-secret-change-in-production',
   db: dbAdapter,
+  email: workerMailerAdapter,
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
