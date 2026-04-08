@@ -38,42 +38,59 @@ export const workerMailerAdapter: EmailAdapter = () => {
     defaultFromAddress: fromEmail,
     defaultFromName: fromName,
     sendEmail: async (message: SendEmailOptions) => {
-      if (!username || !password) {
-        throw new Error('SMTP 자격증명이 설정되지 않았습니다 (SMTP_USER / SMTP_PASS)')
+      console.log('[EMAIL] sendEmail 호출됨', {
+        to: message.to,
+        subject: message.subject,
+        hasUsername: !!username,
+        hasPassword: !!password,
+        host,
+        port,
+      })
+
+      try {
+        if (!username || !password) {
+          throw new Error('SMTP 자격증명이 설정되지 않았습니다 (SMTP_USER / SMTP_PASS)')
+        }
+
+        const from = toUser(message.from as AddressLike) || { name: fromName, email: fromEmail }
+        const to = toUsers(message.to)
+        if (!to || to.length === 0) {
+          throw new Error('수신자가 지정되지 않았습니다')
+        }
+
+        const subject = (message.subject || '').toString()
+        const html = typeof message.html === 'string' ? message.html : undefined
+        const text = typeof message.text === 'string' ? message.text : undefined
+
+        console.log('[EMAIL] worker-mailer import 시작')
+        const { WorkerMailer } = await import('worker-mailer')
+        console.log('[EMAIL] worker-mailer import 완료, 발송 시도')
+
+        await WorkerMailer.send(
+          {
+            host,
+            port,
+            credentials: { username, password },
+            authType: 'login',
+            secure: false,
+            startTls: true,
+            socketTimeoutMs: 15000,
+            responseTimeoutMs: 15000,
+          },
+          {
+            from,
+            to: to.length === 1 ? to[0] : to,
+            subject,
+            html,
+            text,
+          },
+        )
+        console.log('[EMAIL] 발송 성공:', to)
+      } catch (err) {
+        const e = err as Error
+        console.error('[EMAIL] 발송 실패:', e?.message, e?.stack)
+        throw err
       }
-
-      const from = toUser(message.from as AddressLike) || { name: fromName, email: fromEmail }
-      const to = toUsers(message.to)
-      if (!to || to.length === 0) {
-        throw new Error('수신자가 지정되지 않았습니다')
-      }
-
-      const subject = (message.subject || '').toString()
-      const html = typeof message.html === 'string' ? message.html : undefined
-      const text = typeof message.text === 'string' ? message.text : undefined
-
-      // 동적 import (런타임 전용) — Next.js 빌드 단계 평가 회피
-      // worker-mailer는 next.config의 serverExternalPackages에 등록됨
-      const { WorkerMailer } = await import('worker-mailer')
-      await WorkerMailer.send(
-        {
-          host,
-          port,
-          credentials: { username, password },
-          authType: 'login',
-          secure: false,
-          startTls: true,
-          socketTimeoutMs: 15000,
-          responseTimeoutMs: 15000,
-        },
-        {
-          from,
-          to: to.length === 1 ? to[0] : to,
-          subject,
-          html,
-          text,
-        },
-      )
     },
   }
 }
