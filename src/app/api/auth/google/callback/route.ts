@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { jwtSign, getFieldsToSign } from 'payload'
-import { generatePayloadCookie, addSessionToUser } from 'payload/shared'
+import { generatePayloadCookie } from 'payload/shared'
 import { getPayloadClient } from '@/lib/payload'
 
 // Google OAuth 콜백
@@ -113,24 +113,46 @@ export async function GET(request: NextRequest) {
 
     // 4. JWT 직접 발급 (Payload 내부 헬퍼 사용, 비번 검증 우회)
     const collectionConfig = payload.collections['users'].config as any
+    const useSessions = collectionConfig.auth?.useSessions !== false
+
+    let sid: string | undefined
+    if (useSessions) {
+      // 새 세션을 user.sessions에 추가 (payload.update 사용 — req 우회)
+      sid = crypto.randomUUID()
+      const now = new Date()
+      const expiresAt = new Date(
+        now.getTime() + (collectionConfig.auth.tokenExpiration ?? 7200) * 1000,
+      )
+      const newSession = { id: sid, createdAt: now, expiresAt }
+      const existingSessions = Array.isArray(user.sessions) ? user.sessions : []
+      // 만료된 세션 제거 후 새 세션 추가
+      const validSessions = existingSessions.filter((s: any) => {
+        const exp = s.expiresAt instanceof Date ? s.expiresAt : new Date(s.expiresAt)
+        return exp > now
+      })
+      validSessions.push(newSession)
+      user = await payload.update({
+        collection: 'users',
+        id: user.id,
+        data: { sessions: validSessions },
+      })
+    }
+
     const fieldsToSignArgs: Record<string, unknown> = {
       collectionConfig,
       email: googleUser.email,
       user,
     }
-
-    // 세션이 활성화되어 있으면 세션도 추가
-    if (collectionConfig.auth?.useSessions) {
-      const session = await addSessionToUser({
-        collectionConfig,
-        payload,
-        req: { payload, headers: request.headers } as any,
-        user,
-      } as any)
-      if (session?.sid) fieldsToSignArgs.sid = session.sid
-    }
+    if (sid) fieldsToSignArgs.sid = sid
 
     const fieldsToSign = getFieldsToSign(fieldsToSignArgs as any)
+    console.log('[GOOGLE_CALLBACK] JWT 발급', {
+      userId: user.id,
+      email: googleUser.email,
+      sid,
+      useSessions,
+    })
+
     const { token } = await jwtSign({
       fieldsToSign,
       secret: payload.secret,
@@ -142,6 +164,7 @@ export async function GET(request: NextRequest) {
       cookiePrefix: payload.config.cookiePrefix || 'payload',
       token,
     })
+    console.log('[GOOGLE_CALLBACK] cookie set:', cookie.substring(0, 80))
 
     const response = NextResponse.redirect(`${url.origin}/`)
     response.headers.set('set-cookie', cookie)
