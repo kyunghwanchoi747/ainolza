@@ -1,6 +1,8 @@
 import { ThemeProvider } from '../../components/theme-provider'
 import { Header } from '../../components/layout/header'
 import { SiteFooter } from '../../components/layout/site-footer'
+import { MigrationPopup } from '@/components/migration-popup'
+import { CookieConsent } from '@/components/cookie-consent'
 
 export default function LandingLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -13,6 +15,8 @@ export default function LandingLayout({ children }: { children: React.ReactNode 
       <Header />
       {children}
       <SiteFooter />
+      <MigrationPopup />
+      <CookieConsent />
     </ThemeProvider>
   )
 }

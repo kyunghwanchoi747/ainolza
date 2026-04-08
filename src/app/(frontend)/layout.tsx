@@ -1,6 +1,8 @@
 import { ThemeProvider } from '../../components/theme-provider'
 import { Header } from '../../components/layout/header'
 import { SiteFooter } from '../../components/layout/site-footer'
+import { MigrationPopup } from '@/components/migration-popup'
+import { CookieConsent } from '@/components/cookie-consent'
 
 export default function FrontendLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -14,6 +16,8 @@ export default function FrontendLayout({ children }: { children: React.ReactNode
         <Header />
         <main className="flex-1">{children}</main>
         <SiteFooter />
+        <MigrationPopup />
+        <CookieConsent />
       </ThemeProvider>
     </div>
   )

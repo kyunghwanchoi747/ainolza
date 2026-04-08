@@ -1,6 +1,4 @@
 import './globals.css'
-import { CookieConsent } from '@/components/cookie-consent'
-import { MigrationPopup } from '@/components/migration-popup'
 
 export const metadata = {
   title: {
@@ -28,8 +26,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="ko" suppressHydrationWarning>
       <body>
         {children}
-        <MigrationPopup />
-        <CookieConsent />
       </body>
     </html>
   )
