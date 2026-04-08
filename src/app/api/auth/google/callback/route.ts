@@ -164,15 +164,44 @@ export async function GET(request: NextRequest) {
       tokenExpiration: collectionConfig.auth.tokenExpiration,
     })
 
-    const cookie = generatePayloadCookie({
+    // Payload 표준 쿠키 객체 (returnCookieAsObject: true)
+    const cookieObj = generatePayloadCookie({
       collectionAuthConfig: collectionConfig.auth,
       cookiePrefix: payload.config.cookiePrefix || 'payload',
+      returnCookieAsObject: true,
       token,
+    }) as {
+      name: string
+      value: string
+      domain?: string
+      expires?: string
+      httpOnly?: boolean
+      path?: string
+      sameSite?: 'Lax' | 'None' | 'Strict'
+      secure?: boolean
+    }
+
+    console.log('[GOOGLE_CALLBACK] cookie obj:', {
+      name: cookieObj.name,
+      sameSite: cookieObj.sameSite,
+      secure: cookieObj.secure,
+      httpOnly: cookieObj.httpOnly,
+      path: cookieObj.path,
+      domain: cookieObj.domain,
     })
-    console.log('[GOOGLE_CALLBACK] cookie set:', cookie.substring(0, 80))
 
     const response = NextResponse.redirect(`${url.origin}/`)
-    response.headers.set('set-cookie', cookie)
+    // NextResponse.cookies.set으로 설정 (raw header 설정은 Workers에서 무시될 수 있음)
+    response.cookies.set({
+      name: cookieObj.name,
+      value: cookieObj.value,
+      httpOnly: true,
+      path: cookieObj.path || '/',
+      sameSite: (cookieObj.sameSite?.toLowerCase() as 'lax' | 'strict' | 'none') || 'lax',
+      secure: true, // ainolza.kr은 항상 HTTPS
+      ...(cookieObj.domain ? { domain: cookieObj.domain } : {}),
+      ...(cookieObj.expires ? { expires: new Date(cookieObj.expires) } : {}),
+    })
     response.cookies.delete('oauth-state')
     return response
   } catch (err) {
