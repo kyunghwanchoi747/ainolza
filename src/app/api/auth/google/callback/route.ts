@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { jwtSign, getFieldsToSign } from 'payload'
+import { generatePayloadCookie, addSessionToUser } from 'payload/shared'
 import { getPayloadClient } from '@/lib/payload'
 
 // Google OAuth 콜백
@@ -68,7 +70,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(`${url.origin}/login?error=no_email`)
     }
 
-    // 3. Payload Users에서 같은 이메일 찾기
+    // 3. Payload Users에서 같은 이메일 찾기 (없으면 생성)
     const payload = await getPayloadClient()
     const existing = await payload.find({
       collection: 'users',
@@ -76,61 +78,78 @@ export async function GET(request: NextRequest) {
       limit: 1,
     })
 
-    let userId: string | number
-    let userPassword: string
-
+    let user: any
     if (existing.totalDocs > 0) {
-      // 기존 회원 → googleId 업데이트
-      const user = existing.docs[0] as any
-      userId = user.id
-      // 임시 비밀번호 생성 (로그인용)
-      userPassword = generateTempPassword()
-      await payload.update({
-        collection: 'users',
-        id: user.id,
-        data: {
-          googleId: googleUser.id,
-          name: user.name || googleUser.name,
-          password: userPassword,
-        },
-      })
+      // 기존 회원 → googleId만 갱신, password는 절대 건드리지 않음
+      const found = existing.docs[0] as any
+      const updateData: Record<string, unknown> = {}
+      if (!found.googleId) updateData.googleId = googleUser.id
+      if (!found.name && googleUser.name) updateData.name = googleUser.name
+
+      if (Object.keys(updateData).length > 0) {
+        user = await payload.update({
+          collection: 'users',
+          id: found.id,
+          data: updateData,
+        })
+      } else {
+        user = found
+      }
     } else {
-      // 신규 회원 자동 생성
-      userPassword = generateTempPassword()
-      const created = await payload.create({
+      // 신규 회원 자동 생성 (랜덤 비번 부여, mustResetPassword=false)
+      const tempPassword = generateTempPassword()
+      user = await payload.create({
         collection: 'users',
         data: {
           email: googleUser.email,
-          password: userPassword,
+          password: tempPassword,
           name: googleUser.name || '',
           role: 'user',
           googleId: googleUser.id,
           mustResetPassword: false,
         },
       })
-      userId = created.id
     }
 
-    // 4. Payload 로그인 (JWT 발급)
-    const loginRes = await fetch(`${url.origin}/api/users/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: googleUser.email, password: userPassword }),
+    // 4. JWT 직접 발급 (Payload 내부 헬퍼 사용, 비번 검증 우회)
+    const collectionConfig = payload.collections['users'].config as any
+    const fieldsToSignArgs: Record<string, unknown> = {
+      collectionConfig,
+      email: googleUser.email,
+      user,
+    }
+
+    // 세션이 활성화되어 있으면 세션도 추가
+    if (collectionConfig.auth?.useSessions) {
+      const session = await addSessionToUser({
+        collectionConfig,
+        payload,
+        req: { payload, headers: request.headers } as any,
+        user,
+      } as any)
+      if (session?.sid) fieldsToSignArgs.sid = session.sid
+    }
+
+    const fieldsToSign = getFieldsToSign(fieldsToSignArgs as any)
+    const { token } = await jwtSign({
+      fieldsToSign,
+      secret: payload.secret,
+      tokenExpiration: collectionConfig.auth.tokenExpiration,
     })
 
-    if (!loginRes.ok) {
-      return NextResponse.redirect(`${url.origin}/login?error=login_failed`)
-    }
+    const cookie = generatePayloadCookie({
+      collectionAuthConfig: collectionConfig.auth,
+      cookiePrefix: payload.config.cookiePrefix || 'payload',
+      token,
+    })
 
-    // 로그인 성공 → 쿠키 설정
-    const setCookieHeader = loginRes.headers.get('set-cookie')
     const response = NextResponse.redirect(`${url.origin}/`)
-    if (setCookieHeader) {
-      response.headers.set('set-cookie', setCookieHeader)
-    }
+    response.headers.set('set-cookie', cookie)
     response.cookies.delete('oauth-state')
     return response
-  } catch {
+  } catch (err) {
+    const e = err as Error
+    console.error('[GOOGLE_CALLBACK] 실패:', e?.message, e?.stack)
     return NextResponse.redirect(`${url.origin}/login?error=oauth_failed`)
   }
 }
