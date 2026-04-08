@@ -21,7 +21,12 @@ export const metadata = {
   },
 }
 
-// 각 route group에서 자체 <html><body>를 렌더링 (Payload admin 충돌 방지)
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  return children
+  return (
+    <html lang="ko" suppressHydrationWarning>
+      <body>
+        {children}
+      </body>
+    </html>
+  )
 }

@@ -6,9 +6,5 @@ export const metadata = {
 }
 
 export default function EditorLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <html lang="ko" suppressHydrationWarning>
-      <body>{children}</body>
-    </html>
-  )
+  return <>{children}</>
 }

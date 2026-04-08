@@ -27,5 +27,16 @@ export const Users: CollectionConfig = {
       defaultValue: 'user',
       required: true,
     },
+    {
+      name: 'mustResetPassword',
+      type: 'checkbox',
+      label: '첫 로그인 시 비밀번호 재설정 필수',
+      defaultValue: false,
+    },
+    {
+      name: 'importedFrom',
+      type: 'text',
+      label: '이전 출처',
+    },
   ],
 }
