@@ -141,6 +141,11 @@ export interface User {
   name?: string | null;
   phone?: string | null;
   role: 'admin' | 'user';
+  mustResetPassword?: boolean | null;
+  importedFrom?: string | null;
+  googleId?: string | null;
+  kakaoId?: string | null;
+  naverId?: string | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -481,6 +486,11 @@ export interface UsersSelect<T extends boolean = true> {
   name?: T;
   phone?: T;
   role?: T;
+  mustResetPassword?: T;
+  importedFrom?: T;
+  googleId?: T;
+  kakaoId?: T;
+  naverId?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;

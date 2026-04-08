@@ -38,5 +38,23 @@ export const Users: CollectionConfig = {
       type: 'text',
       label: '이전 출처',
     },
+    {
+      name: 'googleId',
+      type: 'text',
+      label: '구글 ID',
+      index: true,
+    },
+    {
+      name: 'kakaoId',
+      type: 'text',
+      label: '카카오 ID',
+      index: true,
+    },
+    {
+      name: 'naverId',
+      type: 'text',
+      label: '네이버 ID',
+      index: true,
+    },
   ],
 }
