@@ -117,7 +117,8 @@ export async function GET(request: NextRequest) {
 
     let sid: string | undefined
     if (useSessions) {
-      // 새 세션을 user.sessions에 추가 (payload.update 사용 — req 우회)
+      // sessions 필드는 access.update가 false로 잠겨있어 payload.update로는 못 바꿈.
+      // payload.db.updateOne으로 ORM/field-access 우회해서 직접 갱신.
       sid = crypto.randomUUID()
       const now = new Date()
       const expiresAt = new Date(
@@ -125,17 +126,21 @@ export async function GET(request: NextRequest) {
       )
       const newSession = { id: sid, createdAt: now, expiresAt }
       const existingSessions = Array.isArray(user.sessions) ? user.sessions : []
-      // 만료된 세션 제거 후 새 세션 추가
       const validSessions = existingSessions.filter((s: any) => {
         const exp = s.expiresAt instanceof Date ? s.expiresAt : new Date(s.expiresAt)
         return exp > now
       })
       validSessions.push(newSession)
-      user = await payload.update({
-        collection: 'users',
+
+      // updatedAt 자동 갱신 방지를 위해 null로 둠 (Payload의 addSessionToUser와 동일 패턴)
+      const updateData = { ...user, sessions: validSessions, updatedAt: null }
+      await (payload as any).db.updateOne({
         id: user.id,
-        data: { sessions: validSessions },
+        collection: 'users',
+        data: updateData,
+        returning: false,
       })
+      console.log('[GOOGLE_CALLBACK] sessions updated via db.updateOne, count:', validSessions.length)
     }
 
     const fieldsToSignArgs: Record<string, unknown> = {
