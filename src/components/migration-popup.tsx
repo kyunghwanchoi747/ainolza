@@ -1,18 +1,24 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 import { X } from 'lucide-react'
 
 export function MigrationPopup() {
   const [show, setShow] = useState(false)
+  const pathname = usePathname()
 
   useEffect(() => {
+    // admin/manager 페이지에서는 팝업 안 보임
+    if (pathname?.startsWith('/admin') || pathname?.startsWith('/manager')) {
+      return
+    }
     const today = new Date().toISOString().split('T')[0]
     const hidden = localStorage.getItem('migration-popup-hidden')
     if (hidden !== today) {
       setShow(true)
     }
-  }, [])
+  }, [pathname])
 
   const handleClose = () => setShow(false)
 

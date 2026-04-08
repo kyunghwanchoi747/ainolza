@@ -1,14 +1,20 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 
 export function CookieConsent() {
   const [show, setShow] = useState(false)
+  const pathname = usePathname()
 
   useEffect(() => {
+    // admin/manager 페이지에서는 표시 안 함
+    if (pathname?.startsWith('/admin') || pathname?.startsWith('/manager')) {
+      return
+    }
     const consent = localStorage.getItem('cookie-consent')
     if (!consent) setShow(true)
-  }, [])
+  }, [pathname])
 
   const accept = () => {
     localStorage.setItem('cookie-consent', 'accepted')
