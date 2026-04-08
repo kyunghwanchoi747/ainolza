@@ -9,10 +9,14 @@ export const metadata = {
 
 export default function ManagerLayout({ children }: { children: React.ReactNode }) {
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-      <ManagerShell>
-        {children}
-      </ManagerShell>
-    </ThemeProvider>
+    <html lang="ko" suppressHydrationWarning>
+      <body>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          <ManagerShell>
+            {children}
+          </ManagerShell>
+        </ThemeProvider>
+      </body>
+    </html>
   )
 }

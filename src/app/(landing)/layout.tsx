@@ -6,17 +6,21 @@ import { CookieConsent } from '@/components/cookie-consent'
 
 export default function LandingLayout({ children }: { children: React.ReactNode }) {
   return (
-    <ThemeProvider
-      attribute="class"
-      defaultTheme="light"
-      enableSystem
-      disableTransitionOnChange
-    >
-      <Header />
-      {children}
-      <SiteFooter />
-      <MigrationPopup />
-      <CookieConsent />
-    </ThemeProvider>
+    <html lang="ko" suppressHydrationWarning>
+      <body>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <Header />
+          {children}
+          <SiteFooter />
+          <MigrationPopup />
+          <CookieConsent />
+        </ThemeProvider>
+      </body>
+    </html>
   )
 }
