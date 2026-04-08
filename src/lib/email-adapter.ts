@@ -38,15 +38,6 @@ export const workerMailerAdapter: EmailAdapter = () => {
     defaultFromAddress: fromEmail,
     defaultFromName: fromName,
     sendEmail: async (message: SendEmailOptions) => {
-      console.log('[EMAIL] sendEmail 호출됨', {
-        to: message.to,
-        subject: message.subject,
-        hasUsername: !!username,
-        hasPassword: !!password,
-        host,
-        port,
-      })
-
       try {
         if (!username || !password) {
           throw new Error('SMTP 자격증명이 설정되지 않았습니다 (SMTP_USER / SMTP_PASS)')
@@ -62,9 +53,9 @@ export const workerMailerAdapter: EmailAdapter = () => {
         const html = typeof message.html === 'string' ? message.html : undefined
         const text = typeof message.text === 'string' ? message.text : undefined
 
-        console.log('[EMAIL] worker-mailer import 시작')
+        // 동적 import — Next.js 빌드 단계 평가 회피
+        // worker-mailer는 next.config의 serverExternalPackages에 등록됨
         const { WorkerMailer } = await import('worker-mailer')
-        console.log('[EMAIL] worker-mailer import 완료, 발송 시도')
 
         await WorkerMailer.send(
           {
@@ -85,10 +76,9 @@ export const workerMailerAdapter: EmailAdapter = () => {
             text,
           },
         )
-        console.log('[EMAIL] 발송 성공:', to)
       } catch (err) {
         const e = err as Error
-        console.error('[EMAIL] 발송 실패:', e?.message, e?.stack)
+        console.error('[EMAIL] 발송 실패:', e?.message)
         throw err
       }
     },

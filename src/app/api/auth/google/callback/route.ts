@@ -132,7 +132,7 @@ export async function GET(request: NextRequest) {
       })
       validSessions.push(newSession)
 
-      // updatedAt 자동 갱신 방지를 위해 null로 둠 (Payload의 addSessionToUser와 동일 패턴)
+      // updatedAt 자동 갱신 방지를 위해 null (Payload의 addSessionToUser와 동일 패턴)
       const updateData = { ...user, sessions: validSessions, updatedAt: null }
       await (payload as any).db.updateOne({
         id: user.id,
@@ -140,7 +140,6 @@ export async function GET(request: NextRequest) {
         data: updateData,
         returning: false,
       })
-      console.log('[GOOGLE_CALLBACK] sessions updated via db.updateOne, count:', validSessions.length)
     }
 
     const fieldsToSignArgs: Record<string, unknown> = {
@@ -151,13 +150,6 @@ export async function GET(request: NextRequest) {
     if (sid) fieldsToSignArgs.sid = sid
 
     const fieldsToSign = getFieldsToSign(fieldsToSignArgs as any)
-    console.log('[GOOGLE_CALLBACK] JWT 발급', {
-      userId: user.id,
-      email: googleUser.email,
-      sid,
-      useSessions,
-    })
-
     const { token } = await jwtSign({
       fieldsToSign,
       secret: payload.secret,
@@ -180,15 +172,6 @@ export async function GET(request: NextRequest) {
       sameSite?: 'Lax' | 'None' | 'Strict'
       secure?: boolean
     }
-
-    console.log('[GOOGLE_CALLBACK] cookie obj:', {
-      name: cookieObj.name,
-      sameSite: cookieObj.sameSite,
-      secure: cookieObj.secure,
-      httpOnly: cookieObj.httpOnly,
-      path: cookieObj.path,
-      domain: cookieObj.domain,
-    })
 
     const response = NextResponse.redirect(`${url.origin}/`)
     // NextResponse.cookies.set으로 설정 (raw header 설정은 Workers에서 무시될 수 있음)
