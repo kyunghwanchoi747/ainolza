@@ -92,5 +92,28 @@ export const Orders: CollectionConfig = {
     { name: 'cashReceiptNumber', type: 'text', label: '현금영수증 번호' },
     // 메모
     { name: 'adminMemo', type: 'textarea', label: '관리자 메모' },
+    // 강의실 / 도서 액세스 권한 (다중 선택)
+    {
+      name: 'classrooms',
+      type: 'select',
+      hasMany: true,
+      label: '강의실',
+      options: [
+        { label: '바이브 코딩 101 (입문)', value: 'vibe-coding-101' },
+        { label: '바이브 코딩 심화', value: 'vibe-coding-advanced' },
+      ],
+    },
+    {
+      name: 'books',
+      type: 'select',
+      hasMany: true,
+      label: '도서',
+      options: [
+        { label: '퍼스널 인텔리젠스', value: 'personal-intelligence' },
+        { label: '불편한 AI', value: 'uncomfortable-ai' },
+        { label: 'AI시대의 15가지 프롬프트 전략', value: 'prompt-15' },
+        { label: 'NotebookLM 학습용 프롬프트 가이드', value: 'notebooklm-guide' },
+      ],
+    },
   ],
 }

@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { User, Mail, Phone, LogOut, ShoppingBag, ChevronDown, ChevronUp } from 'lucide-react'
+import { User, Mail, Phone, LogOut, ShoppingBag, ChevronDown, ChevronUp, GraduationCap } from 'lucide-react'
+import { CLASSROOMS } from '@/lib/classrooms'
 
 const statusLabels: Record<string, { label: string; color: string }> = {
   pending: { label: '주문접수', color: '#F59E0B' },
@@ -68,6 +69,19 @@ export default function MyPage() {
     }
   }
 
+  // 보유한 강의실 (paid/active/completed인 주문에서 추출)
+  const ownedClassrooms = useMemo(() => {
+    const slugs = new Set<string>()
+    for (const o of orders) {
+      if (!['paid', 'active', 'completed'].includes(o.status)) continue
+      const arr = (o as any).classrooms
+      if (Array.isArray(arr)) {
+        for (const s of arr) slugs.add(String(s))
+      }
+    }
+    return CLASSROOMS.filter((c) => slugs.has(c.slug))
+  }, [orders])
+
   if (loading) return <div className="min-h-screen bg-white flex items-center justify-center"><p className="text-[#999]">로딩 중...</p></div>
   if (!user) return null
 
@@ -92,6 +106,46 @@ export default function MyPage() {
               <div className="flex items-center gap-3"><Mail className="w-4 h-4 text-[#999]" /><span className="text-[#666]">{user.email}</span></div>
               {user.phone && <div className="flex items-center gap-3"><Phone className="w-4 h-4 text-[#999]" /><span className="text-[#666]">{user.phone}</span></div>}
             </div>
+          </div>
+
+          {/* 내 강의실 */}
+          <div className="mb-6">
+            <div className="flex items-center gap-2 mb-3">
+              <GraduationCap className="w-5 h-5 text-[#D4756E]" />
+              <h3 className="font-medium text-[#333]">내 강의실</h3>
+              <span className="text-xs text-[#999]">({ownedClassrooms.length}개)</span>
+            </div>
+            {ownedClassrooms.length === 0 ? (
+              <div className="p-4 rounded-xl border border-dashed border-[#e5e5e5] text-center">
+                <p className="text-sm text-[#999] mb-3">아직 수강 중인 강의가 없습니다.</p>
+                <Link
+                  href="/classroom"
+                  className="inline-block text-xs text-[#D4756E] hover:underline"
+                >
+                  강의 둘러보기 →
+                </Link>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {ownedClassrooms.map((c) => (
+                  <Link
+                    key={c.slug}
+                    href={`/classroom/${c.slug}`}
+                    className="block p-4 rounded-xl border border-[#e5e5e5] hover:border-[#D4756E] hover:bg-[#FFF8F7] transition-all"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="inline-block px-2 py-0.5 text-[10px] font-medium rounded-full bg-[#FFF1F0] text-[#D4756E] mb-1">
+                          {c.level}
+                        </div>
+                        <p className="font-medium text-[#333] text-sm">{c.shortTitle}</p>
+                      </div>
+                      <span className="text-[#D4756E] text-sm">입장 →</span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* 주문 내역 */}
