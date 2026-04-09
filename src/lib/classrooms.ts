@@ -39,14 +39,14 @@ export const CLASSROOMS: Classroom[] = [
         week: 1,
         title: '바이브코딩 1회차',
         vimeoId: '1174594779',
-        guidebookUrl: '', // 노션 URL을 여기에 채우세요
+        guidebookUrl: 'https://www.notion.so/33dc7863bde28045910ae83d629ba80e?source=copy_link',
         date: '',
       },
       {
         week: 2,
         title: '바이브코딩 2회차',
         vimeoId: '1181413412',
-        guidebookUrl: '',
+        guidebookUrl: 'https://www.notion.so/33dc7863bde28045910ae83d629ba80e?source=copy_link',
         date: '',
       },
     ],
