@@ -1,66 +1,206 @@
-import { getPayloadClient } from '@/lib/payload'
-import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+import { notFound } from 'next/navigation'
+import type { Metadata } from 'next'
+import { getProduct, getDday, PRODUCTS } from '@/lib/products'
 
 export const dynamic = 'force-dynamic'
 
-export default async function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+function formatPrice(p: number): string {
+  return p.toLocaleString('ko-KR') + '원'
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>
+}): Promise<Metadata> {
   const { slug } = await params
-  const payload = await getPayloadClient()
+  const product = getProduct(slug)
+  if (!product) return { title: '상품을 찾을 수 없습니다' }
+  return {
+    title: `${product.title} | AI놀자`,
+    description: product.shortDescription || product.subtitle || product.title,
+  }
+}
 
-  const result = await payload.find({
-    collection: 'products',
-    where: { slug: { equals: slug }, status: { equals: 'published' } },
-    limit: 1,
-    depth: 1,
-  })
+export default async function ProductDetailPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>
+}) {
+  const { slug } = await params
+  const product = getProduct(slug)
+  if (!product || product.hidden) return notFound()
 
-  const product = result.docs[0] as any
-  if (!product) return notFound()
+  const ext = product.imageExt || 'png'
+  const detailCount = product.detailImageCount ?? 1
+  const detailImages = Array.from({ length: detailCount }, (_, i) =>
+    `/store/${product.slug}/detail-${i + 1}.${ext}`,
+  )
+  const dday = getDday(product.discountUntil)
+
+  // SEO JSON-LD
+  const seoType = product.seo?.type || 'Product'
+  const jsonLd: Record<string, unknown> = {
+    '@context': 'https://schema.org',
+    '@type': seoType,
+    name: product.title,
+    description: product.shortDescription || product.subtitle,
+  }
+  if (product.seo?.author) {
+    jsonLd.author = { '@type': 'Person', name: product.seo.author }
+  }
+  if (product.price) {
+    jsonLd.offers = {
+      '@type': 'Offer',
+      price: product.price,
+      priceCurrency: 'KRW',
+    }
+  }
 
   return (
-    <div className="container max-w-screen-lg px-4 py-8">
-      <Link href="/store" className="text-sm text-muted-foreground hover:text-foreground mb-6 inline-block">
-        &larr; 스토어로 돌아가기
-      </Link>
+    <div className="min-h-screen bg-white">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
-      <div className="grid md:grid-cols-2 gap-8">
-        {/* Thumbnail */}
-        <div className="rounded-xl overflow-hidden bg-muted">
-          {product.thumbnail?.url ? (
-            <img src={product.thumbnail.url} alt={product.title} className="w-full h-full object-cover" />
-          ) : (
-            <div className="aspect-video flex items-center justify-center">
-              <span className="text-muted-foreground">이미지 없음</span>
+      {/* 헤더 — 좌측 썸네일 큰 이미지 + 우측 정보 */}
+      <section className="pt-12 pb-10 px-6">
+        <div className="max-w-[1100px] mx-auto">
+          <Link href="/store" className="text-sm text-[#999] hover:text-[#333] transition-colors mb-6 inline-block">
+            ← 강의/전자책 목록
+          </Link>
+
+          <div className="grid md:grid-cols-2 gap-10 mt-4">
+            {/* 썸네일 영역 */}
+            <div className="relative aspect-square rounded-2xl overflow-hidden bg-[#f8f8f8] border border-[#e5e5e5]">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={`/store/${product.slug}/thumbnail.${ext}`}
+                alt={product.title}
+                className="w-full h-full object-cover"
+              />
+              {dday !== null && (
+                <div className="absolute top-4 right-4 px-3 py-1.5 rounded-lg bg-[#D4756E] text-white text-sm font-bold">
+                  D-{dday}
+                </div>
+              )}
             </div>
-          )}
-        </div>
 
-        {/* Info */}
-        <div>
-          {product.category && (
-            <Badge variant="secondary" className="mb-3">{product.category}</Badge>
-          )}
-          <h1 className="text-3xl font-bold mb-4">{product.title}</h1>
-          {product.description && (
-            <p className="text-muted-foreground mb-6">{product.description}</p>
-          )}
-          <p className="text-3xl font-bold mb-6">
-            {product.price === 0 ? '무료' : `₩${product.price.toLocaleString()}`}
-          </p>
-          <Button size="lg" className="w-full">구매하기</Button>
-        </div>
-      </div>
+            {/* 정보 영역 */}
+            <div className="flex flex-col justify-center">
+              <p className="text-[#D4756E] text-sm font-medium mb-2">{product.category}</p>
+              <h1 className="text-3xl md:text-4xl font-bold text-[#333] leading-tight mb-3">
+                {product.title}
+              </h1>
+              {product.subtitle && (
+                <p className="text-[#666] text-lg mb-2">{product.subtitle}</p>
+              )}
+              {product.shortDescription && (
+                <p className="text-[#999] text-sm mb-6">{product.shortDescription}</p>
+              )}
 
-      {/* Content */}
-      {product.content && (
-        <div className="mt-12 prose prose-neutral dark:prose-invert max-w-none">
-          <h2 className="text-2xl font-bold mb-4">상세 설명</h2>
-          <div className="whitespace-pre-wrap text-muted-foreground">{product.content}</div>
+              {/* 가격 */}
+              <div className="mb-8">
+                {product.priceLabel ? (
+                  <p className="text-2xl text-[#D4756E] font-bold">{product.priceLabel}</p>
+                ) : product.price ? (
+                  <div className="flex items-baseline gap-3">
+                    <p className="text-3xl text-[#D4756E] font-bold">{formatPrice(product.price)}</p>
+                    {product.originalPrice && product.originalPrice > product.price && (
+                      <p className="text-base text-[#999] line-through">
+                        {formatPrice(product.originalPrice)}
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-base text-[#999]">가격 정보 준비 중</p>
+                )}
+              </div>
+
+              {/* 액션 버튼들 */}
+              <div className="space-y-3">
+                {product.actions.map((a, i) => {
+                  const baseCls = a.primary
+                    ? 'block w-full py-4 bg-[#D4756E] text-white font-bold rounded-xl text-center hover:bg-[#c0625b] transition-all'
+                    : 'block w-full py-4 border border-[#333] text-[#333] font-bold rounded-xl text-center hover:bg-[#333] hover:text-white transition-all'
+                  if (a.external || /^https?:/.test(a.url)) {
+                    return (
+                      <a
+                        key={i}
+                        href={a.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={baseCls}
+                      >
+                        {a.label}
+                      </a>
+                    )
+                  }
+                  return (
+                    <Link key={i} href={a.url} className={baseCls}>
+                      {a.label}
+                    </Link>
+                  )
+                })}
+              </div>
+            </div>
+          </div>
         </div>
+      </section>
+
+      {/* 상세 이미지 — public/store/{slug}/detail-1~N.{ext} */}
+      {detailImages.length > 0 && (
+        <section className="py-10 px-6">
+          <div className="max-w-[900px] mx-auto flex flex-col gap-4">
+            {detailImages.map((src, i) => (
+              <div
+                key={src}
+                className="w-full rounded-2xl overflow-hidden border border-[#e5e5e5]"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={src}
+                  alt={`${product.title} 상세 ${i + 1}`}
+                  className="w-full h-auto block"
+                />
+              </div>
+            ))}
+          </div>
+        </section>
       )}
+
+      {/* 하단 다시 한 번 액션 버튼 */}
+      <section className="py-12 px-6 border-t border-[#e5e5e5]">
+        <div className="max-w-[600px] mx-auto space-y-3">
+          {product.actions.map((a, i) => {
+            const baseCls = a.primary
+              ? 'block w-full py-4 bg-[#D4756E] text-white font-bold rounded-xl text-center hover:bg-[#c0625b] transition-all'
+              : 'block w-full py-4 border border-[#333] text-[#333] font-bold rounded-xl text-center hover:bg-[#333] hover:text-white transition-all'
+            if (a.external || /^https?:/.test(a.url)) {
+              return (
+                <a
+                  key={i}
+                  href={a.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={baseCls}
+                >
+                  {a.label}
+                </a>
+              )
+            }
+            return (
+              <Link key={i} href={a.url} className={baseCls}>
+                {a.label}
+              </Link>
+            )
+          })}
+        </div>
+      </section>
     </div>
   )
+}
+
+// 정적 빌드 시 미리 알려진 slug 노출
+export function generateStaticParams() {
+  return PRODUCTS.map((p) => ({ slug: p.slug }))
 }
