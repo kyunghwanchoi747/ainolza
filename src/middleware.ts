@@ -123,25 +123,22 @@ export async function middleware(request: NextRequest) {
   if (pathname.startsWith('/manager')) {
     const token = request.cookies.get('payload-token')?.value
     if (!token) {
-      return NextResponse.redirect(new URL('/login?next=' + pathname, request.url))
+      return NextResponse.redirect(new URL('/login?reason=no_token', request.url))
     }
 
     const secret = process.env.PAYLOAD_SECRET
     if (!secret) {
-      // 시크릿 미설정 시 안전을 위해 차단
-      return NextResponse.redirect(new URL('/login?next=' + pathname, request.url))
+      return NextResponse.redirect(new URL('/login?reason=no_secret', request.url))
     }
 
     const payload = await verifyJwtHS256(token, secret)
     if (!payload) {
-      // JWT 검증 실패 (만료/위조/구버전 토큰)
-      return NextResponse.redirect(new URL('/login?next=' + pathname, request.url))
+      return NextResponse.redirect(new URL('/login?reason=verify_failed', request.url))
     }
 
     const role = payload.role as string | undefined
     if (role !== 'admin') {
-      // 일반 사용자 차단
-      return NextResponse.redirect(new URL('/?error=admin_only', request.url))
+      return NextResponse.redirect(new URL('/?error=admin_only&role=' + (role || 'none'), request.url))
     }
     return NextResponse.next()
   }
