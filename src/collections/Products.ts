@@ -91,6 +91,18 @@ export const Products: CollectionConfig = {
       label: '기간/형식 (예: 4주 과정 | 온라인)',
     },
 
+    // 상품별 FAQ (상세 페이지에 노출)
+    {
+      name: 'faq',
+      type: 'array',
+      label: 'FAQ (자주 묻는 질문)',
+      admin: { description: '이 상품 전용 질문/답변. 상세 페이지에 노출' },
+      fields: [
+        { name: 'question', type: 'text', required: true, label: '질문' },
+        { name: 'answer', type: 'textarea', required: true, label: '답변' },
+      ],
+    },
+
     // 강의실 연결 (수강생 전용)
     {
       name: 'classroomSlug',

@@ -62,7 +62,8 @@ export function Header() {
                             </Link>
                             <button
                                 onClick={handleLogout}
-                                className="hidden md:block text-[14px] text-[#999] hover:text-[#333] transition-colors"
+                                type="button"
+                                className="hidden md:block text-[14px] text-[#999] hover:text-[#D4756E] transition-colors cursor-pointer"
                             >
                                 로그아웃
                             </button>
@@ -78,7 +79,7 @@ export function Header() {
                             </Link>
                         </>
                     )}
-                    <button className="md:hidden p-2 text-[#333]" onClick={() => setIsOpen(!isOpen)}>
+                    <button type="button" className="md:hidden p-2 text-[#333] cursor-pointer" onClick={() => setIsOpen(!isOpen)}>
                         {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
                     </button>
                 </div>
@@ -103,7 +104,7 @@ export function Header() {
                                     <User className="w-4 h-4" />
                                     {user.name || user.email.split('@')[0]}
                                 </Link>
-                                <button onClick={handleLogout} className="text-[#999] text-sm">로그아웃</button>
+                                <button type="button" onClick={handleLogout} className="text-[#999] text-sm cursor-pointer hover:text-[#D4756E] transition-colors">로그아웃</button>
                             </div>
                         ) : (
                             <div className="flex gap-4 text-[#666]">

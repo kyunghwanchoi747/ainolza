@@ -38,6 +38,7 @@ type DbProduct = {
   seoAuthor?: string | null
   tags?: Array<{ id?: string; label: string }> | null
   duration?: string | null
+  faq?: Array<{ id?: string; question: string; answer: string }> | null
 }
 
 function dbToProduct(d: DbProduct): Product {
@@ -89,11 +90,17 @@ function dbToProduct(d: DbProduct): Product {
     ...(detailUrls.length ? { _dbDetailUrls: detailUrls } : {}),
     ...(d.tags && d.tags.length ? { _dbTags: d.tags.map((t) => t.label) } : {}),
     ...(d.duration ? { _dbDuration: d.duration } : {}),
+    ...(d.faq && d.faq.length
+      ? { _dbFaq: d.faq.map((f) => ({ question: f.question, answer: f.answer })) }
+      : {}),
+    ...(d.featured ? { _dbFeatured: true } : {}),
   } as Product & {
     _dbThumbnailUrl?: string
     _dbDetailUrls?: string[]
     _dbTags?: string[]
     _dbDuration?: string
+    _dbFaq?: Array<{ question: string; answer: string }>
+    _dbFeatured?: boolean
   }
 }
 
@@ -102,6 +109,8 @@ export type ProductWithDbImages = Product & {
   _dbDetailUrls?: string[]
   _dbTags?: string[]
   _dbDuration?: string
+  _dbFaq?: Array<{ question: string; answer: string }>
+  _dbFeatured?: boolean
 }
 
 /**

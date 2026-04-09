@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { getDday, PRODUCTS } from '@/lib/products'
 import { getProductForStore } from '@/lib/products-db'
+import { ProductFaqList } from '@/components/store/product-faq-list'
 
 export const dynamic = 'force-dynamic'
 
@@ -84,15 +85,18 @@ export default async function ProductDetailPage({
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
       {/* 헤더 — 좌측 썸네일 큰 이미지 + 우측 정보 */}
-      <section className="pt-12 pb-10 px-6">
-        <div className="max-w-[1100px] mx-auto">
-          <Link href="/store" className="text-sm text-[#999] hover:text-[#333] transition-colors mb-6 inline-block">
+      <section className="pt-16 md:pt-20 pb-16 px-6">
+        <div className="max-w-[1200px] mx-auto">
+          <Link
+            href="/store"
+            className="text-sm text-[#999] hover:text-[#D4756E] transition-colors mb-8 inline-block cursor-pointer font-medium"
+          >
             ← 강의/책 목록
           </Link>
 
-          <div className="grid md:grid-cols-2 gap-10 mt-4">
+          <div className="grid md:grid-cols-2 gap-12 mt-4">
             {/* 썸네일 영역 */}
-            <div className="relative aspect-square rounded-2xl overflow-hidden bg-[#f8f8f8] border border-[#e5e5e5] flex items-center justify-center p-6">
+            <div className="relative aspect-square rounded-3xl overflow-hidden bg-[#f8f8f8] border-2 border-[#e5e5e5] flex items-center justify-center p-8">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={thumbnailUrl}
@@ -100,7 +104,7 @@ export default async function ProductDetailPage({
                 className="max-w-full max-h-full object-contain"
               />
               {dday !== null && (
-                <div className="absolute top-4 right-4 px-3 py-1.5 rounded-lg bg-[#D4756E] text-white text-sm font-bold">
+                <div className="absolute top-5 right-5 px-4 py-2 rounded-xl bg-[#D4756E] text-white text-base font-extrabold shadow-lg">
                   D-{dday}
                 </div>
               )}
@@ -108,26 +112,34 @@ export default async function ProductDetailPage({
 
             {/* 정보 영역 */}
             <div className="flex flex-col justify-center">
-              <p className="text-[#D4756E] text-sm font-medium mb-2">{product.category}</p>
-              <h1 className="text-3xl md:text-4xl font-bold text-[#333] leading-tight mb-3 whitespace-pre-line">
+              <p className="text-[#D4756E] text-sm md:text-base font-bold mb-3 tracking-wide uppercase">
+                {product.category}
+              </p>
+              <h1 className="text-3xl md:text-5xl font-extrabold text-[#333] leading-[1.2] mb-5 whitespace-pre-line">
                 {product.title}
               </h1>
               {product.subtitle && (
-                <p className="text-[#666] text-lg mb-2">{product.subtitle}</p>
+                <p className="text-[#666] text-lg md:text-xl mb-2 font-medium">
+                  {product.subtitle}
+                </p>
               )}
               {product.shortDescription && (
-                <p className="text-[#999] text-sm mb-6">{product.shortDescription}</p>
+                <p className="text-[#999] text-base mb-8">{product.shortDescription}</p>
               )}
 
               {/* 가격 */}
               <div className="mb-8">
                 {product.priceLabel ? (
-                  <p className="text-2xl text-[#D4756E] font-bold">{product.priceLabel}</p>
+                  <p className="text-2xl md:text-3xl text-[#D4756E] font-extrabold">
+                    {product.priceLabel}
+                  </p>
                 ) : product.price ? (
-                  <div className="flex items-baseline gap-3">
-                    <p className="text-3xl text-[#D4756E] font-bold">{formatPrice(product.price)}</p>
+                  <div className="flex items-baseline gap-4">
+                    <p className="text-4xl md:text-5xl text-[#D4756E] font-extrabold">
+                      {formatPrice(product.price)}
+                    </p>
                     {product.originalPrice && product.originalPrice > product.price && (
-                      <p className="text-base text-[#999] line-through">
+                      <p className="text-lg text-[#999] line-through font-medium">
                         {formatPrice(product.originalPrice)}
                       </p>
                     )}
@@ -137,10 +149,12 @@ export default async function ProductDetailPage({
                 )}
               </div>
 
-              {/* 결제 안내 문구 (현재 카드 결제 미연동) */}
-              <div className="mb-4 p-4 rounded-xl bg-[#FFF8F1] border border-[#FFD8A8]">
-                <p className="text-[#B45309] text-sm font-bold mb-1">📢 결제 안내</p>
-                <p className="text-[#92400E] text-xs leading-relaxed">
+              {/* 결제 안내 */}
+              <div className="mb-6 p-5 rounded-2xl bg-[#FFF8F1] border-2 border-[#FFD8A8]">
+                <p className="text-[#B45309] text-sm md:text-base font-extrabold mb-2">
+                  📢 결제 안내
+                </p>
+                <p className="text-[#92400E] text-sm leading-relaxed">
                   현재 홈페이지 이전 작업 중으로 카드 결제를 일시 중단했습니다.
                   <br />
                   <strong>계좌이체로만 결제 가능</strong>하며, 카카오톡으로 문의 주시면 안내드립니다.
@@ -149,21 +163,22 @@ export default async function ProductDetailPage({
 
               {/* 액션 버튼들 */}
               <div className="space-y-3">
-                {/* 카카오톡 문의 (가장 위, 강조) */}
                 <a
                   href="https://open.kakao.com/o/s7kkWTfh"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 w-full py-4 bg-[#FEE500] text-[#191919] font-bold rounded-xl hover:bg-[#FFE000] transition-all"
+                  className="flex items-center justify-center gap-2 w-full py-5 bg-[#FEE500] text-[#191919] font-extrabold rounded-2xl hover:bg-[#FFE000] hover:scale-[1.02] active:scale-[0.98] transition-all text-base md:text-lg cursor-pointer shadow-md"
                 >
-                  <svg className="w-5 h-5" viewBox="0 0 24 24"><path fill="#191919" d="M12 3C6.48 3 2 6.48 2 10.8c0 2.78 1.85 5.22 4.63 6.6-.2.72-.73 2.65-.84 3.06-.13.5.18.49.39.36.16-.1 2.59-1.76 3.63-2.47.72.1 1.45.15 2.19.15 5.52 0 10-3.48 10-7.7S17.52 3 12 3z"/></svg>
+                  <svg className="w-6 h-6" viewBox="0 0 24 24">
+                    <path fill="#191919" d="M12 3C6.48 3 2 6.48 2 10.8c0 2.78 1.85 5.22 4.63 6.6-.2.72-.73 2.65-.84 3.06-.13.5.18.49.39.36.16-.1 2.59-1.76 3.63-2.47.72.1 1.45.15 2.19.15 5.52 0 10-3.48 10-7.7S17.52 3 12 3z" />
+                  </svg>
                   카카오톡으로 문의하기
                 </a>
 
                 {product.actions.map((a, i) => {
                   const baseCls = a.primary
-                    ? 'block w-full py-4 bg-[#D4756E] text-white font-bold rounded-xl text-center hover:bg-[#c0625b] transition-all'
-                    : 'block w-full py-4 border border-[#333] text-[#333] font-bold rounded-xl text-center hover:bg-[#333] hover:text-white transition-all'
+                    ? 'block w-full py-5 bg-[#D4756E] text-white font-extrabold rounded-2xl text-center hover:bg-[#c0625b] hover:scale-[1.02] active:scale-[0.98] transition-all text-base md:text-lg cursor-pointer shadow-md'
+                    : 'block w-full py-5 border-2 border-[#333] text-[#333] font-extrabold rounded-2xl text-center hover:bg-[#333] hover:text-white hover:scale-[1.02] active:scale-[0.98] transition-all text-base md:text-lg cursor-pointer'
                   const finalUrl = withSlug(a.url, product.slug)
                   if (a.external || /^https?:/.test(a.url)) {
                     return (
@@ -211,18 +226,51 @@ export default async function ProductDetailPage({
         </section>
       )}
 
+      {/* 상품별 FAQ */}
+      {product._dbFaq && product._dbFaq.length > 0 && (
+        <section className="py-20 px-6 bg-[#fafafa] border-t border-[#e5e5e5]">
+          <div className="max-w-[900px] mx-auto">
+            <div className="text-center mb-12">
+              <p className="text-[#D4756E] text-sm md:text-base font-bold mb-3 tracking-wide">
+                자주 묻는 질문
+              </p>
+              <h2 className="text-3xl md:text-4xl font-extrabold leading-tight">FAQ</h2>
+              <p className="text-[#666] mt-3 text-base">
+                이 강의에 대해 궁금한 점을 정리했습니다.
+              </p>
+            </div>
+            <ProductFaqList items={product._dbFaq} />
+          </div>
+        </section>
+      )}
+
       {/* 하단 다시 한 번 액션 버튼 */}
-      <section className="py-12 px-6 border-t border-[#e5e5e5]">
+      <section className="py-16 px-6 border-t border-[#e5e5e5]">
         <div className="max-w-[600px] mx-auto space-y-3">
+          <p className="text-center text-[#666] mb-6 text-base md:text-lg">
+            궁금한 점이 있으시면 카카오톡으로 편하게 문의주세요.
+          </p>
+          <a
+            href="https://open.kakao.com/o/s7kkWTfh"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-2 w-full py-5 bg-[#FEE500] text-[#191919] font-extrabold rounded-2xl hover:bg-[#FFE000] hover:scale-[1.02] active:scale-[0.98] transition-all text-base md:text-lg cursor-pointer shadow-md"
+          >
+            <svg className="w-6 h-6" viewBox="0 0 24 24">
+              <path fill="#191919" d="M12 3C6.48 3 2 6.48 2 10.8c0 2.78 1.85 5.22 4.63 6.6-.2.72-.73 2.65-.84 3.06-.13.5.18.49.39.36.16-.1 2.59-1.76 3.63-2.47.72.1 1.45.15 2.19.15 5.52 0 10-3.48 10-7.7S17.52 3 12 3z" />
+            </svg>
+            카카오톡으로 문의하기
+          </a>
           {product.actions.map((a, i) => {
             const baseCls = a.primary
-              ? 'block w-full py-4 bg-[#D4756E] text-white font-bold rounded-xl text-center hover:bg-[#c0625b] transition-all'
-              : 'block w-full py-4 border border-[#333] text-[#333] font-bold rounded-xl text-center hover:bg-[#333] hover:text-white transition-all'
+              ? 'block w-full py-5 bg-[#D4756E] text-white font-extrabold rounded-2xl text-center hover:bg-[#c0625b] hover:scale-[1.02] active:scale-[0.98] transition-all text-base md:text-lg cursor-pointer shadow-md'
+              : 'block w-full py-5 border-2 border-[#333] text-[#333] font-extrabold rounded-2xl text-center hover:bg-[#333] hover:text-white hover:scale-[1.02] active:scale-[0.98] transition-all text-base md:text-lg cursor-pointer'
+            const finalUrl = withSlug(a.url, product.slug)
             if (a.external || /^https?:/.test(a.url)) {
               return (
                 <a
                   key={i}
-                  href={a.url}
+                  href={finalUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className={baseCls}
@@ -232,7 +280,7 @@ export default async function ProductDetailPage({
               )
             }
             return (
-              <Link key={i} href={a.url} className={baseCls}>
+              <Link key={i} href={finalUrl} className={baseCls}>
                 {a.label}
               </Link>
             )

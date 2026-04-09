@@ -130,45 +130,56 @@ function EnrollFormContent() {
   }
 
   return (
-    <div className="bg-background text-foreground min-h-screen">
-      <section className="pt-24 pb-20 px-6">
-        <div className="max-w-xl mx-auto">
+    <div className="bg-white text-[#333] min-h-screen">
+      <section className="pt-20 md:pt-28 pb-24 px-6">
+        <div className="max-w-2xl mx-auto">
 
-          <Link href={`/store/${slug}`} className="text-sm text-foreground/40 hover:text-foreground transition-colors mb-8 inline-block">
-            &larr; 상품 상세
+          <Link href={`/store/${slug}`} className="text-sm text-[#999] hover:text-[#D4756E] transition-colors mb-10 inline-block cursor-pointer font-medium">
+            &larr; 상품 상세로
           </Link>
 
-          <h1 className="text-4xl font-bold tracking-tight mb-2">수강 신청</h1>
-          <p className="text-foreground/50 mb-10 whitespace-pre-line">{product?.title || '강의'}</p>
+          <p className="text-[#D4756E] text-sm md:text-base font-bold mb-3 tracking-wide">수강 신청</p>
+          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 whitespace-pre-line leading-[1.2]">
+            {product?.title || '강의'}
+          </h1>
+          {product?.subtitle && (
+            <p className="text-[#666] text-lg mb-12">{product.subtitle}</p>
+          )}
 
-          {/* 상품 요약 */}
-          <div className="p-6 rounded-2xl border border-foreground/10 bg-foreground/5 mb-10">
-            <div className="flex justify-between items-start mb-4 gap-4">
+          {/* 상품 요약 카드 */}
+          <div className="p-7 rounded-3xl border-2 border-[#e5e5e5] bg-[#fafafa] mb-10">
+            <div className="flex justify-between items-start mb-5 gap-4">
               <div className="min-w-0">
-                <h3 className="font-bold text-lg whitespace-pre-line">{product?.title || '상품'}</h3>
-                {product?.duration && (
-                  <p className="text-foreground/40 text-sm mt-1">{product.duration}</p>
-                )}
+                <p className="text-[#999] text-xs font-bold uppercase tracking-wide mb-2">
+                  {product?.duration || '강의'}
+                </p>
+                <h3 className="font-extrabold text-lg md:text-xl whitespace-pre-line leading-tight">
+                  {product?.title || '상품'}
+                </h3>
               </div>
               <div className="text-right shrink-0">
                 {product?.priceLabel ? (
-                  <p className="text-lg font-bold text-[#D4756E]">{product.priceLabel}</p>
+                  <p className="text-lg font-extrabold text-[#D4756E]">{product.priceLabel}</p>
                 ) : product?.price ? (
                   <>
-                    <p className="text-2xl font-bold text-[#D4756E]">{formatPrice(product.price)}</p>
+                    <p className="text-2xl md:text-3xl font-extrabold text-[#D4756E]">
+                      {formatPrice(product.price)}
+                    </p>
                     {product.originalPrice && product.originalPrice > product.price && (
-                      <p className="text-foreground/30 text-xs line-through">{formatPrice(product.originalPrice)}</p>
+                      <p className="text-[#999] text-sm line-through">
+                        {formatPrice(product.originalPrice)}
+                      </p>
                     )}
                   </>
                 ) : (
-                  <p className="text-sm text-foreground/40">가격 문의</p>
+                  <p className="text-sm text-[#999]">가격 문의</p>
                 )}
               </div>
             </div>
             {product?.tags && product.tags.length > 0 && (
               <div className="flex flex-wrap gap-2">
                 {product.tags.map((t) => (
-                  <span key={t} className="px-3 py-1 rounded-full bg-foreground/10 text-foreground/60 text-xs">
+                  <span key={t} className="px-3 py-1.5 rounded-full bg-white border border-[#e5e5e5] text-[#666] text-xs font-bold">
                     {t}
                   </span>
                 ))}
@@ -177,43 +188,59 @@ function EnrollFormContent() {
           </div>
 
           {/* 결제 안내 */}
-          <div className="mb-6 p-4 rounded-xl bg-[#FFF8F1] border border-[#FFD8A8]">
-            <p className="text-[#B45309] text-sm font-bold mb-1">📢 결제 안내</p>
-            <p className="text-[#92400E] text-xs leading-relaxed">
+          <div className="mb-8 p-5 rounded-2xl bg-[#FFF8F1] border-2 border-[#FFD8A8]">
+            <p className="text-[#B45309] text-base font-extrabold mb-2">📢 결제 안내</p>
+            <p className="text-[#92400E] text-sm md:text-base leading-relaxed">
               현재 홈페이지 이전 작업 중으로 카드 결제를 일시 중단했습니다.
               <br />
               <strong>계좌이체로만 결제 가능</strong>하며, 신청 접수 후 카카오톡으로 상세 안내드립니다.
             </p>
           </div>
 
+          {/* 카카오톡 문의 */}
+          <a
+            href="https://open.kakao.com/o/s7kkWTfh"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-2 w-full py-5 mb-10 bg-[#FEE500] text-[#191919] font-extrabold rounded-2xl hover:bg-[#FFE000] hover:scale-[1.02] active:scale-[0.98] transition-all text-base md:text-lg cursor-pointer shadow-md"
+          >
+            <svg className="w-6 h-6" viewBox="0 0 24 24">
+              <path fill="#191919" d="M12 3C6.48 3 2 6.48 2 10.8c0 2.78 1.85 5.22 4.63 6.6-.2.72-.73 2.65-.84 3.06-.13.5.18.49.39.36.16-.1 2.59-1.76 3.63-2.47.72.1 1.45.15 2.19.15 5.52 0 10-3.48 10-7.7S17.52 3 12 3z" />
+            </svg>
+            카카오톡으로 문의하기
+          </a>
+
           {/* 신청 폼 */}
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="text-center mb-6">
+            <p className="text-[#999] text-sm">또는 신청서를 남기시면 개별 안내드립니다</p>
+          </div>
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium mb-2">이름 <span className="text-red-400">*</span></label>
+              <label className="block text-sm font-bold mb-2">이름 <span className="text-red-500">*</span></label>
               <input type="text" required value={form.name} onChange={e => setForm({...form, name: e.target.value})}
-                className="w-full px-4 py-3 rounded-xl border border-foreground/10 bg-foreground/5 text-foreground placeholder-foreground/30 focus:outline-none focus:border-foreground/30 transition-colors" placeholder="홍길동" />
+                className="w-full px-5 py-4 rounded-2xl border-2 border-[#e5e5e5] bg-white text-[#333] placeholder-[#bbb] focus:outline-none focus:border-[#D4756E] transition-colors text-base" placeholder="홍길동" />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">연락처 <span className="text-red-400">*</span></label>
+              <label className="block text-sm font-bold mb-2">연락처 <span className="text-red-500">*</span></label>
               <input type="tel" required value={form.phone} onChange={e => setForm({...form, phone: e.target.value})}
-                className="w-full px-4 py-3 rounded-xl border border-foreground/10 bg-foreground/5 text-foreground placeholder-foreground/30 focus:outline-none focus:border-foreground/30 transition-colors" placeholder="010-0000-0000" />
+                className="w-full px-5 py-4 rounded-2xl border-2 border-[#e5e5e5] bg-white text-[#333] placeholder-[#bbb] focus:outline-none focus:border-[#D4756E] transition-colors text-base" placeholder="010-0000-0000" />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">이메일 <span className="text-red-400">*</span></label>
+              <label className="block text-sm font-bold mb-2">이메일 <span className="text-red-500">*</span></label>
               <input type="email" required value={form.email} onChange={e => setForm({...form, email: e.target.value})}
-                className="w-full px-4 py-3 rounded-xl border border-foreground/10 bg-foreground/5 text-foreground placeholder-foreground/30 focus:outline-none focus:border-foreground/30 transition-colors" placeholder="example@email.com" />
+                className="w-full px-5 py-4 rounded-2xl border-2 border-[#e5e5e5] bg-white text-[#333] placeholder-[#bbb] focus:outline-none focus:border-[#D4756E] transition-colors text-base" placeholder="example@email.com" />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">문의사항 <span className="text-foreground/30">(선택)</span></label>
-              <textarea rows={3} value={form.message} onChange={e => setForm({...form, message: e.target.value})}
-                className="w-full px-4 py-3 rounded-xl border border-foreground/10 bg-foreground/5 text-foreground placeholder-foreground/30 focus:outline-none focus:border-foreground/30 transition-colors resize-none" placeholder="궁금한 점이 있으시면 적어주세요" />
+              <label className="block text-sm font-bold mb-2">문의사항 <span className="text-[#999] font-normal">(선택)</span></label>
+              <textarea rows={4} value={form.message} onChange={e => setForm({...form, message: e.target.value})}
+                className="w-full px-5 py-4 rounded-2xl border-2 border-[#e5e5e5] bg-white text-[#333] placeholder-[#bbb] focus:outline-none focus:border-[#D4756E] transition-colors resize-none text-base" placeholder="궁금한 점이 있으시면 적어주세요" />
             </div>
             <div className="pt-4 space-y-3">
               <button type="submit" disabled={loading}
-                className="w-full py-4 bg-foreground text-background font-bold rounded-xl hover:opacity-90 transition-all text-base disabled:opacity-50">
+                className="w-full py-5 bg-[#2C3E50] text-white font-extrabold rounded-2xl hover:bg-[#1a2834] hover:scale-[1.02] active:scale-[0.98] transition-all text-base md:text-lg disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-md">
                 {loading ? '접수 중...' : '신청 접수하기'}
               </button>
-              <p className="text-center text-foreground/30 text-xs">
+              <p className="text-center text-[#999] text-xs">
                 신청 접수 후 개별 안내드립니다.
               </p>
             </div>
