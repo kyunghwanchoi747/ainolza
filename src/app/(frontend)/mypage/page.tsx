@@ -47,6 +47,37 @@ export default function MyPage() {
     router.refresh()
   }
 
+  const handleDeleteAccount = async () => {
+    if (!user?.id) return
+    const confirmed = confirm(
+      '정말로 회원탈퇴 하시겠습니까?\n\n' +
+      '- 회원 정보가 영구 삭제됩니다.\n' +
+      '- 구매한 강의/책 액세스 권한도 함께 사라집니다.\n' +
+      '- 이 작업은 되돌릴 수 없습니다.',
+    )
+    if (!confirmed) return
+    const second = prompt("탈퇴를 확정하려면 '탈퇴' 두 글자를 입력해주세요.")
+    if (second !== '탈퇴') return
+
+    try {
+      const res = await fetch(`/api/users/${user.id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      })
+      if (res.ok) {
+        alert('회원탈퇴가 완료되었습니다.')
+        await fetch('/api/users/logout', { method: 'POST', credentials: 'include' })
+        router.push('/')
+        router.refresh()
+      } else {
+        const data = (await res.json().catch(() => ({}))) as { errors?: Array<{ message?: string }> }
+        alert(`탈퇴 실패: ${data?.errors?.[0]?.message || '알 수 없는 오류'}`)
+      }
+    } catch (e) {
+      alert(`오류가 발생했습니다: ${(e as Error).message}`)
+    }
+  }
+
   const handleRefundRequest = async (orderId: string) => {
     const reason = prompt('환불 사유를 입력해주세요:')
     if (!reason) return
@@ -242,6 +273,13 @@ export default function MyPage() {
             className="w-full mt-8 py-3 border border-[#e5e5e5] rounded-xl text-[#999] hover:text-[#333] hover:border-[#333] transition-all flex items-center justify-center gap-2 text-sm"
           >
             <LogOut className="w-4 h-4" /> 로그아웃
+          </button>
+
+          <button
+            onClick={handleDeleteAccount}
+            className="w-full mt-3 py-2 text-xs text-[#ccc] hover:text-[#EF4444] transition-colors"
+          >
+            회원탈퇴
           </button>
         </div>
       </section>

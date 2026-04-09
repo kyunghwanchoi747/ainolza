@@ -8,20 +8,61 @@ export const Users: CollectionConfig = {
   admin: {
     useAsTitle: 'email',
   },
+  access: {
+    // 누구나 회원가입 가능
+    create: () => true,
+    // 본인 정보 또는 admin만 읽기
+    read: ({ req: { user } }) => {
+      if (!user) return false
+      if ((user as { role?: string }).role === 'admin') return true
+      return { id: { equals: user.id } }
+    },
+    // 본인 또는 admin만 수정
+    update: ({ req: { user } }) => {
+      if (!user) return false
+      if ((user as { role?: string }).role === 'admin') return true
+      return { id: { equals: user.id } }
+    },
+    // 본인 (회원탈퇴) 또는 admin만 삭제
+    delete: ({ req: { user } }) => {
+      if (!user) return false
+      if ((user as { role?: string }).role === 'admin') return true
+      return { id: { equals: user.id } }
+    },
+  },
   hooks: {
+    beforeDelete: [
+      // 마지막 admin 삭제 방지 (재발 방지)
+      async ({ id, req }) => {
+        try {
+          const target = await req.payload.findByID({ collection: 'users', id })
+          if ((target as { role?: string })?.role !== 'admin') return
+          const count = await req.payload.count({
+            collection: 'users',
+            where: { role: { equals: 'admin' } },
+          })
+          if (count.totalDocs <= 1) {
+            throw new Error('마지막 관리자는 삭제할 수 없습니다.')
+          }
+        } catch (e) {
+          // 'not found' 같은 오류는 통과시킴
+          if ((e as Error).message?.includes('마지막 관리자')) throw e
+        }
+      },
+    ],
     afterChange: [
       async ({ doc, operation, req, previousDoc }) => {
-        // 신규 가입 시에만 환영 메일 발송
-        // imported(아임웹에서 옮긴 회원)는 발송 안 함
+        // 신규 가입 시에만 환영 메일 발송 (imported 회원 제외)
         if (operation !== 'create') return
         if (doc.importedFrom) return
-        // OAuth로 자동 생성된 회원도 환영 메일 발송 OK
+
+        console.log('[USER WELCOME EMAIL] 시도:', doc.email)
         try {
           await sendWelcomeEmail(req.payload, { email: doc.email, name: doc.name })
+          console.log('[USER WELCOME EMAIL] 성공:', doc.email)
         } catch (e) {
-          console.error('[USER WELCOME EMAIL] 실패:', (e as Error).message)
+          console.error('[USER WELCOME EMAIL] 실패:', doc.email, (e as Error).message)
         }
-        // previousDoc 사용 안 함 — eslint 경고 방지
         void previousDoc
       },
     ],
