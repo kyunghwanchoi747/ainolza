@@ -6,6 +6,38 @@ import { getClassroom } from '@/lib/classrooms'
 
 export const dynamic = 'force-dynamic'
 
+/**
+ * YouTube URL에서 video ID 추출 (다양한 형식 지원)
+ *  - https://www.youtube.com/watch?v=XXXX
+ *  - https://youtu.be/XXXX
+ *  - https://www.youtube.com/live/XXXX
+ *  - https://www.youtube.com/embed/XXXX
+ *  - XXXX (ID만)
+ */
+function extractYouTubeId(input: string): string | null {
+  if (!input) return null
+  const trimmed = input.trim()
+  // ID만 (11자 영숫자/_/-)
+  if (/^[A-Za-z0-9_-]{11}$/.test(trimmed)) return trimmed
+  try {
+    const url = new URL(trimmed)
+    // youtu.be/XXXX
+    if (url.hostname.includes('youtu.be')) {
+      const id = url.pathname.slice(1).split('/')[0]
+      return id || null
+    }
+    // youtube.com/watch?v=XXXX
+    const v = url.searchParams.get('v')
+    if (v) return v
+    // youtube.com/live/XXXX 또는 youtube.com/embed/XXXX
+    const m = url.pathname.match(/\/(?:live|embed|v)\/([A-Za-z0-9_-]{11})/)
+    if (m) return m[1]
+  } catch {
+    // 무시
+  }
+  return null
+}
+
 type AccessResult =
   | { state: 'unauthenticated' }
   | { state: 'denied'; user: any }
@@ -166,41 +198,71 @@ export default async function ClassroomDetailPage({
         {classroom.sessions && classroom.sessions.length > 0 && (
           <section className="space-y-12">
             <h2 className="text-2xl font-bold text-[#333]">회차별 강의</h2>
-            {classroom.sessions.map((s) => (
-              <div key={s.week} className="space-y-4">
-                <div className="flex items-baseline gap-3">
-                  <span className="text-sm font-medium text-[#D4756E]">{s.week}회차</span>
-                  <h3 className="text-lg font-bold text-[#333]">{s.title}</h3>
-                  {s.date && <span className="text-xs text-[#999]">{s.date}</span>}
-                </div>
-
-                {/* Vimeo 임베드 (16:9 반응형) */}
-                <div className="relative w-full overflow-hidden rounded-2xl bg-black" style={{ paddingTop: '56.25%' }}>
-                  <iframe
-                    src={`https://player.vimeo.com/video/${s.vimeoId}?badge=0&autopause=0&player_id=0&app_id=58479`}
-                    frameBorder="0"
-                    allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
-                    referrerPolicy="strict-origin-when-cross-origin"
-                    title={s.title}
-                    className="absolute inset-0 w-full h-full"
-                  />
-                </div>
-
-                {/* 가이드북 버튼 */}
-                {s.guidebookUrl && (
-                  <div className="flex justify-center pt-2">
-                    <a
-                      href={s.guidebookUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-block px-6 py-3 bg-[#1a1a1a] text-white font-bold rounded-full hover:bg-[#333] transition-colors text-sm"
-                    >
-                      {s.week}회차 가이드북
-                    </a>
+            {classroom.sessions.map((s) => {
+              // 우선순위: vimeoId(녹화본) > youtubeLiveUrl(라이브)
+              const isVod = !!s.vimeoId
+              const ytId = !isVod && s.youtubeLiveUrl ? extractYouTubeId(s.youtubeLiveUrl) : null
+              const isLive = !isVod && !!ytId
+              const hasVideo = isVod || isLive
+              return (
+                <div key={s.week} className="space-y-4">
+                  <div className="flex items-baseline gap-3 flex-wrap">
+                    <span className="text-sm font-medium text-[#D4756E]">{s.week}회차</span>
+                    <h3 className="text-lg font-bold text-[#333]">{s.title}</h3>
+                    {s.date && <span className="text-xs text-[#999]">{s.date}</span>}
+                    {isLive && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-500 text-white text-xs font-bold">
+                        <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                        LIVE
+                      </span>
+                    )}
                   </div>
-                )}
-              </div>
-            ))}
+
+                  {/* 영상 임베드 (16:9 반응형) */}
+                  {hasVideo ? (
+                    <div className="relative w-full overflow-hidden rounded-2xl bg-black" style={{ paddingTop: '56.25%' }}>
+                      {isVod ? (
+                        <iframe
+                          src={`https://player.vimeo.com/video/${s.vimeoId}?badge=0&autopause=0&player_id=0&app_id=58479`}
+                          frameBorder="0"
+                          allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
+                          referrerPolicy="strict-origin-when-cross-origin"
+                          title={s.title}
+                          className="absolute inset-0 w-full h-full"
+                        />
+                      ) : (
+                        <iframe
+                          src={`https://www.youtube.com/embed/${ytId}?autoplay=0&rel=0`}
+                          frameBorder="0"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                          allowFullScreen
+                          title={s.title}
+                          className="absolute inset-0 w-full h-full"
+                        />
+                      )}
+                    </div>
+                  ) : (
+                    <div className="rounded-2xl border border-dashed border-[#e5e5e5] bg-[#fafafa] p-12 text-center">
+                      <p className="text-[#999] text-sm">강의 시작 전입니다. 일정이 확정되면 안내드립니다.</p>
+                    </div>
+                  )}
+
+                  {/* 가이드북 버튼 */}
+                  {s.guidebookUrl && (
+                    <div className="flex justify-center pt-2">
+                      <a
+                        href={s.guidebookUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-block px-6 py-3 bg-[#1a1a1a] text-white font-bold rounded-full hover:bg-[#333] transition-colors text-sm"
+                      >
+                        {s.week}회차 가이드북
+                      </a>
+                    </div>
+                  )}
+                </div>
+              )
+            })}
           </section>
         )}
 

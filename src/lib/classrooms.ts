@@ -10,7 +10,8 @@
 export type Session = {
   week: number
   title: string
-  vimeoId: string // 예: "1174594779" (vimeo.com/{id} 의 숫자만)
+  vimeoId?: string // VOD 녹화본 (있으면 우선 표시). 예: "1174594779"
+  youtubeLiveUrl?: string // 라이브 송출 URL (vimeoId 없을 때만 표시)
   guidebookUrl?: string // 노션 페이지 등
   date?: string // YYYY-MM-DD (라이브 일자, 표시용)
 }
@@ -57,7 +58,33 @@ export const CLASSROOMS: Classroom[] = [
     shortTitle: '바이브 코딩 심화',
     description: '백지 상태에서 시작해 4주에 걸쳐 본격적으로 AI와 함께 코딩 능력을 키웁니다.',
     level: '심화',
-    sessions: [],
+    // ▶ 라이브 진행 흐름:
+    //   1) 라이브 직전: 해당 회차의 youtubeLiveUrl 에 라이브 URL 입력 + push
+    //      → 페이지에 자동으로 LIVE 뱃지 + YouTube 임베드 표시
+    //   2) 라이브 종료 후: 녹화본 Vimeo에 업로드 → vimeoId 입력 + push
+    //      → 자동으로 Vimeo 녹화본으로 전환 (youtubeLiveUrl은 그대로 두거나 비움)
+    sessions: [
+      {
+        week: 1,
+        title: '심화 1회차',
+        // youtubeLiveUrl: '',  // 라이브 직전에 채우기 (https://www.youtube.com/live/XXX 등 어떤 형식이든 OK)
+        // vimeoId: '',          // 라이브 끝나고 녹화본 업로드 후 채우기
+        // guidebookUrl: '',
+        // date: '',
+      },
+      {
+        week: 2,
+        title: '심화 2회차',
+      },
+      {
+        week: 3,
+        title: '심화 3회차',
+      },
+      {
+        week: 4,
+        title: '심화 4회차',
+      },
+    ],
   },
 ]
 
