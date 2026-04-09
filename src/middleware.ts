@@ -1,5 +1,49 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { jwtVerify } from 'jose'
+
+/**
+ * 네이티브 Web Crypto API로 HS256 JWT 검증
+ * (jose 라이브러리가 Cloudflare Workers Edge에서 일부 케이스 실패해서 직접 구현)
+ */
+async function verifyJwtHS256(token: string, secret: string): Promise<Record<string, unknown> | null> {
+  try {
+    const parts = token.split('.')
+    if (parts.length !== 3) return null
+    const [headerB64, payloadB64, sigB64] = parts
+
+    const enc = new TextEncoder()
+    const key = await crypto.subtle.importKey(
+      'raw',
+      enc.encode(secret),
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['verify'],
+    )
+
+    const data = enc.encode(`${headerB64}.${payloadB64}`)
+    const sigBytes = Uint8Array.from(
+      atob(sigB64.replace(/-/g, '+').replace(/_/g, '/')),
+      (c) => c.charCodeAt(0),
+    )
+    const valid = await crypto.subtle.verify('HMAC', key, sigBytes, data)
+    if (!valid) return null
+
+    const payloadJson = new TextDecoder().decode(
+      Uint8Array.from(
+        atob(payloadB64.replace(/-/g, '+').replace(/_/g, '/')),
+        (c) => c.charCodeAt(0),
+      ),
+    )
+    const payload = JSON.parse(payloadJson) as Record<string, unknown>
+
+    // 만료 체크
+    const exp = payload.exp as number | undefined
+    if (exp && Date.now() / 1000 > exp) return null
+
+    return payload
+  } catch {
+    return null
+  }
+}
 
 interface NavItem {
   label: string
@@ -82,25 +126,24 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/login?next=' + pathname, request.url))
     }
 
-    // JWT 검증 + role 체크
-    try {
-      const secret = process.env.PAYLOAD_SECRET
-      if (!secret) {
-        // 시크릿 미설정 시 안전을 위해 차단
-        return NextResponse.redirect(new URL('/login', request.url))
-      }
-      const secretKey = new TextEncoder().encode(secret)
-      const { payload } = await jwtVerify(token, secretKey)
-      const role = (payload as { role?: string }).role
-      if (role !== 'admin') {
-        // 일반 사용자는 홈으로 (로그인 페이지로 보내면 무한 루프 가능)
-        return NextResponse.redirect(new URL('/?error=admin_only', request.url))
-      }
-      return NextResponse.next()
-    } catch {
-      // JWT 검증 실패 (만료/위조/구버전 토큰) → 로그인 페이지로
+    const secret = process.env.PAYLOAD_SECRET
+    if (!secret) {
+      // 시크릿 미설정 시 안전을 위해 차단
       return NextResponse.redirect(new URL('/login?next=' + pathname, request.url))
     }
+
+    const payload = await verifyJwtHS256(token, secret)
+    if (!payload) {
+      // JWT 검증 실패 (만료/위조/구버전 토큰)
+      return NextResponse.redirect(new URL('/login?next=' + pathname, request.url))
+    }
+
+    const role = payload.role as string | undefined
+    if (role !== 'admin') {
+      // 일반 사용자 차단
+      return NextResponse.redirect(new URL('/?error=admin_only', request.url))
+    }
+    return NextResponse.next()
   }
 
   // /mypage → 로그인 필수
