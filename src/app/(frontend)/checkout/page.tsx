@@ -12,11 +12,21 @@ function CheckoutContent() {
   const [loading, setLoading] = useState(false)
   const [agreed, setAgreed] = useState({ terms: false, refund: false, privacy: false })
 
-  const productName = searchParams.get('product') || 'AI 바이브 코딩 클래스'
-  const productSlug = searchParams.get('slug') || 'vibe-coding'
-  const productType = searchParams.get('type') || 'class'
-  const amount = parseInt(searchParams.get('amount') || '390000', 10)
-  const originalAmount = parseInt(searchParams.get('original') || String(amount), 10)
+  // slug 만 받고 나머지는 DB에서 조회 (URL의 amount/product 등은 무시 — 위변조 방지)
+  const productSlug = searchParams.get('slug') || 'vibe-coding-101'
+  const [dbProduct, setDbProduct] = useState<{
+    title: string
+    price?: number
+    originalPrice?: number
+    productType?: string
+  } | null>(null)
+  const [productLoading, setProductLoading] = useState(true)
+
+  // 폴백 표시값 — DB 로드 전에 사용
+  const productName = dbProduct?.title || '강의'
+  const productType = dbProduct?.productType || 'class'
+  const amount = dbProduct?.price ?? 0
+  const originalAmount = dbProduct?.originalPrice ?? amount
 
   useEffect(() => {
     fetch('/api/users/me', { credentials: 'include' })
@@ -27,6 +37,24 @@ function CheckoutContent() {
       })
       .catch(() => router.push('/login'))
   }, [router])
+
+  useEffect(() => {
+    fetch(`/api/products?where[slug][equals]=${encodeURIComponent(productSlug)}&depth=0&limit=1`, { credentials: 'include' })
+      .then(res => res.ok ? res.json() : null)
+      .then((data: any) => {
+        const doc = data?.docs?.[0]
+        if (doc) {
+          setDbProduct({
+            title: doc.title,
+            price: doc.price,
+            originalPrice: doc.originalPrice,
+            productType: doc.productType,
+          })
+        }
+      })
+      .catch(() => {})
+      .finally(() => setProductLoading(false))
+  }, [productSlug])
 
   const allAgreed = agreed.terms && agreed.refund && agreed.privacy
 
@@ -81,8 +109,19 @@ function CheckoutContent() {
     }
   }
 
-  if (!user) {
+  if (!user || productLoading) {
     return <div className="min-h-screen bg-white flex items-center justify-center"><p className="text-[#999]">로딩 중...</p></div>
+  }
+
+  if (!dbProduct) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center px-6">
+        <div className="text-center">
+          <p className="text-lg text-[#333] mb-2">상품을 찾을 수 없습니다.</p>
+          <Link href="/store" className="text-sm text-[#D4756E] hover:underline">강의/책 목록으로 돌아가기</Link>
+        </div>
+      </div>
+    )
   }
 
   return (

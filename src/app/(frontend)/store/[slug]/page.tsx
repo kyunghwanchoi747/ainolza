@@ -10,6 +10,23 @@ function formatPrice(p: number): string {
   return p.toLocaleString('ko-KR') + '원'
 }
 
+/**
+ * 액션 URL이 enroll 페이지면 slug 쿼리 파라미터를 자동으로 붙여줌.
+ * (admin에서 URL에 slug를 안 적어도 자동 처리)
+ */
+function withSlug(url: string, slug: string): string {
+  if (!url) return url
+  // 외부 링크는 그대로
+  if (/^https?:/.test(url)) return url
+  // enroll 경로일 때만 slug 자동 추가
+  if (url.includes('/enroll')) {
+    if (url.includes('slug=')) return url
+    const sep = url.includes('?') ? '&' : '?'
+    return `${url}${sep}slug=${encodeURIComponent(slug)}`
+  }
+  return url
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -147,11 +164,12 @@ export default async function ProductDetailPage({
                   const baseCls = a.primary
                     ? 'block w-full py-4 bg-[#D4756E] text-white font-bold rounded-xl text-center hover:bg-[#c0625b] transition-all'
                     : 'block w-full py-4 border border-[#333] text-[#333] font-bold rounded-xl text-center hover:bg-[#333] hover:text-white transition-all'
+                  const finalUrl = withSlug(a.url, product.slug)
                   if (a.external || /^https?:/.test(a.url)) {
                     return (
                       <a
                         key={i}
-                        href={a.url}
+                        href={finalUrl}
                         target="_blank"
                         rel="noopener noreferrer"
                         className={baseCls}
@@ -161,7 +179,7 @@ export default async function ProductDetailPage({
                     )
                   }
                   return (
-                    <Link key={i} href={a.url} className={baseCls}>
+                    <Link key={i} href={finalUrl} className={baseCls}>
                       {a.label}
                     </Link>
                   )

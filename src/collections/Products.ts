@@ -77,6 +77,20 @@ export const Products: CollectionConfig = {
       ],
     },
 
+    // 태그 (수강 신청 페이지에 노출)
+    {
+      name: 'tags',
+      type: 'array',
+      label: '태그 (수강 신청 페이지에 표시)',
+      admin: { description: '예: AI 웹사이트 구축, 4주 과정, 온라인' },
+      fields: [{ name: 'label', type: 'text', required: true }],
+    },
+    {
+      name: 'duration',
+      type: 'text',
+      label: '기간/형식 (예: 4주 과정 | 온라인)',
+    },
+
     // 강의실 연결 (수강생 전용)
     {
       name: 'classroomSlug',

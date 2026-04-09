@@ -59,21 +59,21 @@ export type Product = {
   }
 }
 
+// ⚠️ 가격/제목 등 진짜 데이터는 모두 DB(Payload Products 컬렉션)에 있음.
+// 이 파일은 DB 조회 실패 시의 최소 폴백일 뿐 — 정확한 가격은 두지 않음.
+// 실제 운영 데이터는 admin → Products 에서 관리.
 export const PRODUCTS: Product[] = [
   {
     slug: 'vibe-coding-advanced',
     type: 'class',
     category: '강의',
-    title: 'AI 바이브 코딩 [심화] — 백지 위의 바이브코더',
+    title: 'AI 바이브 코딩 [심화]\n백지 위의 바이브코더',
     subtitle: '백지에서 시작하는 4주 심화 과정',
     shortDescription: '코딩 0인 분도 4주만에 자기 사이트 운영',
-    price: 590000,
-    originalPrice: 990000,
     actions: [
-      { label: '수강 신청하기', url: '/programs/vibe-coding/enroll', primary: true },
+      { label: '수강 신청하기', url: '/programs/vibe-coding/enroll?slug=vibe-coding-advanced', primary: true },
     ],
     classroomSlug: 'vibe-coding-advanced',
-    detailImageCount: 4,
     order: 1,
     seo: { type: 'Course' },
   },
@@ -81,16 +81,13 @@ export const PRODUCTS: Product[] = [
     slug: 'vibe-coding-101',
     type: 'class',
     category: '강의',
-    title: 'AI 바이브 코딩 [입문] — 자동 수익 웹사이트 구축 실전',
+    title: 'AI 바이브 코딩 [입문]\n자동 수익 웹사이트 구축 실전',
     subtitle: '코딩 0인 분도 4주만에 자기 사이트 운영',
     shortDescription: 'AI로 만드는 자동 수익 웹사이트 구축',
-    price: 390000,
-    originalPrice: 590000,
     actions: [
-      { label: '수강 신청하기', url: '/programs/vibe-coding/enroll', primary: true },
+      { label: '수강 신청하기', url: '/programs/vibe-coding/enroll?slug=vibe-coding-101', primary: true },
     ],
     classroomSlug: 'vibe-coding-101',
-    detailImageCount: 4,
     order: 2,
     seo: { type: 'Course' },
   },

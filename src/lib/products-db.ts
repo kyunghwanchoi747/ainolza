@@ -36,6 +36,8 @@ type DbProduct = {
   featured?: boolean | null
   seoType?: 'Product' | 'Course' | 'Book' | null
   seoAuthor?: string | null
+  tags?: Array<{ id?: string; label: string }> | null
+  duration?: string | null
 }
 
 function dbToProduct(d: DbProduct): Product {
@@ -82,15 +84,24 @@ function dbToProduct(d: DbProduct): Product {
           ...(d.seoAuthor ? { author: d.seoAuthor } : {}),
         }
       : undefined,
-    // 추가: DB에서 온 이미지 URL을 별도 필드로 보관 (렌더링 시 사용)
+    // 추가: DB에서 온 이미지 URL과 tags/duration을 별도 필드로 보관
     ...(thumbnailUrl ? { _dbThumbnailUrl: thumbnailUrl } : {}),
     ...(detailUrls.length ? { _dbDetailUrls: detailUrls } : {}),
-  } as Product & { _dbThumbnailUrl?: string; _dbDetailUrls?: string[] }
+    ...(d.tags && d.tags.length ? { _dbTags: d.tags.map((t) => t.label) } : {}),
+    ...(d.duration ? { _dbDuration: d.duration } : {}),
+  } as Product & {
+    _dbThumbnailUrl?: string
+    _dbDetailUrls?: string[]
+    _dbTags?: string[]
+    _dbDuration?: string
+  }
 }
 
 export type ProductWithDbImages = Product & {
   _dbThumbnailUrl?: string
   _dbDetailUrls?: string[]
+  _dbTags?: string[]
+  _dbDuration?: string
 }
 
 /**
