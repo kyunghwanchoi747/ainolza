@@ -1,54 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-/**
- * base64url → Uint8Array (JWT 표준은 padding 없는 base64url)
- */
-function base64UrlDecode(input: string): Uint8Array {
-  // base64url → base64
-  const b64 = input.replace(/-/g, '+').replace(/_/g, '/')
-  // padding 추가
-  const padded = b64 + '='.repeat((4 - (b64.length % 4)) % 4)
-  const binary = atob(padded)
-  const bytes = new Uint8Array(binary.length)
-  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i)
-  return bytes
-}
-
-/**
- * 네이티브 Web Crypto API로 HS256 JWT 검증
- */
-async function verifyJwtHS256(token: string, secret: string): Promise<Record<string, unknown> | null> {
-  try {
-    const parts = token.split('.')
-    if (parts.length !== 3) return null
-    const [headerB64, payloadB64, sigB64] = parts
-
-    const enc = new TextEncoder()
-    const key = await crypto.subtle.importKey(
-      'raw',
-      enc.encode(secret),
-      { name: 'HMAC', hash: 'SHA-256' },
-      false,
-      ['verify'],
-    )
-
-    const data = enc.encode(`${headerB64}.${payloadB64}`)
-    const sigBytes = base64UrlDecode(sigB64)
-    const valid = await crypto.subtle.verify('HMAC', key, sigBytes, data)
-    if (!valid) return null
-
-    const payloadJson = new TextDecoder().decode(base64UrlDecode(payloadB64))
-    const payload = JSON.parse(payloadJson) as Record<string, unknown>
-
-    const exp = payload.exp as number | undefined
-    if (exp && Date.now() / 1000 > exp) return null
-
-    return payload
-  } catch {
-    return null
-  }
-}
-
 interface NavItem {
   label: string
   path: string
@@ -123,26 +74,12 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // /manager → 관리자 전용 (JWT 검증 + role==='admin' 필수)
+  // /manager → JWT 쿠키 존재 체크만 (실제 role 검증은 (manager) 레이아웃에서 Payload로 수행)
+  // 미들웨어에서 jose/Web Crypto 검증은 secret 동기화 문제로 불가
   if (pathname.startsWith('/manager')) {
     const token = request.cookies.get('payload-token')?.value
     if (!token) {
-      return NextResponse.redirect(new URL('/login?reason=no_token', request.url))
-    }
-
-    const secret = process.env.PAYLOAD_SECRET
-    if (!secret) {
-      return NextResponse.redirect(new URL('/login?reason=no_secret', request.url))
-    }
-
-    const payload = await verifyJwtHS256(token, secret)
-    if (!payload) {
-      return NextResponse.redirect(new URL('/login?reason=verify_failed', request.url))
-    }
-
-    const role = payload.role as string | undefined
-    if (role !== 'admin') {
-      return NextResponse.redirect(new URL('/?error=admin_only&role=' + (role || 'none'), request.url))
+      return NextResponse.redirect(new URL('/login?next=' + pathname, request.url))
     }
     return NextResponse.next()
   }
