@@ -80,11 +80,13 @@ export async function GET(request: NextRequest) {
 
     let user: any
     if (existing.totalDocs > 0) {
-      // 기존 회원 → googleId만 갱신, password는 절대 건드리지 않음
+      // 기존 회원 → googleId 연결 + mustResetPassword 해제 (Google 인증으로 이미 검증되었으므로
+      // 별도 비번 변경 안내는 불필요), password는 절대 건드리지 않음
       const found = existing.docs[0] as any
       const updateData: Record<string, unknown> = {}
       if (!found.googleId) updateData.googleId = googleUser.id
       if (!found.name && googleUser.name) updateData.name = googleUser.name
+      if (found.mustResetPassword) updateData.mustResetPassword = false
 
       if (Object.keys(updateData).length > 0) {
         user = await payload.update({

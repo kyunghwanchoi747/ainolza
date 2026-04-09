@@ -13,10 +13,29 @@ export function MigrationPopup() {
     if (pathname?.startsWith('/admin') || pathname?.startsWith('/manager')) {
       return
     }
-    const today = new Date().toISOString().split('T')[0]
-    const hidden = localStorage.getItem('migration-popup-hidden')
-    if (hidden !== today) {
-      setShow(true)
+
+    let cancelled = false
+    ;(async () => {
+      try {
+        // 이미 로그인된 사용자에게는 표시하지 않음 (이전 안내가 무의미)
+        const res = await fetch('/api/users/me', { credentials: 'include' })
+        if (res.ok) {
+          const data = (await res.json()) as { user?: { id: number } | null }
+          if (data?.user) return // 로그인 상태 → 팝업 노출 안 함
+        }
+      } catch {
+        // 무시 — 아래 기본 동작 진행
+      }
+      if (cancelled) return
+      const today = new Date().toISOString().split('T')[0]
+      const hidden = localStorage.getItem('migration-popup-hidden')
+      if (hidden !== today) {
+        setShow(true)
+      }
+    })()
+
+    return () => {
+      cancelled = true
     }
   }, [pathname])
 
@@ -49,12 +68,18 @@ export function MigrationPopup() {
           </p>
 
           <div className="p-4 rounded-xl bg-[#f8f8f8] border border-[#e5e5e5]">
-            <p className="text-xs font-bold text-[#333] mb-2">&#128221; 안내사항</p>
+            <p className="text-xs font-bold text-[#333] mb-2">&#128221; 로그인 안내</p>
             <ul className="text-xs text-[#666] space-y-1.5 leading-relaxed">
-              <li>&#8226; 기존 회원은 비밀번호 재설정이 필요합니다</li>
+              <li>
+                &#8226; <strong>Google로 가입하셨던 분</strong>은 그대로 <strong>“Google로
+                로그인”</strong> 버튼을 사용해주세요. (비밀번호 재설정 불필요)
+              </li>
+              <li>
+                &#8226; <strong>이메일/비밀번호</strong>로 가입하셨던 분은
+                <strong> “비밀번호 찾기”</strong>로 새 비밀번호를 설정해주세요.
+              </li>
               <li>&#8226; 결제 시스템은 곧 오픈됩니다</li>
-              <li>&#8226; 강의 자료는 노션 페이지로 전달됩니다</li>
-              <li>&#8226; 라이브 강의는 유튜브로 진행됩니다</li>
+              <li>&#8226; 강의 자료는 노션, 라이브 강의는 유튜브로 진행됩니다</li>
             </ul>
           </div>
 
