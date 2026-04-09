@@ -42,6 +42,13 @@ export const CLASSROOMS: Classroom[] = [
         guidebookUrl: '', // 노션 URL을 여기에 채우세요
         date: '',
       },
+      {
+        week: 2,
+        title: '바이브코딩 2회차',
+        vimeoId: '1181413412',
+        guidebookUrl: '',
+        date: '',
+      },
     ],
   },
   {
