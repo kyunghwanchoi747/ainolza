@@ -1,4 +1,11 @@
 import type { CollectionConfig } from 'payload'
+import {
+  sendOrderCreatedToAdmin,
+  sendPaymentCompletedToAdmin,
+  sendPaymentCompletedToBuyer,
+  sendRefundRequestedToAdmin,
+  sendRefundCompletedToBuyer,
+} from '../lib/email-templates'
 
 export const Orders: CollectionConfig = {
   slug: 'orders',
@@ -6,6 +13,46 @@ export const Orders: CollectionConfig = {
     useAsTitle: 'orderNumber',
     defaultColumns: ['orderNumber', 'buyerName', 'productName', 'amount', 'status', 'createdAt'],
     listSearchableFields: ['orderNumber', 'buyerName', 'buyerEmail', 'buyerPhone', 'productName'],
+  },
+  hooks: {
+    afterChange: [
+      async ({ doc, operation, previousDoc, req }) => {
+        // 테스트 주문(TEST_ 접두사)은 알림 발송 안 함
+        if (typeof doc.orderNumber === 'string' && doc.orderNumber.startsWith('TEST_')) return
+
+        try {
+          // 1) 신규 주문 → 관리자에게 알림
+          if (operation === 'create') {
+            await sendOrderCreatedToAdmin(req.payload, doc as any)
+          }
+
+          // 2) 상태 변경 감지 (update 시에만)
+          if (operation === 'update' && previousDoc) {
+            const prevStatus = (previousDoc as any).status
+            const newStatus = doc.status
+
+            if (prevStatus !== newStatus) {
+              // → paid 로 변경 시: 관리자 + 사용자 모두에게
+              if (newStatus === 'paid') {
+                await sendPaymentCompletedToAdmin(req.payload, doc as any)
+                await sendPaymentCompletedToBuyer(req.payload, doc as any)
+              }
+              // → refund_requested 로 변경 시: 관리자에게 알림
+              if (newStatus === 'refund_requested') {
+                await sendRefundRequestedToAdmin(req.payload, doc as any)
+              }
+              // → refunded 로 변경 시: 사용자에게 알림
+              if (newStatus === 'refunded') {
+                await sendRefundCompletedToBuyer(req.payload, doc as any)
+              }
+            }
+          }
+        } catch (e) {
+          // 메일 발송 실패가 주문 처리 자체를 막지 않도록 catch
+          console.error('[ORDER NOTIFICATION] 실패:', (e as Error).message)
+        }
+      },
+    ],
   },
   fields: [
     { name: 'orderNumber', type: 'text', required: true, unique: true, label: '주문번호' },

@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { sendWelcomeEmail } from '../lib/email-templates'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://ainolza.kr'
 
@@ -6,6 +7,24 @@ export const Users: CollectionConfig = {
   slug: 'users',
   admin: {
     useAsTitle: 'email',
+  },
+  hooks: {
+    afterChange: [
+      async ({ doc, operation, req, previousDoc }) => {
+        // 신규 가입 시에만 환영 메일 발송
+        // imported(아임웹에서 옮긴 회원)는 발송 안 함
+        if (operation !== 'create') return
+        if (doc.importedFrom) return
+        // OAuth로 자동 생성된 회원도 환영 메일 발송 OK
+        try {
+          await sendWelcomeEmail(req.payload, { email: doc.email, name: doc.name })
+        } catch (e) {
+          console.error('[USER WELCOME EMAIL] 실패:', (e as Error).message)
+        }
+        // previousDoc 사용 안 함 — eslint 경고 방지
+        void previousDoc
+      },
+    ],
   },
   auth: {
     forgotPassword: {

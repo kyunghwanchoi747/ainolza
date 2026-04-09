@@ -120,8 +120,29 @@ export default async function ProductDetailPage({
                 )}
               </div>
 
+              {/* 결제 안내 문구 (현재 카드 결제 미연동) */}
+              <div className="mb-4 p-4 rounded-xl bg-[#FFF8F1] border border-[#FFD8A8]">
+                <p className="text-[#B45309] text-sm font-bold mb-1">📢 결제 안내</p>
+                <p className="text-[#92400E] text-xs leading-relaxed">
+                  현재 홈페이지 이전 작업 중으로 카드 결제를 일시 중단했습니다.
+                  <br />
+                  <strong>계좌이체로만 결제 가능</strong>하며, 카카오톡으로 문의 주시면 안내드립니다.
+                </p>
+              </div>
+
               {/* 액션 버튼들 */}
               <div className="space-y-3">
+                {/* 카카오톡 문의 (가장 위, 강조) */}
+                <a
+                  href="https://open.kakao.com/o/s7kkWTfh"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 w-full py-4 bg-[#FEE500] text-[#191919] font-bold rounded-xl hover:bg-[#FFE000] transition-all"
+                >
+                  <svg className="w-5 h-5" viewBox="0 0 24 24"><path fill="#191919" d="M12 3C6.48 3 2 6.48 2 10.8c0 2.78 1.85 5.22 4.63 6.6-.2.72-.73 2.65-.84 3.06-.13.5.18.49.39.36.16-.1 2.59-1.76 3.63-2.47.72.1 1.45.15 2.19.15 5.52 0 10-3.48 10-7.7S17.52 3 12 3z"/></svg>
+                  카카오톡으로 문의하기
+                </a>
+
                 {product.actions.map((a, i) => {
                   const baseCls = a.primary
                     ? 'block w-full py-4 bg-[#D4756E] text-white font-bold rounded-xl text-center hover:bg-[#c0625b] transition-all'
