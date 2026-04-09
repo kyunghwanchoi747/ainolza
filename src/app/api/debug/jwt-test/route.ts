@@ -81,6 +81,14 @@ export async function GET(request: NextRequest) {
       result.match_trimmed = parts[2] === s2B64
       result.trimmed_len = trimmed.length
       result.has_trailing_ws = secret.length !== trimmed.length
+
+      // 3) fallback secret으로 서명
+      const fallback = 'dev-secret-change-in-production'
+      const k3 = await crypto.subtle.importKey('raw', enc.encode(fallback), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign'])
+      const s3 = new Uint8Array(await crypto.subtle.sign('HMAC', k3, data))
+      const s3B64 = btoa(String.fromCharCode(...s3)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+      result.computed_fallback = s3B64
+      result.match_fallback = parts[2] === s3B64
     } catch (e) {
       result.verifyError = (e as Error).message
     }
