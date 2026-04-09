@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { jwtVerify } from 'jose'
 
 interface NavItem {
   label: string
@@ -74,13 +75,32 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // /manager → 관리자 전용 (쿠키에 JWT 없으면 로그인 페이지로)
+  // /manager → 관리자 전용 (JWT 검증 + role==='admin' 필수)
   if (pathname.startsWith('/manager')) {
     const token = request.cookies.get('payload-token')?.value
     if (!token) {
-      return NextResponse.redirect(new URL('/login', request.url))
+      return NextResponse.redirect(new URL('/login?next=' + pathname, request.url))
     }
-    return NextResponse.next()
+
+    // JWT 검증 + role 체크
+    try {
+      const secret = process.env.PAYLOAD_SECRET
+      if (!secret) {
+        // 시크릿 미설정 시 안전을 위해 차단
+        return NextResponse.redirect(new URL('/login', request.url))
+      }
+      const secretKey = new TextEncoder().encode(secret)
+      const { payload } = await jwtVerify(token, secretKey)
+      const role = (payload as { role?: string }).role
+      if (role !== 'admin') {
+        // 일반 사용자는 홈으로 (로그인 페이지로 보내면 무한 루프 가능)
+        return NextResponse.redirect(new URL('/?error=admin_only', request.url))
+      }
+      return NextResponse.next()
+    } catch {
+      // JWT 검증 실패 (만료/위조/구버전 토큰) → 로그인 페이지로
+      return NextResponse.redirect(new URL('/login?next=' + pathname, request.url))
+    }
   }
 
   // /mypage → 로그인 필수

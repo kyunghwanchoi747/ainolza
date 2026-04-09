@@ -76,6 +76,7 @@ export const Users: CollectionConfig = {
       ],
       defaultValue: 'user',
       required: true,
+      saveToJWT: true, // 미들웨어에서 role 체크하기 위해 JWT에 포함
     },
     {
       name: 'mustResetPassword',
