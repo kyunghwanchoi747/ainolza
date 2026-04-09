@@ -44,19 +44,6 @@ export default function ContactPage() {
               </div>
             </a>
 
-            {/* 전화 */}
-            <a
-              href="tel:070-8028-2616"
-              className="block p-6 rounded-xl border border-[#e5e5e5] hover:border-[#D4756E]/30 transition-all"
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-[#f8f8f8] flex items-center justify-center text-xl shrink-0">&#128222;</div>
-                <div>
-                  <h3 className="font-bold text-[#333]">전화 문의</h3>
-                  <p className="text-[#999] text-sm">070-8028-2616</p>
-                </div>
-              </div>
-            </a>
           </div>
 
           {/* 운영 시간 */}
@@ -65,7 +52,6 @@ export default function ContactPage() {
             <ul className="space-y-1">
               <li>카카오톡: 평일/주말 수시 응답</li>
               <li>이메일: 1~2 영업일 이내 답변</li>
-              <li>전화: 평일 10:00 ~ 18:00</li>
             </ul>
           </div>
         </div>

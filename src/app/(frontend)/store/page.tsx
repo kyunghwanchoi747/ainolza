@@ -4,7 +4,7 @@ import { getDday } from '@/lib/products'
 import { listProductsForStore } from '@/lib/products-db'
 
 export const metadata: Metadata = {
-  title: '강의/전자책',
+  title: '강의/책',
   description: 'AI 바이브 코딩부터 수익화 전략까지. 직접 설계한 콘텐츠를 확인하고 구매하세요.',
 }
 
@@ -23,7 +23,7 @@ export default async function StorePage() {
         <div className="max-w-[1200px] mx-auto">
           <div className="mb-10">
             <p className="text-[#D4756E] text-sm font-medium mb-2">AI놀자의 콘텐츠</p>
-            <h1 className="text-4xl font-bold tracking-tight text-[#333]">강의 / 전자책</h1>
+            <h1 className="text-4xl font-bold tracking-tight text-[#333]">강의 / 책</h1>
             <p className="text-[#666] mt-3">
               AI 활용법부터 수익화 전략, 자동화 시스템 구축까지 직접 설계한 콘텐츠입니다.
             </p>

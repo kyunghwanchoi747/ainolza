@@ -70,7 +70,7 @@ export default async function ProductDetailPage({
       <section className="pt-12 pb-10 px-6">
         <div className="max-w-[1100px] mx-auto">
           <Link href="/store" className="text-sm text-[#999] hover:text-[#333] transition-colors mb-6 inline-block">
-            ← 강의/전자책 목록
+            ← 강의/책 목록
           </Link>
 
           <div className="grid md:grid-cols-2 gap-10 mt-4">

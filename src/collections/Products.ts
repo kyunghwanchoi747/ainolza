@@ -2,6 +2,10 @@ import type { CollectionConfig } from 'payload'
 
 export const Products: CollectionConfig = {
   slug: 'products',
+  access: {
+    // 누구나 상품 정보 읽기 가능 (스토어 페이지용)
+    read: () => true,
+  },
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['title', 'productType', 'price', 'status', 'order'],

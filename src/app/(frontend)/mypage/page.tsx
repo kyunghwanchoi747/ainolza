@@ -207,7 +207,7 @@ export default function MyPage() {
             <Link href="/store" className="block p-4 rounded-xl border border-[#e5e5e5] hover:border-[#D4756E]/30 transition-all">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-medium text-[#333]">강의/전자책</h3>
+                  <h3 className="font-medium text-[#333]">강의/책</h3>
                   <p className="text-xs text-[#999]">구매 가능한 콘텐츠 보기</p>
                 </div>
                 <span className="text-[#999]">&rarr;</span>

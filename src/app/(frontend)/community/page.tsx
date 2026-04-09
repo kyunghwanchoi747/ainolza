@@ -18,7 +18,7 @@ export default function ReviewsPage() {
             <div className="text-5xl mb-4">&#128172;</div>
             <p className="text-lg font-medium text-[#333] mb-2">아직 등록된 후기가 없습니다</p>
             <p className="text-sm text-[#999] mb-6">수강생 분들의 소중한 후기를 기다리고 있어요.</p>
-            <Link href="/store" className="text-sm text-[#D4756E] hover:underline">강의/전자책 둘러보기 &rarr;</Link>
+            <Link href="/store" className="text-sm text-[#D4756E] hover:underline">강의/책 둘러보기 &rarr;</Link>
           </div>
         </div>
       </section>
