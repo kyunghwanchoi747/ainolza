@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getCloudflareContext } from '@opennextjs/cloudflare'
+import { getPayloadClient } from '@/lib/payload'
 
 // 임시 디버그 — 미들웨어와 동일한 검증 로직을 API에서 실행해 비교
 // (TODO: 검증 후 삭제)
@@ -89,6 +91,42 @@ export async function GET(request: NextRequest) {
       const s3B64 = btoa(String.fromCharCode(...s3)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
       result.computed_fallback = s3B64
       result.match_fallback = parts[2] === s3B64
+
+      // 4) Cloudflare 바인딩에서 직접 가져온 secret으로 서명
+      try {
+        const cfCtx = await getCloudflareContext({ async: true })
+        const cfSecret = (cfCtx.env as any).PAYLOAD_SECRET as string | undefined
+        result.cfSecretLen = cfSecret?.length
+        result.cfSecretFirst3 = cfSecret?.substring(0, 3)
+        result.cfSecretMatchProcessEnv = cfSecret === secret
+        if (cfSecret) {
+          const k4 = await crypto.subtle.importKey('raw', enc.encode(cfSecret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign'])
+          const s4 = new Uint8Array(await crypto.subtle.sign('HMAC', k4, data))
+          const s4B64 = btoa(String.fromCharCode(...s4)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+          result.computed_cfSecret = s4B64
+          result.match_cfSecret = parts[2] === s4B64
+        }
+      } catch (e) {
+        result.cfError = (e as Error).message
+      }
+
+      // 5) Payload가 실제로 사용 중인 secret을 직접 조회
+      try {
+        const pl = await getPayloadClient()
+        const realSecret = (pl as any).secret as string
+        result.payloadSecretLen = realSecret?.length
+        result.payloadSecretFirst3 = realSecret?.substring(0, 3)
+        result.payloadSecretMatchProcessEnv = realSecret === secret
+        if (realSecret) {
+          const k5 = await crypto.subtle.importKey('raw', enc.encode(realSecret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign'])
+          const s5 = new Uint8Array(await crypto.subtle.sign('HMAC', k5, data))
+          const s5B64 = btoa(String.fromCharCode(...s5)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+          result.computed_payloadSecret = s5B64
+          result.match_payloadSecret = parts[2] === s5B64
+        }
+      } catch (e) {
+        result.payloadError = (e as Error).message
+      }
     } catch (e) {
       result.verifyError = (e as Error).message
     }
