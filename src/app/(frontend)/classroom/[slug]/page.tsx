@@ -162,11 +162,55 @@ export default async function ClassroomDetailPage({
           </section>
         )}
 
-        {!classroom.liveUrl && !classroom.resourceUrl && (
-          <section className="p-6 border border-[#e5e5e5] rounded-2xl bg-[#fafafa] text-center">
-            <p className="text-[#666]">강의 시작 전입니다. 일정이 확정되면 안내드립니다.</p>
+        {/* 회차별 영상 + 가이드북 */}
+        {classroom.sessions && classroom.sessions.length > 0 && (
+          <section className="space-y-12">
+            <h2 className="text-2xl font-bold text-[#333]">회차별 강의</h2>
+            {classroom.sessions.map((s) => (
+              <div key={s.week} className="space-y-4">
+                <div className="flex items-baseline gap-3">
+                  <span className="text-sm font-medium text-[#D4756E]">{s.week}회차</span>
+                  <h3 className="text-lg font-bold text-[#333]">{s.title}</h3>
+                  {s.date && <span className="text-xs text-[#999]">{s.date}</span>}
+                </div>
+
+                {/* Vimeo 임베드 (16:9 반응형) */}
+                <div className="relative w-full overflow-hidden rounded-2xl bg-black" style={{ paddingTop: '56.25%' }}>
+                  <iframe
+                    src={`https://player.vimeo.com/video/${s.vimeoId}?badge=0&autopause=0&player_id=0&app_id=58479`}
+                    frameBorder="0"
+                    allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
+                    referrerPolicy="strict-origin-when-cross-origin"
+                    title={s.title}
+                    className="absolute inset-0 w-full h-full"
+                  />
+                </div>
+
+                {/* 가이드북 버튼 */}
+                {s.guidebookUrl && (
+                  <div className="flex justify-center pt-2">
+                    <a
+                      href={s.guidebookUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block px-6 py-3 bg-[#1a1a1a] text-white font-bold rounded-full hover:bg-[#333] transition-colors text-sm"
+                    >
+                      {s.week}회차 가이드북
+                    </a>
+                  </div>
+                )}
+              </div>
+            ))}
           </section>
         )}
+
+        {!classroom.liveUrl &&
+          !classroom.resourceUrl &&
+          (!classroom.sessions || classroom.sessions.length === 0) && (
+            <section className="p-6 border border-[#e5e5e5] rounded-2xl bg-[#fafafa] text-center">
+              <p className="text-[#666]">강의 시작 전입니다. 일정이 확정되면 안내드립니다.</p>
+            </section>
+          )}
       </div>
     </div>
   )
