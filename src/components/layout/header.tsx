@@ -6,9 +6,9 @@ import { Menu, X, User } from "lucide-react";
 import { useState, useEffect } from "react";
 
 const navItems = [
-    { href: '/store', label: '강의/전자책' },
+    { href: '/store', label: '강의/책' },
     { href: '/labs', label: 'AI실험실' },
-    { href: '/community', label: '후기' },
+    { href: '/tools', label: '도구' },
     { href: '/contact', label: '문의' },
 ];
 
