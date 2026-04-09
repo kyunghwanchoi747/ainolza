@@ -42,12 +42,12 @@ export default async function StorePage() {
                   href={`/store/${p.slug}`}
                   className="group rounded-2xl border border-[#e5e5e5] overflow-hidden hover:shadow-lg transition-all bg-white"
                 >
-                  <div className="relative aspect-[4/3] bg-[#f8f8f8] overflow-hidden">
+                  <div className="relative aspect-square bg-[#f8f8f8] overflow-hidden flex items-center justify-center p-4">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={thumbnail}
                       alt={p.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                      className="max-w-full max-h-full object-contain group-hover:scale-105 transition-transform"
                     />
                     {dday !== null && (
                       <div className="absolute top-3 right-3 px-2.5 py-1 rounded-md bg-[#D4756E] text-white text-xs font-bold">

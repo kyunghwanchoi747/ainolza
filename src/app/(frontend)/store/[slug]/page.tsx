@@ -75,12 +75,12 @@ export default async function ProductDetailPage({
 
           <div className="grid md:grid-cols-2 gap-10 mt-4">
             {/* 썸네일 영역 */}
-            <div className="relative aspect-square rounded-2xl overflow-hidden bg-[#f8f8f8] border border-[#e5e5e5]">
+            <div className="relative aspect-square rounded-2xl overflow-hidden bg-[#f8f8f8] border border-[#e5e5e5] flex items-center justify-center p-6">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={thumbnailUrl}
                 alt={product.title}
-                className="w-full h-full object-cover"
+                className="max-w-full max-h-full object-contain"
               />
               {dday !== null && (
                 <div className="absolute top-4 right-4 px-3 py-1.5 rounded-lg bg-[#D4756E] text-white text-sm font-bold">
