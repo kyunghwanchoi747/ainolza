@@ -55,7 +55,7 @@ export default function StorePage() {
                   </div>
                   <div className="p-5">
                     <p className="text-xs text-[#999] mb-1.5">{p.category}</p>
-                    <h3 className="font-bold text-[#333] mb-2 line-clamp-2 leading-snug">
+                    <h3 className="font-bold text-[#333] mb-2 line-clamp-2 leading-snug whitespace-pre-line">
                       {p.title}
                     </h3>
                     {p.shortDescription && (

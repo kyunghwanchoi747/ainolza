@@ -88,7 +88,7 @@ export default async function ProductDetailPage({
             {/* 정보 영역 */}
             <div className="flex flex-col justify-center">
               <p className="text-[#D4756E] text-sm font-medium mb-2">{product.category}</p>
-              <h1 className="text-3xl md:text-4xl font-bold text-[#333] leading-tight mb-3">
+              <h1 className="text-3xl md:text-4xl font-bold text-[#333] leading-tight mb-3 whitespace-pre-line">
                 {product.title}
               </h1>
               {product.subtitle && (
