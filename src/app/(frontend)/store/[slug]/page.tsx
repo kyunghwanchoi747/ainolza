@@ -1,7 +1,8 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
-import { getProduct, getDday, PRODUCTS } from '@/lib/products'
+import { getDday, PRODUCTS } from '@/lib/products'
+import { getProductForStore } from '@/lib/products-db'
 
 export const dynamic = 'force-dynamic'
 
@@ -15,7 +16,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>
 }): Promise<Metadata> {
   const { slug } = await params
-  const product = getProduct(slug)
+  const product = await getProductForStore(slug)
   if (!product) return { title: '상품을 찾을 수 없습니다' }
   return {
     title: `${product.title} | AI놀자`,
@@ -29,14 +30,17 @@ export default async function ProductDetailPage({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
-  const product = getProduct(slug)
+  const product = await getProductForStore(slug)
   if (!product || product.hidden) return notFound()
 
   const ext = product.imageExt || 'png'
-  const detailCount = product.detailImageCount ?? 1
-  const detailImages = Array.from({ length: detailCount }, (_, i) =>
-    `/store/${product.slug}/detail-${i + 1}.${ext}`,
-  )
+  // DB 업로드 이미지가 있으면 우선, 없으면 파일 폴백
+  const detailImages: string[] = product._dbDetailUrls && product._dbDetailUrls.length > 0
+    ? product._dbDetailUrls
+    : Array.from({ length: product.detailImageCount ?? 1 }, (_, i) =>
+        `/store/${product.slug}/detail-${i + 1}.${ext}`,
+      )
+  const thumbnailUrl = product._dbThumbnailUrl || `/store/${product.slug}/thumbnail.${ext}`
   const dday = getDday(product.discountUntil)
 
   // SEO JSON-LD
@@ -74,7 +78,7 @@ export default async function ProductDetailPage({
             <div className="relative aspect-square rounded-2xl overflow-hidden bg-[#f8f8f8] border border-[#e5e5e5]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={`/store/${product.slug}/thumbnail.${ext}`}
+                src={thumbnailUrl}
                 alt={product.title}
                 className="w-full h-full object-cover"
               />

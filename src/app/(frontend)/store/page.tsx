@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { getVisibleProducts, getDday } from '@/lib/products'
+import { getDday } from '@/lib/products'
+import { listProductsForStore } from '@/lib/products-db'
 
 export const metadata: Metadata = {
   title: '강의/전자책',
@@ -13,8 +14,8 @@ function formatPrice(p: number): string {
   return p.toLocaleString('ko-KR') + '원'
 }
 
-export default function StorePage() {
-  const products = getVisibleProducts()
+export default async function StorePage() {
+  const products = await listProductsForStore()
 
   return (
     <div className="min-h-screen bg-white">
@@ -32,7 +33,8 @@ export default function StorePage() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {products.map((p) => {
               const ext = p.imageExt || 'png'
-              const thumbnail = `/store/${p.slug}/thumbnail.${ext}`
+              // DB 업로드 이미지가 있으면 우선, 없으면 파일 폴백
+              const thumbnail = p._dbThumbnailUrl || `/store/${p.slug}/thumbnail.${ext}`
               const dday = getDday(p.discountUntil)
               return (
                 <Link
