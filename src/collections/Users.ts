@@ -1,5 +1,5 @@
 import type { CollectionConfig } from 'payload'
-import { sendWelcomeEmail } from '../lib/email-templates'
+import { sendWelcomeEmail, sendUserSignupToAdmin } from '../lib/email-templates'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://ainolza.kr'
 
@@ -62,6 +62,14 @@ export const Users: CollectionConfig = {
           console.log('[USER WELCOME EMAIL] 성공:', doc.email)
         } catch (e) {
           console.error('[USER WELCOME EMAIL] 실패:', doc.email, (e as Error).message)
+        }
+
+        // 관리자에게도 신규 가입 알림
+        try {
+          await sendUserSignupToAdmin(req.payload, doc as any)
+          console.log('[USER SIGNUP ADMIN NOTIFY] 성공:', doc.email)
+        } catch (e) {
+          console.error('[USER SIGNUP ADMIN NOTIFY] 실패:', doc.email, (e as Error).message)
         }
         void previousDoc
       },

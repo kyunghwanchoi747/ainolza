@@ -153,6 +153,37 @@ export async function sendRefundCompletedToBuyer(
 // 관리자용
 // ==========================================
 
+/** 신규 회원가입 → 관리자 알림 */
+export async function sendUserSignupToAdmin(
+  payload: Payload,
+  user: { id: number | string; email: string; name?: string | null; phone?: string | null; googleId?: string | null; kakaoId?: string | null; naverId?: string | null },
+) {
+  const provider = user.googleId
+    ? 'Google OAuth'
+    : user.kakaoId
+      ? '카카오 OAuth'
+      : user.naverId
+        ? '네이버 OAuth'
+        : '이메일 가입'
+  await payload.sendEmail({
+    to: adminEmail(),
+    subject: `[AI놀자 알림] 🆕 새 회원 가입 — ${user.email}`,
+    html: wrap(
+      '🆕 새 회원이 가입했습니다',
+      `
+      <table cellpadding="6" cellspacing="0" style="width:100%;background:#fafafa;border-radius:10px;padding:8px;margin:0 0 24px;font-size:13px;color:#666;">
+        <tr><td style="width:90px;color:#999;">이메일</td><td><strong style="color:#333;">${user.email}</strong></td></tr>
+        <tr><td style="color:#999;">이름</td><td>${user.name || '-'}</td></tr>
+        <tr><td style="color:#999;">연락처</td><td>${user.phone || '-'}</td></tr>
+        <tr><td style="color:#999;">가입경로</td><td>${provider}</td></tr>
+      </table>
+      <div style="text-align:center;margin:24px 0;">
+        <a href="${SITE_URL}/admin/collections/users/${user.id}" style="display:inline-block;background:#D4756E;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:10px;font-size:14px;font-weight:bold;">회원 상세 보기</a>
+      </div>`,
+    ),
+  })
+}
+
 /** 신규 주문 접수 → 관리자 알림 */
 export async function sendOrderCreatedToAdmin(
   payload: Payload,
