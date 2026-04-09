@@ -57,6 +57,30 @@ export async function GET(request: NextRequest) {
   if (token && secret) {
     try {
       result.verify = await verifyJwtHS256(token, secret)
+
+      // 직접 서명 후 비교
+      const parts = token.split('.')
+      const enc = new TextEncoder()
+      const data = enc.encode(`${parts[0]}.${parts[1]}`)
+
+      // 1) trim 안 한 secret으로 서명
+      const k1 = await crypto.subtle.importKey('raw', enc.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign'])
+      const s1 = new Uint8Array(await crypto.subtle.sign('HMAC', k1, data))
+      const s1B64 = btoa(String.fromCharCode(...s1)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+
+      // 2) trim 한 secret으로 서명
+      const trimmed = secret.trim()
+      const k2 = await crypto.subtle.importKey('raw', enc.encode(trimmed), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign'])
+      const s2 = new Uint8Array(await crypto.subtle.sign('HMAC', k2, data))
+      const s2B64 = btoa(String.fromCharCode(...s2)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+
+      result.original_sig = parts[2]
+      result.computed_raw = s1B64
+      result.computed_trimmed = s2B64
+      result.match_raw = parts[2] === s1B64
+      result.match_trimmed = parts[2] === s2B64
+      result.trimmed_len = trimmed.length
+      result.has_trailing_ws = secret.length !== trimmed.length
     } catch (e) {
       result.verifyError = (e as Error).message
     }
