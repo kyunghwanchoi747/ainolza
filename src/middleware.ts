@@ -1,8 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 /**
+ * base64url → Uint8Array (JWT 표준은 padding 없는 base64url)
+ */
+function base64UrlDecode(input: string): Uint8Array {
+  // base64url → base64
+  const b64 = input.replace(/-/g, '+').replace(/_/g, '/')
+  // padding 추가
+  const padded = b64 + '='.repeat((4 - (b64.length % 4)) % 4)
+  const binary = atob(padded)
+  const bytes = new Uint8Array(binary.length)
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i)
+  return bytes
+}
+
+/**
  * 네이티브 Web Crypto API로 HS256 JWT 검증
- * (jose 라이브러리가 Cloudflare Workers Edge에서 일부 케이스 실패해서 직접 구현)
  */
 async function verifyJwtHS256(token: string, secret: string): Promise<Record<string, unknown> | null> {
   try {
@@ -20,22 +33,13 @@ async function verifyJwtHS256(token: string, secret: string): Promise<Record<str
     )
 
     const data = enc.encode(`${headerB64}.${payloadB64}`)
-    const sigBytes = Uint8Array.from(
-      atob(sigB64.replace(/-/g, '+').replace(/_/g, '/')),
-      (c) => c.charCodeAt(0),
-    )
+    const sigBytes = base64UrlDecode(sigB64)
     const valid = await crypto.subtle.verify('HMAC', key, sigBytes, data)
     if (!valid) return null
 
-    const payloadJson = new TextDecoder().decode(
-      Uint8Array.from(
-        atob(payloadB64.replace(/-/g, '+').replace(/_/g, '/')),
-        (c) => c.charCodeAt(0),
-      ),
-    )
+    const payloadJson = new TextDecoder().decode(base64UrlDecode(payloadB64))
     const payload = JSON.parse(payloadJson) as Record<string, unknown>
 
-    // 만료 체크
     const exp = payload.exp as number | undefined
     if (exp && Date.now() / 1000 > exp) return null
 
