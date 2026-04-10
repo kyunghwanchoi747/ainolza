@@ -18,10 +18,11 @@ export const Orders: CollectionConfig = {
   },
   hooks: {
     afterChange: [
-      async ({ doc, operation, previousDoc, req }) => {
-        // 테스트 주문(TEST_ 접두사)은 알림 발송 안 함
-        if (typeof doc.orderNumber === 'string' && doc.orderNumber.startsWith('TEST_')) return
-
+      async ({ doc, operation, previousDoc, req }): Promise<void> => {
+        // ⚠️ 임시 비활성화 — PATCH 500 원인 진단용
+        // TODO: 원인 해결 후 활성화
+        return
+        /* eslint-disable no-unreachable */
         const d = doc as any
         const oid = d.orderNumber || String(d.id)
 

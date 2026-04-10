@@ -32,8 +32,11 @@ export const Users: CollectionConfig = {
   },
   hooks: {
     beforeDelete: [
-      // 마지막 admin 삭제 방지 (재발 방지)
-      async ({ id, req }) => {
+      // ⚠️ 임시 비활성화 — PATCH 500 진단용
+      async ({ id, req }): Promise<void> => {
+        return
+        /* eslint-disable no-unreachable */
+        // 마지막 admin 삭제 방지 (재발 방지)
         try {
           const target = await req.payload.findByID({ collection: 'users', id })
           if ((target as { role?: string })?.role !== 'admin') return
