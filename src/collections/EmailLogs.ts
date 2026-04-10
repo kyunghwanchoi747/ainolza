@@ -22,7 +22,7 @@ export const EmailLogs: CollectionConfig = {
     },
   },
   fields: [
-    { name: 'to', type: 'text', required: true, label: '수신자' },
+    { name: 'recipient', type: 'text', required: true, label: '수신자' },
     { name: 'subject', type: 'text', required: true, label: '제목' },
     {
       name: 'type',

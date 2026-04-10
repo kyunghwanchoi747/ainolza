@@ -85,24 +85,21 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, DesignPages, Products, ProductCategories, Posts, Comments, Programs, SiteSettings, Enrollments, Orders],
-  // EmailLogs 임시 제거 — 'to' 컬럼 SQL 예약어 충돌 의심
+  collections: [Users, Media, DesignPages, Products, ProductCategories, Posts, Comments, Programs, SiteSettings, Enrollments, Orders, EmailLogs],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || 'dev-secret-change-in-production',
   db: dbAdapter,
   email: workerMailerAdapter,
-  // ⚠️ r2Storage 임시 비활성화 — PATCH 500 진단
-  // plugins: r2Binding
-  //   ? [
-  //       r2Storage({
-  //         bucket: r2Binding,
-  //         collections: {
-  //           media: true,
-  //         },
-  //       }),
-  //     ]
-  //   : [],
-  plugins: [],
+  plugins: r2Binding
+    ? [
+        r2Storage({
+          bucket: r2Binding,
+          collections: {
+            media: true,
+          },
+        }),
+      ]
+    : [],
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },

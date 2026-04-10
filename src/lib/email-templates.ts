@@ -25,7 +25,7 @@ export async function logEmailSent(
   try {
     await payload.create({
       collection: 'email_logs' as any,
-      data: { ...data, status: data.status || 'sent' },
+      data: { recipient: data.to, subject: data.subject, type: data.type, status: data.status || 'sent', error: data.error, relatedId: data.relatedId },
     })
   } catch {
     // 로그 저장 실패는 무시
