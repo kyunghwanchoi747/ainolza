@@ -90,16 +90,18 @@ export default buildConfig({
   secret: process.env.PAYLOAD_SECRET || 'dev-secret-change-in-production',
   db: dbAdapter,
   email: workerMailerAdapter,
-  plugins: r2Binding
-    ? [
-        r2Storage({
-          bucket: r2Binding,
-          collections: {
-            media: true,
-          },
-        }),
-      ]
-    : [],
+  // ⚠️ r2Storage 임시 비활성화 — PATCH 500 진단
+  // plugins: r2Binding
+  //   ? [
+  //       r2Storage({
+  //         bucket: r2Binding,
+  //         collections: {
+  //           media: true,
+  //         },
+  //       }),
+  //     ]
+  //   : [],
+  plugins: [],
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
