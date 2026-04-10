@@ -4,6 +4,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, ChevronDown, ExternalLink } from "lucide-react";
 import { useState } from "react";
+import { motion } from "framer-motion";
+import { Reveal, StaggerReveal } from "@/components/ui/reveal";
 import type { ProductWithDbImages } from "@/lib/products-db";
 
 // 일반 FAQ — 모든 상품/사이트 공통 (강의 한정 X)
@@ -104,55 +106,69 @@ export default function LandingPage({ products }: LandingPageProps) {
       {/* 1. 히어로 */}
       <section className="bg-dark-blue text-white py-24 md:py-40 px-6">
         <div className="max-w-[1200px] mx-auto text-center">
-          <p className="text-brand text-base md:text-lg font-bold mb-6 tracking-wide">
-            놀면서 배우는 AI, 만들면서 익히는 AI
-          </p>
-          <h1 className="text-5xl md:text-7xl font-extrabold leading-[1.15] mb-10">
-            AI놀자에서<br />직접 만나보세요
-          </h1>
-          <p className="text-white/80 text-lg md:text-2xl mb-12 leading-relaxed font-medium">
-            제가 직접 만든 도구와 실험실, 그리고 강의로<br />
-            평범한 사람도 AI로 결과를 만들 수 있습니다.
-          </p>
-          <div className="flex flex-wrap gap-4 justify-center">
-            <Link
-              href="/tools"
-              className="inline-block px-10 py-5 bg-white text-[#2C3E50] font-extrabold rounded-full hover:bg-[#f0f0f0] hover:scale-105 active:scale-95 transition-all text-base md:text-lg cursor-pointer shadow-lg"
-            >
-              도구 둘러보기
-            </Link>
-            <Link
-              href="/labs"
-              className="inline-block px-10 py-5 border-2 border-white/50 text-white font-bold rounded-full hover:bg-white/10 hover:scale-105 active:scale-95 transition-all text-base md:text-lg cursor-pointer"
-            >
-              AI 실험실 체험
-            </Link>
-          </div>
+          <Reveal delay={0.1} direction="none">
+            <p className="text-brand text-base md:text-lg font-bold mb-6 tracking-wide">
+              놀면서 배우는 AI, 만들면서 익히는 AI
+            </p>
+          </Reveal>
+          <Reveal delay={0.3} direction="up" distance={30}>
+            <h1 className="text-5xl md:text-7xl font-extrabold leading-[1.15] mb-10">
+              AI놀자에서<br />직접 만나보세요
+            </h1>
+          </Reveal>
+          <Reveal delay={0.5} direction="up" distance={20}>
+            <p className="text-white/80 text-lg md:text-2xl mb-12 leading-relaxed font-medium">
+              제가 직접 만든 도구와 실험실, 그리고 강의로<br />
+              평범한 사람도 AI로 결과를 만들 수 있습니다.
+            </p>
+          </Reveal>
+          <Reveal delay={0.7} direction="up" distance={15}>
+            <div className="flex flex-wrap gap-4 justify-center">
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Link
+                  href="/tools"
+                  className="inline-block px-10 py-5 bg-white text-[#2C3E50] font-extrabold rounded-full hover:bg-[#f0f0f0] transition-colors text-base md:text-lg cursor-pointer shadow-lg"
+                >
+                  도구 둘러보기
+                </Link>
+              </motion.div>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Link
+                  href="/labs"
+                  className="inline-block px-10 py-5 border-2 border-white/50 text-white font-bold rounded-full hover:bg-white/10 transition-colors text-base md:text-lg cursor-pointer"
+                >
+                  AI 실험실 체험
+                </Link>
+              </motion.div>
+            </div>
+          </Reveal>
         </div>
       </section>
 
       {/* 2. 도구 */}
       <section className="py-24 md:py-32 px-6">
         <div className="max-w-[1200px] mx-auto">
-          <div className="flex items-end justify-between mb-12">
-            <div>
-              <p className="text-brand text-sm md:text-base font-bold mb-3 tracking-wide">
-                내가 만든 것들
-              </p>
-              <h2 className="text-4xl md:text-5xl font-extrabold leading-tight">도구</h2>
-              <p className="text-body mt-4 text-base md:text-lg">
-                직접 기획·개발해 운영 중인 무료 웹 서비스와 Chrome 확장
-              </p>
+          <Reveal>
+            <div className="flex items-end justify-between mb-12">
+              <div>
+                <p className="text-brand text-sm md:text-base font-bold mb-3 tracking-wide">
+                  내가 만든 것들
+                </p>
+                <h2 className="text-4xl md:text-5xl font-extrabold leading-tight">도구</h2>
+                <p className="text-body mt-4 text-base md:text-lg">
+                  직접 기획·개발해 운영 중인 무료 웹 서비스와 Chrome 확장
+                </p>
+              </div>
+              <Link
+                href="/tools"
+                className="text-sm md:text-base text-brand font-bold hover:underline flex items-center gap-1 cursor-pointer"
+              >
+                전체 보기 <ArrowRight className="w-4 h-4" />
+              </Link>
             </div>
-            <Link
-              href="/tools"
-              className="text-sm md:text-base text-brand font-bold hover:underline flex items-center gap-1 cursor-pointer"
-            >
-              전체 보기 <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
+          </Reveal>
 
-          <div className="grid sm:grid-cols-2 gap-6">
+          <StaggerReveal stagger={0.12} className="grid sm:grid-cols-2 gap-6">
             {TOOLS.map((t) => (
               <a
                 key={t.url}
@@ -182,33 +198,35 @@ export default function LandingPage({ products }: LandingPageProps) {
                 </div>
               </a>
             ))}
-          </div>
+          </StaggerReveal>
         </div>
       </section>
 
       {/* 3. AI 실험실 */}
       <section className="py-24 md:py-32 px-6 bg-surface">
         <div className="max-w-[1200px] mx-auto">
-          <div className="flex items-end justify-between mb-12">
-            <div>
-              <p className="text-brand text-sm md:text-base font-bold mb-3 tracking-wide">
-                놀면서 배우는
-              </p>
-              <h2 className="text-4xl md:text-5xl font-extrabold leading-tight">AI 실험실</h2>
-              <p className="text-body mt-4 text-base md:text-lg">
-                간단한 체험으로 AI의 원리를 직접 느껴보세요
-              </p>
+          <Reveal>
+            <div className="flex items-end justify-between mb-12">
+              <div>
+                <p className="text-brand text-sm md:text-base font-bold mb-3 tracking-wide">
+                  놀면서 배우는
+                </p>
+                <h2 className="text-4xl md:text-5xl font-extrabold leading-tight">AI 실험실</h2>
+                <p className="text-body mt-4 text-base md:text-lg">
+                  간단한 체험으로 AI의 원리를 직접 느껴보세요
+                </p>
+              </div>
+              <Image
+                src="/mascot.png"
+                alt="AI놀자 마스코트"
+                width={80}
+                height={80}
+                className="object-contain hidden md:block"
+              />
             </div>
-            <Image
-              src="/mascot.png"
-              alt="AI놀자 마스코트"
-              width={80}
-              height={80}
-              className="object-contain hidden md:block"
-            />
-          </div>
+          </Reveal>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <StaggerReveal stagger={0.08} className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
             {LABS_PREVIEW.map((item) => (
               <Link
                 key={item.href}
@@ -235,9 +253,10 @@ export default function LandingPage({ products }: LandingPageProps) {
                 </span>
               </Link>
             ))}
-          </div>
+          </StaggerReveal>
 
           {/* 오늘의 퀴즈 배너 */}
+          <Reveal delay={0.1}>
           <Link
             href="/labs/daily-quiz.html"
             className="group block mt-8 p-6 bg-white rounded-2xl border-2 border-line hover:border-[#D4A853]/40 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer"
@@ -255,21 +274,24 @@ export default function LandingPage({ products }: LandingPageProps) {
               </span>
             </div>
           </Link>
+          </Reveal>
         </div>
       </section>
 
       {/* 4. 강의/책 */}
       <section className="py-24 md:py-32 px-6">
         <div className="max-w-[1200px] mx-auto">
-          <div className="text-center mb-16">
-            <p className="text-brand text-sm md:text-base font-bold mb-3 tracking-wide">
-              더 깊이 배우고 싶다면
-            </p>
-            <h2 className="text-4xl md:text-5xl font-extrabold leading-tight">강의 / 책</h2>
-            <p className="text-body mt-4 max-w-[600px] mx-auto text-base md:text-lg">
-              실험실과 도구를 만들어 본 경험을 그대로 강의에 담았습니다.
-            </p>
-          </div>
+          <Reveal>
+            <div className="text-center mb-16">
+              <p className="text-brand text-sm md:text-base font-bold mb-3 tracking-wide">
+                더 깊이 배우고 싶다면
+              </p>
+              <h2 className="text-4xl md:text-5xl font-extrabold leading-tight">강의 / 책</h2>
+              <p className="text-body mt-4 max-w-[600px] mx-auto text-base md:text-lg">
+                실험실과 도구를 만들어 본 경험을 그대로 강의에 담았습니다.
+              </p>
+            </div>
+          </Reveal>
 
           {/* Featured 큰 카드 */}
           {featured && (
