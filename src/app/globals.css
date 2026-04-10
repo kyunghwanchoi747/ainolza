@@ -116,3 +116,24 @@
     -moz-osx-font-smoothing: grayscale;
   }
 }
+
+/* ═══ 스크롤 등장 애니메이션 (data-reveal) ═══ */
+[data-reveal] {
+  opacity: 0;
+  transition: opacity 0.7s cubic-bezier(.25,.46,.45,.94),
+              transform 0.7s cubic-bezier(.25,.46,.45,.94);
+}
+
+/* 방향별 시작 위치 */
+[data-reveal=""],
+[data-reveal="up"]    { transform: translateY(40px); }
+[data-reveal="down"]  { transform: translateY(-40px); }
+[data-reveal="left"]  { transform: translateX(40px); }
+[data-reveal="right"] { transform: translateX(-40px); }
+[data-reveal="none"]  { transform: none; }
+
+/* 등장 완료 */
+[data-reveal].revealed {
+  opacity: 1;
+  transform: translateY(0) translateX(0);
+}

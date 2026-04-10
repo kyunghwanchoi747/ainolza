@@ -3,6 +3,7 @@ import { Header } from '../../components/layout/header'
 import { SiteFooter } from '../../components/layout/site-footer'
 import { MigrationPopup } from '@/components/migration-popup'
 import { CookieConsent } from '@/components/cookie-consent'
+import { ScrollRevealInit } from '@/components/ui/scroll-reveal'
 
 export default function FrontendLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -18,6 +19,7 @@ export default function FrontendLayout({ children }: { children: React.ReactNode
         <SiteFooter />
         <MigrationPopup />
         <CookieConsent />
+        <ScrollRevealInit />
       </ThemeProvider>
     </div>
   )
