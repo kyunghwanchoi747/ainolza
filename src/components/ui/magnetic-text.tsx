@@ -61,7 +61,7 @@ export function MagneticText({
   const lines = text.split('\n')
 
   return (
-    <div ref={containerRef} className={className} aria-label={text.replace('\n', ' ')}>
+    <div ref={containerRef} className={`${className} cursor-default select-none`} aria-label={text.replace('\n', ' ')}>
       {lines.map((line, li) => (
         <span key={li} className="block">
           {line.split('').map((char, ci) => (
