@@ -129,7 +129,7 @@ function EnrollFormContent() {
               <tbody>
                 <tr><td className="text-sub py-1.5 w-20">은행</td><td className="text-ink font-bold">토스뱅크</td></tr>
                 <tr><td className="text-sub py-1.5">계좌번호</td><td className="text-ink font-bold text-lg">1000-1041-3507</td></tr>
-                <tr><td className="text-sub py-1.5">예금주</td><td className="text-ink font-bold">에이아이놀자</td></tr>
+                <tr><td className="text-sub py-1.5">예금주</td><td className="text-ink font-bold">최경환</td></tr>
                 {product?.price && (
                   <tr><td className="text-sub py-1.5">금액</td><td className="text-brand font-extrabold text-lg">{formatPrice(product.price)}</td></tr>
                 )}

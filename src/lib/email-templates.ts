@@ -207,7 +207,7 @@ export async function sendEnrollmentConfirmToBuyer(
       <table cellpadding="8" cellspacing="0" style="width:100%;background:#FFF1F0;border:2px solid #D4756E;border-radius:12px;margin:0 0 24px;font-size:14px;color:#333;">
         <tr><td style="width:80px;color:#888;font-weight:bold;">은행</td><td><strong>토스뱅크</strong></td></tr>
         <tr><td style="color:#888;font-weight:bold;">계좌번호</td><td><strong style="font-size:18px;color:#1a1a1a;">1000-1041-3507</strong></td></tr>
-        <tr><td style="color:#888;font-weight:bold;">예금주</td><td><strong>에이아이놀자</strong></td></tr>
+        <tr><td style="color:#888;font-weight:bold;">예금주</td><td><strong>최경환</strong></td></tr>
         <tr><td style="color:#888;font-weight:bold;">금액</td><td><strong style="font-size:18px;color:#D4756E;">${priceText}</strong></td></tr>
       </table>
 
