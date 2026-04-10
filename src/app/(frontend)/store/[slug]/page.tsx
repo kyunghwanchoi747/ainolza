@@ -4,6 +4,7 @@ import type { Metadata } from 'next'
 import { getDday, PRODUCTS } from '@/lib/products'
 import { getProductForStore } from '@/lib/products-db'
 import { ProductFaqList } from '@/components/store/product-faq-list'
+import { ReviewSection } from '@/components/store/review-section'
 
 export const dynamic = 'force-dynamic'
 
@@ -224,6 +225,11 @@ export default async function ProductDetailPage({
             ))}
           </div>
         </section>
+      )}
+
+      {/* 수강생 후기 */}
+      {product._dbId && (
+        <ReviewSection productSlug={product.slug} productId={Number(product._dbId)} />
       )}
 
       {/* 상품별 FAQ */}

@@ -94,6 +94,7 @@ function dbToProduct(d: DbProduct): Product {
       ? { _dbFaq: d.faq.map((f) => ({ question: f.question, answer: f.answer })) }
       : {}),
     ...(d.featured ? { _dbFeatured: true } : {}),
+    _dbId: d.id,
   } as Product & {
     _dbThumbnailUrl?: string
     _dbDetailUrls?: string[]
@@ -105,6 +106,7 @@ function dbToProduct(d: DbProduct): Product {
 }
 
 export type ProductWithDbImages = Product & {
+  _dbId?: number | string
   _dbThumbnailUrl?: string
   _dbDetailUrls?: string[]
   _dbTags?: string[]

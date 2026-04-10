@@ -21,6 +21,7 @@ import { SiteSettings } from './collections/SiteSettings'
 import { Enrollments } from './collections/Enrollments'
 import { Orders } from './collections/Orders'
 import { EmailLogs } from './collections/EmailLogs'
+import { Reviews } from './collections/Reviews'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -85,9 +86,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  // EmailLogs 제거 — recipient 컬럼으로 바꿨지만 Payload 내부 스키마 불일치로 여전히 충돌
-  // 별도 마이그레이션 후 재등록 예정
-  collections: [Users, Media, DesignPages, Products, ProductCategories, Posts, Comments, Programs, SiteSettings, Enrollments, Orders],
+  collections: [Users, Media, DesignPages, Products, ProductCategories, Posts, Comments, Programs, SiteSettings, Enrollments, Orders, Reviews],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || 'dev-secret-change-in-production',
   db: dbAdapter,
