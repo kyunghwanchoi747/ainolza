@@ -1,5 +1,5 @@
 import type { CollectionConfig } from 'payload'
-import { sendEnrollmentToAdmin, sendEnrollmentConfirmToBuyer } from '../lib/email-templates'
+import { sendEnrollmentToAdmin, sendEnrollmentConfirmToBuyer, logEmailSent } from '../lib/email-templates'
 
 export const Enrollments: CollectionConfig = {
   slug: 'enrollments',
@@ -12,30 +12,25 @@ export const Enrollments: CollectionConfig = {
       async ({ doc, operation, req }) => {
         if (operation !== 'create') return
 
-        // 1. 관리자에게 알림
+        const d = doc as any
         try {
-          await sendEnrollmentToAdmin(req.payload, doc as any)
+          await sendEnrollmentToAdmin(req.payload, d)
+          await logEmailSent(req.payload, { to: 'admin', subject: `수강신청 ${d.name}`, type: 'enrollment-admin', relatedId: d.email })
         } catch (e) {
-          console.error('[ENROLLMENT ADMIN NOTIFY] 실패:', (e as Error).message)
+          await logEmailSent(req.payload, { to: 'admin', subject: `수강신청`, type: 'enrollment-admin', status: 'failed', error: (e as Error).message })
         }
 
-        // 2. 신청자에게 계좌 안내 메일
         try {
-          // 해당 프로그램의 가격 조회 (DB Products에서)
           let product: { title?: string; price?: number; originalPrice?: number } | null = null
-          if ((doc as any).program) {
-            const result = await req.payload.find({
-              collection: 'products',
-              where: { slug: { equals: (doc as any).program } },
-              limit: 1,
-              depth: 0,
-            })
+          if (d.program) {
+            const result = await req.payload.find({ collection: 'products', where: { slug: { equals: d.program } }, limit: 1, depth: 0 })
             const p = result.docs[0] as any
             if (p) product = { title: p.title, price: p.price, originalPrice: p.originalPrice }
           }
-          await sendEnrollmentConfirmToBuyer(req.payload, doc as any, product)
+          await sendEnrollmentConfirmToBuyer(req.payload, d, product)
+          await logEmailSent(req.payload, { to: d.email, subject: `수강신청 계좌안내`, type: 'enrollment-buyer', relatedId: d.program })
         } catch (e) {
-          console.error('[ENROLLMENT BUYER NOTIFY] 실패:', (e as Error).message)
+          await logEmailSent(req.payload, { to: d.email || '', subject: `수강신청 계좌안내`, type: 'enrollment-buyer', status: 'failed', error: (e as Error).message })
         }
       },
     ],

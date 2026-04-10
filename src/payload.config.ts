@@ -20,6 +20,7 @@ import { Programs } from './collections/Programs'
 import { SiteSettings } from './collections/SiteSettings'
 import { Enrollments } from './collections/Enrollments'
 import { Orders } from './collections/Orders'
+import { EmailLogs } from './collections/EmailLogs'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -84,7 +85,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, DesignPages, Products, ProductCategories, Posts, Comments, Programs, SiteSettings, Enrollments, Orders],
+  collections: [Users, Media, DesignPages, Products, ProductCategories, Posts, Comments, Programs, SiteSettings, Enrollments, Orders, EmailLogs],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || 'dev-secret-change-in-production',
   db: dbAdapter,

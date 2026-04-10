@@ -5,6 +5,7 @@ import {
   sendPaymentCompletedToBuyer,
   sendRefundRequestedToAdmin,
   sendRefundCompletedToBuyer,
+  logEmailSent,
 } from '../lib/email-templates'
 
 export const Orders: CollectionConfig = {
@@ -21,29 +22,32 @@ export const Orders: CollectionConfig = {
         if (typeof doc.orderNumber === 'string' && doc.orderNumber.startsWith('TEST_')) return
 
         try {
-          // 1) 신규 주문 → 관리자에게 알림
+          const d = doc as any
+          const oid = d.orderNumber || String(d.id)
+
           if (operation === 'create') {
-            await sendOrderCreatedToAdmin(req.payload, doc as any)
+            await sendOrderCreatedToAdmin(req.payload, d)
+            await logEmailSent(req.payload, { to: 'admin', subject: `주문접수 ${oid}`, type: 'order-admin', relatedId: oid })
           }
 
-          // 2) 상태 변경 감지 (update 시에만)
           if (operation === 'update' && previousDoc) {
             const prevStatus = (previousDoc as any).status
-            const newStatus = doc.status
+            const newStatus = d.status
 
             if (prevStatus !== newStatus) {
-              // → paid 로 변경 시: 관리자 + 사용자 모두에게
               if (newStatus === 'paid') {
-                await sendPaymentCompletedToAdmin(req.payload, doc as any)
-                await sendPaymentCompletedToBuyer(req.payload, doc as any)
+                await sendPaymentCompletedToAdmin(req.payload, d)
+                await logEmailSent(req.payload, { to: 'admin', subject: `결제완료 ${oid}`, type: 'payment-admin', relatedId: oid })
+                await sendPaymentCompletedToBuyer(req.payload, d)
+                await logEmailSent(req.payload, { to: d.buyerEmail, subject: `결제완료 수강안내`, type: 'payment-buyer', relatedId: oid })
               }
-              // → refund_requested 로 변경 시: 관리자에게 알림
               if (newStatus === 'refund_requested') {
-                await sendRefundRequestedToAdmin(req.payload, doc as any)
+                await sendRefundRequestedToAdmin(req.payload, d)
+                await logEmailSent(req.payload, { to: 'admin', subject: `환불요청 ${oid}`, type: 'refund-request-admin', relatedId: oid })
               }
-              // → refunded 로 변경 시: 사용자에게 알림
               if (newStatus === 'refunded') {
-                await sendRefundCompletedToBuyer(req.payload, doc as any)
+                await sendRefundCompletedToBuyer(req.payload, d)
+                await logEmailSent(req.payload, { to: d.buyerEmail, subject: `환불완료`, type: 'refund-buyer', relatedId: oid })
               }
             }
           }

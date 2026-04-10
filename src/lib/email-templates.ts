@@ -14,6 +14,24 @@ function adminEmail(): string {
   return process.env.ADMIN_EMAIL || 'rex39@naver.com'
 }
 
+/**
+ * 이메일 발송 로그를 DB에 저장.
+ * 각 hook에서 sendEmail 호출 후 이 함수를 호출하면 됨.
+ */
+export async function logEmailSent(
+  payload: Payload,
+  data: { to: string; subject: string; type: string; status?: 'sent' | 'failed'; error?: string; relatedId?: string },
+): Promise<void> {
+  try {
+    await payload.create({
+      collection: 'email-logs' as any,
+      data: { ...data, status: data.status || 'sent' },
+    })
+  } catch {
+    // 로그 저장 실패는 무시
+  }
+}
+
 function priceKR(amount?: number): string {
   if (!amount) return '0원'
   return amount.toLocaleString('ko-KR') + '원'
