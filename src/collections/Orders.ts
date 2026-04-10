@@ -22,50 +22,43 @@ export const Orders: CollectionConfig = {
         // 테스트 주문(TEST_ 접두사)은 알림 발송 안 함
         if (typeof doc.orderNumber === 'string' && doc.orderNumber.startsWith('TEST_')) return
 
-        try {
-          const d = doc as any
-          const oid = d.orderNumber || String(d.id)
+        const d = doc as any
+        const oid = d.orderNumber || String(d.id)
 
-          if (operation === 'create') {
-            await sendOrderCreatedToAdmin(req.payload, d)
-            await logEmailSent(req.payload, { to: 'admin', subject: `주문접수 ${oid}`, type: 'order-admin', relatedId: oid })
-          }
+        // 각 알림을 개별 try/catch — 하나 실패해도 주문 처리에 영향 없음
+        if (operation === 'create') {
+          try { await sendOrderCreatedToAdmin(req.payload, d) } catch (e) { console.error('[ORDER CREATE NOTIFY]', (e as Error).message) }
+          try { await logEmailSent(req.payload, { to: 'admin', subject: `주문접수 ${oid}`, type: 'order-admin', relatedId: oid }) } catch {}
+        }
 
-          if (operation === 'update' && previousDoc) {
-            const prevStatus = (previousDoc as any).status
-            const newStatus = d.status
+        if (operation === 'update' && previousDoc) {
+          const prevStatus = (previousDoc as any).status
+          const newStatus = d.status
+          if (prevStatus === newStatus) return
 
-            if (prevStatus !== newStatus) {
-              if (newStatus === 'paid') {
-                await sendPaymentCompletedToAdmin(req.payload, d)
-                await logEmailSent(req.payload, { to: 'admin', subject: `결제완료 ${oid}`, type: 'payment-admin', relatedId: oid })
-                await sendPaymentCompletedToBuyer(req.payload, d)
-                await logEmailSent(req.payload, { to: d.buyerEmail, subject: `결제완료 수강안내`, type: 'payment-buyer', relatedId: oid })
+          if (newStatus === 'paid') {
+            try { await sendPaymentCompletedToAdmin(req.payload, d) } catch (e) { console.error('[PAID ADMIN]', (e as Error).message) }
+            try { await logEmailSent(req.payload, { to: 'admin', subject: `결제완료 ${oid}`, type: 'payment-admin', relatedId: oid }) } catch {}
+            try { await sendPaymentCompletedToBuyer(req.payload, d) } catch (e) { console.error('[PAID BUYER]', (e as Error).message) }
+            try { await logEmailSent(req.payload, { to: d.buyerEmail, subject: `결제완료 수강안내`, type: 'payment-buyer', relatedId: oid }) } catch {}
 
-                // 심화반 결제 시 단톡방 안내 자동 발송
-                const cls = Array.isArray(d.classrooms) ? d.classrooms : []
-                if (cls.includes('vibe-coding-advanced')) {
-                  try {
-                    await sendAdvancedClassGroupChat(req.payload, d)
-                    await logEmailSent(req.payload, { to: d.buyerEmail, subject: '심화반 단톡방 안내', type: 'other', relatedId: oid })
-                  } catch (chatErr) {
-                    console.error('[심화반 단톡방 안내] 실패:', (chatErr as Error).message)
-                  }
-                }
-              }
-              if (newStatus === 'refund_requested') {
-                await sendRefundRequestedToAdmin(req.payload, d)
-                await logEmailSent(req.payload, { to: 'admin', subject: `환불요청 ${oid}`, type: 'refund-request-admin', relatedId: oid })
-              }
-              if (newStatus === 'refunded') {
-                await sendRefundCompletedToBuyer(req.payload, d)
-                await logEmailSent(req.payload, { to: d.buyerEmail, subject: `환불완료`, type: 'refund-buyer', relatedId: oid })
-              }
+            // 심화반 단톡방 안내
+            const cls = Array.isArray(d.classrooms) ? d.classrooms : []
+            if (cls.includes('vibe-coding-advanced')) {
+              try { await sendAdvancedClassGroupChat(req.payload, d) } catch (e) { console.error('[심화반 단톡방]', (e as Error).message) }
+              try { await logEmailSent(req.payload, { to: d.buyerEmail, subject: '심화반 단톡방 안내', type: 'other', relatedId: oid }) } catch {}
             }
           }
-        } catch (e) {
-          // 메일 발송 실패가 주문 처리 자체를 막지 않도록 catch
-          console.error('[ORDER NOTIFICATION] 실패:', (e as Error).message)
+
+          if (newStatus === 'refund_requested') {
+            try { await sendRefundRequestedToAdmin(req.payload, d) } catch (e) { console.error('[REFUND REQ]', (e as Error).message) }
+            try { await logEmailSent(req.payload, { to: 'admin', subject: `환불요청 ${oid}`, type: 'refund-request-admin', relatedId: oid }) } catch {}
+          }
+
+          if (newStatus === 'refunded') {
+            try { await sendRefundCompletedToBuyer(req.payload, d) } catch (e) { console.error('[REFUNDED]', (e as Error).message) }
+            try { await logEmailSent(req.payload, { to: d.buyerEmail, subject: `환불완료`, type: 'refund-buyer', relatedId: oid }) } catch {}
+          }
         }
       },
     ],
