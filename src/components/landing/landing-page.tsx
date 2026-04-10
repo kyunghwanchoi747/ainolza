@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, ChevronDown, ExternalLink } from "lucide-react";
 import { useState } from "react";
+import { MagneticText } from "@/components/ui/magnetic-text";
 import type { ProductWithDbImages } from "@/lib/products-db";
 
 // 일반 FAQ — 모든 상품/사이트 공통 (강의 한정 X)
@@ -107,9 +108,13 @@ export default function LandingPage({ products }: LandingPageProps) {
           <p data-reveal="none" className="text-brand text-base md:text-lg font-bold mb-6 tracking-wide">
             놀면서 배우는 AI, 만들면서 익히는 AI
           </p>
-          <h1 data-reveal="up" data-reveal-delay="200" className="text-5xl md:text-7xl font-extrabold leading-[1.15] mb-10">
-            AI놀자에서<br />직접 만나보세요
-          </h1>
+          <MagneticText
+            text={"AI놀자에서\n직접 만나보세요"}
+            className="text-5xl md:text-7xl font-extrabold leading-[1.15] mb-10"
+            radius={200}
+            maxScale={1.25}
+            maxLift={-10}
+          />
           <p data-reveal="up" data-reveal-delay="400" className="text-white/80 text-lg md:text-2xl mb-12 leading-relaxed font-medium">
             제가 직접 만든 도구와 실험실, 그리고 강의로<br />
             평범한 사람도 AI로 결과를 만들 수 있습니다.
