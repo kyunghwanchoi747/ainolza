@@ -78,6 +78,7 @@ export interface Config {
     'site-settings': SiteSetting;
     enrollments: Enrollment;
     orders: Order;
+    reviews: Review;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -96,6 +97,7 @@ export interface Config {
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
     enrollments: EnrollmentsSelect<false> | EnrollmentsSelect<true>;
     orders: OrdersSelect<false> | OrdersSelect<true>;
+    reviews: ReviewsSelect<false> | ReviewsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -214,14 +216,80 @@ export interface DesignPage {
 export interface Product {
   id: number;
   title: string;
+  /**
+   * 예: vibe-coding-101 — 이 값으로 /store/{slug} URL이 만들어짐
+   */
   slug: string;
-  description?: string | null;
-  price: number;
+  subtitle?: string | null;
+  shortDescription?: string | null;
+  productType: 'class' | 'ebook' | 'book' | 'bundle';
+  /**
+   * 카드 상단에 표시. 예: "강의" / "전자책 / 종이책"
+   */
   category?: string | null;
+  price?: number | null;
+  originalPrice?: number | null;
+  /**
+   * 가격이 없는 외부 판매 등. 예: "교보문고 판매 중"
+   */
+  priceLabel?: string | null;
+  /**
+   * 있으면 D-N 카운트다운이 카드/상세에 표시됨
+   */
+  discountUntil?: string | null;
+  /**
+   * 구매하기, 외부 링크 등
+   */
+  actions?:
+    | {
+        label: string;
+        url: string;
+        primary?: boolean | null;
+        external?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * 예: AI 웹사이트 구축, 4주 과정, 온라인
+   */
+  tags?:
+    | {
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
+  duration?: string | null;
+  /**
+   * 이 상품 전용 질문/답변. 상세 페이지에 노출
+   */
+  faq?:
+    | {
+        question: string;
+        answer: string;
+        id?: string | null;
+      }[]
+    | null;
+  classroomSlug?: ('' | 'vibe-coding-101' | 'vibe-coding-advanced') | null;
+  /**
+   * 카드 목록에 표시되는 정사각형 이미지
+   */
   thumbnail?: (number | null) | Media;
-  content?: string | null;
-  status?: ('draft' | 'published') | null;
+  /**
+   * 캔바 등으로 만든 상세 이미지를 순서대로 추가
+   */
+  detailImages?:
+    | {
+        image: number | Media;
+        id?: string | null;
+      }[]
+    | null;
+  order?: number | null;
+  status: 'published' | 'draft';
   featured?: boolean | null;
+  seoType?: ('Product' | 'Course' | 'Book') | null;
+  seoAuthor?: string | null;
+  description?: string | null;
+  content?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -365,6 +433,22 @@ export interface Order {
   cashReceiptType?: ('none' | 'income' | 'expense') | null;
   cashReceiptNumber?: string | null;
   adminMemo?: string | null;
+  classrooms?: ('vibe-coding-101' | 'vibe-coding-advanced')[] | null;
+  books?: ('personal-intelligence' | 'uncomfortable-ai' | 'prompt-15' | 'notebooklm-guide')[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reviews".
+ */
+export interface Review {
+  id: number;
+  product: number | Product;
+  user: number | User;
+  rating: number;
+  content: string;
+  status: 'pending' | 'approved' | 'rejected';
   updatedAt: string;
   createdAt: string;
 }
@@ -435,6 +519,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'orders';
         value: number | Order;
+      } | null)
+    | ({
+        relationTo: 'reviews';
+        value: number | Review;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -547,13 +635,52 @@ export interface DesignPagesSelect<T extends boolean = true> {
 export interface ProductsSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
-  description?: T;
-  price?: T;
+  subtitle?: T;
+  shortDescription?: T;
+  productType?: T;
   category?: T;
+  price?: T;
+  originalPrice?: T;
+  priceLabel?: T;
+  discountUntil?: T;
+  actions?:
+    | T
+    | {
+        label?: T;
+        url?: T;
+        primary?: T;
+        external?: T;
+        id?: T;
+      };
+  tags?:
+    | T
+    | {
+        label?: T;
+        id?: T;
+      };
+  duration?: T;
+  faq?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
+        id?: T;
+      };
+  classroomSlug?: T;
   thumbnail?: T;
-  content?: T;
+  detailImages?:
+    | T
+    | {
+        image?: T;
+        id?: T;
+      };
+  order?: T;
   status?: T;
   featured?: T;
+  seoType?: T;
+  seoAuthor?: T;
+  description?: T;
+  content?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -678,6 +805,21 @@ export interface OrdersSelect<T extends boolean = true> {
   cashReceiptType?: T;
   cashReceiptNumber?: T;
   adminMemo?: T;
+  classrooms?: T;
+  books?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reviews_select".
+ */
+export interface ReviewsSelect<T extends boolean = true> {
+  product?: T;
+  user?: T;
+  rating?: T;
+  content?: T;
+  status?: T;
   updatedAt?: T;
   createdAt?: T;
 }

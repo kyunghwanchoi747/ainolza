@@ -45,8 +45,44 @@ export const Users: CollectionConfig = {
             throw new Error('마지막 관리자는 삭제할 수 없습니다.')
           }
         } catch (e) {
-          // 'not found' 같은 오류는 통과시킴
-          if ((e as Error).message?.includes('마지막 관리자')) throw e
+          const errorMsg = (e as Error).message || ''
+          // '마지막 관리자' 오류만 던지고, 다른 오류는 로그만 남림
+          if (errorMsg.includes('마지막 관리자')) throw e
+          // 다른 오류는 무시 (not found 등)
+        }
+      },
+      // 사용자 삭제 시 관련 데이터 정리
+      async ({ id, req }) => {
+        try {
+          // Orders의 user 필드를 NULL로 설정 (주문 기록 보존)
+          const orders = await req.payload.find({
+            collection: 'orders',
+            where: { user: { equals: id } },
+            limit: 9999,
+          })
+          for (const order of orders.docs) {
+            await req.payload.update({
+              collection: 'orders',
+              id: order.id,
+              data: { user: null },
+              req,
+            })
+          }
+          
+          // 댓글 삭제
+          await req.payload.delete({
+            collection: 'comments',
+            where: { author: { equals: id } },
+            req,
+          })
+          // 리뷰 삭제
+          await req.payload.delete({
+            collection: 'reviews',
+            where: { user: { equals: id } },
+            req,
+          })
+        } catch (e) {
+          console.warn(`[User Delete] Failed to clean up related data for user ${id}:`, (e as Error).message)
         }
       },
     ],
@@ -74,6 +110,7 @@ export const Users: CollectionConfig = {
     ],
   },
   auth: {
+    useSessions: false,
     forgotPassword: {
       generateEmailSubject: () => 'AI놀자 비밀번호 재설정 안내',
       generateEmailHTML: (args) => {

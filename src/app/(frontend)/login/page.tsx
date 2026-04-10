@@ -1,15 +1,26 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [form, setForm] = useState({ email: '', password: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [showEmail, setShowEmail] = useState(false)
+
+  useEffect(() => {
+    const err = searchParams.get('error')
+    if (err) {
+      if (err === 'oauth_failed') setError('소셜 로그인 처리 중 오류가 발생했습니다. 다시 시도하거나 이메일로 로그인해주세요.')
+      else if (err === 'no_email') setError('계정에 이메일 정보가 없어 로그인을 진행할 수 없습니다.')
+      else if (err === 'oauth_denied') setError('로그인이 취소되었습니다.')
+      else setError('로그인 중 오류가 발생했습니다. 다시 시도해주세요.')
+    }
+  }, [searchParams])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -133,5 +144,13 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginContent />
+    </Suspense>
   )
 }

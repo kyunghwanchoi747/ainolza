@@ -107,40 +107,15 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // 4. JWT 직접 발급 + session 저장
+    // 4. JWT 직접 발급 (Payload 내부 헬퍼 사용, 비번 검증 우회)
+    // useSessions: false → sessions DB 저장 불필요, JWT signature만으로 인증
     const collectionConfig = payload.collections['users'].config as any
-    const useSessions = collectionConfig.auth?.useSessions !== false
-
-    let sid: string | undefined
-    if (useSessions) {
-      sid = crypto.randomUUID()
-      const now = new Date()
-      const expiresAt = new Date(
-        now.getTime() + (collectionConfig.auth.tokenExpiration ?? 7200) * 1000,
-      )
-      const newSession = { id: sid, createdAt: now, expiresAt }
-      const existingSessions = Array.isArray(user.sessions) ? user.sessions : []
-      const validSessions = existingSessions.filter((s: any) => {
-        const exp = s.expiresAt instanceof Date ? s.expiresAt : new Date(s.expiresAt)
-        return exp > now
-      })
-      validSessions.push(newSession)
-
-      const updateData = { ...user, sessions: validSessions, updatedAt: null }
-      await (payload as any).db.updateOne({
-        id: user.id,
-        collection: 'users',
-        data: updateData,
-        returning: false,
-      })
-    }
 
     const fieldsToSignArgs: Record<string, unknown> = {
       collectionConfig,
       email: naverUser.email,
       user,
     }
-    if (sid) fieldsToSignArgs.sid = sid
 
     const fieldsToSign = getFieldsToSign(fieldsToSignArgs as any)
     const { token } = await jwtSign({

@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
     const body: any = await req.json()
     const { title, slug, description, price, category, thumbnail, content, status, featured } = body
 
-    const created = await payload.create({
+    const created = await (payload as any).create({
       collection: 'products',
       data: {
         title: title || 'Untitled',
