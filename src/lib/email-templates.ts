@@ -184,6 +184,50 @@ export async function sendUserSignupToAdmin(
   })
 }
 
+/** 수강 신청 접수 → 신청자에게 계좌 안내 메일 */
+export async function sendEnrollmentConfirmToBuyer(
+  payload: Payload,
+  enrollment: { name: string; email: string; program?: string | null },
+  product?: { title?: string; price?: number; originalPrice?: number } | null,
+) {
+  const name = enrollment.name || enrollment.email.split('@')[0]
+  const programTitle = product?.title || enrollment.program || '강의'
+  const priceText = product?.price ? priceKR(product.price) : '금액 별도 안내'
+  await payload.sendEmail({
+    to: enrollment.email,
+    subject: '[AI놀자] 수강 신청이 접수되었습니다 — 입금 안내',
+    html: wrap(
+      `${name}님, 수강 신청이 접수되었습니다`,
+      `
+      <p style="color:#666;font-size:15px;line-height:1.7;margin:0 0 16px;">
+        <strong>${programTitle}</strong> 수강 신청이 정상 접수되었습니다.
+        아래 계좌로 입금해 주시면 확인 후 수강 안내를 보내드립니다.
+      </p>
+
+      <table cellpadding="8" cellspacing="0" style="width:100%;background:#FFF1F0;border:2px solid #D4756E;border-radius:12px;margin:0 0 24px;font-size:14px;color:#333;">
+        <tr><td style="width:80px;color:#888;font-weight:bold;">은행</td><td><strong>토스뱅크</strong></td></tr>
+        <tr><td style="color:#888;font-weight:bold;">계좌번호</td><td><strong style="font-size:18px;color:#1a1a1a;">1000-1041-3507</strong></td></tr>
+        <tr><td style="color:#888;font-weight:bold;">예금주</td><td><strong>에이아이놀자</strong></td></tr>
+        <tr><td style="color:#888;font-weight:bold;">금액</td><td><strong style="font-size:18px;color:#D4756E;">${priceText}</strong></td></tr>
+      </table>
+
+      <div style="background:#fafafa;border-radius:10px;padding:16px;margin:0 0 24px;font-size:13px;color:#666;line-height:1.8;">
+        • 입금자명은 <strong style="color:#333;">신청자 본인 이름</strong>으로 부탁드립니다.<br>
+        • 입금 확인 후 카카오톡 또는 메일로 수강 안내를 보내드립니다.<br>
+        • 확인까지 최대 1 영업일 소요될 수 있습니다.
+      </div>
+
+      <div style="text-align:center;margin:24px 0;">
+        <a href="${KAKAO_OPEN_CHAT}" style="display:inline-block;background:#FEE500;color:#191919;text-decoration:none;padding:14px 32px;border-radius:12px;font-size:15px;font-weight:bold;">카카오톡으로 입금 확인 요청</a>
+      </div>
+
+      <p style="color:#999;font-size:12px;line-height:1.6;margin:24px 0 0;">
+        문의사항은 <a href="${KAKAO_OPEN_CHAT}" style="color:#D4756E;">카카오톡 오픈채팅</a>으로 부탁드립니다.
+      </p>`,
+    ),
+  })
+}
+
 /** 신규 수강 신청 → 관리자 알림 */
 export async function sendEnrollmentToAdmin(
   payload: Payload,

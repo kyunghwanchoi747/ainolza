@@ -115,15 +115,47 @@ function EnrollFormContent() {
 
   if (submitted) {
     return (
-      <div className="bg-background text-foreground min-h-screen flex items-center justify-center px-6">
-        <div className="max-w-md text-center">
-          <div className="text-6xl mb-6">&#10003;</div>
-          <h1 className="text-3xl font-bold mb-4">신청이 접수되었습니다</h1>
-          <p className="text-foreground/50 mb-2">입력하신 연락처로 상세 안내를 보내드립니다.</p>
-          <p className="text-foreground/40 text-sm mb-8">문의사항은 카카오톡 오픈채팅으로 연락해주세요.</p>
-          <Link href={`/store/${slug}`} className="text-sm text-foreground/50 hover:text-foreground transition-colors underline">
-            상품 상세로 돌아가기
-          </Link>
+      <div className="bg-white text-ink min-h-screen flex items-center justify-center px-6">
+        <div className="max-w-lg">
+          <div className="text-center mb-8">
+            <div className="text-6xl mb-6">&#10003;</div>
+            <h1 className="text-3xl font-extrabold mb-4">신청이 접수되었습니다</h1>
+            <p className="text-body mb-2">아래 계좌로 입금해 주시면 수강 안내를 보내드립니다.</p>
+          </div>
+
+          <div className="p-6 rounded-2xl border-2 border-brand bg-brand-light mb-6">
+            <p className="text-brand font-extrabold text-sm mb-3">💳 입금 안내</p>
+            <table className="w-full text-sm">
+              <tbody>
+                <tr><td className="text-sub py-1.5 w-20">은행</td><td className="text-ink font-bold">토스뱅크</td></tr>
+                <tr><td className="text-sub py-1.5">계좌번호</td><td className="text-ink font-bold text-lg">1000-1041-3507</td></tr>
+                <tr><td className="text-sub py-1.5">예금주</td><td className="text-ink font-bold">에이아이놀자</td></tr>
+                {product?.price && (
+                  <tr><td className="text-sub py-1.5">금액</td><td className="text-brand font-extrabold text-lg">{formatPrice(product.price)}</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="p-4 rounded-xl bg-surface border border-line text-sm text-body mb-6">
+            <p className="mb-1">• 입금자명은 <strong className="text-ink">신청자 본인 이름</strong>으로 부탁드립니다.</p>
+            <p className="mb-1">• 입금 확인 후 카카오톡 또는 메일로 수강 안내를 보내드립니다.</p>
+            <p>• 문의사항은 카카오톡 오픈채팅으로 연락해 주세요.</p>
+          </div>
+
+          <div className="flex flex-col gap-3">
+            <a
+              href="https://open.kakao.com/o/s7kkWTfh"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 w-full py-4 bg-[#FEE500] text-[#191919] font-extrabold rounded-2xl hover:bg-[#FFE000] transition-all cursor-pointer text-base"
+            >
+              카카오톡으로 입금 확인 요청
+            </a>
+            <Link href={`/store/${slug}`} className="text-center text-sm text-sub hover:text-brand transition-colors">
+              상품 상세로 돌아가기
+            </Link>
+          </div>
         </div>
       </div>
     )
