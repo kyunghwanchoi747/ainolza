@@ -1,5 +1,5 @@
 import type { CollectionConfig } from 'payload'
-import { sendWelcomeEmail, sendUserSignupToAdmin, logEmailSent } from '../lib/email-templates'
+import { sendWelcomeEmail, sendUserSignupToAdmin } from '../lib/email-templates'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://ainolza.kr'
 
@@ -58,16 +58,16 @@ export const Users: CollectionConfig = {
 
         try {
           await sendWelcomeEmail(req.payload, { email: doc.email, name: doc.name })
-          await logEmailSent(req.payload, { to: doc.email, subject: '가입 환영', type: 'welcome', relatedId: String(doc.id) })
+        // await logEmailSent(req.payload, { to: doc.email, subject: '가입 환영', type: 'welcome', relatedId: String(doc.id) })  // TODO: 로깅 재활성화
         } catch (e) {
-          await logEmailSent(req.payload, { to: doc.email, subject: '가입 환영', type: 'welcome', status: 'failed', error: (e as Error).message })
+        // await logEmailSent(req.payload, { to: doc.email, subject: '가입 환영', type: 'welcome', status: 'failed', error: (e as Error).message })  // TODO: 로깅 재활성화
         }
 
         try {
           await sendUserSignupToAdmin(req.payload, doc as any)
-          await logEmailSent(req.payload, { to: 'admin', subject: '신규 가입 알림', type: 'signup-admin', relatedId: doc.email })
+        // await logEmailSent(req.payload, { to: 'admin', subject: '신규 가입 알림', type: 'signup-admin', relatedId: doc.email })  // TODO: 로깅 재활성화
         } catch (e) {
-          await logEmailSent(req.payload, { to: 'admin', subject: '신규 가입 알림', type: 'signup-admin', status: 'failed', error: (e as Error).message })
+        // await logEmailSent(req.payload, { to: 'admin', subject: '신규 가입 알림', type: 'signup-admin', status: 'failed', error: (e as Error).message })  // TODO: 로깅 재활성화
         }
         void previousDoc
       },

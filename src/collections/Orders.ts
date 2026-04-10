@@ -6,7 +6,6 @@ import {
   sendRefundRequestedToAdmin,
   sendRefundCompletedToBuyer,
   sendAdvancedClassGroupChat,
-  logEmailSent,
 } from '../lib/email-templates'
 
 export const Orders: CollectionConfig = {
@@ -25,7 +24,7 @@ export const Orders: CollectionConfig = {
         // 각 알림을 개별 try/catch — 하나 실패해도 주문 처리에 영향 없음
         if (operation === 'create') {
           try { await sendOrderCreatedToAdmin(req.payload, d) } catch (e) { console.error('[ORDER CREATE NOTIFY]', (e as Error).message) }
-          try { await logEmailSent(req.payload, { to: 'admin', subject: `주문접수 ${oid}`, type: 'order-admin', relatedId: oid }) } catch {}
+        // try { await logEmailSent(req.payload, { to: 'admin', subject: `주문접수 ${oid}`, type: 'order-admin', relatedId: oid }) } catch {}  // TODO: 로깅 재활성화
         }
 
         if (operation === 'update' && previousDoc) {
@@ -35,26 +34,26 @@ export const Orders: CollectionConfig = {
 
           if (newStatus === 'paid') {
             try { await sendPaymentCompletedToAdmin(req.payload, d) } catch (e) { console.error('[PAID ADMIN]', (e as Error).message) }
-            try { await logEmailSent(req.payload, { to: 'admin', subject: `결제완료 ${oid}`, type: 'payment-admin', relatedId: oid }) } catch {}
+        // try { await logEmailSent(req.payload, { to: 'admin', subject: `결제완료 ${oid}`, type: 'payment-admin', relatedId: oid }) } catch {}  // TODO: 로깅 재활성화
             try { await sendPaymentCompletedToBuyer(req.payload, d) } catch (e) { console.error('[PAID BUYER]', (e as Error).message) }
-            try { await logEmailSent(req.payload, { to: d.buyerEmail, subject: `결제완료 수강안내`, type: 'payment-buyer', relatedId: oid }) } catch {}
+        // try { await logEmailSent(req.payload, { to: d.buyerEmail, subject: `결제완료 수강안내`, type: 'payment-buyer', relatedId: oid }) } catch {}  // TODO: 로깅 재활성화
 
             // 심화반 단톡방 안내
             const cls = Array.isArray(d.classrooms) ? d.classrooms : []
             if (cls.includes('vibe-coding-advanced')) {
               try { await sendAdvancedClassGroupChat(req.payload, d) } catch (e) { console.error('[심화반 단톡방]', (e as Error).message) }
-              try { await logEmailSent(req.payload, { to: d.buyerEmail, subject: '심화반 단톡방 안내', type: 'other', relatedId: oid }) } catch {}
+        // try { await logEmailSent(req.payload, { to: d.buyerEmail, subject: '심화반 단톡방 안내', type: 'other', relatedId: oid }) } catch {}  // TODO: 로깅 재활성화
             }
           }
 
           if (newStatus === 'refund_requested') {
             try { await sendRefundRequestedToAdmin(req.payload, d) } catch (e) { console.error('[REFUND REQ]', (e as Error).message) }
-            try { await logEmailSent(req.payload, { to: 'admin', subject: `환불요청 ${oid}`, type: 'refund-request-admin', relatedId: oid }) } catch {}
+        // try { await logEmailSent(req.payload, { to: 'admin', subject: `환불요청 ${oid}`, type: 'refund-request-admin', relatedId: oid }) } catch {}  // TODO: 로깅 재활성화
           }
 
           if (newStatus === 'refunded') {
             try { await sendRefundCompletedToBuyer(req.payload, d) } catch (e) { console.error('[REFUNDED]', (e as Error).message) }
-            try { await logEmailSent(req.payload, { to: d.buyerEmail, subject: `환불완료`, type: 'refund-buyer', relatedId: oid }) } catch {}
+        // try { await logEmailSent(req.payload, { to: d.buyerEmail, subject: `환불완료`, type: 'refund-buyer', relatedId: oid }) } catch {}  // TODO: 로깅 재활성화
           }
         }
       },

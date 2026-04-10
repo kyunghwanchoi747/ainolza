@@ -1,5 +1,5 @@
 import type { CollectionConfig } from 'payload'
-import { sendEnrollmentToAdmin, sendEnrollmentConfirmToBuyer, logEmailSent } from '../lib/email-templates'
+import { sendEnrollmentToAdmin, sendEnrollmentConfirmToBuyer } from '../lib/email-templates'
 
 export const Enrollments: CollectionConfig = {
   slug: 'enrollments',
@@ -15,9 +15,9 @@ export const Enrollments: CollectionConfig = {
         const d = doc as any
         try {
           await sendEnrollmentToAdmin(req.payload, d)
-          await logEmailSent(req.payload, { to: 'admin', subject: `수강신청 ${d.name}`, type: 'enrollment-admin', relatedId: d.email })
+        // await logEmailSent(req.payload, { to: 'admin', subject: `수강신청 ${d.name}`, type: 'enrollment-admin', relatedId: d.email })  // TODO: 로깅 재활성화
         } catch (e) {
-          await logEmailSent(req.payload, { to: 'admin', subject: `수강신청`, type: 'enrollment-admin', status: 'failed', error: (e as Error).message })
+        // await logEmailSent(req.payload, { to: 'admin', subject: `수강신청`, type: 'enrollment-admin', status: 'failed', error: (e as Error).message })  // TODO: 로깅 재활성화
         }
 
         try {
@@ -28,9 +28,9 @@ export const Enrollments: CollectionConfig = {
             if (p) product = { title: p.title, price: p.price, originalPrice: p.originalPrice }
           }
           await sendEnrollmentConfirmToBuyer(req.payload, d, product)
-          await logEmailSent(req.payload, { to: d.email, subject: `수강신청 계좌안내`, type: 'enrollment-buyer', relatedId: d.program })
+        // await logEmailSent(req.payload, { to: d.email, subject: `수강신청 계좌안내`, type: 'enrollment-buyer', relatedId: d.program })  // TODO: 로깅 재활성화
         } catch (e) {
-          await logEmailSent(req.payload, { to: d.email || '', subject: `수강신청 계좌안내`, type: 'enrollment-buyer', status: 'failed', error: (e as Error).message })
+        // await logEmailSent(req.payload, { to: d.email || '', subject: `수강신청 계좌안내`, type: 'enrollment-buyer', status: 'failed', error: (e as Error).message })  // TODO: 로깅 재활성화
         }
       },
     ],
