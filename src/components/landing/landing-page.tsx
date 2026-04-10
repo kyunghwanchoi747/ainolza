@@ -144,7 +144,7 @@ export default function LandingPage({ products }: LandingPageProps) {
               <p className="text-brand text-sm md:text-base font-bold mb-3 tracking-wide">
                 내가 만든 것들
               </p>
-              <h2 className="text-4xl md:text-5xl font-extrabold leading-tight">도구</h2>
+              <MagneticText text="도구" className="text-4xl md:text-5xl font-extrabold leading-tight" />
               <p className="text-body mt-4 text-base md:text-lg">
                 직접 기획·개발해 운영 중인 무료 웹 서비스와 Chrome 확장
               </p>
@@ -199,7 +199,7 @@ export default function LandingPage({ products }: LandingPageProps) {
               <p className="text-brand text-sm md:text-base font-bold mb-3 tracking-wide">
                 놀면서 배우는
               </p>
-              <h2 className="text-4xl md:text-5xl font-extrabold leading-tight">AI 실험실</h2>
+              <MagneticText text="AI 실험실" className="text-4xl md:text-5xl font-extrabold leading-tight" />
               <p className="text-body mt-4 text-base md:text-lg">
                 간단한 체험으로 AI의 원리를 직접 느껴보세요
               </p>
@@ -270,7 +270,7 @@ export default function LandingPage({ products }: LandingPageProps) {
             <p className="text-brand text-sm md:text-base font-bold mb-3 tracking-wide">
               더 깊이 배우고 싶다면
             </p>
-            <h2 className="text-4xl md:text-5xl font-extrabold leading-tight">강의 / 책</h2>
+            <MagneticText text="강의 / 책" className="text-4xl md:text-5xl font-extrabold leading-tight" />
             <p className="text-body mt-4 max-w-[600px] mx-auto text-base md:text-lg">
               실험실과 도구를 만들어 본 경험을 그대로 강의에 담았습니다.
             </p>
@@ -398,7 +398,7 @@ export default function LandingPage({ products }: LandingPageProps) {
               <p className="text-brand text-sm md:text-base font-bold mb-3 tracking-wide">
                 자주 묻는 질문
               </p>
-              <h2 data-reveal className="text-4xl md:text-5xl font-extrabold leading-tight">FAQ</h2>
+              <MagneticText text="FAQ" className="text-4xl md:text-5xl font-extrabold leading-tight" />
               <p className="text-body mt-4 text-base">
                 강의별 FAQ는 각 상품 페이지를 참고해 주세요.
               </p>
@@ -440,9 +440,7 @@ export default function LandingPage({ products }: LandingPageProps) {
           <p className="text-brand text-sm md:text-base font-bold mb-4 tracking-wide">
             지금 바로
           </p>
-          <h2 data-reveal className="text-4xl md:text-5xl font-extrabold mb-6 leading-tight">
-            AI놀자와 함께<br />시작하세요
-          </h2>
+          <MagneticText text={"AI놀자와 함께\n시작하세요"} className="text-4xl md:text-5xl font-extrabold mb-6 leading-tight" />
           <p className="text-white/70 text-base md:text-lg mb-12">
             도구로 시작하고, 실험실에서 익히고, 강의로 깊이를 더하세요.
           </p>
