@@ -184,6 +184,31 @@ export async function sendUserSignupToAdmin(
   })
 }
 
+/** 신규 수강 신청 → 관리자 알림 */
+export async function sendEnrollmentToAdmin(
+  payload: Payload,
+  enrollment: { id: number | string; name: string; email: string; phone?: string | null; program?: string | null; message?: string | null },
+) {
+  await payload.sendEmail({
+    to: adminEmail(),
+    subject: `[AI놀자 알림] 📩 새 수강 신청 — ${enrollment.name} (${enrollment.program || '미지정'})`,
+    html: wrap(
+      '📩 새 수강 신청이 접수되었습니다',
+      `
+      <table cellpadding="6" cellspacing="0" style="width:100%;background:#fafafa;border-radius:10px;padding:8px;margin:0 0 24px;font-size:13px;color:#666;">
+        <tr><td style="width:90px;color:#999;">이름</td><td><strong style="color:#333;">${enrollment.name}</strong></td></tr>
+        <tr><td style="color:#999;">이메일</td><td>${enrollment.email}</td></tr>
+        <tr><td style="color:#999;">연락처</td><td>${enrollment.phone || '-'}</td></tr>
+        <tr><td style="color:#999;">프로그램</td><td><strong style="color:#D4756E;">${enrollment.program || '-'}</strong></td></tr>
+        ${enrollment.message ? `<tr><td style="color:#999;vertical-align:top;">문의사항</td><td style="color:#333;">${enrollment.message}</td></tr>` : ''}
+      </table>
+      <div style="text-align:center;margin:24px 0;">
+        <a href="${SITE_URL}/admin/collections/enrollments/${enrollment.id}" style="display:inline-block;background:#D4756E;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:10px;font-size:14px;font-weight:bold;">신청 상세 보기</a>
+      </div>`,
+    ),
+  })
+}
+
 /** 신규 주문 접수 → 관리자 알림 */
 export async function sendOrderCreatedToAdmin(
   payload: Payload,

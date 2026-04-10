@@ -1,10 +1,23 @@
 import type { CollectionConfig } from 'payload'
+import { sendEnrollmentToAdmin } from '../lib/email-templates'
 
 export const Enrollments: CollectionConfig = {
   slug: 'enrollments',
   admin: {
     useAsTitle: 'name',
     defaultColumns: ['name', 'phone', 'email', 'program', 'status', 'createdAt'],
+  },
+  hooks: {
+    afterChange: [
+      async ({ doc, operation, req }) => {
+        if (operation !== 'create') return
+        try {
+          await sendEnrollmentToAdmin(req.payload, doc as any)
+        } catch (e) {
+          console.error('[ENROLLMENT NOTIFY] 실패:', (e as Error).message)
+        }
+      },
+    ],
   },
   fields: [
     { name: 'name', type: 'text', required: true, label: '이름' },
