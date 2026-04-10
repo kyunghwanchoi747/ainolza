@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 export const EmailLogs: CollectionConfig = {
-  slug: 'email-logs',
+  slug: 'email_logs',
   admin: {
     useAsTitle: 'subject',
     defaultColumns: ['to', 'subject', 'type', 'status', 'createdAt'],

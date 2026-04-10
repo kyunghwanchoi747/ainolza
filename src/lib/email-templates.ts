@@ -24,7 +24,7 @@ export async function logEmailSent(
 ): Promise<void> {
   try {
     await payload.create({
-      collection: 'email-logs' as any,
+      collection: 'email_logs' as any,
       data: { ...data, status: data.status || 'sent' },
     })
   } catch {
