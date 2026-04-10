@@ -98,7 +98,7 @@ export function ReviewSection({ productSlug, productId }: ReviewSectionProps) {
           user: user.id,
           rating,
           content: content.trim(),
-          status: 'pending',
+          status: 'approved',
         }),
       })
       if (res.ok || res.status === 201) {
@@ -150,8 +150,7 @@ export function ReviewSection({ productSlug, productId }: ReviewSectionProps) {
         {/* 후기 작성 완료 메시지 */}
         {submitted && (
           <div className="mb-8 p-5 rounded-2xl bg-brand-light border border-brand/30 text-center">
-            <p className="text-brand font-bold mb-1">후기가 접수되었습니다 ✨</p>
-            <p className="text-sub text-sm">관리자 승인 후 게시됩니다.</p>
+            <p className="text-brand font-bold">후기가 등록되었습니다 ✨</p>
           </div>
         )}
 
