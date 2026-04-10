@@ -167,6 +167,42 @@ export async function sendRefundCompletedToBuyer(
   })
 }
 
+/** 심화반 결제 시 → 단톡방 안내 자동 발송 */
+export async function sendAdvancedClassGroupChat(
+  payload: Payload,
+  order: { buyerName?: string | null; buyerEmail: string },
+) {
+  const name = order.buyerName || order.buyerEmail.split('@')[0]
+  await payload.sendEmail({
+    to: order.buyerEmail,
+    subject: '[AI놀자] 바이브코딩 심화반 전용 단톡방 초대 및 입장 안내',
+    html: wrap(
+      `[바이브코딩 심화반] 전용 단톡방 초대 및 입장 안내`,
+      `
+      <p style="color:#444;font-size:15px;line-height:1.8;margin:0 0 16px;">
+        안녕하세요, ${name}님.<br>
+        바이브코딩 심화반에 합류하신 것을 진심으로 환영합니다.
+      </p>
+      <p style="color:#444;font-size:15px;line-height:1.8;margin:0 0 16px;">
+        본격적인 시작을 위해 <strong style="color:#1a1a1a;">심화반 전용 단톡방</strong> 입장을 안내해 드립니다.
+      </p>
+      <p style="color:#666;font-size:14px;line-height:1.8;margin:0 0 24px;">
+        지난 입문자반 진행 당시, 안내된 링크를 찾지 못해 입장이 지연되거나 오류를 겪으신 분들이 많았습니다.
+        원활한 소통과 공지 전달을 위해, 반드시 결제 시 기재하신 이메일함(스팸함 포함)과 문자 메시지를 꼼꼼히 확인해 주시고
+        아래 링크를 통해 오류 없이 입장해 주시기 바랍니다.
+      </p>
+      <table cellpadding="12" cellspacing="0" style="width:100%;background:#FFF1F0;border:2px solid #D4756E;border-radius:12px;margin:0 0 24px;font-size:15px;color:#1a1a1a;">
+        <tr><td style="color:#888;font-weight:bold;width:160px;">👉 단톡방 입장 링크</td><td><a href="https://open.kakao.com/o/gbmc0ppi" style="color:#D4756E;font-weight:bold;text-decoration:underline;">https://open.kakao.com/o/gbmc0ppi</a></td></tr>
+        <tr><td style="color:#888;font-weight:bold;">👉 참여 코드(비밀번호)</td><td><strong style="font-size:18px;">nolza232</strong></td></tr>
+      </table>
+      <p style="color:#444;font-size:14px;line-height:1.8;margin:0 0 16px;">
+        상세한 안내는 단톡방을 통해 순차적으로 공지해 드리겠습니다.
+      </p>
+      <p style="color:#444;font-size:14px;margin:0;">감사합니다.</p>`,
+    ),
+  })
+}
+
 // ==========================================
 // 관리자용
 // ==========================================

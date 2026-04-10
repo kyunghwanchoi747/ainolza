@@ -5,6 +5,7 @@ import {
   sendPaymentCompletedToBuyer,
   sendRefundRequestedToAdmin,
   sendRefundCompletedToBuyer,
+  sendAdvancedClassGroupChat,
   logEmailSent,
 } from '../lib/email-templates'
 
@@ -40,6 +41,17 @@ export const Orders: CollectionConfig = {
                 await logEmailSent(req.payload, { to: 'admin', subject: `결제완료 ${oid}`, type: 'payment-admin', relatedId: oid })
                 await sendPaymentCompletedToBuyer(req.payload, d)
                 await logEmailSent(req.payload, { to: d.buyerEmail, subject: `결제완료 수강안내`, type: 'payment-buyer', relatedId: oid })
+
+                // 심화반 결제 시 단톡방 안내 자동 발송
+                const cls = Array.isArray(d.classrooms) ? d.classrooms : []
+                if (cls.includes('vibe-coding-advanced')) {
+                  try {
+                    await sendAdvancedClassGroupChat(req.payload, d)
+                    await logEmailSent(req.payload, { to: d.buyerEmail, subject: '심화반 단톡방 안내', type: 'other', relatedId: oid })
+                  } catch (chatErr) {
+                    console.error('[심화반 단톡방 안내] 실패:', (chatErr as Error).message)
+                  }
+                }
               }
               if (newStatus === 'refund_requested') {
                 await sendRefundRequestedToAdmin(req.payload, d)
