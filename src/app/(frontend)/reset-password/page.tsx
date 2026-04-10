@@ -57,9 +57,9 @@ function ResetPasswordForm() {
     return (
       <div className="w-full max-w-[400px] text-center">
         <div className="text-5xl mb-4">&#10003;</div>
-        <h1 className="text-2xl font-bold text-[#333] mb-4">비밀번호 변경 완료</h1>
-        <p className="text-[#666] text-sm mb-8">잠시 후 로그인 페이지로 이동합니다.</p>
-        <Link href="/login" className="text-sm text-[#D4756E] hover:underline">로그인하기</Link>
+        <h1 className="text-2xl font-bold text-ink mb-4">비밀번호 변경 완료</h1>
+        <p className="text-body text-sm mb-8">잠시 후 로그인 페이지로 이동합니다.</p>
+        <Link href="/login" className="text-sm text-brand hover:underline">로그인하기</Link>
       </div>
     )
   }
@@ -67,32 +67,32 @@ function ResetPasswordForm() {
   return (
     <div className="w-full max-w-[400px]">
       <div className="text-center mb-8">
-        <Link href="/" className="text-2xl font-bold text-[#D4756E]">AI놀자</Link>
-        <h1 className="text-2xl font-bold text-[#333] mt-4">새 비밀번호 설정</h1>
-        <p className="text-[#999] text-sm mt-2">새로 사용할 비밀번호를 입력해주세요</p>
+        <Link href="/" className="text-2xl font-bold text-brand">AI놀자</Link>
+        <h1 className="text-2xl font-bold text-ink mt-4">새 비밀번호 설정</h1>
+        <p className="text-sub text-sm mt-2">새로 사용할 비밀번호를 입력해주세요</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-[#333] mb-1">새 비밀번호</label>
+          <label className="block text-sm font-medium text-ink mb-1">새 비밀번호</label>
           <input
             type="password"
             required
             value={password}
             onChange={e => setPassword(e.target.value)}
-            className="w-full px-4 py-3 border border-[#e5e5e5] rounded-xl text-[#333] placeholder-[#ccc] focus:outline-none focus:border-[#D4756E] transition-colors"
+            className="w-full px-4 py-3 border border-line rounded-xl text-ink placeholder-hint focus:outline-none focus:border-[#D4756E] transition-colors"
             placeholder="6자 이상"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-[#333] mb-1">비밀번호 확인</label>
+          <label className="block text-sm font-medium text-ink mb-1">비밀번호 확인</label>
           <input
             type="password"
             required
             value={confirm}
             onChange={e => setConfirm(e.target.value)}
-            className="w-full px-4 py-3 border border-[#e5e5e5] rounded-xl text-[#333] placeholder-[#ccc] focus:outline-none focus:border-[#D4756E] transition-colors"
+            className="w-full px-4 py-3 border border-line rounded-xl text-ink placeholder-hint focus:outline-none focus:border-[#D4756E] transition-colors"
             placeholder="비밀번호 재입력"
           />
         </div>
@@ -104,14 +104,14 @@ function ResetPasswordForm() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-3 bg-[#D4756E] text-white font-bold rounded-xl hover:bg-[#c0625b] transition-all disabled:opacity-50"
+          className="w-full py-3 bg-brand text-white font-bold rounded-xl hover:bg-brand-dark transition-all disabled:opacity-50"
         >
           {loading ? '변경 중...' : '비밀번호 변경'}
         </button>
       </form>
 
-      <p className="text-center text-sm text-[#999] mt-6">
-        <Link href="/login" className="text-[#D4756E] hover:underline">로그인으로 돌아가기</Link>
+      <p className="text-center text-sm text-sub mt-6">
+        <Link href="/login" className="text-brand hover:underline">로그인으로 돌아가기</Link>
       </p>
     </div>
   )
@@ -120,7 +120,7 @@ function ResetPasswordForm() {
 export default function ResetPasswordPage() {
   return (
     <div className="min-h-screen bg-white flex items-center justify-center px-6 py-20">
-      <Suspense fallback={<div className="text-[#999]">로딩 중...</div>}>
+      <Suspense fallback={<div className="text-sub">로딩 중...</div>}>
         <ResetPasswordForm />
       </Suspense>
     </div>

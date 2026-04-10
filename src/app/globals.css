@@ -1,6 +1,8 @@
 @import "tailwindcss";
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
 
 @theme inline {
+  /* shadcn 기본 시맨틱 */
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
   --color-card: hsl(var(--card));
@@ -22,61 +24,85 @@
   --color-ring: hsl(var(--ring));
   --color-sidebar: hsl(var(--sidebar));
   --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+
+  /* ══════ AI놀자 브랜드 토큰 ══════ */
+  /* 텍스트 위계 — 너의 캔바/HTML 디자인 기준 */
+  --color-ink: #1a1a1a;        /* 제목·강조 (가장 진한) */
+  --color-body: #444444;       /* 본문 텍스트 */
+  --color-sub: #888888;        /* 보조 설명 */
+  --color-hint: #bbbbbb;       /* 아주 약한 캡션 */
+
+  /* 브랜드 컬러 */
+  --color-brand: #D4756E;      /* 메인 포인트 (코랄 핑크) */
+  --color-brand-dark: #C0625B; /* 호버 상태 */
+  --color-brand-light: #FFF1F0;/* 배지/태그 배경 */
+
+  /* 배경 */
+  --color-surface: #fafafa;    /* 카드·섹션 배경 */
+  --color-dark: #1a1a1a;       /* 다크 섹션 */
+  --color-dark-blue: #2C3E50;  /* 히어로·CTA */
+
+  /* 보더 */
+  --color-line: #dddddd;       /* 보더·구분선 */
+
+  /* 폰트 */
+  --font-pretendard: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+
+  /* 라운드 */
   --radius: 0.5rem;
-  --font-pretendard: 'Pretendard', sans-serif;
+
+  /* 애니메이션 */
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
 }
 
 :root {
-  /* AI놀자 라이트 모드 — 웜 코랄 브랜드 */
-  --background: 30 33% 97%;          /* #F5F0EB 크림 화이트 */
-  --foreground: 210 18% 20%;          /* #2C3E50 웜 네이비 */
-  --card: 30 20% 99%;                 /* #FDFBF9 웜 화이트 */
-  --card-foreground: 210 18% 20%;
+  --background: 0 0% 100%;
+  --foreground: 0 0% 10%;              /* #1a1a1a */
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 10%;
   --popover: 0 0% 100%;
-  --popover-foreground: 210 18% 20%;
-  --primary: 4 50% 63%;               /* #D4756E 웜 코랄 */
+  --popover-foreground: 0 0% 10%;
+  --primary: 4 50% 63%;                /* #D4756E */
   --primary-foreground: 0 0% 100%;
-  --secondary: 30 20% 95%;            /* #F5E0DE 블러시 */
-  --secondary-foreground: 210 18% 20%;
-  --muted: 30 10% 95%;
-  --muted-foreground: 210 10% 46%;    /* #5D6D7E 슬레이트 */
-  --accent: 39 55% 58%;               /* #D4A853 웜 골드 */
-  --accent-foreground: 210 18% 20%;
+  --secondary: 0 0% 96%;               /* #f5f5f5 */
+  --secondary-foreground: 0 0% 10%;
+  --muted: 0 0% 96%;
+  --muted-foreground: 0 0% 53%;        /* #888 */
+  --accent: 210 29% 24%;               /* #2C3E50 */
+  --accent-foreground: 0 0% 100%;
   --destructive: 0 72% 51%;
   --destructive-foreground: 0 0% 100%;
-  --border: 30 10% 90%;               /* #e5e0db */
-  --input: 30 10% 90%;
-  --ring: 4 50% 63%;                  /* 코랄 포커스 링 */
-  --sidebar: 30 20% 97%;
-  --sidebar-foreground: 210 18% 20%;
+  --border: 0 0% 87%;                  /* #DDD */
+  --input: 0 0% 87%;
+  --ring: 4 50% 63%;
+  --sidebar: 0 0% 98%;
+  --sidebar-foreground: 0 0% 10%;
   --radius: 0.5rem;
 }
 
 .dark {
-  /* AI놀자 다크 모드 */
-  --background: 220 20% 7%;           /* #111318 */
-  --foreground: 30 20% 93%;           /* #F0EBE5 */
+  --background: 220 20% 7%;
+  --foreground: 0 0% 93%;
   --card: 220 20% 10%;
-  --card-foreground: 30 20% 93%;
+  --card-foreground: 0 0% 93%;
   --popover: 220 20% 10%;
-  --popover-foreground: 30 20% 93%;
-  --primary: 4 50% 63%;               /* #D4756E 코랄 유지 */
+  --popover-foreground: 0 0% 93%;
+  --primary: 4 50% 63%;
   --primary-foreground: 0 0% 100%;
   --secondary: 220 15% 18%;
-  --secondary-foreground: 30 20% 93%;
+  --secondary-foreground: 0 0% 93%;
   --muted: 220 15% 18%;
   --muted-foreground: 220 10% 60%;
-  --accent: 39 55% 58%;               /* 골드 유지 */
-  --accent-foreground: 30 20% 93%;
+  --accent: 210 29% 24%;
+  --accent-foreground: 0 0% 93%;
   --destructive: 0 62% 30%;
-  --destructive-foreground: 30 20% 93%;
+  --destructive-foreground: 0 0% 93%;
   --border: 220 15% 18%;
   --input: 220 15% 18%;
   --ring: 4 50% 63%;
   --sidebar: 220 20% 8%;
-  --sidebar-foreground: 30 20% 93%;
+  --sidebar-foreground: 0 0% 93%;
 }
 
 @layer base {
@@ -86,5 +112,7 @@
 
   body {
     @apply bg-background text-foreground font-pretendard;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }

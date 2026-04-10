@@ -63,9 +63,9 @@ export default function ToolsPage() {
       <section className="pt-16 pb-8 px-6">
         <div className="max-w-[1200px] mx-auto flex items-end justify-between">
           <div>
-            <p className="text-[#D4756E] text-sm font-medium mb-2">AI놀자가 만든 것들</p>
-            <h1 className="text-4xl font-bold tracking-tight text-[#333]">도구</h1>
-            <p className="text-[#666] mt-3">
+            <p className="text-brand text-sm font-medium mb-2">AI놀자가 만든 것들</p>
+            <h1 className="text-4xl font-bold tracking-tight text-ink">도구</h1>
+            <p className="text-body mt-3">
               직접 기획·개발해 운영 중인 무료 웹 서비스와 Chrome 확장 프로그램입니다.
               누구나 무료로 사용하실 수 있어요.
             </p>
@@ -89,7 +89,7 @@ export default function ToolsPage() {
                 href={t.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group relative block p-6 rounded-2xl border border-[#e5e5e5] hover:shadow-lg hover:-translate-y-0.5 transition-all bg-white"
+                className="group relative block p-6 rounded-2xl border border-line hover:shadow-lg hover:-translate-y-0.5 transition-all bg-white"
               >
                 {/* 좌측 컬러 바 */}
                 <div
@@ -108,15 +108,15 @@ export default function ToolsPage() {
                     >
                       {t.badge}
                     </span>
-                    <ExternalLink className="w-4 h-4 text-[#999] group-hover:text-[#D4756E] transition-colors" />
+                    <ExternalLink className="w-4 h-4 text-sub group-hover:text-brand transition-colors" />
                   </div>
 
-                  <h3 className="text-lg font-bold text-[#333] mb-2 group-hover:text-[#D4756E] transition-colors">
+                  <h3 className="text-lg font-bold text-ink mb-2 group-hover:text-brand transition-colors">
                     {t.title}
                   </h3>
-                  <p className="text-sm text-[#666] leading-relaxed">{t.description}</p>
+                  <p className="text-sm text-body leading-relaxed">{t.description}</p>
 
-                  <div className="mt-4 text-xs text-[#999] truncate">
+                  <div className="mt-4 text-xs text-sub truncate">
                     {t.url.replace(/^https?:\/\//, '').replace(/\/$/, '')}
                   </div>
                 </div>
@@ -124,12 +124,12 @@ export default function ToolsPage() {
             ))}
           </div>
 
-          <div className="mt-12 p-6 rounded-2xl bg-[#f8f8f8] border border-[#e5e5e5] text-center">
-            <p className="text-sm text-[#666]">
+          <div className="mt-12 p-6 rounded-2xl bg-surface border border-line text-center">
+            <p className="text-sm text-body">
               새로운 도구나 프로그램이 만들어지면 이곳에 추가됩니다.
               <br className="md:hidden" />{' '}
               사용 중 피드백이나 제안이 있으시면{' '}
-              <a href="/contact" className="text-[#D4756E] hover:underline">
+              <a href="/contact" className="text-brand hover:underline">
                 문의 페이지
               </a>
               로 알려주세요.

@@ -39,14 +39,14 @@ export default function ForgotPasswordPage() {
       <div className="min-h-screen bg-white flex items-center justify-center px-6 py-20">
         <div className="w-full max-w-[400px] text-center">
           <div className="text-5xl mb-4">&#9993;</div>
-          <h1 className="text-2xl font-bold text-[#333] mb-4">이메일을 확인해주세요</h1>
-          <p className="text-[#666] text-sm mb-2">
+          <h1 className="text-2xl font-bold text-ink mb-4">이메일을 확인해주세요</h1>
+          <p className="text-body text-sm mb-2">
             <strong>{email}</strong>으로 비밀번호 재설정 링크를 보냈습니다.
           </p>
-          <p className="text-[#999] text-xs mb-8">
+          <p className="text-sub text-xs mb-8">
             메일이 도착하지 않았다면 스팸함을 확인해주세요.
           </p>
-          <Link href="/login" className="text-sm text-[#D4756E] hover:underline">
+          <Link href="/login" className="text-sm text-brand hover:underline">
             로그인 페이지로 돌아가기
           </Link>
         </div>
@@ -58,20 +58,20 @@ export default function ForgotPasswordPage() {
     <div className="min-h-screen bg-white flex items-center justify-center px-6 py-20">
       <div className="w-full max-w-[400px]">
         <div className="text-center mb-8">
-          <Link href="/" className="text-2xl font-bold text-[#D4756E]">AI놀자</Link>
-          <h1 className="text-2xl font-bold text-[#333] mt-4">비밀번호 재설정</h1>
-          <p className="text-[#999] text-sm mt-2">가입한 이메일을 입력하면 재설정 링크를 보내드립니다</p>
+          <Link href="/" className="text-2xl font-bold text-brand">AI놀자</Link>
+          <h1 className="text-2xl font-bold text-ink mt-4">비밀번호 재설정</h1>
+          <p className="text-sub text-sm mt-2">가입한 이메일을 입력하면 재설정 링크를 보내드립니다</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-[#333] mb-1">이메일</label>
+            <label className="block text-sm font-medium text-ink mb-1">이메일</label>
             <input
               type="email"
               required
               value={email}
               onChange={e => setEmail(e.target.value)}
-              className="w-full px-4 py-3 border border-[#e5e5e5] rounded-xl text-[#333] placeholder-[#ccc] focus:outline-none focus:border-[#D4756E] transition-colors"
+              className="w-full px-4 py-3 border border-line rounded-xl text-ink placeholder-hint focus:outline-none focus:border-[#D4756E] transition-colors"
               placeholder="example@email.com"
             />
           </div>
@@ -83,14 +83,14 @@ export default function ForgotPasswordPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-[#D4756E] text-white font-bold rounded-xl hover:bg-[#c0625b] transition-all disabled:opacity-50"
+            className="w-full py-3 bg-brand text-white font-bold rounded-xl hover:bg-brand-dark transition-all disabled:opacity-50"
           >
             {loading ? '전송 중...' : '재설정 링크 보내기'}
           </button>
         </form>
 
-        <p className="text-center text-sm text-[#999] mt-6">
-          <Link href="/login" className="text-[#D4756E] hover:underline">로그인으로 돌아가기</Link>
+        <p className="text-center text-sm text-sub mt-6">
+          <Link href="/login" className="text-brand hover:underline">로그인으로 돌아가기</Link>
         </p>
       </div>
     </div>

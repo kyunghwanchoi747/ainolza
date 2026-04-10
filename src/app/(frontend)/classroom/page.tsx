@@ -49,10 +49,10 @@ export default async function ClassroomListPage() {
     <div className="min-h-screen bg-white">
       <div className="max-w-5xl mx-auto px-6 py-16">
         <div className="mb-12">
-          <h1 className="text-3xl md:text-4xl font-bold text-[#333]">강의실</h1>
-          <p className="text-[#666] mt-3">
+          <h1 className="text-3xl md:text-4xl font-bold text-ink">강의실</h1>
+          <p className="text-body mt-3">
             수강 신청한 강의는 입장하기 버튼이 활성화됩니다. 처음 방문하셨다면{' '}
-            <Link href="/store" className="text-[#D4756E] hover:underline">
+            <Link href="/store" className="text-brand hover:underline">
               스토어
             </Link>
             에서 강의를 구매할 수 있습니다.
@@ -65,25 +65,25 @@ export default async function ClassroomListPage() {
             return (
               <div
                 key={c.slug}
-                className="border border-[#e5e5e5] rounded-2xl p-6 bg-white hover:shadow-md transition-shadow"
+                className="border border-line rounded-2xl p-6 bg-white hover:shadow-md transition-shadow"
               >
-                <div className="inline-block px-3 py-1 text-xs font-medium rounded-full bg-[#FFF1F0] text-[#D4756E] mb-3">
+                <div className="inline-block px-3 py-1 text-xs font-medium rounded-full bg-brand-light text-brand mb-3">
                   {c.level}
                 </div>
-                <h2 className="text-xl font-bold text-[#333] mb-2">{c.shortTitle}</h2>
-                <p className="text-[#666] text-sm mb-6 leading-relaxed">{c.description}</p>
+                <h2 className="text-xl font-bold text-ink mb-2">{c.shortTitle}</h2>
+                <p className="text-body text-sm mb-6 leading-relaxed">{c.description}</p>
 
                 {isOwned ? (
                   <Link
                     href={`/classroom/${c.slug}`}
-                    className="inline-block w-full text-center py-3 bg-[#D4756E] text-white font-bold rounded-xl hover:bg-[#c0625b] transition-colors"
+                    className="inline-block w-full text-center py-3 bg-brand text-white font-bold rounded-xl hover:bg-brand-dark transition-colors"
                   >
                     강의실 입장
                   </Link>
                 ) : (
                   <Link
                     href="/store"
-                    className="inline-block w-full text-center py-3 bg-[#f5f5f5] text-[#999] font-bold rounded-xl hover:bg-[#eee] transition-colors"
+                    className="inline-block w-full text-center py-3 bg-[#f5f5f5] text-sub font-bold rounded-xl hover:bg-[#eee] transition-colors"
                   >
                     수강 신청하기
                   </Link>

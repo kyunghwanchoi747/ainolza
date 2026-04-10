@@ -95,16 +95,16 @@ export default function LandingPage({ products }: LandingPageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-white text-[#333] font-sans">
+    <div className="min-h-screen bg-white text-ink font-sans">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
       {/* 1. 히어로 */}
-      <section className="bg-[#2C3E50] text-white py-24 md:py-40 px-6">
+      <section className="bg-dark-blue text-white py-24 md:py-40 px-6">
         <div className="max-w-[1200px] mx-auto text-center">
-          <p className="text-[#D4756E] text-base md:text-lg font-bold mb-6 tracking-wide">
+          <p className="text-brand text-base md:text-lg font-bold mb-6 tracking-wide">
             놀면서 배우는 AI, 만들면서 익히는 AI
           </p>
           <h1 className="text-5xl md:text-7xl font-extrabold leading-[1.15] mb-10">
@@ -136,17 +136,17 @@ export default function LandingPage({ products }: LandingPageProps) {
         <div className="max-w-[1200px] mx-auto">
           <div className="flex items-end justify-between mb-12">
             <div>
-              <p className="text-[#D4756E] text-sm md:text-base font-bold mb-3 tracking-wide">
+              <p className="text-brand text-sm md:text-base font-bold mb-3 tracking-wide">
                 내가 만든 것들
               </p>
               <h2 className="text-4xl md:text-5xl font-extrabold leading-tight">도구</h2>
-              <p className="text-[#666] mt-4 text-base md:text-lg">
+              <p className="text-body mt-4 text-base md:text-lg">
                 직접 기획·개발해 운영 중인 무료 웹 서비스와 Chrome 확장
               </p>
             </div>
             <Link
               href="/tools"
-              className="text-sm md:text-base text-[#D4756E] font-bold hover:underline flex items-center gap-1 cursor-pointer"
+              className="text-sm md:text-base text-brand font-bold hover:underline flex items-center gap-1 cursor-pointer"
             >
               전체 보기 <ArrowRight className="w-4 h-4" />
             </Link>
@@ -159,7 +159,7 @@ export default function LandingPage({ products }: LandingPageProps) {
                 href={t.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group relative block p-7 rounded-2xl border-2 border-[#e5e5e5] hover:border-[#D4756E]/40 hover:shadow-xl hover:-translate-y-1 active:translate-y-0 transition-all bg-white cursor-pointer"
+                className="group relative block p-7 rounded-2xl border-2 border-line hover:border-[#D4756E]/40 hover:shadow-xl hover:-translate-y-1 active:translate-y-0 transition-all bg-white cursor-pointer"
               >
                 <div
                   className="absolute left-0 top-7 bottom-7 w-1.5 rounded-r-full"
@@ -173,12 +173,12 @@ export default function LandingPage({ products }: LandingPageProps) {
                     >
                       {t.badge}
                     </span>
-                    <ExternalLink className="w-5 h-5 text-[#999] group-hover:text-[#D4756E] group-hover:scale-110 transition-all" />
+                    <ExternalLink className="w-5 h-5 text-sub group-hover:text-brand group-hover:scale-110 transition-all" />
                   </div>
-                  <h3 className="text-xl md:text-2xl font-extrabold text-[#333] mb-2 group-hover:text-[#D4756E] transition-colors">
+                  <h3 className="text-xl md:text-2xl font-extrabold text-ink mb-2 group-hover:text-brand transition-colors">
                     {t.title}
                   </h3>
-                  <p className="text-sm md:text-base text-[#666] leading-relaxed">{t.desc}</p>
+                  <p className="text-sm md:text-base text-body leading-relaxed">{t.desc}</p>
                 </div>
               </a>
             ))}
@@ -187,15 +187,15 @@ export default function LandingPage({ products }: LandingPageProps) {
       </section>
 
       {/* 3. AI 실험실 */}
-      <section className="py-24 md:py-32 px-6 bg-[#f8f8f8]">
+      <section className="py-24 md:py-32 px-6 bg-surface">
         <div className="max-w-[1200px] mx-auto">
           <div className="flex items-end justify-between mb-12">
             <div>
-              <p className="text-[#D4756E] text-sm md:text-base font-bold mb-3 tracking-wide">
+              <p className="text-brand text-sm md:text-base font-bold mb-3 tracking-wide">
                 놀면서 배우는
               </p>
               <h2 className="text-4xl md:text-5xl font-extrabold leading-tight">AI 실험실</h2>
-              <p className="text-[#666] mt-4 text-base md:text-lg">
+              <p className="text-body mt-4 text-base md:text-lg">
                 간단한 체험으로 AI의 원리를 직접 느껴보세요
               </p>
             </div>
@@ -213,7 +213,7 @@ export default function LandingPage({ products }: LandingPageProps) {
               <Link
                 key={item.href}
                 href={item.href}
-                className="group p-7 bg-white rounded-2xl border-2 border-[#e5e5e5] hover:border-[#D4756E]/40 hover:shadow-xl hover:-translate-y-1 active:translate-y-0 transition-all cursor-pointer"
+                className="group p-7 bg-white rounded-2xl border-2 border-line hover:border-[#D4756E]/40 hover:shadow-xl hover:-translate-y-1 active:translate-y-0 transition-all cursor-pointer"
               >
                 <div className="flex items-start justify-between mb-3">
                   <h3 className="font-extrabold text-xl">{item.title}</h3>
@@ -226,7 +226,7 @@ export default function LandingPage({ products }: LandingPageProps) {
                     </span>
                   )}
                 </div>
-                <p className="text-[#666] text-sm md:text-base mb-5">{item.desc}</p>
+                <p className="text-body text-sm md:text-base mb-5">{item.desc}</p>
                 <span
                   className="text-sm font-bold flex items-center gap-1 group-hover:gap-2 transition-all"
                   style={{ color: item.color }}
@@ -240,7 +240,7 @@ export default function LandingPage({ products }: LandingPageProps) {
           {/* 오늘의 퀴즈 배너 */}
           <Link
             href="/labs/daily-quiz.html"
-            className="group block mt-8 p-6 bg-white rounded-2xl border-2 border-[#e5e5e5] hover:border-[#D4A853]/40 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer"
+            className="group block mt-8 p-6 bg-white rounded-2xl border-2 border-line hover:border-[#D4A853]/40 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer"
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
@@ -262,11 +262,11 @@ export default function LandingPage({ products }: LandingPageProps) {
       <section className="py-24 md:py-32 px-6">
         <div className="max-w-[1200px] mx-auto">
           <div className="text-center mb-16">
-            <p className="text-[#D4756E] text-sm md:text-base font-bold mb-3 tracking-wide">
+            <p className="text-brand text-sm md:text-base font-bold mb-3 tracking-wide">
               더 깊이 배우고 싶다면
             </p>
             <h2 className="text-4xl md:text-5xl font-extrabold leading-tight">강의 / 책</h2>
-            <p className="text-[#666] mt-4 max-w-[600px] mx-auto text-base md:text-lg">
+            <p className="text-body mt-4 max-w-[600px] mx-auto text-base md:text-lg">
               실험실과 도구를 만들어 본 경험을 그대로 강의에 담았습니다.
             </p>
           </div>
@@ -275,9 +275,9 @@ export default function LandingPage({ products }: LandingPageProps) {
           {featured && (
             <Link
               href={`/store/${featured.slug}`}
-              className="group block max-w-[1000px] mx-auto rounded-3xl overflow-hidden border-2 border-[#e5e5e5] hover:border-[#D4756E]/50 hover:shadow-2xl hover:-translate-y-1 active:translate-y-0 transition-all bg-white cursor-pointer mb-10"
+              className="group block max-w-[1000px] mx-auto rounded-3xl overflow-hidden border-2 border-line hover:border-[#D4756E]/50 hover:shadow-2xl hover:-translate-y-1 active:translate-y-0 transition-all bg-white cursor-pointer mb-10"
             >
-              <div className="aspect-[16/10] overflow-hidden bg-[#f8f8f8] flex items-center justify-center p-8">
+              <div className="aspect-[16/10] overflow-hidden bg-surface flex items-center justify-center p-8">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={featured._dbThumbnailUrl || `/store/${featured.slug}/thumbnail.png`}
@@ -288,28 +288,28 @@ export default function LandingPage({ products }: LandingPageProps) {
               <div className="p-8 md:p-10">
                 <div className="flex items-center justify-between gap-4">
                   <div className="min-w-0">
-                    <p className="text-[#D4756E] text-sm md:text-base font-bold mb-2">
+                    <p className="text-brand text-sm md:text-base font-bold mb-2">
                       {featured.category || "강의"}
                     </p>
                     <h3 className="text-2xl md:text-3xl font-extrabold whitespace-pre-line leading-tight mb-3">
                       {featured.title}
                     </h3>
                     {featured.subtitle && (
-                      <p className="text-[#666] text-base md:text-lg">{featured.subtitle}</p>
+                      <p className="text-body text-base md:text-lg">{featured.subtitle}</p>
                     )}
                   </div>
                   <div className="text-right shrink-0">
                     {featured.priceLabel ? (
-                      <p className="text-base md:text-lg font-bold text-[#D4756E]">
+                      <p className="text-base md:text-lg font-bold text-brand">
                         {featured.priceLabel}
                       </p>
                     ) : featured.price ? (
                       <>
-                        <p className="text-2xl md:text-3xl font-extrabold text-[#D4756E]">
+                        <p className="text-2xl md:text-3xl font-extrabold text-brand">
                           {formatPrice(featured.price)}
                         </p>
                         {featured.originalPrice && featured.originalPrice > featured.price && (
-                          <p className="text-sm text-[#999] line-through">
+                          <p className="text-sm text-sub line-through">
                             {formatPrice(featured.originalPrice)}
                           </p>
                         )}
@@ -317,7 +317,7 @@ export default function LandingPage({ products }: LandingPageProps) {
                     ) : null}
                   </div>
                 </div>
-                <div className="mt-6 inline-flex items-center gap-2 text-[#D4756E] font-bold group-hover:gap-3 transition-all">
+                <div className="mt-6 inline-flex items-center gap-2 text-brand font-bold group-hover:gap-3 transition-all">
                   자세히 보기 <ArrowRight className="w-5 h-5" />
                 </div>
               </div>
@@ -331,9 +331,9 @@ export default function LandingPage({ products }: LandingPageProps) {
                 <Link
                   key={p.slug}
                   href={`/store/${p.slug}`}
-                  className="group rounded-2xl overflow-hidden border-2 border-[#e5e5e5] hover:border-[#D4756E]/40 hover:shadow-xl hover:-translate-y-1 active:translate-y-0 transition-all bg-white cursor-pointer"
+                  className="group rounded-2xl overflow-hidden border-2 border-line hover:border-[#D4756E]/40 hover:shadow-xl hover:-translate-y-1 active:translate-y-0 transition-all bg-white cursor-pointer"
                 >
-                  <div className="aspect-square overflow-hidden bg-[#f8f8f8] flex items-center justify-center p-4">
+                  <div className="aspect-square overflow-hidden bg-surface flex items-center justify-center p-4">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={p._dbThumbnailUrl || `/store/${p.slug}/thumbnail.png`}
@@ -342,14 +342,14 @@ export default function LandingPage({ products }: LandingPageProps) {
                     />
                   </div>
                   <div className="p-5">
-                    <p className="text-xs text-[#999] mb-1.5 font-medium">{p.category}</p>
-                    <h4 className="font-extrabold text-base text-[#333] line-clamp-2 whitespace-pre-line leading-snug mb-2">
+                    <p className="text-xs text-sub mb-1.5 font-medium">{p.category}</p>
+                    <h4 className="font-extrabold text-base text-ink line-clamp-2 whitespace-pre-line leading-snug mb-2">
                       {p.title}
                     </h4>
                     {p.priceLabel ? (
-                      <p className="text-[#D4756E] font-bold text-sm">{p.priceLabel}</p>
+                      <p className="text-brand font-bold text-sm">{p.priceLabel}</p>
                     ) : p.price ? (
-                      <p className="text-[#D4756E] font-extrabold text-base">
+                      <p className="text-brand font-extrabold text-base">
                         {formatPrice(p.price)}
                       </p>
                     ) : null}
@@ -362,7 +362,7 @@ export default function LandingPage({ products }: LandingPageProps) {
           <div className="text-center">
             <Link
               href="/store"
-              className="inline-block px-8 py-4 border-2 border-[#333] text-[#333] font-bold rounded-full hover:bg-[#333] hover:text-white hover:scale-105 active:scale-95 transition-all text-base cursor-pointer"
+              className="inline-block px-8 py-4 border-2 border-[#333] text-ink font-bold rounded-full hover:bg-ink hover:text-white hover:scale-105 active:scale-95 transition-all text-base cursor-pointer"
             >
               모든 강의·책 보기
             </Link>
@@ -371,12 +371,12 @@ export default function LandingPage({ products }: LandingPageProps) {
       </section>
 
       {/* 5. 신뢰 (소셜 프루프) */}
-      <section className="py-20 px-6 border-y border-[#e5e5e5] bg-[#fafafa]">
+      <section className="py-20 px-6 border-y border-line bg-surface">
         <div className="max-w-[1200px] mx-auto text-center">
-          <p className="text-[#999] text-xs md:text-sm uppercase tracking-widest mb-10 font-bold">
+          <p className="text-sub text-xs md:text-sm uppercase tracking-widest mb-10 font-bold">
             강연 및 교육 수강생 1,000+명
           </p>
-          <div className="flex flex-wrap justify-center items-center gap-x-12 gap-y-6 text-[#666]">
+          <div className="flex flex-wrap justify-center items-center gap-x-12 gap-y-6 text-body">
             <span className="text-lg md:text-xl font-bold">바이브 코딩 클래스</span>
             <span className="text-lg md:text-xl font-bold">AI 관련 도서 2권 출판</span>
             <span className="text-lg md:text-xl font-bold">방송 출연</span>
@@ -390,11 +390,11 @@ export default function LandingPage({ products }: LandingPageProps) {
         <div className="max-w-[1100px] mx-auto">
           <div className="grid md:grid-cols-[260px_1fr] gap-10">
             <div>
-              <p className="text-[#D4756E] text-sm md:text-base font-bold mb-3 tracking-wide">
+              <p className="text-brand text-sm md:text-base font-bold mb-3 tracking-wide">
                 자주 묻는 질문
               </p>
               <h2 className="text-4xl md:text-5xl font-extrabold leading-tight">FAQ</h2>
-              <p className="text-[#666] mt-4 text-base">
+              <p className="text-body mt-4 text-base">
                 강의별 FAQ는 각 상품 페이지를 참고해 주세요.
               </p>
             </div>
@@ -402,7 +402,7 @@ export default function LandingPage({ products }: LandingPageProps) {
               {faqItems.map((item, i) => (
                 <div
                   key={i}
-                  className="bg-[#f8f8f8] rounded-2xl overflow-hidden border-2 border-transparent hover:border-[#D4756E]/20 transition-all"
+                  className="bg-surface rounded-2xl overflow-hidden border-2 border-transparent hover:border-[#D4756E]/20 transition-all"
                 >
                   <button
                     type="button"
@@ -410,15 +410,15 @@ export default function LandingPage({ products }: LandingPageProps) {
                     onClick={() => setOpenFaq(openFaq === i ? null : i)}
                   >
                     <span className="flex items-center gap-4">
-                      <span className="text-[#D4756E] text-sm font-extrabold">Q</span>
-                      <span className="text-base md:text-lg font-bold text-[#333]">{item.q}</span>
+                      <span className="text-brand text-sm font-extrabold">Q</span>
+                      <span className="text-base md:text-lg font-bold text-ink">{item.q}</span>
                     </span>
                     <ChevronDown
-                      className={`w-5 h-5 text-[#999] transition-transform shrink-0 ml-3 ${openFaq === i ? "rotate-180" : ""}`}
+                      className={`w-5 h-5 text-sub transition-transform shrink-0 ml-3 ${openFaq === i ? "rotate-180" : ""}`}
                     />
                   </button>
                   {openFaq === i && (
-                    <div className="px-6 pb-6 text-[#666] text-sm md:text-base leading-relaxed pl-14">
+                    <div className="px-6 pb-6 text-body text-sm md:text-base leading-relaxed pl-14">
                       {item.a}
                     </div>
                   )}
@@ -430,9 +430,9 @@ export default function LandingPage({ products }: LandingPageProps) {
       </section>
 
       {/* 7. 푸터 CTA */}
-      <section className="py-24 md:py-32 px-6 bg-[#2C3E50] text-white text-center">
+      <section className="py-24 md:py-32 px-6 bg-dark-blue text-white text-center">
         <div className="max-w-[700px] mx-auto">
-          <p className="text-[#D4756E] text-sm md:text-base font-bold mb-4 tracking-wide">
+          <p className="text-brand text-sm md:text-base font-bold mb-4 tracking-wide">
             지금 바로
           </p>
           <h2 className="text-4xl md:text-5xl font-extrabold mb-6 leading-tight">

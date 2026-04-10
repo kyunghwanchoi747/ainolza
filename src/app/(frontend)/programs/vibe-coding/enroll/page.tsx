@@ -95,18 +95,18 @@ function EnrollFormContent() {
   }
 
   if (isLoggedIn === null || loadingProduct) {
-    return <div className="min-h-screen bg-white flex items-center justify-center"><p className="text-[#999]">로딩 중...</p></div>
+    return <div className="min-h-screen bg-white flex items-center justify-center"><p className="text-sub">로딩 중...</p></div>
   }
 
   if (isLoggedIn === false) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center px-6">
         <div className="max-w-[400px] text-center">
-          <h2 className="text-2xl font-bold text-[#333] mb-4">로그인이 필요합니다</h2>
-          <p className="text-[#666] text-sm mb-6">수강 신청을 하려면 먼저 로그인해주세요.</p>
+          <h2 className="text-2xl font-bold text-ink mb-4">로그인이 필요합니다</h2>
+          <p className="text-body text-sm mb-6">수강 신청을 하려면 먼저 로그인해주세요.</p>
           <div className="flex flex-col gap-3">
-            <Link href={`/login?next=/programs/vibe-coding/enroll?slug=${slug}`} className="py-3 bg-[#D4756E] text-white font-bold rounded-xl text-center hover:bg-[#c0625b] transition-all">로그인</Link>
-            <Link href="/signup" className="py-3 border border-[#e5e5e5] text-[#333] font-bold rounded-xl text-center hover:bg-[#f8f8f8] transition-all">회원가입</Link>
+            <Link href={`/login?next=/programs/vibe-coding/enroll?slug=${slug}`} className="py-3 bg-brand text-white font-bold rounded-xl text-center hover:bg-brand-dark transition-all">로그인</Link>
+            <Link href="/signup" className="py-3 border border-line text-ink font-bold rounded-xl text-center hover:bg-surface transition-all">회원가입</Link>
           </div>
         </div>
       </div>
@@ -130,27 +130,27 @@ function EnrollFormContent() {
   }
 
   return (
-    <div className="bg-white text-[#333] min-h-screen">
+    <div className="bg-white text-ink min-h-screen">
       <section className="pt-20 md:pt-28 pb-24 px-6">
         <div className="max-w-2xl mx-auto">
 
-          <Link href={`/store/${slug}`} className="text-sm text-[#999] hover:text-[#D4756E] transition-colors mb-10 inline-block cursor-pointer font-medium">
+          <Link href={`/store/${slug}`} className="text-sm text-sub hover:text-brand transition-colors mb-10 inline-block cursor-pointer font-medium">
             &larr; 상품 상세로
           </Link>
 
-          <p className="text-[#D4756E] text-sm md:text-base font-bold mb-3 tracking-wide">수강 신청</p>
+          <p className="text-brand text-sm md:text-base font-bold mb-3 tracking-wide">수강 신청</p>
           <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 whitespace-pre-line leading-[1.2]">
             {product?.title || '강의'}
           </h1>
           {product?.subtitle && (
-            <p className="text-[#666] text-lg mb-12">{product.subtitle}</p>
+            <p className="text-body text-lg mb-12">{product.subtitle}</p>
           )}
 
           {/* 상품 요약 카드 */}
-          <div className="p-7 rounded-3xl border-2 border-[#e5e5e5] bg-[#fafafa] mb-10">
+          <div className="p-7 rounded-3xl border-2 border-line bg-surface mb-10">
             <div className="flex justify-between items-start mb-5 gap-4">
               <div className="min-w-0">
-                <p className="text-[#999] text-xs font-bold uppercase tracking-wide mb-2">
+                <p className="text-sub text-xs font-bold uppercase tracking-wide mb-2">
                   {product?.duration || '강의'}
                 </p>
                 <h3 className="font-extrabold text-lg md:text-xl whitespace-pre-line leading-tight">
@@ -159,27 +159,27 @@ function EnrollFormContent() {
               </div>
               <div className="text-right shrink-0">
                 {product?.priceLabel ? (
-                  <p className="text-lg font-extrabold text-[#D4756E]">{product.priceLabel}</p>
+                  <p className="text-lg font-extrabold text-brand">{product.priceLabel}</p>
                 ) : product?.price ? (
                   <>
-                    <p className="text-2xl md:text-3xl font-extrabold text-[#D4756E]">
+                    <p className="text-2xl md:text-3xl font-extrabold text-brand">
                       {formatPrice(product.price)}
                     </p>
                     {product.originalPrice && product.originalPrice > product.price && (
-                      <p className="text-[#999] text-sm line-through">
+                      <p className="text-sub text-sm line-through">
                         {formatPrice(product.originalPrice)}
                       </p>
                     )}
                   </>
                 ) : (
-                  <p className="text-sm text-[#999]">가격 문의</p>
+                  <p className="text-sm text-sub">가격 문의</p>
                 )}
               </div>
             </div>
             {product?.tags && product.tags.length > 0 && (
               <div className="flex flex-wrap gap-2">
                 {product.tags.map((t) => (
-                  <span key={t} className="px-3 py-1.5 rounded-full bg-white border border-[#e5e5e5] text-[#666] text-xs font-bold">
+                  <span key={t} className="px-3 py-1.5 rounded-full bg-white border border-line text-body text-xs font-bold">
                     {t}
                   </span>
                 ))}
@@ -212,35 +212,35 @@ function EnrollFormContent() {
 
           {/* 신청 폼 */}
           <div className="text-center mb-6">
-            <p className="text-[#999] text-sm">또는 신청서를 남기시면 개별 안내드립니다</p>
+            <p className="text-sub text-sm">또는 신청서를 남기시면 개별 안내드립니다</p>
           </div>
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className="block text-sm font-bold mb-2">이름 <span className="text-red-500">*</span></label>
               <input type="text" required value={form.name} onChange={e => setForm({...form, name: e.target.value})}
-                className="w-full px-5 py-4 rounded-2xl border-2 border-[#e5e5e5] bg-white text-[#333] placeholder-[#bbb] focus:outline-none focus:border-[#D4756E] transition-colors text-base" placeholder="홍길동" />
+                className="w-full px-5 py-4 rounded-2xl border-2 border-line bg-white text-ink placeholder-hint focus:outline-none focus:border-[#D4756E] transition-colors text-base" placeholder="홍길동" />
             </div>
             <div>
               <label className="block text-sm font-bold mb-2">연락처 <span className="text-red-500">*</span></label>
               <input type="tel" required value={form.phone} onChange={e => setForm({...form, phone: e.target.value})}
-                className="w-full px-5 py-4 rounded-2xl border-2 border-[#e5e5e5] bg-white text-[#333] placeholder-[#bbb] focus:outline-none focus:border-[#D4756E] transition-colors text-base" placeholder="010-0000-0000" />
+                className="w-full px-5 py-4 rounded-2xl border-2 border-line bg-white text-ink placeholder-hint focus:outline-none focus:border-[#D4756E] transition-colors text-base" placeholder="010-0000-0000" />
             </div>
             <div>
               <label className="block text-sm font-bold mb-2">이메일 <span className="text-red-500">*</span></label>
               <input type="email" required value={form.email} onChange={e => setForm({...form, email: e.target.value})}
-                className="w-full px-5 py-4 rounded-2xl border-2 border-[#e5e5e5] bg-white text-[#333] placeholder-[#bbb] focus:outline-none focus:border-[#D4756E] transition-colors text-base" placeholder="example@email.com" />
+                className="w-full px-5 py-4 rounded-2xl border-2 border-line bg-white text-ink placeholder-hint focus:outline-none focus:border-[#D4756E] transition-colors text-base" placeholder="example@email.com" />
             </div>
             <div>
-              <label className="block text-sm font-bold mb-2">문의사항 <span className="text-[#999] font-normal">(선택)</span></label>
+              <label className="block text-sm font-bold mb-2">문의사항 <span className="text-sub font-normal">(선택)</span></label>
               <textarea rows={4} value={form.message} onChange={e => setForm({...form, message: e.target.value})}
-                className="w-full px-5 py-4 rounded-2xl border-2 border-[#e5e5e5] bg-white text-[#333] placeholder-[#bbb] focus:outline-none focus:border-[#D4756E] transition-colors resize-none text-base" placeholder="궁금한 점이 있으시면 적어주세요" />
+                className="w-full px-5 py-4 rounded-2xl border-2 border-line bg-white text-ink placeholder-hint focus:outline-none focus:border-[#D4756E] transition-colors resize-none text-base" placeholder="궁금한 점이 있으시면 적어주세요" />
             </div>
             <div className="pt-4 space-y-3">
               <button type="submit" disabled={loading}
-                className="w-full py-5 bg-[#2C3E50] text-white font-extrabold rounded-2xl hover:bg-[#1a2834] hover:scale-[1.02] active:scale-[0.98] transition-all text-base md:text-lg disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-md">
+                className="w-full py-5 bg-dark-blue text-white font-extrabold rounded-2xl hover:bg-dark hover:scale-[1.02] active:scale-[0.98] transition-all text-base md:text-lg disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-md">
                 {loading ? '접수 중...' : '신청 접수하기'}
               </button>
-              <p className="text-center text-[#999] text-xs">
+              <p className="text-center text-sub text-xs">
                 신청 접수 후 개별 안내드립니다.
               </p>
             </div>
@@ -254,7 +254,7 @@ function EnrollFormContent() {
 
 export default function EnrollPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center"><p className="text-[#999]">로딩 중...</p></div>}>
+    <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center"><p className="text-sub">로딩 중...</p></div>}>
       <EnrollFormContent />
     </Suspense>
   )

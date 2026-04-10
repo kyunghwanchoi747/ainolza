@@ -89,14 +89,14 @@ export default async function ProductDetailPage({
         <div className="max-w-[1200px] mx-auto">
           <Link
             href="/store"
-            className="text-sm text-[#999] hover:text-[#D4756E] transition-colors mb-8 inline-block cursor-pointer font-medium"
+            className="text-sm text-sub hover:text-brand transition-colors mb-8 inline-block cursor-pointer font-medium"
           >
             ← 강의/책 목록
           </Link>
 
           <div className="grid md:grid-cols-2 gap-12 mt-4">
             {/* 썸네일 영역 */}
-            <div className="relative aspect-square rounded-3xl overflow-hidden bg-[#f8f8f8] border-2 border-[#e5e5e5] flex items-center justify-center p-8">
+            <div className="relative aspect-square rounded-3xl overflow-hidden bg-surface border-2 border-line flex items-center justify-center p-8">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={thumbnailUrl}
@@ -104,7 +104,7 @@ export default async function ProductDetailPage({
                 className="max-w-full max-h-full object-contain"
               />
               {dday !== null && (
-                <div className="absolute top-5 right-5 px-4 py-2 rounded-xl bg-[#D4756E] text-white text-base font-extrabold shadow-lg">
+                <div className="absolute top-5 right-5 px-4 py-2 rounded-xl bg-brand text-white text-base font-extrabold shadow-lg">
                   D-{dday}
                 </div>
               )}
@@ -112,40 +112,40 @@ export default async function ProductDetailPage({
 
             {/* 정보 영역 */}
             <div className="flex flex-col justify-center">
-              <p className="text-[#D4756E] text-sm md:text-base font-bold mb-3 tracking-wide uppercase">
+              <p className="text-brand text-sm md:text-base font-bold mb-3 tracking-wide uppercase">
                 {product.category}
               </p>
-              <h1 className="text-3xl md:text-5xl font-extrabold text-[#333] leading-[1.2] mb-5 whitespace-pre-line">
+              <h1 className="text-3xl md:text-5xl font-extrabold text-ink leading-[1.2] mb-5 whitespace-pre-line">
                 {product.title}
               </h1>
               {product.subtitle && (
-                <p className="text-[#666] text-lg md:text-xl mb-2 font-medium">
+                <p className="text-body text-lg md:text-xl mb-2 font-medium">
                   {product.subtitle}
                 </p>
               )}
               {product.shortDescription && (
-                <p className="text-[#999] text-base mb-8">{product.shortDescription}</p>
+                <p className="text-sub text-base mb-8">{product.shortDescription}</p>
               )}
 
               {/* 가격 */}
               <div className="mb-8">
                 {product.priceLabel ? (
-                  <p className="text-2xl md:text-3xl text-[#D4756E] font-extrabold">
+                  <p className="text-2xl md:text-3xl text-brand font-extrabold">
                     {product.priceLabel}
                   </p>
                 ) : product.price ? (
                   <div className="flex items-baseline gap-4">
-                    <p className="text-4xl md:text-5xl text-[#D4756E] font-extrabold">
+                    <p className="text-4xl md:text-5xl text-brand font-extrabold">
                       {formatPrice(product.price)}
                     </p>
                     {product.originalPrice && product.originalPrice > product.price && (
-                      <p className="text-lg text-[#999] line-through font-medium">
+                      <p className="text-lg text-sub line-through font-medium">
                         {formatPrice(product.originalPrice)}
                       </p>
                     )}
                   </div>
                 ) : (
-                  <p className="text-base text-[#999]">가격 정보 준비 중</p>
+                  <p className="text-base text-sub">가격 정보 준비 중</p>
                 )}
               </div>
 
@@ -177,8 +177,8 @@ export default async function ProductDetailPage({
 
                 {product.actions.map((a, i) => {
                   const baseCls = a.primary
-                    ? 'block w-full py-5 bg-[#D4756E] text-white font-extrabold rounded-2xl text-center hover:bg-[#c0625b] hover:scale-[1.02] active:scale-[0.98] transition-all text-base md:text-lg cursor-pointer shadow-md'
-                    : 'block w-full py-5 border-2 border-[#333] text-[#333] font-extrabold rounded-2xl text-center hover:bg-[#333] hover:text-white hover:scale-[1.02] active:scale-[0.98] transition-all text-base md:text-lg cursor-pointer'
+                    ? 'block w-full py-5 bg-brand text-white font-extrabold rounded-2xl text-center hover:bg-brand-dark hover:scale-[1.02] active:scale-[0.98] transition-all text-base md:text-lg cursor-pointer shadow-md'
+                    : 'block w-full py-5 border-2 border-[#333] text-ink font-extrabold rounded-2xl text-center hover:bg-ink hover:text-white hover:scale-[1.02] active:scale-[0.98] transition-all text-base md:text-lg cursor-pointer'
                   const finalUrl = withSlug(a.url, product.slug)
                   if (a.external || /^https?:/.test(a.url)) {
                     return (
@@ -212,7 +212,7 @@ export default async function ProductDetailPage({
             {detailImages.map((src, i) => (
               <div
                 key={src}
-                className="w-full rounded-2xl overflow-hidden border border-[#e5e5e5]"
+                className="w-full rounded-2xl overflow-hidden border border-line"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
@@ -228,14 +228,14 @@ export default async function ProductDetailPage({
 
       {/* 상품별 FAQ */}
       {product._dbFaq && product._dbFaq.length > 0 && (
-        <section className="py-20 px-6 bg-[#fafafa] border-t border-[#e5e5e5]">
+        <section className="py-20 px-6 bg-surface border-t border-line">
           <div className="max-w-[900px] mx-auto">
             <div className="text-center mb-12">
-              <p className="text-[#D4756E] text-sm md:text-base font-bold mb-3 tracking-wide">
+              <p className="text-brand text-sm md:text-base font-bold mb-3 tracking-wide">
                 자주 묻는 질문
               </p>
               <h2 className="text-3xl md:text-4xl font-extrabold leading-tight">FAQ</h2>
-              <p className="text-[#666] mt-3 text-base">
+              <p className="text-body mt-3 text-base">
                 이 강의에 대해 궁금한 점을 정리했습니다.
               </p>
             </div>
@@ -245,9 +245,9 @@ export default async function ProductDetailPage({
       )}
 
       {/* 하단 다시 한 번 액션 버튼 */}
-      <section className="py-16 px-6 border-t border-[#e5e5e5]">
+      <section className="py-16 px-6 border-t border-line">
         <div className="max-w-[600px] mx-auto space-y-3">
-          <p className="text-center text-[#666] mb-6 text-base md:text-lg">
+          <p className="text-center text-body mb-6 text-base md:text-lg">
             궁금한 점이 있으시면 카카오톡으로 편하게 문의주세요.
           </p>
           <a
@@ -263,8 +263,8 @@ export default async function ProductDetailPage({
           </a>
           {product.actions.map((a, i) => {
             const baseCls = a.primary
-              ? 'block w-full py-5 bg-[#D4756E] text-white font-extrabold rounded-2xl text-center hover:bg-[#c0625b] hover:scale-[1.02] active:scale-[0.98] transition-all text-base md:text-lg cursor-pointer shadow-md'
-              : 'block w-full py-5 border-2 border-[#333] text-[#333] font-extrabold rounded-2xl text-center hover:bg-[#333] hover:text-white hover:scale-[1.02] active:scale-[0.98] transition-all text-base md:text-lg cursor-pointer'
+              ? 'block w-full py-5 bg-brand text-white font-extrabold rounded-2xl text-center hover:bg-brand-dark hover:scale-[1.02] active:scale-[0.98] transition-all text-base md:text-lg cursor-pointer shadow-md'
+              : 'block w-full py-5 border-2 border-[#333] text-ink font-extrabold rounded-2xl text-center hover:bg-ink hover:text-white hover:scale-[1.02] active:scale-[0.98] transition-all text-base md:text-lg cursor-pointer'
             const finalUrl = withSlug(a.url, product.slug)
             if (a.external || /^https?:/.test(a.url)) {
               return (

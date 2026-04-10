@@ -23,8 +23,8 @@ export default function LabsPage() {
       <section className="pt-16 pb-8 px-6">
         <div className="max-w-[1200px] mx-auto flex items-end justify-between">
           <div>
-            <h1 className="text-4xl font-bold tracking-tight text-[#333]">AI 실험실</h1>
-            <p className="text-[#666] mt-2">놀면서 배우는 AI 체험 프로그램</p>
+            <h1 className="text-4xl font-bold tracking-tight text-ink">AI 실험실</h1>
+            <p className="text-body mt-2">놀면서 배우는 AI 체험 프로그램</p>
           </div>
           <Image src="/mascot.png" alt="AI놀자 마스코트" width={60} height={60} className="object-contain" />
         </div>
@@ -32,14 +32,14 @@ export default function LabsPage() {
 
       {/* 오늘의 퀴즈 배너 */}
       <section className="px-6 pb-6">
-        <Link href="/labs/daily-quiz.html" className="group block max-w-[1200px] mx-auto p-5 bg-[#f8f8f8] rounded-xl border border-[#e5e5e5] hover:border-[#D4A853]/30 transition-all">
+        <Link href="/labs/daily-quiz.html" className="group block max-w-[1200px] mx-auto p-5 bg-surface rounded-xl border border-line hover:border-[#D4A853]/30 transition-all">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <span className="text-2xl">&#128218;</span>
               <div>
                 <span className="text-[11px] text-[#D4A853] font-bold">DAILY</span>
-                <h3 className="font-bold text-[#333]">오늘의 AI 퀴즈</h3>
-                <p className="text-[#999] text-sm">매일 1문제! 출석 도장도 모으고 AI 상식도 쌓아보세요.</p>
+                <h3 className="font-bold text-ink">오늘의 AI 퀴즈</h3>
+                <p className="text-sub text-sm">매일 1문제! 출석 도장도 모으고 AI 상식도 쌓아보세요.</p>
               </div>
             </div>
             <span className="text-sm text-[#D4A853] font-medium flex items-center gap-1 shrink-0">
@@ -56,13 +56,13 @@ export default function LabsPage() {
             <Link
               key={item.href}
               href={item.href}
-              className="group p-6 bg-white rounded-xl border border-[#e5e5e5] hover:border-[#D4756E]/30 hover:shadow-sm transition-all"
+              className="group p-6 bg-white rounded-xl border border-line hover:border-[#D4756E]/30 hover:shadow-sm transition-all"
             >
               <div className="flex items-start justify-between mb-3">
-                <h3 className="font-bold text-lg text-[#333]">{item.title}</h3>
+                <h3 className="font-bold text-lg text-ink">{item.title}</h3>
                 {item.tag && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: item.color + '20', color: item.color }}>{item.tag}</span>}
               </div>
-              <p className="text-[#666] text-sm mb-4">{item.desc}</p>
+              <p className="text-body text-sm mb-4">{item.desc}</p>
               <span className="text-sm font-medium flex items-center gap-1" style={{ color: item.color }}>
                 시작하기 <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
               </span>

@@ -24,17 +24,17 @@ export function ProductFaqList({ items }: { items: FaqItem[] }) {
             onClick={() => setOpen(open === i ? null : i)}
           >
             <span className="flex items-start gap-4 min-w-0 pr-3">
-              <span className="text-[#D4756E] text-sm font-extrabold mt-0.5 shrink-0">Q</span>
-              <span className="text-base md:text-lg font-bold text-[#333]">{item.question}</span>
+              <span className="text-brand text-sm font-extrabold mt-0.5 shrink-0">Q</span>
+              <span className="text-base md:text-lg font-bold text-ink">{item.question}</span>
             </span>
             <ChevronDown
-              className={`w-5 h-5 text-[#999] transition-transform shrink-0 ${
+              className={`w-5 h-5 text-sub transition-transform shrink-0 ${
                 open === i ? 'rotate-180' : ''
               }`}
             />
           </button>
           {open === i && (
-            <div className="px-6 pb-6 pl-14 text-[#666] text-sm md:text-base leading-relaxed whitespace-pre-line">
+            <div className="px-6 pb-6 pl-14 text-body text-sm md:text-base leading-relaxed whitespace-pre-line">
               {item.answer}
             </div>
           )}

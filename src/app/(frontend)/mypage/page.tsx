@@ -113,45 +113,45 @@ export default function MyPage() {
     return CLASSROOMS.filter((c) => slugs.has(c.slug))
   }, [orders])
 
-  if (loading) return <div className="min-h-screen bg-white flex items-center justify-center"><p className="text-[#999]">로딩 중...</p></div>
+  if (loading) return <div className="min-h-screen bg-white flex items-center justify-center"><p className="text-sub">로딩 중...</p></div>
   if (!user) return null
 
   return (
     <div className="min-h-screen bg-white">
       <section className="pt-16 pb-20 px-6">
         <div className="max-w-[600px] mx-auto">
-          <h1 className="text-3xl font-bold text-[#333] mb-8">마이페이지</h1>
+          <h1 className="text-3xl font-bold text-ink mb-8">마이페이지</h1>
 
           {/* 프로필 */}
-          <div className="p-6 rounded-2xl bg-[#f8f8f8] border border-[#e5e5e5] mb-6">
+          <div className="p-6 rounded-2xl bg-surface border border-line mb-6">
             <div className="flex items-center gap-4 mb-4">
-              <div className="w-14 h-14 rounded-full bg-[#D4756E]/10 flex items-center justify-center">
-                <User className="w-6 h-6 text-[#D4756E]" />
+              <div className="w-14 h-14 rounded-full bg-brand/10 flex items-center justify-center">
+                <User className="w-6 h-6 text-brand" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-[#333]">{user.name || '회원'}</h2>
-                <p className="text-[#999] text-sm">{user.role === 'admin' ? '관리자' : '일반 회원'}</p>
+                <h2 className="text-xl font-bold text-ink">{user.name || '회원'}</h2>
+                <p className="text-sub text-sm">{user.role === 'admin' ? '관리자' : '일반 회원'}</p>
               </div>
             </div>
             <div className="space-y-2 text-sm">
-              <div className="flex items-center gap-3"><Mail className="w-4 h-4 text-[#999]" /><span className="text-[#666]">{user.email}</span></div>
-              {user.phone && <div className="flex items-center gap-3"><Phone className="w-4 h-4 text-[#999]" /><span className="text-[#666]">{user.phone}</span></div>}
+              <div className="flex items-center gap-3"><Mail className="w-4 h-4 text-sub" /><span className="text-body">{user.email}</span></div>
+              {user.phone && <div className="flex items-center gap-3"><Phone className="w-4 h-4 text-sub" /><span className="text-body">{user.phone}</span></div>}
             </div>
           </div>
 
           {/* 내 강의실 */}
           <div className="mb-6">
             <div className="flex items-center gap-2 mb-3">
-              <GraduationCap className="w-5 h-5 text-[#D4756E]" />
-              <h3 className="font-medium text-[#333]">내 강의실</h3>
-              <span className="text-xs text-[#999]">({ownedClassrooms.length}개)</span>
+              <GraduationCap className="w-5 h-5 text-brand" />
+              <h3 className="font-medium text-ink">내 강의실</h3>
+              <span className="text-xs text-sub">({ownedClassrooms.length}개)</span>
             </div>
             {ownedClassrooms.length === 0 ? (
-              <div className="p-4 rounded-xl border border-dashed border-[#e5e5e5] text-center">
-                <p className="text-sm text-[#999] mb-3">아직 수강 중인 강의가 없습니다.</p>
+              <div className="p-4 rounded-xl border border-dashed border-line text-center">
+                <p className="text-sm text-sub mb-3">아직 수강 중인 강의가 없습니다.</p>
                 <Link
                   href="/classroom"
-                  className="inline-block text-xs text-[#D4756E] hover:underline"
+                  className="inline-block text-xs text-brand hover:underline"
                 >
                   강의 둘러보기 →
                 </Link>
@@ -162,16 +162,16 @@ export default function MyPage() {
                   <Link
                     key={c.slug}
                     href={`/classroom/${c.slug}`}
-                    className="block p-4 rounded-xl border border-[#e5e5e5] hover:border-[#D4756E] hover:bg-[#FFF8F7] transition-all"
+                    className="block p-4 rounded-xl border border-line hover:border-[#D4756E] hover:bg-brand-light transition-all"
                   >
                     <div className="flex items-center justify-between">
                       <div>
-                        <div className="inline-block px-2 py-0.5 text-[10px] font-medium rounded-full bg-[#FFF1F0] text-[#D4756E] mb-1">
+                        <div className="inline-block px-2 py-0.5 text-[10px] font-medium rounded-full bg-brand-light text-brand mb-1">
                           {c.level}
                         </div>
-                        <p className="font-medium text-[#333] text-sm">{c.shortTitle}</p>
+                        <p className="font-medium text-ink text-sm">{c.shortTitle}</p>
                       </div>
-                      <span className="text-[#D4756E] text-sm">입장 →</span>
+                      <span className="text-brand text-sm">입장 →</span>
                     </div>
                   </Link>
                 ))}
@@ -183,48 +183,48 @@ export default function MyPage() {
           <div className="mb-6">
             <button
               onClick={() => setShowOrders(!showOrders)}
-              className="w-full p-4 rounded-xl border border-[#e5e5e5] flex items-center justify-between hover:bg-[#f8f8f8] transition-all"
+              className="w-full p-4 rounded-xl border border-line flex items-center justify-between hover:bg-surface transition-all"
             >
               <div className="flex items-center gap-3">
-                <ShoppingBag className="w-5 h-5 text-[#D4756E]" />
+                <ShoppingBag className="w-5 h-5 text-brand" />
                 <div className="text-left">
-                  <h3 className="font-medium text-[#333]">주문 내역</h3>
-                  <p className="text-xs text-[#999]">{orders.length}건</p>
+                  <h3 className="font-medium text-ink">주문 내역</h3>
+                  <p className="text-xs text-sub">{orders.length}건</p>
                 </div>
               </div>
-              {showOrders ? <ChevronUp className="w-5 h-5 text-[#999]" /> : <ChevronDown className="w-5 h-5 text-[#999]" />}
+              {showOrders ? <ChevronUp className="w-5 h-5 text-sub" /> : <ChevronDown className="w-5 h-5 text-sub" />}
             </button>
 
             {showOrders && (
               <div className="mt-2 space-y-2">
                 {orders.length === 0 ? (
-                  <p className="p-4 text-center text-sm text-[#999]">주문 내역이 없습니다.</p>
+                  <p className="p-4 text-center text-sm text-sub">주문 내역이 없습니다.</p>
                 ) : (
                   orders.map((order: any) => {
                     const st = statusLabels[order.status] || statusLabels.pending
                     return (
-                      <div key={order.id} className="p-4 rounded-xl border border-[#e5e5e5]">
+                      <div key={order.id} className="p-4 rounded-xl border border-line">
                         <div className="flex items-start justify-between mb-2">
                           <div>
-                            <p className="font-medium text-[#333] text-sm">{order.productName}</p>
-                            <p className="text-xs text-[#999]">{order.orderNumber}</p>
+                            <p className="font-medium text-ink text-sm">{order.productName}</p>
+                            <p className="text-xs text-sub">{order.orderNumber}</p>
                           </div>
                           <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: st.color + '20', color: st.color }}>
                             {st.label}
                           </span>
                         </div>
                         <div className="flex items-center justify-between">
-                          <span className="text-sm font-bold text-[#333]">{order.amount?.toLocaleString()}원</span>
+                          <span className="text-sm font-bold text-ink">{order.amount?.toLocaleString()}원</span>
                           <div className="flex gap-2">
                             {order.receiptUrl && (
-                              <a href={order.receiptUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-[#999] hover:text-[#333] underline">영수증</a>
+                              <a href={order.receiptUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-sub hover:text-ink underline">영수증</a>
                             )}
                             {(order.status === 'paid' || order.status === 'active') && (
                               <button onClick={() => handleRefundRequest(order.id)} className="text-xs text-red-400 hover:text-red-600 underline">환불 신청</button>
                             )}
                           </div>
                         </div>
-                        <p className="text-xs text-[#999] mt-1">{order.createdAt ? new Date(order.createdAt).toLocaleDateString('ko-KR') : ''}</p>
+                        <p className="text-xs text-sub mt-1">{order.createdAt ? new Date(order.createdAt).toLocaleDateString('ko-KR') : ''}</p>
                       </div>
                     )
                   })
@@ -235,34 +235,34 @@ export default function MyPage() {
 
           {/* 메뉴 */}
           <div className="space-y-2">
-            <Link href="/store" className="block p-4 rounded-xl border border-[#e5e5e5] hover:border-[#D4756E]/30 transition-all">
+            <Link href="/store" className="block p-4 rounded-xl border border-line hover:border-[#D4756E]/30 transition-all">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-medium text-[#333]">강의/책</h3>
-                  <p className="text-xs text-[#999]">구매 가능한 콘텐츠 보기</p>
+                  <h3 className="font-medium text-ink">강의/책</h3>
+                  <p className="text-xs text-sub">구매 가능한 콘텐츠 보기</p>
                 </div>
-                <span className="text-[#999]">&rarr;</span>
+                <span className="text-sub">&rarr;</span>
               </div>
             </Link>
 
-            <Link href="/labs" className="block p-4 rounded-xl border border-[#e5e5e5] hover:border-[#D4756E]/30 transition-all">
+            <Link href="/labs" className="block p-4 rounded-xl border border-line hover:border-[#D4756E]/30 transition-all">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-medium text-[#333]">AI 실험실</h3>
-                  <p className="text-xs text-[#999]">무료 AI 체험 프로그램</p>
+                  <h3 className="font-medium text-ink">AI 실험실</h3>
+                  <p className="text-xs text-sub">무료 AI 체험 프로그램</p>
                 </div>
-                <span className="text-[#999]">&rarr;</span>
+                <span className="text-sub">&rarr;</span>
               </div>
             </Link>
 
             {user.role === 'admin' && (
-              <Link href="/manager" className="block p-4 rounded-xl border border-[#D4756E]/20 bg-[#D4756E]/5 hover:bg-[#D4756E]/10 transition-all">
+              <Link href="/manager" className="block p-4 rounded-xl border border-[#D4756E]/20 bg-brand/5 hover:bg-brand/10 transition-all">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-medium text-[#D4756E]">관리자 대시보드</h3>
-                    <p className="text-xs text-[#D4756E]/60">사이트 관리 페이지</p>
+                    <h3 className="font-medium text-brand">관리자 대시보드</h3>
+                    <p className="text-xs text-brand/60">사이트 관리 페이지</p>
                   </div>
-                  <span className="text-[#D4756E]">&rarr;</span>
+                  <span className="text-brand">&rarr;</span>
                 </div>
               </Link>
             )}
@@ -270,14 +270,14 @@ export default function MyPage() {
 
           <button
             onClick={handleLogout}
-            className="w-full mt-8 py-3 border border-[#e5e5e5] rounded-xl text-[#999] hover:text-[#333] hover:border-[#333] transition-all flex items-center justify-center gap-2 text-sm"
+            className="w-full mt-8 py-3 border border-line rounded-xl text-sub hover:text-ink hover:border-[#333] transition-all flex items-center justify-center gap-2 text-sm"
           >
             <LogOut className="w-4 h-4" /> 로그아웃
           </button>
 
           <button
             onClick={handleDeleteAccount}
-            className="w-full mt-3 py-2 text-xs text-[#ccc] hover:text-[#EF4444] transition-colors"
+            className="w-full mt-3 py-2 text-xs text-hint hover:text-[#EF4444] transition-colors"
           >
             회원탈퇴
           </button>

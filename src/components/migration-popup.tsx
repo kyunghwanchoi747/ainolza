@@ -53,23 +53,23 @@ export function MigrationPopup() {
     <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
       <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
         {/* 헤더 */}
-        <div className="flex items-center justify-between p-5 border-b border-[#e5e5e5]">
-          <h2 className="text-lg font-bold text-[#333]">새 홈페이지로 이전 중입니다</h2>
-          <button onClick={handleClose} className="text-[#999] hover:text-[#333] transition-colors">
+        <div className="flex items-center justify-between p-5 border-b border-line">
+          <h2 className="text-lg font-bold text-ink">새 홈페이지로 이전 중입니다</h2>
+          <button onClick={handleClose} className="text-sub hover:text-ink transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* 본문 */}
         <div className="p-5 space-y-4">
-          <p className="text-sm text-[#666] leading-relaxed">
-            안녕하세요, <strong className="text-[#D4756E]">AI놀자</strong>입니다.<br />
+          <p className="text-sm text-body leading-relaxed">
+            안녕하세요, <strong className="text-brand">AI놀자</strong>입니다.<br />
             홈페이지를 새로 단장하여 운영을 시작합니다.
           </p>
 
-          <div className="p-4 rounded-xl bg-[#f8f8f8] border border-[#e5e5e5]">
-            <p className="text-xs font-bold text-[#333] mb-2">&#128221; 로그인 안내</p>
-            <ul className="text-xs text-[#666] space-y-1.5 leading-relaxed">
+          <div className="p-4 rounded-xl bg-surface border border-line">
+            <p className="text-xs font-bold text-ink mb-2">&#128221; 로그인 안내</p>
+            <ul className="text-xs text-body space-y-1.5 leading-relaxed">
               <li>
                 &#8226; <strong>Google로 가입하셨던 분</strong>은 그대로 <strong>“Google로
                 로그인”</strong> 버튼을 사용해주세요. (비밀번호 재설정 불필요)
@@ -83,7 +83,7 @@ export function MigrationPopup() {
             </ul>
           </div>
 
-          <p className="text-xs text-[#999] leading-relaxed">
+          <p className="text-xs text-sub leading-relaxed">
             문의는 카카오톡 오픈채팅으로 부탁드립니다.
           </p>
 
@@ -99,16 +99,16 @@ export function MigrationPopup() {
         </div>
 
         {/* 푸터 버튼 */}
-        <div className="flex border-t border-[#e5e5e5]">
+        <div className="flex border-t border-line">
           <button
             onClick={handleHideToday}
-            className="flex-1 py-4 text-sm text-[#666] hover:bg-[#f8f8f8] transition-colors border-r border-[#e5e5e5]"
+            className="flex-1 py-4 text-sm text-body hover:bg-surface transition-colors border-r border-line"
           >
             오늘 다시 보지 않기
           </button>
           <button
             onClick={handleClose}
-            className="flex-1 py-4 text-sm font-bold text-[#333] hover:bg-[#f8f8f8] transition-colors"
+            className="flex-1 py-4 text-sm font-bold text-ink hover:bg-surface transition-colors"
           >
             닫기
           </button>
