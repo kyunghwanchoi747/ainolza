@@ -18,6 +18,7 @@ import {
   ShoppingCart,
   Search,
   KeyRound,
+  Users,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -45,6 +46,7 @@ const mainNavItems: NavItem[] = [
   { href: '/manager/posts', label: '게시판', icon: MessageSquare, shortcut: 'G B' },
   { href: '/manager/programs', label: '프로그램', icon: Download, shortcut: 'G R' },
   { href: '/manager/orders', label: '주문관리', icon: ShoppingCart, shortcut: 'G O' },
+  { href: '/manager/students', label: '수강생', icon: Users },
   { href: '/manager/access', label: '강의실 권한', icon: KeyRound },
   { href: '/manager/enrollments', label: '수강신청', icon: ClipboardList, shortcut: 'G N' },
   { href: '/manager/seo', label: 'SEO', icon: Search, shortcut: 'G S' },
