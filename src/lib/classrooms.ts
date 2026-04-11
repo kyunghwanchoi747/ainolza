@@ -72,7 +72,7 @@ export const CLASSROOMS: Classroom[] = [
       {
         week: 1,
         title: '심화 1회차',
-        youtubeLiveUrl: '',  // ← 라이브 직전에 유튜브 URL 입력 후 push (예: https://www.youtube.com/live/XXXXXXX)
+        youtubeLiveUrl: 'https://youtube.com/live/WW6EwB7kAtg?feature=share',
         // vimeoId: '',      // ← 라이브 끝나고 Vimeo 녹화본 업로드 후 입력
         // guidebookUrl: '', // ← 노션 가이드북 URL
         date: '',            // ← 강의 날짜 (예: 2026-04-15)
