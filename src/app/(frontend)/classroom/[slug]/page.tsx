@@ -3,6 +3,7 @@ import { headers } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { getPayloadClient } from '@/lib/payload'
 import { getClassroom } from '@/lib/classrooms'
+import { SecretUnlock } from '@/components/classroom/secret-unlock'
 
 export const dynamic = 'force-dynamic'
 
@@ -259,6 +260,15 @@ export default async function ClassroomDetailPage({
                         {s.week}회차 가이드북
                       </a>
                     </div>
+                  )}
+
+                  {/* 비밀 공간 */}
+                  {s.secret && (
+                    <SecretUnlock
+                      password={s.secret.password}
+                      notionUrl={s.secret.notionUrl}
+                      label={s.secret.label}
+                    />
                   )}
                 </div>
               )

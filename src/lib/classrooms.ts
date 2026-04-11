@@ -14,6 +14,11 @@ export type Session = {
   youtubeLiveUrl?: string // 라이브 송출 URL (vimeoId 없을 때만 표시)
   guidebookUrl?: string // 노션 페이지 등
   date?: string // YYYY-MM-DD (라이브 일자, 표시용)
+  secret?: {
+    password: string  // 강의 후반부에 수강생에게 알려줄 비밀번호
+    notionUrl: string // 잠금 해제 후 열리는 노션 페이지 URL
+    label?: string    // 버튼 텍스트 (기본값: '비밀 자료 열기')
+  }
 }
 
 export type Classroom = {
@@ -67,10 +72,10 @@ export const CLASSROOMS: Classroom[] = [
       {
         week: 1,
         title: '심화 1회차',
-        // youtubeLiveUrl: '',  // 라이브 직전에 채우기 (https://www.youtube.com/live/XXX 등 어떤 형식이든 OK)
-        // vimeoId: '',          // 라이브 끝나고 녹화본 업로드 후 채우기
-        // guidebookUrl: '',
-        // date: '',
+        youtubeLiveUrl: '',  // ← 라이브 직전에 유튜브 URL 입력 후 push (예: https://www.youtube.com/live/XXXXXXX)
+        // vimeoId: '',      // ← 라이브 끝나고 Vimeo 녹화본 업로드 후 입력
+        // guidebookUrl: '', // ← 노션 가이드북 URL
+        date: '',            // ← 강의 날짜 (예: 2026-04-15)
       },
       {
         week: 2,
