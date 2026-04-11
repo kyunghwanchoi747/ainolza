@@ -76,6 +76,11 @@ export const CLASSROOMS: Classroom[] = [
         // vimeoId: '',      // ← 라이브 끝나고 Vimeo 녹화본 업로드 후 입력
         // guidebookUrl: '', // ← 노션 가이드북 URL
         date: '',            // ← 강의 날짜 (예: 2026-04-15)
+        secret: {
+          password: 'ainolza232',
+          notionUrl: 'https://www.notion.so/33fc7863bde2805889c1f7eeb7536bb8?source=copy_link',
+          label: '1회차 비밀 자료',
+        },
       },
       {
         week: 2,
