@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 import {
   sendOrderCreatedToAdmin,
+  sendEnrollmentConfirmToBuyer,
   sendPaymentCompletedToAdmin,
   sendPaymentCompletedToBuyer,
   sendRefundRequestedToAdmin,
@@ -23,8 +24,19 @@ export const Orders: CollectionConfig = {
 
         // 각 알림을 개별 try/catch — 하나 실패해도 주문 처리에 영향 없음
         if (operation === 'create') {
+          // 관리자 알림
           try { await sendOrderCreatedToAdmin(req.payload, d) } catch (e) { console.error('[ORDER CREATE NOTIFY]', (e as Error).message) }
-        // try { await logEmailSent(req.payload, { to: 'admin', subject: `주문접수 ${oid}`, type: 'order-admin', relatedId: oid }) } catch {}  // TODO: 로깅 재활성화
+
+          // 구매자 입금 안내 메일 (포트원 결제 연동 전까지)
+          if (d.buyerEmail) {
+            try {
+              await sendEnrollmentConfirmToBuyer(
+                req.payload,
+                { name: d.buyerName || d.buyerEmail.split('@')[0], email: d.buyerEmail },
+                { title: d.productName, price: d.amount ?? undefined },
+              )
+            } catch (e) { console.error('[ORDER CREATE BUYER EMAIL]', (e as Error).message) }
+          }
         }
 
         if (operation === 'update' && previousDoc) {
@@ -69,6 +81,7 @@ export const Orders: CollectionConfig = {
       type: 'relationship',
       relationTo: 'users',
       label: '회원',
+      required: false, // 사용자 삭제 시 NULL로 설정 가능
     },
     { name: 'productName', type: 'text', required: true, label: '상품명' },
     { name: 'productSlug', type: 'text', label: '상품 슬러그' },
