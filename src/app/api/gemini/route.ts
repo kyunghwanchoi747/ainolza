@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
       const ai = (env as unknown as Record<string, unknown>).AI;
       if (ai) {
         const aiBinding = ai as { run: (model: string, input: Record<string, unknown>) => Promise<{ response: string }> };
-        const aiResponse = await aiBinding.run('@cf/meta/llama-3.1-70b-instruct', {
+        const aiResponse = await aiBinding.run('@cf/google/gemma-3-12b-it', {
           messages: [
             { role: 'system', content: systemPrompt },
             { role: 'user', content: jsonMode ? `${userQuery}\n\n반드시 JSON 형식으로만 응답하세요: {"score": 숫자, "feedback": "문자열", "rubric": {"subject": 숫자, "color_quantity": 숫자, "location": 숫자, "detail": 숫자}}` : userQuery },
