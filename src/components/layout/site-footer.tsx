@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { X } from 'lucide-react'
 
 const termsContent = `제1조 목적
@@ -115,6 +116,8 @@ export function SiteFooter() {
             <button onClick={() => setModal('privacy')} className="hover:text-white transition-colors">개인정보처리방침</button>
             <span className="text-white/20">|</span>
             <button onClick={() => setModal('terms')} className="hover:text-white transition-colors">이용약관</button>
+            <span className="text-white/20">|</span>
+            <Link href="/faq" className="hover:text-white transition-colors">FAQ</Link>
           </div>
           <div className="text-xs text-white/30 leading-relaxed space-y-1">
             <p>에이아이놀자 (AI놀자) 대표자: 최경환 | 개인정보관리책임자: 최경환 | 이메일: ainolza@naver.com</p>
