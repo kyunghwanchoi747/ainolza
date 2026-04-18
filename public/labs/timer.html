@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>심플 타이머 — AI놀자</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f8f9fa;
+            color: #333;
+            overflow-y: auto;
+            transition: background-color 0.3s;
+        }
+        .top-bar {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 20px;
+            background: white;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .top-bar a {
+            font-size: 13px;
+            color: #868e96;
+            text-decoration: none;
+        }
+        .top-bar a:hover { color: #D4756E; }
+        .top-bar-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+        }
+        .top-bar-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .icon-btn {
+            background: #f1f3f5;
+            border: none;
+            border-radius: 8px;
+            padding: 6px 10px;
+            font-size: 13px;
+            cursor: pointer;
+            color: #495057;
+            transition: all 0.2s;
+        }
+        .icon-btn:hover { background: #e9ecef; }
+        .icon-btn.active { background: #339af0; color: white; }
+
+        .timer-container {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            text-align: center;
+            margin-top: 24px;
+            width: 90%;
+            max-width: 340px;
+        }
+        .inputs {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            height: 70px;
+        }
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        input[type="number"], input[type="time"], input[type="text"] {
+            width: 70px;
+            padding: 10px;
+            font-size: 16px;
+            text-align: center;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            outline: none;
+            transition: border-color 0.2s;
+            background-color: #f8f9fa;
+        }
+        input[type="number"]:focus, input[type="time"]:focus, input[type="text"]:focus {
+            border-color: #4dabf7;
+            background-color: white;
+        }
+        label {
+            margin-top: 8px;
+            font-size: 14px;
+            color: #868e96;
+            font-weight: 500;
+        }
+        .display {
+            font-size: 64px;
+            font-weight: 700;
+            margin: 20px 0 30px 0;
+            font-variant-numeric: tabular-nums;
+            color: #212529;
+            letter-spacing: 2px;
+        }
+        .buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        button:active { transform: scale(0.96); }
+        button:disabled {
+            background-color: #dee2e6;
+            color: #adb5bd;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn-start, .btn-pomo-start, .btn-add { background-color: #339af0; }
+        .btn-start:hover:not(:disabled), .btn-pomo-start:hover, .btn-add:hover { background-color: #228be6; }
+        .btn-stop, .btn-pomo-stop, .btn-del { background-color: #fa5252; }
+        .btn-stop:hover:not(:disabled), .btn-pomo-stop:hover, .btn-del:hover { background-color: #e03131; }
+        .btn-reset { background-color: #868e96; }
+        .btn-reset:hover:not(:disabled) { background-color: #495057; }
+
+        /* 다크모드 */
+        body.dark-mode {
+            background-color: #111;
+        }
+        body.dark-mode .top-bar {
+            background: #1a1a1a;
+            border-bottom-color: #333;
+        }
+        body.dark-mode .top-bar a,
+        body.dark-mode .top-bar-title { color: #868e96; }
+        body.dark-mode .timer-container {
+            background: #1a1a1a;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        body.dark-mode .display { color: #f8f9fa; }
+        body.dark-mode input {
+            background-color: #2c2c2c;
+            border-color: #444;
+            color: #f8f9fa;
+        }
+
+        /* 집중모드 (풀스크린 타이머) */
+        body.focus-mode {
+            background-color: black;
+            justify-content: center;
+        }
+        body.focus-mode .top-bar { display: none; }
+        body.focus-mode .timer-container {
+            background: transparent;
+            box-shadow: none;
+            max-width: none;
+            width: 100%;
+            margin: 0;
+        }
+        body.focus-mode .display {
+            font-size: 20vw;
+            color: white;
+            text-shadow: 0 0 40px rgba(255,255,255,0.6);
+            margin: 0;
+        }
+        body.focus-mode .inputs,
+        body.focus-mode .buttons,
+        body.focus-mode #mode-panel { display: none !important; }
+        body.focus-mode .focus-exit {
+            display: block !important;
+        }
+        .focus-exit {
+            display: none;
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: rgba(255,255,255,0.15);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        /* 패널 */
+        #mode-panel {
+            display: none;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #e9ecef;
+            width: 100%;
+            text-align: left;
+        }
+        body.dark-mode #mode-panel { border-top-color: #333; }
+        .mode-tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 15px;
+            justify-content: center;
+        }
+        .mode-tabs button {
+            background-color: #868e96;
+            padding: 5px 10px;
+            font-size: 12px;
+            border-radius: 5px;
+        }
+        .mode-tabs button.active { background-color: #339af0; }
+        .ui-section { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="top-bar">
+    <a href="/tools">← 도구 목록</a>
+    <span class="top-bar-title">⏱ 심플 타이머</span>
+    <div class="top-bar-actions">
+        <button class="icon-btn" id="btn-dark" onclick="toggleDark()" title="다크모드">🌙</button>
+        <button class="icon-btn" id="btn-more" onclick="togglePanel()" title="추가 모드">⚙️</button>
+        <button class="icon-btn" id="btn-focus" onclick="enterFocus()" title="집중모드">⛶</button>
+    </div>
+</div>
+
+<div class="timer-container">
+    <div class="inputs" id="input-section">
+        <div class="input-group">
+            <input type="number" id="hours" min="0" value="0" onclick="this.select()">
+            <label>시간</label>
+        </div>
+        <div class="input-group">
+            <input type="number" id="minutes" min="0" max="59" value="5" onclick="this.select()">
+            <label>분</label>
+        </div>
+        <div class="input-group">
+            <input type="number" id="seconds" min="0" max="59" value="0" onclick="this.select()">
+            <label>초</label>
+        </div>
+    </div>
+
+    <div class="display" id="display">00:05:00</div>
+
+    <div class="buttons" id="main-buttons">
+        <button class="btn-start" id="start-btn" onclick="startTimer()">시작</button>
+        <button class="btn-stop" id="stop-btn" onclick="stopTimer()" disabled>정지</button>
+        <button class="btn-reset" id="reset-btn" onclick="resetTimer()">리셋</button>
+    </div>
+
+    <div id="mode-panel">
+        <div class="mode-tabs">
+            <button id="tab-normal" class="active" onclick="setMode('normal')">기본모드</button>
+            <button id="tab-pomodoro" onclick="setMode('pomodoro')">뽀모도로</button>
+            <button id="tab-schedule" onclick="setMode('schedule')">시간표</button>
+        </div>
+
+        <div id="ui-pomodoro" class="ui-section">
+            <div style="display:flex;gap:10px;align-items:center;justify-content:center;margin-bottom:10px;">
+                <div class="input-group">
+                    <input type="number" id="pomo-work" value="25" min="1" style="width:60px;">
+                    <label>작업(분)</label>
+                </div>
+                <div class="input-group">
+                    <input type="number" id="pomo-rest" value="5" min="1" style="width:60px;">
+                    <label>휴식(분)</label>
+                </div>
+            </div>
+            <div style="text-align:center;">
+                <button class="btn-pomo-start" onclick="startPomodoro()">시작</button>
+                <button class="btn-pomo-stop" onclick="stopPomodoro()">정지</button>
+            </div>
+        </div>
+
+        <div id="ui-schedule" class="ui-section">
+            <div style="display:flex;gap:5px;justify-content:center;margin-bottom:10px;">
+                <input type="time" id="sch-time" style="width:auto;">
+                <input type="text" id="sch-memo" placeholder="예: 1교시" style="width:100px;">
+                <button class="btn-add" onclick="addSchedule()">추가</button>
+            </div>
+            <ul id="sch-list" style="list-style:none;padding:0;margin:0;max-height:120px;overflow-y:auto;"></ul>
+        </div>
+    </div>
+</div>
+
+<button class="focus-exit" onclick="exitFocus()">집중모드 종료 (ESC)</button>
+
+<script>
+    /* === 상태 === */
+    let timerInterval;
+    let totalSeconds = 0;
+    let isRunning = false;
+    let currentMode = 'normal';
+    let isDark = false;
+
+    const hoursInput = document.getElementById('hours');
+    const minutesInput = document.getElementById('minutes');
+    const secondsInput = document.getElementById('seconds');
+    const display = document.getElementById('display');
+    const inputSection = document.getElementById('input-section');
+    const startBtn = document.getElementById('start-btn');
+    const stopBtn = document.getElementById('stop-btn');
+    const mainButtons = document.getElementById('main-buttons');
+
+    /* === 알림음 (Web Audio API) === */
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    function playAlarm(type = 'sine') {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.type = type;
+        osc.frequency.setValueAtTime(type === 'sine' ? 880 : 440, audioCtx.currentTime);
+        gain.gain.setValueAtTime(type === 'sine' ? 1 : 0.1, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.5);
+        osc.start(audioCtx.currentTime);
+        osc.stop(audioCtx.currentTime + 1.5);
+    }
+
+    /* === 유틸 === */
+    function formatTime(seconds) {
+        const h = Math.floor(seconds / 3600);
+        const m = Math.floor((seconds % 3600) / 60);
+        const s = seconds % 60;
+        if (h > 0) return `${pad(h)}:${pad(m)}:${pad(s)}`;
+        return `${pad(m)}:${pad(s)}`;
+    }
+    function pad(n) { return String(n).padStart(2, '0'); }
+
+    function updateDisplay(t = totalSeconds) {
+        if (currentMode === 'normal') display.textContent = formatTime(t);
+    }
+
+    /* === 기본 타이머 === */
+    function startTimer() {
+        if (isRunning) return;
+        if (totalSeconds === 0) {
+            const h = parseInt(hoursInput.value) || 0;
+            const m = parseInt(minutesInput.value) || 0;
+            const s = parseInt(secondsInput.value) || 0;
+            totalSeconds = h * 3600 + m * 60 + s;
+        }
+        if (totalSeconds <= 0) { alert('시간을 1초 이상 설정해주세요!'); return; }
+        isRunning = true;
+        inputSection.style.visibility = 'hidden';
+        startBtn.disabled = true;
+        stopBtn.disabled = false;
+        updateDisplay();
+        timerInterval = setInterval(() => {
+            totalSeconds--;
+            updateDisplay();
+            if (totalSeconds <= 0) { resetTimerState(); playAlarm(); }
+        }, 1000);
+    }
+
+    function stopTimer() {
+        if (!isRunning) return;
+        clearInterval(timerInterval);
+        isRunning = false;
+        startBtn.disabled = false;
+        stopBtn.disabled = true;
+    }
+
+    function resetTimerState() {
+        clearInterval(timerInterval);
+        isRunning = false;
+        startBtn.disabled = false;
+        stopBtn.disabled = true;
+        inputSection.style.visibility = 'visible';
+    }
+
+    function resetTimer() {
+        resetTimerState();
+        totalSeconds = 0;
+        const h = parseInt(hoursInput.value) || 0;
+        const m = parseInt(minutesInput.value) || 0;
+        const s = parseInt(secondsInput.value) || 0;
+        display.textContent = formatTime(h * 3600 + m * 60 + s);
+    }
+
+    updateDisplay();
+
+    /* === 다크모드 === */
+    function toggleDark() {
+        isDark = !isDark;
+        document.body.classList.toggle('dark-mode', isDark);
+        document.getElementById('btn-dark').classList.toggle('active', isDark);
+    }
+
+    /* === 집중모드 === */
+    function enterFocus() {
+        document.body.classList.add('focus-mode');
+    }
+    function exitFocus() {
+        document.body.classList.remove('focus-mode');
+    }
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') exitFocus();
+    });
+
+    /* === 추가 패널 === */
+    function togglePanel() {
+        const panel = document.getElementById('mode-panel');
+        const isOpen = panel.style.display === 'block';
+        panel.style.display = isOpen ? 'none' : 'block';
+        document.getElementById('btn-more').classList.toggle('active', !isOpen);
+    }
+
+    function setMode(mode) {
+        if (isRunning) stopTimer();
+        if (isPomoRunning) stopPomodoro();
+        currentMode = mode;
+        document.querySelectorAll('.mode-tabs button').forEach(b => b.classList.remove('active'));
+        document.getElementById(`tab-${mode}`).classList.add('active');
+        document.getElementById('ui-pomodoro').style.display = mode === 'pomodoro' ? 'block' : 'none';
+        document.getElementById('ui-schedule').style.display = mode === 'schedule' ? 'block' : 'none';
+        if (mode === 'normal') {
+            inputSection.style.display = 'flex';
+            mainButtons.style.display = 'flex';
+            resetTimer();
+        } else {
+            inputSection.style.display = 'none';
+            mainButtons.style.display = 'none';
+            if (mode === 'pomodoro') updatePomoDisplay();
+            else if (mode === 'schedule') display.textContent = '시간표';
+        }
+    }
+
+    /* === 뽀모도로 === */
+    let isPomoRunning = false;
+    let pomoInterval;
+    let pomoPhase = 'work';
+    let currentPomoSecs = 0;
+
+    function startPomodoro() {
+        if (isPomoRunning) return;
+        isPomoRunning = true;
+        if (currentPomoSecs === 0) {
+            pomoPhase = 'work';
+            currentPomoSecs = (parseInt(document.getElementById('pomo-work').value) || 25) * 60;
+        }
+        updatePomoDisplay();
+        pomoInterval = setInterval(() => {
+            currentPomoSecs--;
+            updatePomoDisplay();
+            if (currentPomoSecs <= 0) {
+                if (pomoPhase === 'work') {
+                    playAlarm('sine');
+                    pomoPhase = 'rest';
+                    currentPomoSecs = (parseInt(document.getElementById('pomo-rest').value) || 5) * 60;
+                } else {
+                    playAlarm('square');
+                    pomoPhase = 'work';
+                    currentPomoSecs = (parseInt(document.getElementById('pomo-work').value) || 25) * 60;
+                }
+            }
+        }, 1000);
+    }
+
+    function stopPomodoro() {
+        isPomoRunning = false;
+        clearInterval(pomoInterval);
+        currentPomoSecs = 0;
+        updatePomoDisplay();
+    }
+
+    function updatePomoDisplay() {
+        if (currentMode !== 'pomodoro') return;
+        if (currentPomoSecs === 0) {
+            const m = parseInt(document.getElementById('pomo-work').value) || 25;
+            display.textContent = `W ${formatTime(m * 60)}`;
+        } else {
+            display.textContent = (pomoPhase === 'work' ? 'W ' : 'R ') + formatTime(currentPomoSecs);
+        }
+    }
+
+    /* === 시간표 === */
+    let schedules = JSON.parse(localStorage.getItem('ainolza_timer_schedules') || '[]');
+
+    function addSchedule() {
+        const time = document.getElementById('sch-time').value;
+        const memo = document.getElementById('sch-memo').value;
+        if (!time) return;
+        schedules.push({ time, memo });
+        schedules.sort((a, b) => a.time.localeCompare(b.time));
+        localStorage.setItem('ainolza_timer_schedules', JSON.stringify(schedules));
+        renderSchedules();
+    }
+
+    function deleteSchedule(idx) {
+        schedules.splice(idx, 1);
+        localStorage.setItem('ainolza_timer_schedules', JSON.stringify(schedules));
+        renderSchedules();
+    }
+
+    function renderSchedules() {
+        const list = document.getElementById('sch-list');
+        list.innerHTML = '';
+        schedules.forEach((sch, idx) => {
+            const li = document.createElement('li');
+            li.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:5px 10px;font-size:14px;border-bottom:1px solid #f1f3f5;';
+            const span = document.createElement('span');
+            span.textContent = `${sch.time} - ${sch.memo}`;
+            const btn = document.createElement('button');
+            btn.className = 'btn-del';
+            btn.textContent = 'X';
+            btn.style.cssText = 'padding:2px 6px;font-size:12px;';
+            btn.onclick = () => deleteSchedule(idx);
+            li.appendChild(span);
+            li.appendChild(btn);
+            list.appendChild(li);
+        });
+    }
+
+    setInterval(() => {
+        const now = new Date();
+        const hm = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+        if (now.getSeconds() === 0 && schedules.some(s => s.time === hm)) playAlarm();
+    }, 1000);
+
+    renderSchedules();
+</script>
+</body>
+</html>

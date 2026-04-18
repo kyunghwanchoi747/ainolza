@@ -45,6 +45,7 @@ const LABS_PREVIEW = [
   { href: "/labs/career-explorer.html", title: "AI 직업 탐색기", desc: "관심사를 입력하면 미래 직업을 추천해줘요", color: "#3B82F6" },
   { href: "/labs/ai-word-quiz.html", title: "AI 단어 퀴즈", desc: "AI 용어를 배우면서 두뇌도 훈련!", color: "#F59E0B" },
   { href: "/labs/ai-or-human.html", title: "AI일까? 사람일까?", desc: "이 글을 만든 건 누구일까요?", color: "#EC4899" },
+  { href: "/labs/timer.html", title: "뽀모도로 타이머", desc: "집중·휴식 사이클로 생산성을 높여보세요", tag: "신규", color: "#F59E0B" },
 ];
 
 function formatPrice(p: number): string {

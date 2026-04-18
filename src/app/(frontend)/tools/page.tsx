@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description: 'AI놀자가 직접 만들어 운영 중인 무료 웹 서비스와 Chrome 확장 프로그램들입니다.',
 }
 
-type ToolType = 'web' | 'chrome-extension'
+type ToolType = 'web' | 'chrome-extension' | 'lab'
 
 type Tool = {
   title: string
@@ -55,6 +55,15 @@ const TOOLS: Tool[] = [
     badge: 'Chrome 확장',
     color: '#3B82F6',
   },
+  {
+    title: '뽀모도로 타이머',
+    description:
+      '기본 타이머·뽀모도로·시간표 모드를 지원하는 집중 관리 도구. 알림음, 다크모드, 포커스 모드 기능 포함.',
+    url: '/labs/timer.html',
+    type: 'lab',
+    badge: '무료 도구',
+    color: '#F59E0B',
+  },
 ]
 
 export default function ToolsPage() {
@@ -87,8 +96,7 @@ export default function ToolsPage() {
               <a
                 key={t.url}
                 href={t.url}
-                target="_blank"
-                rel="noopener noreferrer"
+                {...(t.type !== 'lab' ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
                 className="group relative block p-6 rounded-2xl border border-line hover:shadow-lg hover:-translate-y-0.5 transition-all bg-white"
               >
                 {/* 좌측 컬러 바 */}
@@ -117,7 +125,7 @@ export default function ToolsPage() {
                   <p className="text-sm text-body leading-relaxed">{t.description}</p>
 
                   <div className="mt-4 text-xs text-sub truncate">
-                    {t.url.replace(/^https?:\/\//, '').replace(/\/$/, '')}
+                    {t.type === 'lab' ? 'ainolza.kr' + t.url : t.url.replace(/^https?:\/\//, '').replace(/\/$/, '')}
                   </div>
                 </div>
               </a>
