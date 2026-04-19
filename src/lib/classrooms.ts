@@ -84,6 +84,7 @@ export const CLASSROOMS: Classroom[] = [
       {
         week: 2,
         title: '심화 2회차',
+        vimeoId: '1184517423',
         guidebookUrl: 'https://www.notion.so/2-342c7863bde280a6a621dff24e491d7a',
       },
       {
