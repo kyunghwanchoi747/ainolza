@@ -119,7 +119,7 @@ export default function LandingPage({ products }: LandingPageProps) {
           <div className="flex items-end justify-between mb-12">
             <div data-reveal>
               <p className="text-brand text-sm md:text-base font-bold mb-3 tracking-wide">
-                내가 만든 것들
+                AI놀자 프로젝트
               </p>
               <MagneticText text="도구" className="text-4xl md:text-5xl font-extrabold leading-tight" />
               <p className="text-body mt-4 text-base md:text-lg">
