@@ -88,13 +88,13 @@ export function StoreBanner({ items }: { items: BannerItem[] }) {
         <>
           <button
             onClick={(e) => { e.preventDefault(); go(current - 1) }}
-            className="absolute left-4 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/80 hover:bg-white shadow flex items-center justify-center transition-all z-10"
+            className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 hover:bg-white hover:scale-110 hover:shadow-lg shadow flex items-center justify-center transition-all z-10 cursor-pointer"
           >
             <ChevronLeft className="w-5 h-5 text-ink" />
           </button>
           <button
             onClick={(e) => { e.preventDefault(); go(current + 1) }}
-            className="absolute right-4 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/80 hover:bg-white shadow flex items-center justify-center transition-all z-10"
+            className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 hover:bg-white hover:scale-110 hover:shadow-lg shadow flex items-center justify-center transition-all z-10 cursor-pointer"
           >
             <ChevronRight className="w-5 h-5 text-ink" />
           </button>

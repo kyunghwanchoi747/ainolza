@@ -73,36 +73,43 @@ export default function LandingPage({ products }: LandingPageProps) {
       />
 
       {/* 1. 히어로 */}
-      <section className="bg-dark-blue text-white py-24 md:py-40 px-6">
+      <section className="relative bg-dark-blue text-white pt-20 pb-16 md:pt-28 md:pb-20 px-6">
         <div className="max-w-[1200px] mx-auto text-center">
-          <p data-reveal="none" className="text-brand text-base md:text-lg font-bold mb-6 tracking-wide">
+          <p data-reveal="none" className="text-brand text-base md:text-lg font-bold mb-5 tracking-wide">
             놀면서 배우는 AI, 만들면서 익히는 AI
           </p>
           <MagneticText
             text={"AI놀자에서\n직접 만나보세요"}
-            className="text-5xl md:text-7xl font-extrabold leading-[1.15] mb-10"
+            className="text-4xl md:text-6xl font-extrabold leading-[1.15] mb-7"
             radius={200}
             maxScale={1.25}
             maxLift={-10}
           />
-          <p data-reveal="up" data-reveal-delay="400" className="text-white/80 text-lg md:text-2xl mb-12 leading-relaxed font-medium">
+          <p data-reveal="up" data-reveal-delay="400" className="text-white/70 text-base md:text-xl mb-10 leading-relaxed">
             제가 직접 만든 도구와 실험실, 그리고 강의로<br />
             평범한 사람도 AI로 결과를 만들 수 있습니다.
           </p>
-          <div data-reveal="up" data-reveal-delay="600" className="flex flex-wrap gap-4 justify-center">
+          <div data-reveal="up" data-reveal-delay="600" className="flex flex-wrap gap-4 justify-center mb-12">
             <Link
               href="/tools"
-              className="inline-block px-10 py-5 bg-white text-[#2C3E50] font-extrabold rounded-full hover:bg-[#f0f0f0] hover:scale-105 active:scale-95 transition-all text-base md:text-lg cursor-pointer shadow-lg"
+              className="inline-block px-8 py-4 bg-white text-[#2C3E50] font-extrabold rounded-full hover:bg-[#f0f0f0] hover:scale-105 active:scale-95 transition-all text-base cursor-pointer shadow-lg"
             >
               도구 둘러보기
             </Link>
             <Link
               href="/labs"
-              className="inline-block px-10 py-5 border-2 border-white/50 text-white font-bold rounded-full hover:bg-white/10 hover:scale-105 active:scale-95 transition-all text-base md:text-lg cursor-pointer"
+              className="inline-block px-8 py-4 border-2 border-white/50 text-white font-bold rounded-full hover:bg-white/10 hover:scale-105 active:scale-95 transition-all text-base cursor-pointer"
             >
               AI 실험실 체험
             </Link>
           </div>
+        </div>
+        {/* 아래 섹션 암시 */}
+        <div className="flex flex-col items-center gap-1 text-white/30 animate-bounce">
+          <span className="text-xs tracking-widest">SCROLL</span>
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
         </div>
       </section>
 
