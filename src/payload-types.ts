@@ -157,13 +157,6 @@ export interface User {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
   password?: string | null;
   collection: 'users';
 }
@@ -444,11 +437,13 @@ export interface Order {
  */
 export interface Review {
   id: number;
-  product: number | Product;
+  product?: (number | null) | Product;
   user: number | User;
   rating: number;
   content: string;
+  siteUrl?: string | null;
   status: 'pending' | 'approved' | 'rejected';
+  order?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -588,13 +583,6 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
-  sessions?:
-    | T
-    | {
-        id?: T;
-        createdAt?: T;
-        expiresAt?: T;
-      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -819,7 +807,9 @@ export interface ReviewsSelect<T extends boolean = true> {
   user?: T;
   rating?: T;
   content?: T;
+  siteUrl?: T;
   status?: T;
+  order?: T;
   updatedAt?: T;
   createdAt?: T;
 }

@@ -37,9 +37,9 @@ export async function POST(request: NextRequest) {
     const { user } = await payload.auth({ headers: request.headers as unknown as Headers })
     if (!user) return NextResponse.json({ error: '로그인이 필요합니다.' }, { status: 401 })
 
-    const body = await request.json()
-    const { rating, content, siteUrl } = body
+    const body = await request.json() as { rating: number; content: string; siteUrl?: string }
 
+    const { rating, content, siteUrl } = body
     if (!rating || !content?.trim()) {
       return NextResponse.json({ error: '별점과 내용을 입력해주세요.' }, { status: 400 })
     }
@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
         siteUrl: siteUrl?.trim() || undefined,
         status: 'approved',
         order: 0,
-      },
+      } as any,
     })
 
     return NextResponse.json(review, { status: 201 })
