@@ -2,6 +2,7 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { getDday } from '@/lib/products'
 import { listProductsForStore } from '@/lib/products-db'
+import { StoreBanner } from '@/components/store/store-banner'
 
 export const metadata: Metadata = {
   title: '강의/책',
@@ -17,24 +18,26 @@ function formatPrice(p: number): string {
 export default async function StorePage() {
   const products = await listProductsForStore()
 
+  const bannerItems = products.map(p => ({
+    slug: p.slug,
+    title: p.title,
+    shortDescription: p.shortDescription,
+    thumbnail: p._dbThumbnailUrl || `/store/${p.slug}/thumbnail.${p.imageExt || 'png'}`,
+    category: p.category || '',
+    price: p.price,
+    priceLabel: p.priceLabel,
+  }))
+
   return (
     <div className="min-h-screen bg-white">
       <section className="pt-20 md:pt-28 pb-24 px-6">
         <div className="max-w-[1200px] mx-auto">
-          <div className="mb-16 text-center">
-            <p className="text-brand text-sm md:text-base font-bold mb-3 tracking-wide">
-              AI놀자의 콘텐츠
-            </p>
-            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-ink leading-tight">
-              강의 / 책
-            </h1>
-            <p className="text-body mt-5 text-base md:text-lg max-w-[600px] mx-auto">
-              AI 활용법부터 수익화 전략, 자동화 시스템 구축까지<br />
-              직접 설계한 콘텐츠입니다.
-            </p>
-          </div>
+
+          {/* 배너 슬라이드 */}
+          <StoreBanner items={bannerItems} />
 
           {/* 상품 카드 그리드 */}
+          <h2 className="text-xl font-bold text-ink mb-6">전체 콘텐츠</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {products.map((p) => {
               const ext = p.imageExt || 'png'
