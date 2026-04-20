@@ -51,7 +51,7 @@ export default function MyPage() {
   // 내 후기 불러오기
   useEffect(() => {
     if (!user?.id) return
-    fetch(`/api/reviews?where[user][equals]=${user.id}&limit=1&depth=0`, { credentials: 'include' })
+    fetch(`/api/reviews?where[user][equals]=${user.id}&limit=1`, { credentials: 'include' })
       .then(r => r.ok ? r.json() : null)
       .then((data: any) => {
         if (data?.docs?.length > 0) {
@@ -129,27 +129,16 @@ export default function MyPage() {
     if (!user || !reviewContent.trim()) return
     setReviewSubmitting(true)
     try {
-      const body: any = {
-        user: user.id,
-        rating: reviewRating,
-        content: reviewContent.trim(),
-        siteUrl: reviewSiteUrl.trim() || null,
-        status: 'approved',
-        order: 0,
-      }
-      // product 필드가 required라 임시로 1번 상품 할당 (없으면 null)
-      // 실제로는 홈 배너용이라 상품 연결 불필요 → product를 optional로 변경 후 개선 가능
+      const body = { rating: reviewRating, content: reviewContent.trim(), siteUrl: reviewSiteUrl.trim() || null }
       let res: Response
       if (myReview) {
-        // 수정
         res = await fetch(`/api/reviews/${myReview.id}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
-          body: JSON.stringify({ rating: reviewRating, content: reviewContent.trim(), siteUrl: reviewSiteUrl.trim() || null }),
+          body: JSON.stringify(body),
         })
       } else {
-        // 신규 — product 없이 제출 (컬렉션에서 required 해제 필요)
         res = await fetch('/api/reviews', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
