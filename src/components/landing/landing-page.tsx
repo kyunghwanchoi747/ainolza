@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, ExternalLink, ArrowUpRight } from "lucide-react";
 import { MagneticText } from "@/components/ui/magnetic-text";
+import { ShaderBackground } from "@/components/ui/shader-background";
 import type { ProductWithDbImages } from "@/lib/products-db";
 import { ReviewBanner } from "@/components/landing/review-banner";
 import { StoreBanner } from "@/components/store/store-banner";
@@ -79,11 +80,8 @@ export default function LandingPage({ products }: LandingPageProps) {
 
       {/* ── 1. 히어로 ── */}
       <section className="relative bg-dark-blue text-white overflow-hidden pt-24 pb-20 md:pt-32 md:pb-28 px-6">
-        {/* 배경 장식 */}
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full bg-brand/10 blur-[80px]" />
-          <div className="absolute -bottom-20 -left-20 w-[350px] h-[350px] rounded-full bg-[#7C3AED]/10 blur-[60px]" />
-        </div>
+        {/* 쉐이더 배경 */}
+        <ShaderBackground />
 
         <div className="relative max-w-[900px] mx-auto text-center">
           <span className="inline-block px-4 py-1.5 rounded-full border border-brand/40 text-brand text-xs md:text-sm font-bold mb-6 tracking-wider">
