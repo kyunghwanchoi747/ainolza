@@ -39,47 +39,49 @@ export function StoreBanner({ items }: { items: BannerItem[] }) {
   if (items.length === 0) return null
 
   return (
-    <div className="relative w-full overflow-hidden bg-[#f8f7f5] rounded-3xl mb-16" style={{ aspectRatio: '16/6' }}>
-      {items.map((item, i) => (
-        <Link
-          key={item.slug}
-          href={`/store/${item.slug}`}
-          className={`absolute inset-0 flex transition-opacity duration-700 ${i === current ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
-        >
-          {/* 왼쪽: 텍스트 */}
-          <div className="flex-1 flex flex-col justify-center px-10 md:px-16 py-8">
-            <p className="text-xs font-bold text-brand tracking-widest uppercase mb-3">{item.category}</p>
-            <h2 className="text-2xl md:text-4xl font-extrabold text-ink leading-tight mb-4 whitespace-pre-line">
-              {item.title}
-            </h2>
-            {item.shortDescription && (
-              <p className="text-sm md:text-base text-body line-clamp-2 mb-6">{item.shortDescription}</p>
-            )}
-            <div>
-              {item.priceLabel ? (
-                <span className="text-brand font-extrabold text-lg">{item.priceLabel}</span>
-              ) : item.price ? (
-                <span className="text-brand font-extrabold text-2xl">{item.price.toLocaleString('ko-KR')}원</span>
-              ) : null}
+    <div className="relative w-full overflow-hidden bg-white border-2 border-line rounded-3xl mb-16">
+      {/* 고정 높이: 모바일 auto, 데스크탑 280px */}
+      <div className="relative w-full md:h-[280px]">
+        {items.map((item, i) => (
+          <Link
+            key={item.slug}
+            href={`/store/${item.slug}`}
+            className={`md:absolute md:inset-0 flex flex-col md:flex-row transition-opacity duration-700 ${i === current ? 'opacity-100 pointer-events-auto' : 'md:opacity-0 md:pointer-events-none hidden md:flex'}`}
+          >
+            {/* 텍스트 */}
+            <div className="flex-1 flex flex-col justify-center px-8 md:px-14 py-8 md:py-0">
+              <p className="text-xs font-bold text-brand tracking-widest uppercase mb-2">{item.category}</p>
+              <h2 className="text-xl md:text-3xl font-extrabold text-ink leading-tight mb-3">
+                {item.title}
+              </h2>
+              {item.shortDescription && (
+                <p className="text-sm text-body line-clamp-2 mb-4 hidden md:block">{item.shortDescription}</p>
+              )}
+              <div className="mb-4">
+                {item.priceLabel ? (
+                  <span className="text-brand font-extrabold text-lg">{item.priceLabel}</span>
+                ) : item.price ? (
+                  <span className="text-brand font-extrabold text-xl md:text-2xl">{item.price.toLocaleString('ko-KR')}원</span>
+                ) : null}
+              </div>
+              <div>
+                <span className="inline-block px-5 py-2 bg-brand text-white font-bold rounded-full text-sm">
+                  자세히 보기 →
+                </span>
+              </div>
             </div>
-            <div className="mt-6">
-              <span className="inline-block px-6 py-2.5 bg-brand text-white font-bold rounded-full text-sm hover:bg-brand-dark transition-colors">
-                자세히 보기 →
-              </span>
-            </div>
-          </div>
 
-          {/* 오른쪽: 이미지 */}
-          <div className="w-[35%] flex items-center justify-center p-6">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={item.thumbnail}
-              alt={item.title}
-              className="max-h-full max-w-full object-contain drop-shadow-xl"
-            />
-          </div>
-        </Link>
-      ))}
+            {/* 이미지 */}
+            <div className="w-full md:w-[300px] flex items-center justify-center p-6 md:p-8 bg-surface md:bg-transparent">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={item.thumbnail}
+                alt={item.title}
+                className="h-[160px] md:h-full max-w-full object-contain drop-shadow-xl"
+              />
+            </div>
+          </Link>
+        ))}
 
       {/* 이전/다음 버튼 */}
       {items.length > 1 && (
@@ -109,6 +111,7 @@ export function StoreBanner({ items }: { items: BannerItem[] }) {
           </div>
         </>
       )}
+      </div>
     </div>
   )
 }
