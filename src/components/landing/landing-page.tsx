@@ -6,6 +6,7 @@ import { ArrowRight, ExternalLink } from "lucide-react";
 import { MagneticText } from "@/components/ui/magnetic-text";
 import type { ProductWithDbImages } from "@/lib/products-db";
 import { ReviewBanner } from "@/components/landing/review-banner";
+import { StoreBanner } from "@/components/store/store-banner";
 
 
 const TOOLS = [
@@ -49,19 +50,12 @@ const LABS_PREVIEW = [
   { href: "/labs/timer.html", title: "뽀모도로 타이머", desc: "집중·휴식 사이클로 생산성을 높여보세요", tag: "신규", color: "#F59E0B" },
 ];
 
-function formatPrice(p: number): string {
-  return p.toLocaleString("ko-KR") + "원";
-}
-
 interface LandingPageProps {
   products: ProductWithDbImages[];
 }
 
 export default function LandingPage({ products }: LandingPageProps) {
   // featured 우선 → 없으면 첫 번째 상품
-  const featured =
-    products.find((p) => p._dbFeatured) || products[0] || null;
-  const others = products.filter((p) => p.slug !== featured?.slug).slice(0, 3);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -239,115 +233,27 @@ export default function LandingPage({ products }: LandingPageProps) {
         </div>
       </section>
 
-      {/* 4. 강의/책 */}
+      {/* 4. 강의/책 배너 */}
       <section className="py-24 md:py-32 px-6">
         <div className="max-w-[1200px] mx-auto">
-          <div data-reveal className="text-center mb-16">
-            <p className="text-brand text-sm md:text-base font-bold mb-3 tracking-wide">
-              더 깊이 배우고 싶다면
-            </p>
-            <MagneticText text="강의 / 책" className="text-4xl md:text-5xl font-extrabold leading-tight" />
-            <p className="text-body mt-4 max-w-[600px] mx-auto text-base md:text-lg">
-              실험실과 도구를 만들어 본 경험을 그대로 강의에 담았습니다.
-            </p>
-          </div>
-
-          {/* Featured 큰 카드 */}
-          {featured && (
-            <Link
-              href={`/store/${featured.slug}`}
-              data-reveal="up" className="group block max-w-[1000px] mx-auto rounded-3xl overflow-hidden border-2 border-line hover:border-[#D4756E]/50 hover:shadow-2xl hover:-translate-y-1 active:translate-y-0 transition-all bg-white cursor-pointer mb-10"
-            >
-              <div className="aspect-[16/10] overflow-hidden bg-surface flex items-center justify-center p-8">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={featured._dbThumbnailUrl || `/store/${featured.slug}/thumbnail.png`}
-                  alt={featured.title}
-                  className="max-w-full max-h-full object-contain group-hover:scale-105 transition-transform duration-500"
-                />
-              </div>
-              <div className="p-8 md:p-10">
-                <div className="flex items-center justify-between gap-4">
-                  <div className="min-w-0">
-                    <p className="text-brand text-sm md:text-base font-bold mb-2">
-                      {featured.category || "강의"}
-                    </p>
-                    <h3 className="text-2xl md:text-3xl font-extrabold whitespace-pre-line leading-tight mb-3">
-                      {featured.title}
-                    </h3>
-                    {featured.subtitle && (
-                      <p className="text-body text-base md:text-lg">{featured.subtitle}</p>
-                    )}
-                  </div>
-                  <div className="text-right shrink-0">
-                    {featured.priceLabel ? (
-                      <p className="text-base md:text-lg font-bold text-brand">
-                        {featured.priceLabel}
-                      </p>
-                    ) : featured.price ? (
-                      <>
-                        <p className="text-2xl md:text-3xl font-extrabold text-brand">
-                          {formatPrice(featured.price)}
-                        </p>
-                        {featured.originalPrice && featured.originalPrice > featured.price && (
-                          <p className="text-sm text-sub line-through">
-                            {formatPrice(featured.originalPrice)}
-                          </p>
-                        )}
-                      </>
-                    ) : null}
-                  </div>
-                </div>
-                <div className="mt-6 inline-flex items-center gap-2 text-brand font-bold group-hover:gap-3 transition-all">
-                  자세히 보기 <ArrowRight className="w-5 h-5" />
-                </div>
-              </div>
-            </Link>
-          )}
-
-          {/* 나머지 작은 카드 줄 */}
-          {others.length > 0 && (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-[1000px] mx-auto mb-10">
-              {others.map((p) => (
-                <Link
-                  key={p.slug}
-                  href={`/store/${p.slug}`}
-                  className="group rounded-2xl overflow-hidden border-2 border-line hover:border-[#D4756E]/40 hover:shadow-xl hover:-translate-y-1 active:translate-y-0 transition-all bg-white cursor-pointer"
-                >
-                  <div className="aspect-square overflow-hidden bg-surface flex items-center justify-center p-4">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={p._dbThumbnailUrl || `/store/${p.slug}/thumbnail.png`}
-                      alt={p.title}
-                      className="max-w-full max-h-full object-contain group-hover:scale-105 transition-transform duration-500"
-                    />
-                  </div>
-                  <div className="p-5">
-                    <p className="text-xs text-sub mb-1.5 font-medium">{p.category}</p>
-                    <h4 className="font-extrabold text-base text-ink line-clamp-2 whitespace-pre-line leading-snug mb-2">
-                      {p.title}
-                    </h4>
-                    {p.priceLabel ? (
-                      <p className="text-brand font-bold text-sm">{p.priceLabel}</p>
-                    ) : p.price ? (
-                      <p className="text-brand font-extrabold text-base">
-                        {formatPrice(p.price)}
-                      </p>
-                    ) : null}
-                  </div>
-                </Link>
-              ))}
+          <div className="flex items-end justify-between mb-10" data-reveal>
+            <div>
+              <p className="text-brand text-sm md:text-base font-bold mb-3 tracking-wide">더 깊이 배우고 싶다면</p>
+              <MagneticText text="강의 / 책" className="text-4xl md:text-5xl font-extrabold leading-tight" />
             </div>
-          )}
-
-          <div className="text-center">
-            <Link
-              href="/store"
-              className="inline-block px-8 py-4 border-2 border-[#333] text-ink font-bold rounded-full hover:bg-ink hover:text-white hover:scale-105 active:scale-95 transition-all text-base cursor-pointer"
-            >
-              모든 강의·책 보기
+            <Link href="/store" className="text-sm md:text-base text-brand font-bold hover:underline flex items-center gap-1">
+              전체 보기 <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
+          <StoreBanner items={products.map(p => ({
+            slug: p.slug,
+            title: p.title,
+            shortDescription: p.shortDescription,
+            thumbnail: p._dbThumbnailUrl || `/store/${p.slug}/thumbnail.${p.imageExt || 'png'}`,
+            category: p.category || '',
+            price: p.price,
+            priceLabel: p.priceLabel,
+          }))} />
         </div>
       </section>
 
