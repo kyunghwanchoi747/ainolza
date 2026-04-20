@@ -79,10 +79,11 @@ export default function LandingPage({ products }: LandingPageProps) {
 
       {/* ── 1. 히어로 ── */}
       <section className="relative bg-dark-blue text-white overflow-hidden pt-24 pb-20 md:pt-32 md:pb-28 px-6">
-        {/* 배경 장식 */}
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full bg-brand/10 blur-[80px]" />
-          <div className="absolute -bottom-20 -left-20 w-[350px] h-[350px] rounded-full bg-[#7C3AED]/10 blur-[60px]" />
+        {/* 유기물 Blob 배경 */}
+        <div aria-hidden="true">
+          <div className="blob blob-1" />
+          <div className="blob blob-2" />
+          <div className="blob blob-3" />
         </div>
 
         <div className="relative max-w-[900px] mx-auto text-center">
