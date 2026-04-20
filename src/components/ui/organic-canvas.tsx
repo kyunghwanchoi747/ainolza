@@ -78,14 +78,14 @@ class Organism {
     for (let i = 1; i < this.history.length; i++) {
       ctx.lineTo(this.history[i].x, this.history[i].y)
     }
-    ctx.strokeStyle = `rgba(${this.color}, 0.35)`
+    ctx.strokeStyle = `rgba(${this.color}, 0.55)`
     ctx.lineWidth = this.size
     ctx.stroke()
 
     // 머리
     ctx.beginPath()
     ctx.arc(this.x, this.y, this.size * 1.6, 0, Math.PI * 2)
-    ctx.fillStyle = `rgba(${this.color}, 0.65)`
+    ctx.fillStyle = `rgba(${this.color}, 0.9)`
     ctx.fill()
   }
 }
@@ -153,7 +153,7 @@ export function OrganicCanvas() {
         width: '100vw',
         height: '100vh',
         pointerEvents: 'none',
-        zIndex: 0,
+        zIndex: 9999,
       }}
     />
   )
