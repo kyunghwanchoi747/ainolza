@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayloadClient } from '@/lib/payload'
+import { getCloudflareContext } from '@opennextjs/cloudflare'
 
 // PATCH: 후기 수정 (본인만)
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -40,7 +41,8 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
       return NextResponse.json({ error: '권한이 없습니다.' }, { status: 403 })
     }
 
-    await payload.delete({ collection: 'reviews', id: Number(id) })
+    const { env } = await getCloudflareContext()
+    await (env as any).D1.prepare('DELETE FROM reviews WHERE id = ?').bind(Number(id)).run()
     return NextResponse.json({ success: true })
   } catch (e) {
     console.error('[REVIEWS DELETE]', (e as Error).message)
