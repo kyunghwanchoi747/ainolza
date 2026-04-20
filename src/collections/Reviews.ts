@@ -28,8 +28,8 @@ export const Reviews: CollectionConfig = {
       name: 'product',
       type: 'relationship',
       relationTo: 'products',
-      required: true,
-      label: '상품',
+      required: false,
+      label: '상품 (선택)',
     },
     {
       name: 'user',
@@ -53,16 +53,27 @@ export const Reviews: CollectionConfig = {
       label: '후기 내용',
     },
     {
+      name: 'siteUrl',
+      type: 'text',
+      label: '내 사이트 URL (선택)',
+    },
+    {
       name: 'status',
       type: 'select',
       required: true,
-      defaultValue: 'pending',
+      defaultValue: 'approved',
       label: '상태',
       options: [
         { label: '대기 (승인 전)', value: 'pending' },
         { label: '승인됨', value: 'approved' },
         { label: '거부됨', value: 'rejected' },
       ],
+    },
+    {
+      name: 'order',
+      type: 'number',
+      label: '노출 순서 (낮을수록 앞에 표시)',
+      defaultValue: 0,
     },
   ],
 }

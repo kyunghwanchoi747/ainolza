@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { User, Mail, Phone, LogOut, ShoppingBag, ChevronDown, ChevronUp, GraduationCap } from 'lucide-react'
+import { User, Mail, Phone, LogOut, ShoppingBag, ChevronDown, ChevronUp, GraduationCap, Star, MessageSquare } from 'lucide-react'
 import { CLASSROOMS } from '@/lib/classrooms'
 
 const statusLabels: Record<string, { label: string; color: string }> = {
@@ -23,6 +23,13 @@ export default function MyPage() {
   const [orders, setOrders] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [showOrders, setShowOrders] = useState(false)
+  const [myReview, setMyReview] = useState<any>(null)
+  const [showReviewForm, setShowReviewForm] = useState(false)
+  const [reviewRating, setReviewRating] = useState(5)
+  const [reviewContent, setReviewContent] = useState('')
+  const [reviewSiteUrl, setReviewSiteUrl] = useState('')
+  const [reviewSubmitting, setReviewSubmitting] = useState(false)
+  const [reviewSubmitted, setReviewSubmitted] = useState(false)
 
   useEffect(() => {
     Promise.all([
@@ -40,6 +47,23 @@ export default function MyPage() {
       .catch(() => router.push('/login'))
       .finally(() => setLoading(false))
   }, [router])
+
+  // 내 후기 불러오기
+  useEffect(() => {
+    if (!user?.id) return
+    fetch(`/api/reviews?where[user][equals]=${user.id}&limit=1&depth=0`, { credentials: 'include' })
+      .then(r => r.ok ? r.json() : null)
+      .then((data: any) => {
+        if (data?.docs?.length > 0) {
+          const r = data.docs[0]
+          setMyReview(r)
+          setReviewRating(r.rating)
+          setReviewContent(r.content)
+          setReviewSiteUrl(r.siteUrl || '')
+        }
+      })
+      .catch(() => {})
+  }, [user?.id, reviewSubmitted])
 
   const handleLogout = async () => {
     await fetch('/api/users/logout', { method: 'POST', credentials: 'include' })
@@ -98,6 +122,47 @@ export default function MyPage() {
     } catch {
       alert('오류가 발생했습니다.')
     }
+  }
+
+  const handleReviewSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!user || !reviewContent.trim()) return
+    setReviewSubmitting(true)
+    try {
+      const body: any = {
+        user: user.id,
+        rating: reviewRating,
+        content: reviewContent.trim(),
+        siteUrl: reviewSiteUrl.trim() || null,
+        status: 'approved',
+        order: 0,
+      }
+      // product 필드가 required라 임시로 1번 상품 할당 (없으면 null)
+      // 실제로는 홈 배너용이라 상품 연결 불필요 → product를 optional로 변경 후 개선 가능
+      let res: Response
+      if (myReview) {
+        // 수정
+        res = await fetch(`/api/reviews/${myReview.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ rating: reviewRating, content: reviewContent.trim(), siteUrl: reviewSiteUrl.trim() || null }),
+        })
+      } else {
+        // 신규 — product 없이 제출 (컬렉션에서 required 해제 필요)
+        res = await fetch('/api/reviews', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(body),
+        })
+      }
+      if (res.ok || res.status === 201) {
+        setReviewSubmitted(prev => !prev)
+        setShowReviewForm(false)
+      }
+    } catch {}
+    finally { setReviewSubmitting(false) }
   }
 
   // 보유한 강의실 (paid/active/completed인 주문에서 추출)
@@ -176,6 +241,101 @@ export default function MyPage() {
                   </Link>
                 ))}
               </div>
+            )}
+          </div>
+
+          {/* 수강 후기 */}
+          <div className="mb-6 p-6 rounded-2xl border border-line bg-surface">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <MessageSquare className="w-5 h-5 text-brand" />
+                <h3 className="font-medium text-ink">수강 후기</h3>
+              </div>
+              {!showReviewForm && (
+                <button
+                  onClick={() => setShowReviewForm(true)}
+                  className="text-xs px-3 py-1.5 rounded-lg bg-brand text-white font-medium hover:bg-brand-dark transition-colors"
+                >
+                  {myReview ? '후기 수정' : '후기 작성'}
+                </button>
+              )}
+            </div>
+
+            {/* 기존 후기 표시 */}
+            {myReview && !showReviewForm && (
+              <div className="p-4 rounded-xl bg-white border border-line">
+                <div className="flex items-center gap-1 mb-2">
+                  {[1,2,3,4,5].map(n => (
+                    <Star key={n} className={`w-4 h-4 ${n <= myReview.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-200'}`} />
+                  ))}
+                </div>
+                <p className="text-sm text-body leading-relaxed whitespace-pre-line mb-2">{myReview.content}</p>
+                {myReview.siteUrl && (
+                  <a href={myReview.siteUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-brand hover:underline break-all">
+                    🔗 {myReview.siteUrl}
+                  </a>
+                )}
+              </div>
+            )}
+
+            {/* 후기 미작성 */}
+            {!myReview && !showReviewForm && (
+              <p className="text-sm text-sub text-center py-4">
+                AI놀자 수강 후기를 남기고 내 사이트를 홍보해보세요!
+              </p>
+            )}
+
+            {/* 작성/수정 폼 */}
+            {showReviewForm && (
+              <form onSubmit={handleReviewSubmit} className="space-y-4">
+                <div>
+                  <p className="text-sm text-sub mb-2">별점</p>
+                  <div className="flex gap-1">
+                    {[1,2,3,4,5].map(n => (
+                      <button key={n} type="button" onClick={() => setReviewRating(n)}>
+                        <Star className={`w-7 h-7 transition-colors ${n <= reviewRating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`} />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-sm text-sub mb-2">후기 내용</p>
+                  <textarea
+                    value={reviewContent}
+                    onChange={e => setReviewContent(e.target.value)}
+                    rows={4}
+                    required
+                    placeholder="수강 경험을 자유롭게 작성해주세요"
+                    className="w-full px-4 py-3 rounded-xl border-2 border-line bg-white text-ink placeholder-hint focus:outline-none focus:border-brand transition-colors resize-none text-sm"
+                  />
+                </div>
+                <div>
+                  <p className="text-sm text-sub mb-2">내 사이트 URL <span className="text-hint">(선택 — 홈 화면에 링크 노출)</span></p>
+                  <input
+                    type="url"
+                    value={reviewSiteUrl}
+                    onChange={e => setReviewSiteUrl(e.target.value)}
+                    placeholder="https://my-site.com"
+                    className="w-full px-4 py-3 rounded-xl border-2 border-line bg-white text-ink placeholder-hint focus:outline-none focus:border-brand transition-colors text-sm"
+                  />
+                </div>
+                <div className="flex gap-3">
+                  <button
+                    type="submit"
+                    disabled={reviewSubmitting || !reviewContent.trim()}
+                    className="px-5 py-2.5 bg-brand text-white font-bold rounded-xl hover:bg-brand-dark transition-all disabled:opacity-50 text-sm"
+                  >
+                    {reviewSubmitting ? '저장 중...' : '저장'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowReviewForm(false)}
+                    className="px-5 py-2.5 border border-line text-sub font-medium rounded-xl hover:bg-white transition-all text-sm"
+                  >
+                    취소
+                  </button>
+                </div>
+              </form>
             )}
           </div>
 

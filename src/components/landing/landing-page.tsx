@@ -5,6 +5,7 @@ import Image from "next/image";
 import { ArrowRight, ExternalLink } from "lucide-react";
 import { MagneticText } from "@/components/ui/magnetic-text";
 import type { ProductWithDbImages } from "@/lib/products-db";
+import { ReviewBanner } from "@/components/landing/review-banner";
 
 
 const TOOLS = [
@@ -365,7 +366,10 @@ export default function LandingPage({ products }: LandingPageProps) {
         </div>
       </section>
 
-      {/* 6. 푸터 CTA */}
+      {/* 6. 수강생 후기 배너 */}
+      <ReviewBanner />
+
+      {/* 7. 푸터 CTA */}
       <section className="py-24 md:py-32 px-6 bg-dark-blue text-white text-center">
         <div className="max-w-[700px] mx-auto">
           <p className="text-brand text-sm md:text-base font-bold mb-4 tracking-wide">
