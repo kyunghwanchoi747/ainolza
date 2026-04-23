@@ -39,10 +39,22 @@ function extractYouTubeId(input: string): string | null {
   return null
 }
 
+const SERVICE_DAYS = 100
+// 기존 수강생 기산점: 오늘(2026-04-23) 기준 → 만료 2026-07-31
+const BASELINE_DATE = new Date('2026-04-23T00:00:00+09:00')
+
+function calcExpiry(paidAt?: string | null): Date {
+  const base = paidAt ? new Date(paidAt) : BASELINE_DATE
+  const expiry = new Date(base)
+  expiry.setDate(expiry.getDate() + SERVICE_DAYS)
+  return expiry
+}
+
 type AccessResult =
   | { state: 'unauthenticated' }
   | { state: 'denied'; user: any }
-  | { state: 'allowed'; user: any }
+  | { state: 'expired'; user: any; expiry: Date }
+  | { state: 'allowed'; user: any; expiry: Date }
 
 async function checkAccess(slug: string): Promise<AccessResult> {
   try {
@@ -64,16 +76,18 @@ async function checkAccess(slug: string): Promise<AccessResult> {
       depth: 0,
     })
 
-    let hasAccess = false
     for (const o of orders.docs as any[]) {
       const arr = o.classrooms
       if (Array.isArray(arr) && arr.includes(slug)) {
-        hasAccess = true
-        break
+        const expiry = calcExpiry(o.paidAt || o.createdAt)
+        const expired = new Date() > expiry
+        return expired
+          ? { state: 'expired', user, expiry }
+          : { state: 'allowed', user, expiry }
       }
     }
 
-    return hasAccess ? { state: 'allowed', user } : { state: 'denied', user }
+    return { state: 'denied', user }
   } catch {
     return { state: 'unauthenticated' }
   }
@@ -106,6 +120,41 @@ export default async function ClassroomDetailPage({
           >
             로그인하기
           </Link>
+        </div>
+      </div>
+    )
+  }
+
+  // 수강 기간 만료
+  if (access.state === 'expired') {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center px-6 py-16">
+        <div className="max-w-md text-center">
+          <div className="text-5xl mb-4">⏰</div>
+          <h1 className="text-2xl font-bold text-ink mb-3">수강 기간이 종료되었습니다</h1>
+          <p className="text-body text-sm mb-2">
+            <strong>{classroom.shortTitle}</strong> 강의실의 수강 기간이 만료되었습니다.
+          </p>
+          <p className="text-sub text-xs mb-8">
+            만료일: {access.expiry.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}<br />
+            재수강을 원하시면 카카오톡으로 문의해 주세요.
+          </p>
+          <div className="space-y-3">
+            <a
+              href="https://open.kakao.com/o/s7kkWTfh"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 w-full px-8 py-3 bg-[#FEE500] text-[#191919] font-bold rounded-xl hover:bg-[#FFE000] transition-colors"
+            >
+              카카오톡으로 문의하기
+            </a>
+            <Link
+              href="/classroom"
+              className="inline-block w-full px-8 py-3 border border-line text-body font-medium rounded-xl hover:bg-[#f5f5f5] transition-colors"
+            >
+              강의실 목록으로
+            </Link>
+          </div>
         </div>
       </div>
     )
@@ -144,6 +193,9 @@ export default async function ClassroomDetailPage({
   }
 
   // 정상 입장
+  const expiry = (access as { state: 'allowed'; user: any; expiry: Date }).expiry
+  const daysLeft = Math.ceil((expiry.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+
   return (
     <div className="min-h-screen bg-white">
       <div className="max-w-4xl mx-auto px-6 py-12">
@@ -151,6 +203,11 @@ export default async function ClassroomDetailPage({
           <Link href="/classroom" className="text-sm text-sub hover:text-brand">
             ← 강의실 목록
           </Link>
+          {/* 만료일 안내 */}
+          <div className={`mt-4 px-4 py-3 rounded-xl text-sm font-medium flex items-center gap-2 ${daysLeft <= 14 ? 'bg-orange-50 text-orange-700 border border-orange-200' : 'bg-blue-50 text-blue-700 border border-blue-100'}`}>
+            <span>{daysLeft <= 14 ? '⚠️' : '📅'}</span>
+            <span>수강 기간: <strong>{expiry.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}</strong> 까지 (D-{daysLeft})</span>
+          </div>
           <div className="inline-block px-3 py-1 text-xs font-medium rounded-full bg-brand-light text-brand mt-4 mb-3">
             {classroom.level}
           </div>
