@@ -150,6 +150,15 @@ export default async function ProductDetailPage({
                 )}
               </div>
 
+              {/* 서비스 제공기간 */}
+              <div className="mb-4 p-4 rounded-2xl bg-[#F0F9FF] border border-[#BAE6FD]">
+                <p className="text-[#0369A1] text-sm font-extrabold mb-1">📅 서비스 제공기간</p>
+                <p className="text-[#0C4A6E] text-sm leading-relaxed">
+                  결제일로부터 <strong>100일</strong>간 수강 가능합니다.<br />
+                  (예: 1월 1일 결제 → 4월 11일까지 이용)
+                </p>
+              </div>
+
               {/* 결제 안내 */}
               <div className="mb-6 p-5 rounded-2xl bg-[#FFF8F1] border-2 border-[#FFD8A8]">
                 <p className="text-[#B45309] text-sm md:text-base font-extrabold mb-2">
