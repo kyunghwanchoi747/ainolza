@@ -334,23 +334,6 @@ export default function LandingPage({ products }: LandingPageProps) {
         </div>
       </section>
 
-      {/* ── 6. 소셜 프루프 ── */}
-      <section className="py-16 px-6 bg-[#f7f7f8] border-y border-line">
-        <div className="max-w-[1200px] mx-auto">
-          <p className="text-center text-sub text-xs tracking-[0.2em] uppercase font-bold mb-10">
-            AI놀자를 경험한 분들
-          </p>
-          <div className="flex flex-wrap justify-center items-center gap-x-10 gap-y-4">
-            {["바이브 코딩 클래스", "AI 관련 도서 2권 출판", "방송 출연", "신문사 칼럼"].map((item, i) => (
-              <span key={i} className="text-sm md:text-base font-bold text-body flex items-center gap-2">
-                <span className="w-1 h-1 rounded-full bg-brand inline-block" />
-                {item}
-              </span>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* ── 7. 수강생 후기 ── */}
       <ReviewBanner />
 
