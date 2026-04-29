@@ -32,6 +32,8 @@ jobs:
         env:
           NODE_OPTIONS: "--no-deprecation --max-old-space-size=8000"
           BUILD_PHASE: "true"
+          NEXT_PUBLIC_PORTONE_STORE_ID: store-32c055e8-eaea-4e2a-bf26-cfdc4e73d548
+          NEXT_PUBLIC_PORTONE_CHANNEL_KEY: channel-key-8f029d2e-1279-4aa7-b25e-6e518c72d083
 
       - name: Deploy to Cloudflare
         run: npx wrangler deploy --config wrangler.jsonc
