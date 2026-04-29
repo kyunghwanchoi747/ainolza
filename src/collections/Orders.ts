@@ -42,6 +42,22 @@ export const Orders: CollectionConfig = {
         if (operation === 'update' && previousDoc) {
           const prevStatus = (previousDoc as any).status
           const newStatus = d.status
+
+          // 강의실 권한 변경 시 어드민 알림
+          const prevClassrooms: string[] = Array.isArray((previousDoc as any).classrooms) ? (previousDoc as any).classrooms : []
+          const newClassrooms: string[] = Array.isArray(d.classrooms) ? d.classrooms : []
+          const addedClassrooms = newClassrooms.filter((c: string) => !prevClassrooms.includes(c))
+          if (addedClassrooms.length > 0) {
+            const adminTo = process.env.ADMIN_EMAIL || 'rex39@naver.com'
+            try {
+              await req.payload.sendEmail({
+                to: adminTo,
+                subject: `[AI놀자] 강의실 권한 부여: ${d.buyerName || d.buyerEmail}`,
+                html: `<p>주문번호: ${oid}<br>수강생: ${d.buyerName || ''} (${d.buyerEmail})<br>추가된 강의실: ${addedClassrooms.join(', ')}</p>`,
+              })
+            } catch (e) { console.error('[CLASSROOM GRANT]', (e as Error).message) }
+          }
+
           if (prevStatus === newStatus) return
 
           if (newStatus === 'paid') {
