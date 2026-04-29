@@ -37,6 +37,7 @@
     "@payloadcms/richtext-lexical": "3.76.1",
     "@payloadcms/storage-r2": "3.76.1",
     "@payloadcms/ui": "3.76.1",
+    "@portone/browser-sdk": "^0.1.5",
     "@puckeditor/core": "^0.21.1",
     "@radix-ui/react-avatar": "^1.1.11",
     "@radix-ui/react-dialog": "^1.1.15",

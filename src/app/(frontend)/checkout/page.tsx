@@ -4,6 +4,12 @@ import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
+import * as PortOne from '@portone/browser-sdk/v2'
+
+const PORTONE_STORE_ID = process.env.NEXT_PUBLIC_PORTONE_STORE_ID || ''
+const PORTONE_CHANNEL_KEY = process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY || ''
+
+type PayMethod = 'CARD' | 'TRANSFER' | 'VIRTUAL_ACCOUNT' | 'EASY_PAY'
 
 function CheckoutContent() {
   const router = useRouter()
@@ -11,6 +17,7 @@ function CheckoutContent() {
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(false)
   const [agreed, setAgreed] = useState({ terms: false, refund: false, privacy: false })
+  const [payMethod, setPayMethod] = useState<PayMethod>('CARD')
 
   // slug 만 받고 나머지는 DB에서 조회 (URL의 amount/product 등은 무시 — 위변조 방지)
   const productSlug = searchParams.get('slug') || 'vibe-coding-101'
@@ -87,21 +94,55 @@ function CheckoutContent() {
         return
       }
 
-      // 2. PortOne 결제 (도메인 연결 후 활성화)
-      // TODO: PortOne SDK 연동
-      // IMP.request_pay({
-      //   pg: 'tosspayments',
-      //   pay_method: 'card',
-      //   merchant_uid: orderData.merchantUid,
-      //   name: productName,
-      //   amount: amount,
-      //   buyer_email: user?.email,
-      //   buyer_name: user?.name,
-      //   buyer_tel: user?.phone,
-      // }, callback)
+      if (!PORTONE_STORE_ID || !PORTONE_CHANNEL_KEY) {
+        alert('결제 시스템 설정이 완료되지 않았습니다. 관리자에게 문의해주세요.')
+        setLoading(false)
+        return
+      }
 
-      // 임시: 결제 완료 페이지로 이동 (테스트용)
-      router.push(`/checkout/complete?orderNumber=${orderData.orderNumber}`)
+      // 2. PortOne V2 결제창 호출
+      const paymentResponse = await PortOne.requestPayment({
+        storeId: PORTONE_STORE_ID,
+        channelKey: PORTONE_CHANNEL_KEY,
+        paymentId: orderData.merchantUid,
+        orderName: productName,
+        totalAmount: amount,
+        currency: 'CURRENCY_KRW',
+        payMethod,
+        customer: {
+          fullName: user?.name || '',
+          email: user?.email || '',
+          phoneNumber: user?.phone || '',
+        },
+        redirectUrl: `${window.location.origin}/checkout/complete?orderNumber=${orderData.orderNumber}`,
+      } as any)
+
+      if (paymentResponse?.code !== undefined) {
+        // 결제 실패 / 취소
+        alert(`결제 실패: ${paymentResponse.message || '취소되었습니다.'}`)
+        setLoading(false)
+        return
+      }
+
+      // 3. 서버에서 결제 검증
+      const verifyRes = await fetch('/api/payments/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          paymentId: paymentResponse?.paymentId || orderData.merchantUid,
+          merchantUid: orderData.merchantUid,
+        }),
+      })
+      const verifyData = await verifyRes.json() as { ok?: boolean; error?: string; orderNumber?: string }
+
+      if (!verifyData.ok) {
+        alert(verifyData.error || '결제 검증에 실패했습니다.')
+        setLoading(false)
+        return
+      }
+
+      router.push(`/checkout/complete?orderNumber=${verifyData.orderNumber || orderData.orderNumber}`)
     } catch {
       alert('결제 처리 중 오류가 발생했습니다.')
     } finally {
@@ -167,9 +208,24 @@ function CheckoutContent() {
           <div className="p-5 rounded-xl border border-line mb-6">
             <h3 className="font-bold text-ink mb-4">결제수단</h3>
             <div className="grid grid-cols-3 gap-2">
-              <div className="p-3 rounded-lg border-2 border-[#D4756E] bg-brand/5 text-center text-sm font-medium text-brand">카드</div>
-              <div className="p-3 rounded-lg border border-line text-center text-sm text-sub">계좌이체</div>
-              <div className="p-3 rounded-lg border border-line text-center text-sm text-sub">카카오페이</div>
+              {([
+                { key: 'CARD', label: '카드' },
+                { key: 'TRANSFER', label: '계좌이체' },
+                { key: 'VIRTUAL_ACCOUNT', label: '가상계좌' },
+              ] as { key: PayMethod; label: string }[]).map((m) => (
+                <button
+                  key={m.key}
+                  type="button"
+                  onClick={() => setPayMethod(m.key)}
+                  className={`p-3 rounded-lg text-center text-sm font-medium transition-all ${
+                    payMethod === m.key
+                      ? 'border-2 border-[#D4756E] bg-brand/5 text-brand'
+                      : 'border border-line text-sub hover:border-brand/40'
+                  }`}
+                >
+                  {m.label}
+                </button>
+              ))}
             </div>
           </div>
 
