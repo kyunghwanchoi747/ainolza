@@ -362,7 +362,7 @@ export default function AccessGrantPage() {
                     <span className="font-medium">{g.email}</span>
                     <span className="text-muted-foreground"> · {g.classroom}</span>
                   </div>
-                  <Button variant="outline" size="sm" onClick={() => revoke(g.orderId)}>
+                  <Button variant="outline" size="sm" onClick={() => revoke(g.orderId, CLASSROOM_OPTIONS.find(c => c.label === g.classroom)?.slug || '', true)}>
                     회수
                   </Button>
                 </div>
