@@ -13,15 +13,20 @@ function formatPrice(p: number): string {
 }
 
 /**
- * 액션 URL이 enroll 페이지면 slug 쿼리 파라미터를 자동으로 붙여줌.
- * (admin에서 URL에 slug를 안 적어도 자동 처리)
+ * 액션 URL을 결제 페이지(/checkout)로 변환.
+ * - enroll 경로 → /checkout?slug=... 으로 자동 변경 (PortOne 결제 연동 후)
+ * - 외부 링크 / 다른 내부 경로는 그대로
  */
 function withSlug(url: string, slug: string): string {
   if (!url) return url
   // 외부 링크는 그대로
   if (/^https?:/.test(url)) return url
-  // enroll 경로일 때만 slug 자동 추가
+  // enroll 경로 → /checkout 경로로 변경 (PortOne 결제 연동 완료)
   if (url.includes('/enroll')) {
+    return `/checkout?slug=${encodeURIComponent(slug)}`
+  }
+  // /checkout 경로면 slug 자동 추가
+  if (url.includes('/checkout')) {
     if (url.includes('slug=')) return url
     const sep = url.includes('?') ? '&' : '?'
     return `${url}${sep}slug=${encodeURIComponent(slug)}`
@@ -156,18 +161,6 @@ export default async function ProductDetailPage({
                 <p className="text-[#0C4A6E] text-sm leading-relaxed">
                   결제일로부터 <strong>100일</strong>간 수강 가능합니다.<br />
                   (예: 1월 1일 결제 → 4월 11일까지 이용)
-                </p>
-              </div>
-
-              {/* 결제 안내 */}
-              <div className="mb-6 p-5 rounded-2xl bg-[#FFF8F1] border-2 border-[#FFD8A8]">
-                <p className="text-[#B45309] text-sm md:text-base font-extrabold mb-2">
-                  📢 결제 안내
-                </p>
-                <p className="text-[#92400E] text-sm leading-relaxed">
-                  현재 홈페이지 이전 작업 중으로 카드 결제를 일시 중단했습니다.
-                  <br />
-                  <strong>계좌이체로만 결제 가능</strong>하며, 카카오톡으로 문의 주시면 안내드립니다.
                 </p>
               </div>
 
