@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
     const payMethod = payMethodMap[methodType] || undefined
 
     // 6. 결제 완료 시 — 상품에 연결된 강의실 권한 자동 부여
-    let grantedClassroomSlugs: string[] = Array.isArray(order.classrooms) ? [...order.classrooms] : []
+    const grantedClassroomSlugs: string[] = Array.isArray(order.classrooms) ? [...order.classrooms] : []
     if (newStatus === 'paid' && order.productSlug) {
       try {
         const productResult = await payload.find({
