@@ -120,14 +120,16 @@ export async function DELETE(request: NextRequest) {
     }
 
     const payload = await getPayloadClient()
+    const { headers } = await import('next/headers')
+    const hdrs = await headers()
+    const { user } = await payload.auth({ headers: hdrs as unknown as Headers })
+
     const order = await payload.findByID({ collection: 'orders', id: Number(orderId), overrideAccess: true })
     const isTest = typeof (order as any).orderNumber === 'string' && (order as any).orderNumber.startsWith('TEST_')
 
     if (isTest) {
-      // 테스트 주문은 삭제
-      await payload.delete({ collection: 'orders', id: Number(orderId), overrideAccess: true })
+      await payload.delete({ collection: 'orders', id: Number(orderId), overrideAccess: true, user: user ?? undefined })
     } else {
-      // 실제 주문은 classrooms에서 해당 슬러그만 제거
       if (!classroomSlug) {
         return NextResponse.json({ error: '실제 주문은 classroomSlug 필수' }, { status: 400 })
       }
@@ -138,6 +140,7 @@ export async function DELETE(request: NextRequest) {
         id: Number(orderId),
         data: { classrooms: updatedClassrooms } as any,
         overrideAccess: true,
+        user: user ?? undefined,
       })
     }
 
