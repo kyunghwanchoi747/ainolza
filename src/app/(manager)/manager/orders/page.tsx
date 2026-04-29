@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { getPayloadClient } from '@/lib/payload'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { RefundApprovalButton } from '@/components/manager/refund-approval-button'
 
 export const dynamic = 'force-dynamic'
 
@@ -49,6 +50,42 @@ export default async function OrdersManagerPage() {
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-blue-600">오늘 주문</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold text-blue-600">{orders.filter(o => new Date(o.createdAt).toDateString() === new Date().toDateString()).length}</div></CardContent></Card>
       </div>
 
+      {/* 환불 요청 섹션 (있을 때만 표시) */}
+      {refundRequestCount > 0 && (
+        <Card className="border-red-200 bg-red-50/50">
+          <CardHeader>
+            <CardTitle className="text-red-700 flex items-center gap-2">
+              ⚠️ 환불 요청 ({refundRequestCount}건)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {orders.filter(o => o.status === 'refund_requested').map((o: any) => (
+                <div key={o.id} className="flex items-center justify-between p-3 bg-white rounded-md border">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Link href={`/manager/orders/${o.id}`} className="font-mono text-xs text-blue-500 underline">
+                        {o.orderNumber}
+                      </Link>
+                      <span className="text-sm font-medium">{o.buyerName}</span>
+                      <span className="text-xs text-muted-foreground">{o.buyerEmail}</span>
+                    </div>
+                    <div className="text-sm">
+                      <span className="text-muted-foreground">{o.productName}</span>
+                      <span className="ml-2 font-bold">{o.amount?.toLocaleString()}원</span>
+                    </div>
+                    {o.refundReason && (
+                      <p className="text-xs text-muted-foreground mt-1">사유: {o.refundReason}</p>
+                    )}
+                  </div>
+                  <RefundApprovalButton orderId={o.id} orderNumber={o.orderNumber} />
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {orders.length === 0 ? (
         <div className="text-center py-20"><p className="text-lg text-muted-foreground">아직 주문이 없습니다.</p></div>
       ) : (
@@ -64,20 +101,27 @@ export default async function OrdersManagerPage() {
                   <th className="text-left p-3 font-medium">결제수단</th>
                   <th className="text-left p-3 font-medium">상태</th>
                   <th className="text-left p-3 font-medium">일시</th>
+                  <th className="text-left p-3 font-medium">액션</th>
                 </tr>
               </thead>
               <tbody>
                 {orders.map((o: any) => {
                   const st = statusLabels[o.status] || statusLabels.pending
+                  const canRefund = ['paid', 'active', 'refund_requested'].includes(o.status)
                   return (
-                    <tr key={o.id} className="border-b hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => window.location.href = `/manager/orders/${o.id}`}>
-                      <td className="p-3 font-mono text-xs text-blue-500 underline">{o.orderNumber}</td>
+                    <tr key={o.id} className="border-b hover:bg-muted/30 transition-colors">
+                      <td className="p-3 font-mono text-xs">
+                        <Link href={`/manager/orders/${o.id}`} className="text-blue-500 underline">{o.orderNumber}</Link>
+                      </td>
                       <td className="p-3">{o.buyerName}<br/><span className="text-xs text-muted-foreground">{o.buyerEmail}</span></td>
                       <td className="p-3">{o.productName}</td>
                       <td className="p-3 font-bold">{o.amount?.toLocaleString()}원</td>
                       <td className="p-3 text-muted-foreground">{o.payMethod || '-'}</td>
                       <td className="p-3"><Badge variant={st.variant}>{st.label}</Badge></td>
                       <td className="p-3 text-xs text-muted-foreground">{o.createdAt ? new Date(o.createdAt).toLocaleDateString('ko-KR') : '-'}</td>
+                      <td className="p-3">
+                        {canRefund && <RefundApprovalButton orderId={o.id} orderNumber={o.orderNumber} />}
+                      </td>
                     </tr>
                   )
                 })}
