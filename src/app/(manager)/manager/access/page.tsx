@@ -155,10 +155,12 @@ export default function AccessGrantPage() {
     }
   }
 
-  const revoke = async (orderId: number) => {
-    if (!confirm('이 권한을 회수하시겠습니까? (테스트 주문이 삭제됩니다)')) return
+  const revoke = async (orderId: number, classroomSlug: string, isTest: boolean) => {
+    if (!confirm('이 강의실 권한을 회수하시겠습니까?')) return
     try {
-      const res = await fetch(`/api/manager/grant-classroom?orderId=${orderId}`, {
+      const params = new URLSearchParams({ orderId: String(orderId) })
+      if (!isTest) params.set('classroomSlug', classroomSlug)
+      const res = await fetch(`/api/manager/grant-classroom?${params.toString()}`, {
         method: 'DELETE',
         credentials: 'include',
       })
@@ -167,7 +169,8 @@ export default function AccessGrantPage() {
         setMessage({ type: 'success', text: '권한이 회수되었습니다.' })
         if (selectedUser) await loadUserOrders(selectedUser.id)
       } else {
-        setMessage({ type: 'error', text: '회수 실패' })
+        const data = await res.json() as { error?: string }
+        setMessage({ type: 'error', text: data.error || '회수 실패' })
       }
     } catch (err) {
       setMessage({ type: 'error', text: (err as Error).message })
@@ -265,20 +268,23 @@ export default function AccessGrantPage() {
                             )}
                           </p>
                           {slugs.length > 0 && (
-                            <div className="flex flex-wrap gap-1 mt-2">
+                            <div className="flex flex-wrap gap-2 mt-2">
                               {slugs.map((s) => (
-                                <Badge key={s} variant="secondary" className="text-xs">
-                                  {labelOf(s)}
-                                </Badge>
+                                <div key={s} className="flex items-center gap-1">
+                                  <Badge variant="secondary" className="text-xs">{labelOf(s)}</Badge>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-5 px-1.5 text-xs text-red-500 hover:text-red-700 hover:bg-red-50"
+                                    onClick={() => revoke(o.id, s, o.isTest)}
+                                  >
+                                    회수
+                                  </Button>
+                                </div>
                               ))}
                             </div>
                           )}
                         </div>
-                        {o.isTest && (
-                          <Button variant="outline" size="sm" onClick={() => revoke(o.id)}>
-                            회수
-                          </Button>
-                        )}
                       </div>
                     </div>
                   )

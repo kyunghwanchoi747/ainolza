@@ -103,7 +103,9 @@ export async function POST(request: NextRequest) {
 }
 
 /**
- * 관리자 전용 — 부여한 권한 회수 (테스트 주문 삭제).
+ * 관리자 전용 — 권한 회수.
+ * - 테스트 주문(TEST_): 주문 자체 삭제
+ * - 실제 주문: classrooms 배열에서 해당 강의실만 제거
  */
 export async function DELETE(request: NextRequest) {
   const adminCheck = await requireAdmin(request)
@@ -112,12 +114,32 @@ export async function DELETE(request: NextRequest) {
   try {
     const url = new URL(request.url)
     const orderId = url.searchParams.get('orderId')
+    const classroomSlug = url.searchParams.get('classroomSlug')
     if (!orderId) {
       return NextResponse.json({ error: 'orderId 필수' }, { status: 400 })
     }
 
     const payload = await getPayloadClient()
-    await payload.delete({ collection: 'orders', id: Number(orderId) })
+    const order = await payload.findByID({ collection: 'orders', id: Number(orderId), overrideAccess: true })
+    const isTest = typeof (order as any).orderNumber === 'string' && (order as any).orderNumber.startsWith('TEST_')
+
+    if (isTest) {
+      // 테스트 주문은 삭제
+      await payload.delete({ collection: 'orders', id: Number(orderId), overrideAccess: true })
+    } else {
+      // 실제 주문은 classrooms에서 해당 슬러그만 제거
+      if (!classroomSlug) {
+        return NextResponse.json({ error: '실제 주문은 classroomSlug 필수' }, { status: 400 })
+      }
+      const currentClassrooms: string[] = Array.isArray((order as any).classrooms) ? (order as any).classrooms : []
+      const updatedClassrooms = currentClassrooms.filter((c) => c !== classroomSlug)
+      await payload.update({
+        collection: 'orders',
+        id: Number(orderId),
+        data: { classrooms: updatedClassrooms } as any,
+        overrideAccess: true,
+      })
+    }
 
     return NextResponse.json({ ok: true })
   } catch (err) {
