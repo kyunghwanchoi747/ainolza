@@ -26,21 +26,41 @@ function CheckoutContent() {
     price?: number
     originalPrice?: number
     productType?: string
+    requiresShipping?: boolean
   } | null>(null)
   const [productLoading, setProductLoading] = useState(true)
+
+  // 배송지 정보 (종이책 등)
+  const [shipping, setShipping] = useState({
+    recipient: '',
+    phone: '',
+    zipcode: '',
+    address: '',
+    addressDetail: '',
+    message: '',
+  })
 
   // 폴백 표시값 — DB 로드 전에 사용
   const productName = dbProduct?.title || '강의'
   const productType = dbProduct?.productType || 'class'
   const amount = dbProduct?.price ?? 0
   const originalAmount = dbProduct?.originalPrice ?? amount
+  const requiresShipping = !!dbProduct?.requiresShipping
 
   useEffect(() => {
     fetch('/api/users/me', { credentials: 'include' })
       .then(res => res.ok ? res.json() : null)
       .then((data: any) => {
-        if (data?.user) setUser(data.user)
-        else router.push('/login')
+        if (data?.user) {
+          setUser(data.user)
+          setShipping((s) => ({
+            ...s,
+            recipient: s.recipient || data.user.name || '',
+            phone: s.phone || data.user.phone || '',
+          }))
+        } else {
+          router.push('/login')
+        }
       })
       .catch(() => router.push('/login'))
   }, [router])
@@ -56,6 +76,7 @@ function CheckoutContent() {
             price: doc.price,
             originalPrice: doc.originalPrice,
             productType: doc.productType,
+            requiresShipping: !!doc.requiresShipping,
           })
         }
       })
@@ -64,9 +85,19 @@ function CheckoutContent() {
   }, [productSlug])
 
   const allAgreed = agreed.terms && agreed.refund && agreed.privacy
+  const shippingValid =
+    !requiresShipping ||
+    (shipping.recipient.trim() &&
+      shipping.phone.trim() &&
+      shipping.zipcode.trim() &&
+      shipping.address.trim())
 
   const handlePayment = async () => {
     if (!allAgreed) return
+    if (requiresShipping && !shippingValid) {
+      alert('배송지 정보를 모두 입력해주세요.')
+      return
+    }
     setLoading(true)
 
     try {
@@ -84,6 +115,16 @@ function CheckoutContent() {
           buyerName: user?.name || '',
           buyerEmail: user?.email || '',
           buyerPhone: user?.phone || '',
+          ...(requiresShipping
+            ? {
+                shippingRecipient: shipping.recipient.trim(),
+                shippingPhone: shipping.phone.trim(),
+                shippingZipcode: shipping.zipcode.trim(),
+                shippingAddress: shipping.address.trim(),
+                shippingAddressDetail: shipping.addressDetail.trim(),
+                shippingMessage: shipping.message.trim(),
+              }
+            : {}),
         }),
       })
 
@@ -204,6 +245,75 @@ function CheckoutContent() {
             </div>
           </div>
 
+          {/* 배송지 입력 (종이책 등) */}
+          {requiresShipping && (
+            <div className="p-5 rounded-xl border border-line mb-6">
+              <h3 className="font-bold text-ink mb-4">배송지 정보 <span className="text-brand">*</span></h3>
+              <div className="space-y-3 text-sm">
+                <div>
+                  <label className="block text-sub text-xs mb-1">받는 사람</label>
+                  <input
+                    type="text"
+                    value={shipping.recipient}
+                    onChange={(e) => setShipping({ ...shipping, recipient: e.target.value })}
+                    className="w-full px-3 py-2 border border-line rounded-lg text-ink focus:outline-none focus:border-brand"
+                    placeholder="홍길동"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sub text-xs mb-1">연락처</label>
+                  <input
+                    type="tel"
+                    value={shipping.phone}
+                    onChange={(e) => setShipping({ ...shipping, phone: e.target.value })}
+                    className="w-full px-3 py-2 border border-line rounded-lg text-ink focus:outline-none focus:border-brand"
+                    placeholder="010-1234-5678"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sub text-xs mb-1">우편번호</label>
+                  <input
+                    type="text"
+                    value={shipping.zipcode}
+                    onChange={(e) => setShipping({ ...shipping, zipcode: e.target.value })}
+                    className="w-full px-3 py-2 border border-line rounded-lg text-ink focus:outline-none focus:border-brand"
+                    placeholder="12345"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sub text-xs mb-1">주소</label>
+                  <input
+                    type="text"
+                    value={shipping.address}
+                    onChange={(e) => setShipping({ ...shipping, address: e.target.value })}
+                    className="w-full px-3 py-2 border border-line rounded-lg text-ink focus:outline-none focus:border-brand"
+                    placeholder="서울시 강남구 테헤란로 123"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sub text-xs mb-1">상세 주소 (선택)</label>
+                  <input
+                    type="text"
+                    value={shipping.addressDetail}
+                    onChange={(e) => setShipping({ ...shipping, addressDetail: e.target.value })}
+                    className="w-full px-3 py-2 border border-line rounded-lg text-ink focus:outline-none focus:border-brand"
+                    placeholder="101동 202호"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sub text-xs mb-1">배송 메시지 (선택)</label>
+                  <input
+                    type="text"
+                    value={shipping.message}
+                    onChange={(e) => setShipping({ ...shipping, message: e.target.value })}
+                    className="w-full px-3 py-2 border border-line rounded-lg text-ink focus:outline-none focus:border-brand"
+                    placeholder="문 앞에 놓아주세요"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* 결제수단 */}
           <div className="p-5 rounded-xl border border-line mb-6">
             <h3 className="font-bold text-ink mb-4">결제수단</h3>
@@ -248,7 +358,7 @@ function CheckoutContent() {
           {/* 결제 버튼 */}
           <button
             onClick={handlePayment}
-            disabled={!allAgreed || loading}
+            disabled={!allAgreed || loading || (requiresShipping && !shippingValid)}
             className="w-full py-4 bg-brand text-white font-bold rounded-xl hover:bg-brand-dark transition-all disabled:opacity-40 disabled:cursor-not-allowed text-lg"
           >
             {loading ? '처리 중...' : `${amount.toLocaleString()}원 결제하기`}

@@ -129,6 +129,35 @@ export const Products: CollectionConfig = {
       admin: { hidden: true },
     },
 
+    // 전자책 다운로드 URL (productType='ebook' 일 때)
+    {
+      name: 'downloadUrl',
+      type: 'text',
+      label: '전자책 다운로드 URL (구글 드라이브 등)',
+      admin: {
+        description:
+          '전자책 상품일 때 사용. 결제 완료한 회원이 마이페이지에서 다운로드할 수 있는 링크. 구글 드라이브 공유 링크 등을 입력하세요.',
+      },
+    },
+    {
+      name: 'downloadNote',
+      type: 'textarea',
+      label: '다운로드 안내 문구',
+      admin: {
+        description:
+          '예: "파일 용량이 크니 다운로드 후 보관해 주세요." 마이페이지와 결제 완료 메일에 표시됩니다.',
+      },
+    },
+    {
+      name: 'requiresShipping',
+      type: 'checkbox',
+      label: '배송 필요 (종이책 등)',
+      defaultValue: false,
+      admin: {
+        description: '체크하면 결제 시 배송지 입력 폼이 노출됩니다.',
+      },
+    },
+
     // 이미지
     {
       name: 'thumbnail',

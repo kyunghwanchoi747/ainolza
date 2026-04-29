@@ -7,6 +7,13 @@ import { User, Mail, Phone, LogOut, ShoppingBag, ChevronDown, ChevronUp, Graduat
 
 type ClassroomMeta = { slug: string; shortTitle: string; level: string; description?: string }
 
+type EbookMeta = {
+  slug: string
+  title: string
+  downloadUrl?: string
+  downloadNote?: string
+}
+
 const statusLabels: Record<string, { label: string; color: string }> = {
   pending: { label: '주문접수', color: '#F59E0B' },
   paid: { label: '결제완료', color: '#10B981' },
@@ -23,6 +30,7 @@ export default function MyPage() {
   const [user, setUser] = useState<any>(null)
   const [orders, setOrders] = useState<any[]>([])
   const [classroomMeta, setClassroomMeta] = useState<ClassroomMeta[]>([])
+  const [ebookMeta, setEbookMeta] = useState<EbookMeta[]>([])
   const [loading, setLoading] = useState(true)
   const [showOrders, setShowOrders] = useState(false)
   const [myReview, setMyReview] = useState<any>(null)
@@ -38,8 +46,9 @@ export default function MyPage() {
       fetch('/api/users/me', { credentials: 'include' }).then(r => r.ok ? r.json() : null),
       fetch('/api/payments', { credentials: 'include' }).then(r => r.ok ? r.json() : null),
       fetch('/api/classrooms?limit=100&depth=0', { credentials: 'include' }).then(r => r.ok ? r.json() : null),
+      fetch('/api/products?where[productType][equals]=ebook&limit=100&depth=0', { credentials: 'include' }).then(r => r.ok ? r.json() : null),
     ])
-      .then(([userData, orderData, classroomData]: any[]) => {
+      .then(([userData, orderData, classroomData, ebookData]: any[]) => {
         if (userData?.user) {
           setUser(userData.user)
           setOrders(orderData?.orders || [])
@@ -49,6 +58,13 @@ export default function MyPage() {
             shortTitle: d.shortTitle || d.title,
             level: d.level || '입문',
             description: d.description,
+          })))
+          const ebooks = (ebookData?.docs || []) as any[]
+          setEbookMeta(ebooks.map((d) => ({
+            slug: d.slug,
+            title: d.title,
+            downloadUrl: d.downloadUrl,
+            downloadNote: d.downloadNote,
           })))
         } else {
           router.push('/login')
@@ -196,6 +212,27 @@ export default function MyPage() {
     return classroomMeta.filter((c) => slugs.has(c.slug))
   }, [orders, classroomMeta])
 
+  // 보유한 전자책 (paid/active/completed 주문 + productType ebook)
+  const ownedEbooks = useMemo(() => {
+    const slugs = new Set<string>()
+    for (const o of orders) {
+      if (!['paid', 'active', 'completed'].includes(o.status)) continue
+      if ((o as any).productType !== 'ebook') continue
+      const slug = (o as any).productSlug
+      if (slug) slugs.add(String(slug))
+    }
+    return ebookMeta.filter((b) => slugs.has(b.slug))
+  }, [orders, ebookMeta])
+
+  // 종이책 주문 (배송 추적용)
+  const bookOrders = useMemo(() => {
+    return orders.filter((o: any) =>
+      ['paid', 'active', 'completed'].includes(o.status) &&
+      o.productType === 'book' &&
+      o.shippingAddress,
+    )
+  }, [orders])
+
   if (loading) return <div className="min-h-screen bg-white flex items-center justify-center"><p className="text-sub">로딩 중...</p></div>
   if (!user) return null
 
@@ -288,6 +325,96 @@ export default function MyPage() {
               </div>
             )}
           </div>
+
+          {/* 내 전자책 */}
+          {ownedEbooks.length > 0 && (
+            <div className="mb-6">
+              <div className="flex items-center gap-2 mb-3">
+                <ShoppingBag className="w-5 h-5 text-brand" />
+                <h3 className="font-medium text-ink">내 전자책</h3>
+                <span className="text-xs text-sub">({ownedEbooks.length}권)</span>
+              </div>
+              <div className="space-y-2">
+                {ownedEbooks.map((b) => (
+                  <div
+                    key={b.slug}
+                    className="p-4 rounded-xl border border-line"
+                  >
+                    <div className="flex items-start justify-between gap-3 mb-2">
+                      <div className="min-w-0 flex-1">
+                        <div className="inline-block px-2 py-0.5 text-[10px] font-medium rounded-full bg-blue-50 text-blue-600 mb-1">전자책</div>
+                        <p className="font-medium text-ink text-sm">{b.title}</p>
+                      </div>
+                      {b.downloadUrl ? (
+                        <a
+                          href={b.downloadUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-3 py-1.5 rounded-lg bg-brand text-white text-xs font-bold hover:bg-brand-dark transition-colors whitespace-nowrap"
+                        >
+                          다운로드
+                        </a>
+                      ) : (
+                        <span className="text-xs text-sub">준비 중</span>
+                      )}
+                    </div>
+                    {b.downloadNote && (
+                      <p className="text-[11px] text-orange-600 mt-2 leading-relaxed">
+                        ⚠ {b.downloadNote}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 종이책 배송 현황 */}
+          {bookOrders.length > 0 && (
+            <div className="mb-6">
+              <div className="flex items-center gap-2 mb-3">
+                <ShoppingBag className="w-5 h-5 text-brand" />
+                <h3 className="font-medium text-ink">종이책 배송</h3>
+                <span className="text-xs text-sub">({bookOrders.length}건)</span>
+              </div>
+              <div className="space-y-2">
+                {bookOrders.map((o: any) => {
+                  const shippingStatusLabels: Record<string, { label: string; color: string }> = {
+                    pending: { label: '발송 대기', color: '#F59E0B' },
+                    preparing: { label: '발송 준비중', color: '#3B82F6' },
+                    shipping: { label: '배송중', color: '#10B981' },
+                    delivered: { label: '배송완료', color: '#6B7280' },
+                  }
+                  const ss = shippingStatusLabels[o.shippingStatus || 'pending'] || shippingStatusLabels.pending
+                  return (
+                    <div key={o.id} className="p-4 rounded-xl border border-line">
+                      <div className="flex items-start justify-between gap-3 mb-2">
+                        <div className="min-w-0 flex-1">
+                          <div className="inline-block px-2 py-0.5 text-[10px] font-medium rounded-full bg-amber-50 text-amber-700 mb-1">종이책</div>
+                          <p className="font-medium text-ink text-sm">{o.productName}</p>
+                        </div>
+                        <span
+                          className="px-2 py-0.5 rounded-full text-[10px] font-bold whitespace-nowrap"
+                          style={{ backgroundColor: ss.color + '20', color: ss.color }}
+                        >
+                          {ss.label}
+                        </span>
+                      </div>
+                      <div className="text-xs text-sub mt-2 space-y-0.5 leading-relaxed">
+                        <p>받는 사람: {o.shippingRecipient} ({o.shippingPhone})</p>
+                        <p>주소: ({o.shippingZipcode}) {o.shippingAddress} {o.shippingAddressDetail}</p>
+                        {o.trackingNumber && (
+                          <p className="text-brand">
+                            운송장: {o.shippingCarrier || '택배'} {o.trackingNumber}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
 
           {/* 수강 후기 */}
           <div className="mb-6 p-6 rounded-2xl border border-line bg-surface">

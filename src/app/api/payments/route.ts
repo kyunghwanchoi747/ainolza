@@ -20,9 +20,30 @@ export async function POST(request: NextRequest) {
       buyerName: string
       buyerEmail: string
       buyerPhone?: string
+      shippingRecipient?: string
+      shippingPhone?: string
+      shippingZipcode?: string
+      shippingAddress?: string
+      shippingAddressDetail?: string
+      shippingMessage?: string
     }
 
-    const { productName, productSlug, productType, amount, originalAmount, buyerName, buyerEmail, buyerPhone } = body
+    const {
+      productName,
+      productSlug,
+      productType,
+      amount,
+      originalAmount,
+      buyerName,
+      buyerEmail,
+      buyerPhone,
+      shippingRecipient,
+      shippingPhone,
+      shippingZipcode,
+      shippingAddress,
+      shippingAddressDetail,
+      shippingMessage,
+    } = body
 
     if (!productName || !amount || !buyerName || !buyerEmail) {
       return NextResponse.json({ error: '필수 항목을 입력해주세요.' }, { status: 400 })
@@ -41,22 +62,35 @@ export async function POST(request: NextRequest) {
       if (user) userId = user.id
     } catch { /* 비로그인 */ }
 
+    const orderData: Record<string, any> = {
+      orderNumber,
+      productName,
+      productSlug: productSlug || '',
+      productType: (productType || 'class') as 'class' | 'ebook' | 'book' | 'bundle',
+      amount,
+      originalAmount: originalAmount || amount,
+      buyerName,
+      buyerEmail,
+      buyerPhone: buyerPhone || '',
+      user: userId,
+      status: 'pending',
+      merchantUid: orderNumber,
+    }
+
+    // 배송 정보가 있으면 저장 (종이책 등)
+    if (shippingRecipient && shippingAddress) {
+      orderData.shippingRecipient = shippingRecipient
+      orderData.shippingPhone = shippingPhone
+      orderData.shippingZipcode = shippingZipcode
+      orderData.shippingAddress = shippingAddress
+      orderData.shippingAddressDetail = shippingAddressDetail
+      orderData.shippingMessage = shippingMessage
+      orderData.shippingStatus = 'pending'
+    }
+
     const order = await payload.create({
       collection: 'orders',
-      data: {
-        orderNumber,
-        productName,
-        productSlug: productSlug || '',
-        productType: (productType || 'class') as 'class' | 'ebook' | 'book' | 'bundle',
-        amount,
-        originalAmount: originalAmount || amount,
-        buyerName,
-        buyerEmail,
-        buyerPhone: buyerPhone || '',
-        user: userId,
-        status: 'pending',
-        merchantUid: orderNumber,
-      },
+      data: orderData as any,
     })
 
     return NextResponse.json({

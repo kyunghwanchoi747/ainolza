@@ -89,13 +89,107 @@ export async function sendWelcomeEmail(payload: Payload, user: { email: string; 
   })
 }
 
-/** 결제 완료 → 사용자에게 수강 안내 */
+/** 결제 완료 → 사용자에게 안내 (상품 유형별 분기) */
 export async function sendPaymentCompletedToBuyer(
   payload: Payload,
-  order: { orderNumber: string; buyerName?: string | null; buyerEmail: string; productName: string; amount?: number | null; classrooms?: string[] | null },
+  order: {
+    orderNumber: string
+    buyerName?: string | null
+    buyerEmail: string
+    productName: string
+    productType?: string | null
+    productSlug?: string | null
+    amount?: number | null
+    classrooms?: string[] | null
+    shippingRecipient?: string | null
+    shippingAddress?: string | null
+    shippingAddressDetail?: string | null
+    shippingZipcode?: string | null
+  },
 ) {
   const name = order.buyerName || order.buyerEmail.split('@')[0]
+  const productType = (order.productType || '').toLowerCase()
   const hasClassroom = Array.isArray(order.classrooms) && order.classrooms.length > 0
+
+  // 전자책 — 상품 정보에서 다운로드 안내 가져오기
+  let ebookDownloadHtml = ''
+  if (productType === 'ebook' && order.productSlug) {
+    try {
+      const result = await payload.find({
+        collection: 'products',
+        where: { slug: { equals: order.productSlug } },
+        limit: 1,
+        depth: 0,
+        overrideAccess: true,
+      })
+      const product = result.docs[0] as any
+      const downloadUrl = product?.downloadUrl
+      const downloadNote = product?.downloadNote || '파일 용량이 크니 반드시 다운로드 후 보관해 주세요.'
+      if (downloadUrl) {
+        ebookDownloadHtml = `
+          <h3 style="color:#333;font-size:15px;margin:24px 0 8px;">📚 전자책 다운로드</h3>
+          <p style="color:#666;font-size:14px;line-height:1.7;margin:0 0 12px;">
+            아래 링크에서 전자책을 다운로드 받으실 수 있습니다.
+          </p>
+          <p style="color:#B45309;font-size:13px;line-height:1.7;margin:0 0 20px;background:#FFF8F1;padding:12px 14px;border-radius:8px;border:1px solid #FFD8A8;">
+            ⚠ ${downloadNote}
+          </p>
+          <div style="text-align:center;margin:24px 0;">
+            <a href="${downloadUrl}" style="display:inline-block;background:#D4756E;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:10px;font-size:14px;font-weight:bold;">전자책 다운로드</a>
+          </div>
+          <p style="color:#666;font-size:13px;line-height:1.7;margin:0 0 16px;text-align:center;">
+            마이페이지에서도 언제든지 다운로드하실 수 있습니다.<br>
+            <a href="${SITE_URL}/mypage" style="color:#D4756E;">마이페이지 가기</a>
+          </p>`
+      } else {
+        ebookDownloadHtml = `
+          <p style="color:#666;font-size:14px;line-height:1.7;margin:0 0 16px;">
+            전자책 다운로드 링크는 곧 마이페이지에 등록됩니다.
+          </p>`
+      }
+    } catch { /* ignore */ }
+  }
+
+  // 종이책 — 배송 안내
+  let bookShippingHtml = ''
+  if (productType === 'book' && order.shippingAddress) {
+    bookShippingHtml = `
+      <h3 style="color:#333;font-size:15px;margin:24px 0 8px;">📦 배송 안내</h3>
+      <p style="color:#666;font-size:14px;line-height:1.7;margin:0 0 16px;">
+        영업일 기준 2~3일 내에 발송됩니다. 운송장 번호가 등록되면 마이페이지에서 확인하실 수 있습니다.
+      </p>
+      <table cellpadding="6" cellspacing="0" style="width:100%;background:#fafafa;border-radius:10px;padding:8px;margin:0 0 20px;font-size:13px;color:#666;">
+        <tr><td style="width:90px;color:#999;">받는 사람</td><td>${order.shippingRecipient || ''}</td></tr>
+        <tr><td style="color:#999;">주소</td><td>(${order.shippingZipcode || ''}) ${order.shippingAddress} ${order.shippingAddressDetail || ''}</td></tr>
+      </table>
+      <div style="text-align:center;margin:24px 0;">
+        <a href="${SITE_URL}/mypage" style="display:inline-block;background:#D4756E;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:10px;font-size:14px;font-weight:bold;">배송 현황 확인</a>
+      </div>`
+  }
+
+  // 강의 — 강의실 입장 안내
+  let classroomHtml = ''
+  if (hasClassroom) {
+    classroomHtml = `
+      <h3 style="color:#333;font-size:15px;margin:24px 0 8px;">🎓 수강 시작하기</h3>
+      <p style="color:#666;font-size:14px;line-height:1.7;margin:0 0 16px;">
+        마이페이지의 <strong>"내 강의실"</strong>에서 강의를 시청하실 수 있습니다.
+        영상은 회차별로 정리되어 있으며, 각 회차마다 노션 가이드북이 함께 제공됩니다.
+      </p>
+      <div style="text-align:center;margin:24px 0;">
+        <a href="${SITE_URL}/mypage" style="display:inline-block;background:#D4756E;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:10px;font-size:14px;font-weight:bold;">내 강의실로 이동</a>
+      </div>`
+  }
+
+  // 어떤 안내도 없으면 기본 마이페이지 안내
+  const detailHtml = ebookDownloadHtml || bookShippingHtml || classroomHtml || `
+    <p style="color:#666;font-size:14px;line-height:1.7;margin:0 0 16px;">
+      마이페이지에서 주문 내역을 확인하실 수 있습니다.
+    </p>
+    <div style="text-align:center;margin:24px 0;">
+      <a href="${SITE_URL}/mypage" style="display:inline-block;background:#D4756E;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:10px;font-size:14px;font-weight:bold;">마이페이지</a>
+    </div>`
+
   await payload.sendEmail({
     to: order.buyerEmail,
     subject: '[AI놀자] 결제가 완료되었습니다',
@@ -110,25 +204,7 @@ export async function sendPaymentCompletedToBuyer(
         <tr><td style="color:#999;">상품</td><td><strong style="color:#333;">${order.productName}</strong></td></tr>
         <tr><td style="color:#999;">결제금액</td><td><strong style="color:#D4756E;">${priceKR(order.amount || 0)}</strong></td></tr>
       </table>
-      ${
-        hasClassroom
-          ? `
-        <h3 style="color:#333;font-size:15px;margin:24px 0 8px;">🎓 수강 시작하기</h3>
-        <p style="color:#666;font-size:14px;line-height:1.7;margin:0 0 16px;">
-          마이페이지의 <strong>"내 강의실"</strong>에서 강의를 시청하실 수 있습니다.
-          영상은 회차별로 정리되어 있으며, 각 회차마다 노션 가이드북이 함께 제공됩니다.
-        </p>
-        <div style="text-align:center;margin:24px 0;">
-          <a href="${SITE_URL}/mypage" style="display:inline-block;background:#D4756E;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:10px;font-size:14px;font-weight:bold;">내 강의실로 이동</a>
-        </div>`
-          : `
-        <p style="color:#666;font-size:14px;line-height:1.7;margin:0 0 16px;">
-          마이페이지에서 주문 내역을 확인하실 수 있습니다.
-        </p>
-        <div style="text-align:center;margin:24px 0;">
-          <a href="${SITE_URL}/mypage" style="display:inline-block;background:#D4756E;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:10px;font-size:14px;font-weight:bold;">마이페이지</a>
-        </div>`
-      }
+      ${detailHtml}
       <p style="color:#999;font-size:12px;line-height:1.6;margin:24px 0 0;">
         문의사항은 <a href="${KAKAO_OPEN_CHAT}" style="color:#D4756E;">카카오톡 오픈채팅</a>으로 부탁드립니다.
       </p>`,

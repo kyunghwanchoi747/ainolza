@@ -175,6 +175,26 @@ export const Orders: CollectionConfig = {
       defaultValue: 'none',
     },
     { name: 'cashReceiptNumber', type: 'text', label: '현금영수증 번호' },
+    // 배송 (종이책)
+    { name: 'shippingRecipient', type: 'text', label: '받는 사람' },
+    { name: 'shippingPhone', type: 'text', label: '연락처' },
+    { name: 'shippingZipcode', type: 'text', label: '우편번호' },
+    { name: 'shippingAddress', type: 'text', label: '주소' },
+    { name: 'shippingAddressDetail', type: 'text', label: '상세 주소' },
+    { name: 'shippingMessage', type: 'textarea', label: '배송 메시지' },
+    {
+      name: 'shippingStatus',
+      type: 'select',
+      label: '배송 상태',
+      options: [
+        { label: '미발송', value: 'pending' },
+        { label: '발송 준비중', value: 'preparing' },
+        { label: '배송중', value: 'shipping' },
+        { label: '배송완료', value: 'delivered' },
+      ],
+    },
+    { name: 'trackingNumber', type: 'text', label: '운송장 번호' },
+    { name: 'shippingCarrier', type: 'text', label: '택배사' },
     // 메모
     { name: 'adminMemo', type: 'textarea', label: '관리자 메모' },
     // 강의실 / 도서 액세스 권한 (다중 선택)
