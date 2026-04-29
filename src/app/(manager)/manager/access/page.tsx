@@ -27,25 +27,36 @@ type UserOrder = {
   isTest: boolean
 }
 
-const CLASSROOM_OPTIONS: Classroom[] = [
-  { slug: 'vibe-coding-101', label: '바이브 코딩 101 (입문)' },
-  { slug: 'vibe-coding-advanced', label: '바이브 코딩 심화' },
-]
-
-const labelOf = (slug: string) =>
-  CLASSROOM_OPTIONS.find((c) => c.slug === slug)?.label || slug
+const labelOf = (slug: string, options: Classroom[]) =>
+  options.find((c) => c.slug === slug)?.label || slug
 
 export default function AccessGrantPage() {
   const [emailQuery, setEmailQuery] = useState('')
   const [searching, setSearching] = useState(false)
   const [results, setResults] = useState<User[]>([])
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
-  const [selectedSlug, setSelectedSlug] = useState<string>('vibe-coding-advanced')
+  const [selectedSlug, setSelectedSlug] = useState<string>('')
+  const [classroomOptions, setClassroomOptions] = useState<Classroom[]>([])
   const [granting, setGranting] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [grantedHistory, setGrantedHistory] = useState<{ orderId: number; email: string; classroom: string }[]>([])
   const [userOrders, setUserOrders] = useState<UserOrder[]>([])
   const [loadingOrders, setLoadingOrders] = useState(false)
+
+  // 강의실 목록 DB에서 로드
+  useEffect(() => {
+    fetch('/api/classrooms?limit=100&depth=0&where[status][not_equals]=draft', { credentials: 'include' })
+      .then(r => r.ok ? r.json() : null)
+      .then((data: any) => {
+        const opts: Classroom[] = (data?.docs || []).map((d: any) => ({
+          slug: d.slug,
+          label: d.shortTitle || d.title,
+        }))
+        setClassroomOptions(opts)
+        if (opts.length > 0) setSelectedSlug(opts[0].slug)
+      })
+      .catch(() => {})
+  }, [])
 
   // 선택된 회원의 현재 보유 강의실 (paid 주문) 조회
   const loadUserOrders = async (userId: number) => {
@@ -133,7 +144,7 @@ export default function AccessGrantPage() {
       setMessage({
         type: 'success',
         text: data.already
-          ? `${selectedUser.email} 은(는) 이미 ${CLASSROOM_OPTIONS.find((c) => c.slug === selectedSlug)?.label} 권한이 있습니다.`
+          ? `${selectedUser.email} 은(는) 이미 ${classroomOptions.find((c) => c.slug === selectedSlug)?.label} 권한이 있습니다.`
           : data.message || '권한이 부여되었습니다.',
       })
       if (data.orderId && !data.already) {
@@ -141,7 +152,7 @@ export default function AccessGrantPage() {
           {
             orderId: data.orderId,
             email: selectedUser.email,
-            classroom: CLASSROOM_OPTIONS.find((c) => c.slug === selectedSlug)?.label || selectedSlug,
+            classroom: classroomOptions.find((c) => c.slug === selectedSlug)?.label || selectedSlug,
           },
           ...h,
         ])
@@ -271,7 +282,7 @@ export default function AccessGrantPage() {
                             <div className="flex flex-wrap gap-2 mt-2">
                               {slugs.map((s) => (
                                 <div key={s} className="flex items-center gap-1">
-                                  <Badge variant="secondary" className="text-xs">{labelOf(s)}</Badge>
+                                  <Badge variant="secondary" className="text-xs">{labelOf(s, classroomOptions)}</Badge>
                                   <Button
                                     variant="ghost"
                                     size="sm"
@@ -301,7 +312,7 @@ export default function AccessGrantPage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
-            {CLASSROOM_OPTIONS.map((c) => (
+            {classroomOptions.map((c) => (
               <label
                 key={c.slug}
                 className={`flex items-center gap-3 p-3 border rounded-md cursor-pointer hover:bg-muted/50 ${
@@ -362,7 +373,7 @@ export default function AccessGrantPage() {
                     <span className="font-medium">{g.email}</span>
                     <span className="text-muted-foreground"> · {g.classroom}</span>
                   </div>
-                  <Button variant="outline" size="sm" onClick={() => revoke(g.orderId, CLASSROOM_OPTIONS.find(c => c.label === g.classroom)?.slug || '', true)}>
+                  <Button variant="outline" size="sm" onClick={() => revoke(g.orderId, classroomOptions.find(c => c.label === g.classroom)?.slug || '', true)}>
                     회수
                   </Button>
                 </div>

@@ -22,6 +22,7 @@ import { Enrollments } from './collections/Enrollments'
 import { Orders } from './collections/Orders'
 import { EmailLogs } from './collections/EmailLogs'
 import { Reviews } from './collections/Reviews'
+import { Classrooms } from './collections/Classrooms'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -80,13 +81,14 @@ function getCloudflareContextFromWrangler(): Promise<CloudflareContext> {
 }
 
 export default buildConfig({
+  serverURL: process.env.NEXT_PUBLIC_SITE_URL || 'https://ainolza.kr',
   admin: {
     user: Users.slug,
     importMap: {
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, DesignPages, Products, ProductCategories, Posts, Comments, Programs, SiteSettings, Enrollments, Orders, Reviews],
+  collections: [Users, Media, DesignPages, Products, ProductCategories, Posts, Comments, Programs, SiteSettings, Enrollments, Orders, Reviews, Classrooms],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || 'dev-secret-change-in-production',
   db: dbAdapter,

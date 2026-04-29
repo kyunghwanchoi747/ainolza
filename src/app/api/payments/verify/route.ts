@@ -88,12 +88,39 @@ export async function POST(request: NextRequest) {
     }
     const payMethod = payMethodMap[methodType] || undefined
 
-    // 6. 주문 업데이트
+    // 6. 결제 완료 시 — 상품에 연결된 강의실 권한 자동 부여
+    let grantedClassroomSlugs: string[] = Array.isArray(order.classrooms) ? [...order.classrooms] : []
+    if (newStatus === 'paid' && order.productSlug) {
+      try {
+        const productResult = await payload.find({
+          collection: 'products',
+          where: { slug: { equals: order.productSlug } },
+          limit: 1,
+          depth: 0,
+          overrideAccess: true,
+        })
+        const product = productResult.docs[0] as any
+        const arr = Array.isArray(product?.grantedClassroomSlugs) ? product.grantedClassroomSlugs : []
+        for (const item of arr) {
+          const slug = typeof item === 'object' ? item.slug : item
+          if (slug && !grantedClassroomSlugs.includes(slug)) {
+            grantedClassroomSlugs.push(slug)
+          }
+        }
+      } catch (e) {
+        console.error('[VERIFY GRANT CLASSROOM]', (e as Error).message)
+      }
+    }
+
+    // 7. 주문 업데이트
     const updateData: Record<string, any> = {
       impUid: paymentId,
       status: newStatus,
       pgProvider: paymentData.pgProvider || undefined,
       receiptUrl: paymentData.receiptUrl || undefined,
+    }
+    if (grantedClassroomSlugs.length > 0) {
+      updateData.classrooms = grantedClassroomSlugs
     }
     if (payMethod) updateData.payMethod = payMethod
     if (paymentData.virtualAccount) {

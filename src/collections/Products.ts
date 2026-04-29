@@ -103,16 +103,30 @@ export const Products: CollectionConfig = {
       ],
     },
 
-    // 강의실 연결 (수강생 전용)
+    // 강의실 연결 (수강 상품 결제 시 자동 부여될 강의실)
+    {
+      name: 'grantedClassroomSlugs',
+      type: 'array',
+      label: '결제 시 부여될 강의실 슬러그',
+      admin: {
+        description:
+          '강의 상품인 경우 결제 완료 시 여기 입력한 슬러그의 강의실 입장 권한이 자동 부여됩니다. 책/전자책은 비워두세요. 기수가 다르면 별도 강의실을 만들어 슬러그를 등록하세요. 예: vibe-coding-advanced-2',
+      },
+      fields: [
+        {
+          name: 'slug',
+          type: 'text',
+          required: true,
+          label: '강의실 슬러그',
+        },
+      ],
+    },
+    // 구버전 호환 — DB 스키마 유지용 (사용 안 함)
     {
       name: 'classroomSlug',
-      type: 'select',
-      label: '연결된 강의실 (수강 시 입장 권한)',
-      options: [
-        { label: '연결 없음', value: '' },
-        { label: '바이브 코딩 101 (입문)', value: 'vibe-coding-101' },
-        { label: '바이브 코딩 심화', value: 'vibe-coding-advanced' },
-      ],
+      type: 'text',
+      label: '구 강의실 슬러그 (사용 안 함)',
+      admin: { hidden: true },
     },
 
     // 이미지

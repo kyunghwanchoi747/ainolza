@@ -4,7 +4,8 @@ import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { User, Mail, Phone, LogOut, ShoppingBag, ChevronDown, ChevronUp, GraduationCap, Star, MessageSquare } from 'lucide-react'
-import { CLASSROOMS } from '@/lib/classrooms'
+
+type ClassroomMeta = { slug: string; shortTitle: string; level: string; description?: string }
 
 const statusLabels: Record<string, { label: string; color: string }> = {
   pending: { label: '주문접수', color: '#F59E0B' },
@@ -21,6 +22,7 @@ export default function MyPage() {
   const router = useRouter()
   const [user, setUser] = useState<any>(null)
   const [orders, setOrders] = useState<any[]>([])
+  const [classroomMeta, setClassroomMeta] = useState<ClassroomMeta[]>([])
   const [loading, setLoading] = useState(true)
   const [showOrders, setShowOrders] = useState(false)
   const [myReview, setMyReview] = useState<any>(null)
@@ -35,11 +37,19 @@ export default function MyPage() {
     Promise.all([
       fetch('/api/users/me', { credentials: 'include' }).then(r => r.ok ? r.json() : null),
       fetch('/api/payments', { credentials: 'include' }).then(r => r.ok ? r.json() : null),
+      fetch('/api/classrooms?limit=100&depth=0', { credentials: 'include' }).then(r => r.ok ? r.json() : null),
     ])
-      .then(([userData, orderData]: any[]) => {
+      .then(([userData, orderData, classroomData]: any[]) => {
         if (userData?.user) {
           setUser(userData.user)
           setOrders(orderData?.orders || [])
+          const docs = (classroomData?.docs || []) as any[]
+          setClassroomMeta(docs.map((d) => ({
+            slug: d.slug,
+            shortTitle: d.shortTitle || d.title,
+            level: d.level || '입문',
+            description: d.description,
+          })))
         } else {
           router.push('/login')
         }
@@ -183,8 +193,8 @@ export default function MyPage() {
         for (const s of arr) slugs.add(String(s))
       }
     }
-    return CLASSROOMS.filter((c) => slugs.has(c.slug))
-  }, [orders])
+    return classroomMeta.filter((c) => slugs.has(c.slug))
+  }, [orders, classroomMeta])
 
   if (loading) return <div className="min-h-screen bg-white flex items-center justify-center"><p className="text-sub">로딩 중...</p></div>
   if (!user) return null

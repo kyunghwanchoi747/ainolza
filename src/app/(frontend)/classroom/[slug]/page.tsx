@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { headers } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { getPayloadClient } from '@/lib/payload'
-import { getClassroom } from '@/lib/classrooms'
+import { getClassroomBySlug } from '@/lib/classrooms-db'
 import { SecretUnlock } from '@/components/classroom/secret-unlock'
 
 export const dynamic = 'force-dynamic'
@@ -99,7 +99,7 @@ export default async function ClassroomDetailPage({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
-  const classroom = getClassroom(slug)
+  const classroom = await getClassroomBySlug(slug)
   if (!classroom) return notFound()
 
   const access = await checkAccess(slug)

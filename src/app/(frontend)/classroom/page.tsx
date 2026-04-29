@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { headers } from 'next/headers'
 import { getPayloadClient } from '@/lib/payload'
-import { CLASSROOMS } from '@/lib/classrooms'
+import { listActiveClassrooms } from '@/lib/classrooms-db'
 
 export const dynamic = 'force-dynamic'
 
@@ -43,7 +43,10 @@ async function getOwnedSlugs(): Promise<Set<string>> {
 }
 
 export default async function ClassroomListPage() {
-  const owned = await getOwnedSlugs()
+  const [owned, classrooms] = await Promise.all([
+    getOwnedSlugs(),
+    listActiveClassrooms(),
+  ])
 
   return (
     <div className="min-h-screen bg-white">
@@ -60,7 +63,7 @@ export default async function ClassroomListPage() {
         </div>
 
         <div className="grid gap-6 md:grid-cols-2">
-          {CLASSROOMS.map((c) => {
+          {classrooms.map((c) => {
             const isOwned = owned.has(c.slug)
             return (
               <div

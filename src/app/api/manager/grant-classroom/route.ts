@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayloadClient } from '@/lib/payload'
 import { requireAdmin } from '@/lib/auth'
-import { CLASSROOMS } from '@/lib/classrooms'
 
 /**
  * 관리자 전용 — 특정 회원에게 강의실 액세스 권한을 부여한다.
@@ -19,14 +18,24 @@ export async function POST(request: NextRequest) {
     if (!classroomSlug) {
       return NextResponse.json({ error: 'classroomSlug 필수' }, { status: 400 })
     }
-    if (!CLASSROOMS.find((c) => c.slug === classroomSlug)) {
-      return NextResponse.json({ error: '존재하지 않는 강의실' }, { status: 400 })
-    }
     if (!userId && !email) {
       return NextResponse.json({ error: 'userId 또는 email 필요' }, { status: 400 })
     }
 
     const payload = await getPayloadClient()
+
+    // DB에서 강의실 존재 확인
+    const classroomResult = await payload.find({
+      collection: 'classrooms' as any,
+      where: { slug: { equals: classroomSlug } },
+      limit: 1,
+      depth: 0,
+      overrideAccess: true,
+    })
+    const classroom = classroomResult.docs[0] as any
+    if (!classroom) {
+      return NextResponse.json({ error: '존재하지 않는 강의실' }, { status: 400 })
+    }
 
     // 회원 찾기
     let user: any = null
@@ -69,8 +78,6 @@ export async function POST(request: NextRequest) {
         orderId: existing.docs[0].id,
       })
     }
-
-    const classroom = CLASSROOMS.find((c) => c.slug === classroomSlug)!
 
     // 테스트 주문 생성
     const orderNumber = `TEST_${Date.now().toString(36).toUpperCase()}`
@@ -160,11 +167,22 @@ export async function DELETE(request: NextRequest) {
       const buyerEmail = (order as any).buyerEmail || ''
       const buyerName = (order as any).buyerName || ''
       const revokedSlug = isTest ? ((order as any).classrooms?.[0] || '') : (classroomSlug || '')
-      const cls = CLASSROOMS.find((c) => c.slug === revokedSlug)
+      let revokedTitle = revokedSlug
+      try {
+        const cr = await payload.find({
+          collection: 'classrooms' as any,
+          where: { slug: { equals: revokedSlug } },
+          limit: 1,
+          depth: 0,
+          overrideAccess: true,
+        })
+        const c = cr.docs[0] as any
+        if (c?.shortTitle) revokedTitle = c.shortTitle
+      } catch { /* ignore */ }
       await payload.sendEmail({
         to: adminTo,
         subject: `[AI놀자] 강의실 권한 회수: ${buyerName || buyerEmail}`,
-        html: `<p>회원: ${buyerName} (${buyerEmail})<br>회수된 강의실: ${cls?.shortTitle || revokedSlug}<br>주문번호: ${(order as any).orderNumber}</p>`,
+        html: `<p>회원: ${buyerName} (${buyerEmail})<br>회수된 강의실: ${revokedTitle}<br>주문번호: ${(order as any).orderNumber}</p>`,
       })
     } catch (e) { console.error('[REVOKE NOTIFY]', (e as Error).message) }
 
