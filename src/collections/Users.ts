@@ -59,30 +59,32 @@ export const Users: CollectionConfig = {
             collection: 'orders',
             where: { user: { equals: id } },
             limit: 9999,
+            overrideAccess: true,
           })
           for (const order of orders.docs) {
             await req.payload.update({
               collection: 'orders',
               id: order.id,
               data: { user: null },
-              req,
+              overrideAccess: true,
             })
           }
-          
+
           // 댓글 삭제
           await req.payload.delete({
             collection: 'comments',
             where: { author: { equals: id } },
-            req,
+            overrideAccess: true,
           })
           // 리뷰 삭제
           await req.payload.delete({
             collection: 'reviews',
             where: { user: { equals: id } },
-            req,
+            overrideAccess: true,
           })
         } catch (e) {
-          console.warn(`[User Delete] Failed to clean up related data for user ${id}:`, (e as Error).message)
+          console.error(`[User Delete] Failed to clean up related data for user ${id}:`, (e as Error).message)
+          // 정리 실패해도 유저 삭제는 계속 진행
         }
       },
     ],
