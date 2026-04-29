@@ -91,6 +91,16 @@ export async function POST(request: NextRequest) {
       } as any,
     })
 
+    // 어드민에게 권한 부여 알림 메일
+    try {
+      const adminTo = process.env.ADMIN_EMAIL || 'rex39@naver.com'
+      await payload.sendEmail({
+        to: adminTo,
+        subject: `[AI놀자] 강의실 권한 부여: ${user.name || user.email}`,
+        html: `<p>회원: ${user.name || ''} (${user.email})<br>부여된 강의실: ${classroom.shortTitle}<br>주문번호: ${orderNumber}</p>`,
+      })
+    } catch (e) { console.error('[GRANT NOTIFY]', (e as Error).message) }
+
     return NextResponse.json({
       ok: true,
       message: `${user.email} 에게 ${classroom.shortTitle} 권한을 부여했습니다.`,
@@ -143,6 +153,20 @@ export async function DELETE(request: NextRequest) {
         user: user ?? undefined,
       })
     }
+
+    // 어드민에게 회수 알림 메일
+    try {
+      const adminTo = process.env.ADMIN_EMAIL || 'rex39@naver.com'
+      const buyerEmail = (order as any).buyerEmail || ''
+      const buyerName = (order as any).buyerName || ''
+      const revokedSlug = isTest ? ((order as any).classrooms?.[0] || '') : (classroomSlug || '')
+      const cls = CLASSROOMS.find((c) => c.slug === revokedSlug)
+      await payload.sendEmail({
+        to: adminTo,
+        subject: `[AI놀자] 강의실 권한 회수: ${buyerName || buyerEmail}`,
+        html: `<p>회원: ${buyerName} (${buyerEmail})<br>회수된 강의실: ${cls?.shortTitle || revokedSlug}<br>주문번호: ${(order as any).orderNumber}</p>`,
+      })
+    } catch (e) { console.error('[REVOKE NOTIFY]', (e as Error).message) }
 
     return NextResponse.json({ ok: true })
   } catch (err) {
