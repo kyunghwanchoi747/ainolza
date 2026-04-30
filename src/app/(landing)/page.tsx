@@ -1,9 +1,5 @@
-import LandingPage from '@/components/landing/landing-page'
-import { listProductsForStore } from '@/lib/products-db'
+import LandingPageV3 from '@/components/landing/LandingPageV3'
 
-export const dynamic = 'force-dynamic'
-
-export default async function Home() {
-  const products = await listProductsForStore()
-  return <LandingPage products={products} />
+export default function Home() {
+  return <LandingPageV3 />
 }

@@ -1,0 +1,128 @@
+/* ─── Labs 페이지 전용 스타일 (V3 디자인 톤) ─── */
+.labsPageRoot {
+  --brand: #6366F1;
+  --brand-dark: #4F46E5;
+  --brand-light: #EEEFFF;
+  --brand-grad: linear-gradient(135deg, #818CF8 0%, #6366F1 50%, #7C3AED 100%);
+  --ink: #1a1a1a;
+  --body: #515154;
+  --sub: #86868B;
+  --hint: #B0B0B5;
+  --bg-soft: #F5F5F7;
+  --hair: rgba(0,0,0,0.08);
+  background: #ffffff;
+}
+
+.labsPageHero {
+  padding: 64px clamp(20px, 4vw, 48px) 32px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+.labsPageHero .pageEyebrow {
+  display: inline-flex; align-items: center; gap: 12px;
+  font-size: 13px; font-weight: 700; color: var(--brand);
+  letter-spacing: 0.18em; text-transform: uppercase;
+  margin: 0 0 20px;
+}
+.labsPageHero .pageEyebrow .line { width: 36px; height: 2px; background: var(--brand-grad); border-radius: 2px; }
+.labsPageHero .pageTitle {
+  font-size: clamp(36px, 5vw, 60px);
+  font-weight: 800; letter-spacing: -0.04em; line-height: 1.05;
+  margin: 0 0 16px;
+  color: var(--ink);
+}
+.labsPageHero .pageTitle .grad {
+  background: var(--brand-grad);
+  -webkit-background-clip: text; background-clip: text;
+  color: transparent;
+}
+.labsPageHero .pageLead {
+  font-size: 17px; color: var(--body); line-height: 1.6;
+  margin: 0; letter-spacing: -0.01em; max-width: 720px;
+}
+
+.labsContainer { padding: 24px clamp(20px, 4vw, 48px) 120px; max-width: 1280px; margin: 0 auto; }
+.labGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+@media (max-width: 1100px) { .labGrid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 800px)  { .labGrid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px)  { .labGrid { grid-template-columns: 1fr; } }
+
+.labCard {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  border-radius: 28px;
+  overflow: hidden;
+  padding: 20px;
+  display: flex; flex-direction: column;
+  color: #fff;
+  background: var(--cardBg);
+  box-shadow: 0 12px 32px -8px rgba(0,0,0,0.18);
+  transition: transform .35s cubic-bezier(.4,0,.2,1), box-shadow .35s;
+  cursor: pointer;
+  text-decoration: none;
+}
+.labCard:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 24px 48px -12px rgba(0,0,0,0.28);
+}
+.labCard::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 40%);
+  pointer-events: none;
+}
+.labCard::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(115deg, transparent 40%, rgba(255,255,255,0.22) 50%, transparent 62%);
+  mix-blend-mode: overlay; pointer-events: none;
+}
+.labCard__top {
+  position: relative; z-index: 1;
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px;
+}
+.labTag {
+  padding: 5px 11px; border-radius: 9999px;
+  background: rgba(255,255,255,0.85); color: #1a1a1a;
+  font-size: 11px; font-weight: 700; letter-spacing: -0.005em;
+}
+.extIcon {
+  color: rgba(255,255,255,0.7); transition: color .2s, transform .2s;
+}
+.labCard:hover .extIcon { color: #fff; transform: translate(2px, -2px); }
+.labIllu {
+  position: relative; z-index: 1;
+  flex: 1;
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px 12px;
+}
+.labIllu svg { width: 70%; height: auto; max-width: 180px; opacity: 0.95; }
+.labCaption {
+  position: relative; z-index: 1;
+  padding: 16px 4px 4px;
+}
+.labName {
+  font-size: 19px; font-weight: 800; color: #fff;
+  margin: 0 0 6px; letter-spacing: -0.02em;
+}
+.labDesc {
+  font-size: 13px; color: rgba(255,255,255,0.85); line-height: 1.5;
+  margin: 0;
+}
+
+/* "곧 출시 예정" — 글래스 효과 */
+.labCard.coming {
+  background: linear-gradient(135deg, rgba(255,255,255,0.7) 0%, rgba(245,245,247,0.55) 100%);
+  backdrop-filter: blur(20px);
+  border: 2px dashed rgba(0,0,0,0.15);
+  color: var(--ink);
+  box-shadow: none;
+}
+.labCard.coming::before, .labCard.coming::after { display: none; }
+.labCard.coming .labName { color: var(--ink); }
+.labCard.coming .labDesc { color: var(--sub); }
+.labCard.coming .labTag { background: var(--brand-light); color: var(--brand-dark); }
+.labCard.coming .labIllu { color: var(--brand); }
