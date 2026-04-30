@@ -23,10 +23,12 @@ function CheckoutContent() {
   const productSlug = searchParams.get('slug') || 'vibe-coding-101'
   const [dbProduct, setDbProduct] = useState<{
     title: string
+    subtitle?: string
     price?: number
     originalPrice?: number
     productType?: string
     requiresShipping?: boolean
+    thumbnailUrl?: string
   } | null>(null)
   const [productLoading, setProductLoading] = useState(true)
 
@@ -66,17 +68,29 @@ function CheckoutContent() {
   }, [router])
 
   useEffect(() => {
-    fetch(`/api/products?where[slug][equals]=${encodeURIComponent(productSlug)}&depth=0&limit=1`, { credentials: 'include' })
+    fetch(`/api/products?where[slug][equals]=${encodeURIComponent(productSlug)}&depth=1&limit=1`, { credentials: 'include' })
       .then(res => res.ok ? res.json() : null)
       .then((data: any) => {
         const doc = data?.docs?.[0]
         if (doc) {
+          const thumb = doc.thumbnail
+          let thumbnailUrl: string | undefined
+          if (thumb && typeof thumb === 'object') {
+            thumbnailUrl = thumb.url || thumb.thumbnailURL
+          }
+          if (!thumbnailUrl) {
+            // 폴백 — public 이미지 규칙
+            const ext = doc.imageExt || 'png'
+            thumbnailUrl = `/store/${doc.slug}/thumbnail.${ext}`
+          }
           setDbProduct({
             title: doc.title,
+            subtitle: doc.subtitle,
             price: doc.price,
             originalPrice: doc.originalPrice,
             productType: doc.productType,
             requiresShipping: !!doc.requiresShipping,
+            thumbnailUrl,
           })
         }
       })
@@ -206,164 +220,254 @@ function CheckoutContent() {
     )
   }
 
+  const productTypeLabel =
+    productType === 'class' ? '온라인 강의' :
+    productType === 'ebook' ? '전자책' :
+    productType === 'book' ? '종이책' : '상품'
+  const discount = Math.max(0, originalAmount - amount)
+
   return (
-    <div className="min-h-screen bg-white">
-      <section className="pt-16 pb-20 px-6">
-        <div className="max-w-[600px] mx-auto">
-          <h1 className="text-3xl font-bold text-ink mb-8">주문서</h1>
+    <div className="min-h-screen bg-[#fafafa]">
+      <section className="pt-12 md:pt-16 pb-20 px-4 md:px-6">
+        <div className="max-w-[1100px] mx-auto">
+          <h1 className="text-2xl md:text-3xl font-bold text-ink mb-8 text-center">결제하기</h1>
 
-          {/* 상품 정보 */}
-          <div className="p-5 rounded-xl bg-surface border border-line mb-6">
-            <h3 className="font-bold text-ink mb-1">{productName}</h3>
-            <p className="text-sm text-sub">{productType === 'class' ? '온라인 강의' : productType === 'ebook' ? '전자책' : '상품'}</p>
-            <div className="flex items-end gap-2 mt-3">
-              <span className="text-2xl font-bold text-brand">{amount.toLocaleString()}원</span>
-              {originalAmount > amount && (
-                <span className="text-sm text-sub line-through">{originalAmount.toLocaleString()}원</span>
+          <div className="grid lg:grid-cols-[1fr_380px] gap-6">
+            {/* ─── 좌측: 주문 상품 + 주문자 + 배송지 ─── */}
+            <div className="space-y-6">
+              {/* 주문 상품 정보 */}
+              <div className="p-5 md:p-6 rounded-2xl bg-white border border-line">
+                <h2 className="text-base font-bold text-ink mb-4">주문 상품 정보</h2>
+                <div className="flex gap-4">
+                  {dbProduct.thumbnailUrl && (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      src={dbProduct.thumbnailUrl}
+                      alt={productName}
+                      className="w-24 h-24 md:w-28 md:h-28 rounded-lg object-cover bg-surface border border-line shrink-0"
+                    />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs text-sub mb-1">{productTypeLabel}</p>
+                    <p className="font-bold text-ink text-sm md:text-base mb-2 leading-snug">{productName}</p>
+                    {dbProduct.subtitle && (
+                      <p className="text-xs text-sub mb-3 line-clamp-2">{dbProduct.subtitle}</p>
+                    )}
+                    <p className="text-xs text-sub mb-1">수량 1개</p>
+                    <div className="flex items-baseline gap-2 mt-1">
+                      <span className="text-lg font-bold text-brand">{amount.toLocaleString()}원</span>
+                      {originalAmount > amount && (
+                        <span className="text-xs text-sub line-through">{originalAmount.toLocaleString()}원</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 주문자 정보 */}
+              <div className="p-5 md:p-6 rounded-2xl bg-white border border-line">
+                <h2 className="text-base font-bold text-ink mb-4">주문자 정보</h2>
+                <div className="space-y-2 text-sm">
+                  <div className="flex">
+                    <span className="text-sub w-20 shrink-0">이름</span>
+                    <span className="text-ink">{user.name || '-'}</span>
+                  </div>
+                  <div className="flex">
+                    <span className="text-sub w-20 shrink-0">이메일</span>
+                    <span className="text-ink break-all">{user.email}</span>
+                  </div>
+                  {user.phone && (
+                    <div className="flex">
+                      <span className="text-sub w-20 shrink-0">연락처</span>
+                      <span className="text-ink">{user.phone}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* 배송지 입력 (종이책 등) */}
+              {requiresShipping && (
+                <div className="p-5 md:p-6 rounded-2xl bg-white border border-line">
+                  <h2 className="text-base font-bold text-ink mb-4">
+                    배송지 정보 <span className="text-brand">*</span>
+                  </h2>
+                  <div className="space-y-3 text-sm">
+                    <div>
+                      <label className="block text-sub text-xs mb-1">받는 사람</label>
+                      <input
+                        type="text"
+                        value={shipping.recipient}
+                        onChange={(e) => setShipping({ ...shipping, recipient: e.target.value })}
+                        className="w-full px-3 py-2 border border-line rounded-lg text-ink focus:outline-none focus:border-brand"
+                        placeholder="홍길동"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sub text-xs mb-1">연락처</label>
+                      <input
+                        type="tel"
+                        value={shipping.phone}
+                        onChange={(e) => setShipping({ ...shipping, phone: e.target.value })}
+                        className="w-full px-3 py-2 border border-line rounded-lg text-ink focus:outline-none focus:border-brand"
+                        placeholder="010-1234-5678"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sub text-xs mb-1">우편번호</label>
+                      <input
+                        type="text"
+                        value={shipping.zipcode}
+                        onChange={(e) => setShipping({ ...shipping, zipcode: e.target.value })}
+                        className="w-full px-3 py-2 border border-line rounded-lg text-ink focus:outline-none focus:border-brand"
+                        placeholder="12345"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sub text-xs mb-1">주소</label>
+                      <input
+                        type="text"
+                        value={shipping.address}
+                        onChange={(e) => setShipping({ ...shipping, address: e.target.value })}
+                        className="w-full px-3 py-2 border border-line rounded-lg text-ink focus:outline-none focus:border-brand"
+                        placeholder="서울시 강남구 테헤란로 123"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sub text-xs mb-1">상세 주소 (선택)</label>
+                      <input
+                        type="text"
+                        value={shipping.addressDetail}
+                        onChange={(e) => setShipping({ ...shipping, addressDetail: e.target.value })}
+                        className="w-full px-3 py-2 border border-line rounded-lg text-ink focus:outline-none focus:border-brand"
+                        placeholder="101동 202호"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sub text-xs mb-1">배송 메시지 (선택)</label>
+                      <input
+                        type="text"
+                        value={shipping.message}
+                        onChange={(e) => setShipping({ ...shipping, message: e.target.value })}
+                        className="w-full px-3 py-2 border border-line rounded-lg text-ink focus:outline-none focus:border-brand"
+                        placeholder="문 앞에 놓아주세요"
+                      />
+                    </div>
+                  </div>
+                </div>
               )}
             </div>
-          </div>
 
-          {/* 구매자 정보 */}
-          <div className="p-5 rounded-xl border border-line mb-6">
-            <h3 className="font-bold text-ink mb-4">구매자 정보</h3>
-            <div className="space-y-3 text-sm">
-              <div className="flex justify-between">
-                <span className="text-sub">이름</span>
-                <span className="text-ink">{user.name || '-'}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sub">이메일</span>
-                <span className="text-ink">{user.email}</span>
-              </div>
-              {user.phone && (
-                <div className="flex justify-between">
-                  <span className="text-sub">연락처</span>
-                  <span className="text-ink">{user.phone}</span>
+            {/* ─── 우측: 주문 요약 + 결제수단 + 약관 + 결제 버튼 ─── */}
+            <div className="space-y-6">
+              <div className="lg:sticky lg:top-20 space-y-6">
+                {/* 주문 요약 */}
+                <div className="p-5 md:p-6 rounded-2xl bg-white border border-line">
+                  <h2 className="text-base font-bold text-ink mb-4">주문 요약</h2>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-sub">상품가격</span>
+                      <span className="text-ink">{originalAmount.toLocaleString()}원</span>
+                    </div>
+                    {discount > 0 && (
+                      <div className="flex justify-between">
+                        <span className="text-sub">상품 할인금액</span>
+                        <span className="text-brand">- {discount.toLocaleString()}원</span>
+                      </div>
+                    )}
+                  </div>
+                  <hr className="my-4 border-line" />
+                  <div className="flex justify-between items-baseline">
+                    <span className="text-sm font-bold text-ink">총 주문금액</span>
+                    <span className="text-2xl font-extrabold text-brand">{amount.toLocaleString()}원</span>
+                  </div>
                 </div>
-              )}
-            </div>
-          </div>
 
-          {/* 배송지 입력 (종이책 등) */}
-          {requiresShipping && (
-            <div className="p-5 rounded-xl border border-line mb-6">
-              <h3 className="font-bold text-ink mb-4">배송지 정보 <span className="text-brand">*</span></h3>
-              <div className="space-y-3 text-sm">
-                <div>
-                  <label className="block text-sub text-xs mb-1">받는 사람</label>
-                  <input
-                    type="text"
-                    value={shipping.recipient}
-                    onChange={(e) => setShipping({ ...shipping, recipient: e.target.value })}
-                    className="w-full px-3 py-2 border border-line rounded-lg text-ink focus:outline-none focus:border-brand"
-                    placeholder="홍길동"
-                  />
+                {/* 결제수단 */}
+                <div className="p-5 md:p-6 rounded-2xl bg-white border border-line">
+                  <h2 className="text-base font-bold text-ink mb-4">결제수단</h2>
+                  <div className="space-y-2">
+                    {([
+                      { key: 'CARD', label: '신용카드' },
+                      { key: 'TRANSFER', label: '계좌이체' },
+                      { key: 'VIRTUAL_ACCOUNT', label: '가상계좌(무통장입금)' },
+                    ] as { key: PayMethod; label: string }[]).map((m) => (
+                      <label
+                        key={m.key}
+                        className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
+                          payMethod === m.key
+                            ? 'border-[#D4756E] bg-brand/5'
+                            : 'border-line hover:border-brand/40'
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="payMethod"
+                          checked={payMethod === m.key}
+                          onChange={() => setPayMethod(m.key)}
+                          className="accent-[#D4756E]"
+                        />
+                        <span className={`text-sm font-medium ${payMethod === m.key ? 'text-brand' : 'text-ink'}`}>
+                          {m.label}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sub text-xs mb-1">연락처</label>
-                  <input
-                    type="tel"
-                    value={shipping.phone}
-                    onChange={(e) => setShipping({ ...shipping, phone: e.target.value })}
-                    className="w-full px-3 py-2 border border-line rounded-lg text-ink focus:outline-none focus:border-brand"
-                    placeholder="010-1234-5678"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sub text-xs mb-1">우편번호</label>
-                  <input
-                    type="text"
-                    value={shipping.zipcode}
-                    onChange={(e) => setShipping({ ...shipping, zipcode: e.target.value })}
-                    className="w-full px-3 py-2 border border-line rounded-lg text-ink focus:outline-none focus:border-brand"
-                    placeholder="12345"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sub text-xs mb-1">주소</label>
-                  <input
-                    type="text"
-                    value={shipping.address}
-                    onChange={(e) => setShipping({ ...shipping, address: e.target.value })}
-                    className="w-full px-3 py-2 border border-line rounded-lg text-ink focus:outline-none focus:border-brand"
-                    placeholder="서울시 강남구 테헤란로 123"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sub text-xs mb-1">상세 주소 (선택)</label>
-                  <input
-                    type="text"
-                    value={shipping.addressDetail}
-                    onChange={(e) => setShipping({ ...shipping, addressDetail: e.target.value })}
-                    className="w-full px-3 py-2 border border-line rounded-lg text-ink focus:outline-none focus:border-brand"
-                    placeholder="101동 202호"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sub text-xs mb-1">배송 메시지 (선택)</label>
-                  <input
-                    type="text"
-                    value={shipping.message}
-                    onChange={(e) => setShipping({ ...shipping, message: e.target.value })}
-                    className="w-full px-3 py-2 border border-line rounded-lg text-ink focus:outline-none focus:border-brand"
-                    placeholder="문 앞에 놓아주세요"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
 
-          {/* 결제수단 */}
-          <div className="p-5 rounded-xl border border-line mb-6">
-            <h3 className="font-bold text-ink mb-4">결제수단</h3>
-            <div className="grid grid-cols-3 gap-2">
-              {([
-                { key: 'CARD', label: '카드' },
-                { key: 'TRANSFER', label: '계좌이체' },
-                { key: 'VIRTUAL_ACCOUNT', label: '가상계좌' },
-              ] as { key: PayMethod; label: string }[]).map((m) => (
+                {/* 약관 동의 */}
+                <div className="p-5 md:p-6 rounded-2xl bg-white border border-line">
+                  <h2 className="text-base font-bold text-ink mb-3">이용 및 정보 제공 약관</h2>
+                  <p className="text-xs text-sub leading-relaxed mb-4">
+                    결제 전 이용 및 정보 제공 약관 등의 내용을 확인했으며 이에 동의합니다.
+                  </p>
+                  <div className="space-y-2">
+                    <label className="flex items-start gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={agreed.terms}
+                        onChange={(e) => setAgreed({ ...agreed, terms: e.target.checked })}
+                        className="mt-0.5 accent-[#D4756E]"
+                      />
+                      <span className="text-xs text-ink">
+                        주문 내용을 확인하였으며 결제에 동의합니다 <span className="text-brand">*</span>
+                      </span>
+                    </label>
+                    <label className="flex items-start gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={agreed.refund}
+                        onChange={(e) => setAgreed({ ...agreed, refund: e.target.checked })}
+                        className="mt-0.5 accent-[#D4756E]"
+                      />
+                      <span className="text-xs text-body">
+                        디지털 콘텐츠 특성상 이용 후 환불이 제한될 수 있음에 동의합니다 <span className="text-brand">*</span>
+                      </span>
+                    </label>
+                    <label className="flex items-start gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={agreed.privacy}
+                        onChange={(e) => setAgreed({ ...agreed, privacy: e.target.checked })}
+                        className="mt-0.5 accent-[#D4756E]"
+                      />
+                      <span className="text-xs text-body">
+                        개인정보 제3자 제공에 동의합니다 (결제 대행사) <span className="text-brand">*</span>
+                      </span>
+                    </label>
+                  </div>
+                </div>
+
+                {/* 결제 버튼 */}
                 <button
-                  key={m.key}
-                  type="button"
-                  onClick={() => setPayMethod(m.key)}
-                  className={`p-3 rounded-lg text-center text-sm font-medium transition-all ${
-                    payMethod === m.key
-                      ? 'border-2 border-[#D4756E] bg-brand/5 text-brand'
-                      : 'border border-line text-sub hover:border-brand/40'
-                  }`}
+                  onClick={handlePayment}
+                  disabled={!allAgreed || loading || (requiresShipping && !shippingValid)}
+                  className="w-full py-4 bg-brand text-white font-bold rounded-xl hover:bg-brand-dark transition-all disabled:opacity-40 disabled:cursor-not-allowed text-base md:text-lg shadow-md"
                 >
-                  {m.label}
+                  {loading ? '처리 중...' : `${amount.toLocaleString()}원 결제하기`}
                 </button>
-              ))}
+              </div>
             </div>
           </div>
-
-          {/* 동의 체크박스 */}
-          <div className="space-y-3 mb-8">
-            <label className="flex items-start gap-3 cursor-pointer">
-              <input type="checkbox" checked={agreed.terms} onChange={e => setAgreed({...agreed, terms: e.target.checked})} className="mt-1 accent-[#D4756E]" />
-              <span className="text-sm text-ink">주문 내용을 확인하였으며 결제에 동의합니다 <span className="text-brand">*</span></span>
-            </label>
-            <label className="flex items-start gap-3 cursor-pointer">
-              <input type="checkbox" checked={agreed.refund} onChange={e => setAgreed({...agreed, refund: e.target.checked})} className="mt-1 accent-[#D4756E]" />
-              <span className="text-sm text-body">디지털 콘텐츠 특성상 이용 후 환불이 제한될 수 있음에 동의합니다 <span className="text-brand">*</span></span>
-            </label>
-            <label className="flex items-start gap-3 cursor-pointer">
-              <input type="checkbox" checked={agreed.privacy} onChange={e => setAgreed({...agreed, privacy: e.target.checked})} className="mt-1 accent-[#D4756E]" />
-              <span className="text-sm text-body">개인정보 제3자 제공에 동의합니다 (결제 대행사) <span className="text-brand">*</span></span>
-            </label>
-          </div>
-
-          {/* 결제 버튼 */}
-          <button
-            onClick={handlePayment}
-            disabled={!allAgreed || loading || (requiresShipping && !shippingValid)}
-            className="w-full py-4 bg-brand text-white font-bold rounded-xl hover:bg-brand-dark transition-all disabled:opacity-40 disabled:cursor-not-allowed text-lg"
-          >
-            {loading ? '처리 중...' : `${amount.toLocaleString()}원 결제하기`}
-          </button>
-
         </div>
       </section>
     </div>
