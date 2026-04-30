@@ -79,18 +79,18 @@
   color: var(--ink);
 }
 .thanksLead {
-  font-size: clamp(16px, 1.6vw, 19px);
+  font-size: clamp(18px, 1.8vw, 21px);
   color: var(--body); line-height: 1.8;
   margin: 0 auto 18px;
-  max-width: 680px;
+  max-width: 720px;
   letter-spacing: -0.01em;
 }
 .thanksLead strong { color: var(--ink); font-weight: 800; }
 .thanksLeadSub {
-  font-size: clamp(14px, 1.3vw, 16px);
+  font-size: clamp(16px, 1.5vw, 18px);
   color: var(--sub); line-height: 1.7;
   margin: 0 auto 36px;
-  max-width: 680px;
+  max-width: 720px;
 }
 .thanksNotice {
   display: inline-block;
@@ -99,11 +99,11 @@
   backdrop-filter: blur(12px);
   border: 1px solid rgba(0,0,0,0.06);
   border-radius: 16px;
-  font-size: 13px;
+  font-size: 15px;
   color: var(--sub);
   line-height: 1.7;
   letter-spacing: -0.005em;
-  max-width: 600px;
+  max-width: 640px;
 }
 
 /* ─── 공통 섹션 ─── */
@@ -137,10 +137,10 @@
   color: transparent;
 }
 .sectionLead {
-  font-size: clamp(15px, 1.5vw, 17px);
+  font-size: clamp(17px, 1.7vw, 19px);
   color: var(--body); line-height: 1.7;
   margin: 0 0 56px;
-  max-width: 720px;
+  max-width: 760px;
   letter-spacing: -0.01em;
 }
 .sectionLead strong { color: var(--ink); font-weight: 700; }
@@ -201,7 +201,7 @@
   margin: 0 0 14px; color: var(--ink);
 }
 .bookSummary {
-  font-size: clamp(13px, 1.2vw, 15px);
+  font-size: clamp(15px, 1.4vw, 17px);
   color: var(--body); line-height: 1.7;
   margin: 0 0 22px;
   letter-spacing: -0.005em;
@@ -304,7 +304,7 @@
   transition: all .3s;
 }
 .nextCard h3 {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 800;
   letter-spacing: -0.025em;
   margin: 0 0 8px;
@@ -312,7 +312,7 @@
   transition: color .3s;
 }
 .nextCard p {
-  font-size: 14px;
+  font-size: 16px;
   color: var(--body);
   line-height: 1.6;
   margin: 0 0 18px;
@@ -320,7 +320,7 @@
   transition: color .3s;
 }
 .nextLink {
-  font-size: 14px; font-weight: 700;
+  font-size: 16px; font-weight: 700;
   color: var(--brand);
   letter-spacing: -0.01em;
   transition: color .3s;
