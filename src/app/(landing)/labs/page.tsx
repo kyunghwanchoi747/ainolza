@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import { V3Header } from '@/components/landing/v3-header'
 import './labs-v3.css'
 
 export const metadata: Metadata = {
@@ -123,7 +124,8 @@ const LABS = [
 export default function LabsPage() {
   return (
     <div className="labsPageRoot">
-      <section className="labsPageHero">
+      <V3Header />
+      <section className="labsPageHero" style={{ paddingTop: 120 }}>
         <p className="pageEyebrow"><span className="line"></span> AI NOLZA · LAB</p>
         <h1 className="pageTitle"><span className="grad">놀면서 배우는</span> AI 실험실</h1>
         <p className="pageLead">

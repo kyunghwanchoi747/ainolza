@@ -191,7 +191,7 @@ export default function LandingPageV3() {
               평범한 사람도 AI로 결과를 만들 수 있습니다.
             </p>
             <div className="ctas">
-              <Link href="/labs" className="btnCoral">도구 둘러보기 <Icons.Arrow /></Link>
+              <Link href="/tools" className="btnCoral">도구 둘러보기 <Icons.Arrow /></Link>
               <Link href="/labs" className="btnGhost">AI 실험실 체험</Link>
             </div>
           </div>
