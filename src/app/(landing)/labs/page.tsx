@@ -104,21 +104,6 @@ const LABS = [
       </svg>
     ),
   },
-  {
-    href: '/labs/timer.html',
-    tag: 'NEW',
-    name: '뽀모도로 타이머',
-    desc: '25분 집중 + 5분 휴식 사이클',
-    cardBg: 'linear-gradient(160deg, #67E8F9 0%, #38BDF8 60%, #6366F1 100%)',
-    illu: (
-      <svg viewBox="0 0 120 120" fill="none" stroke="rgba(255,255,255,0.96)" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="60" cy="64" r="36" fill="rgba(255,255,255,0.22)" />
-        <path d="M60 46v18l12 12" />
-        <path d="M48 18h24" />
-        <path d="M92 32l8-8" />
-      </svg>
-    ),
-  },
 ]
 
 export default function LabsPage() {

@@ -1,0 +1,179 @@
+/* ─── Contact 페이지 (V3 디자인 톤) ─── */
+.contactPageRoot {
+  --brand: #6366F1;
+  --brand-dark: #4F46E5;
+  --brand-light: #EEEFFF;
+  --brand-grad: linear-gradient(135deg, #818CF8 0%, #6366F1 50%, #7C3AED 100%);
+  --kakao: #FEE500;
+  --ink: #1a1a1a;
+  --body: #515154;
+  --sub: #86868B;
+  --bg-soft: #F5F5F7;
+  font-family: Pretendard, -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  color: var(--ink);
+  background: #fff;
+  letter-spacing: -0.015em;
+  min-height: 100vh;
+}
+.contactPageRoot * { box-sizing: border-box; }
+
+/* Hero */
+.contactPageHero {
+  padding: clamp(140px, 14vw, 180px) clamp(20px, 4vw, 48px) 40px;
+  max-width: 1080px;
+  margin: 0 auto;
+  text-align: center;
+}
+.pageEyebrow {
+  display: inline-flex; align-items: center; gap: 12px;
+  font-size: 15px; font-weight: 700; color: var(--brand);
+  letter-spacing: 0.18em; text-transform: uppercase;
+  margin: 0 0 22px;
+}
+.pageEyebrow .line {
+  width: 36px; height: 2px;
+  background: var(--brand-grad);
+  border-radius: 2px;
+}
+.pageTitle {
+  font-size: clamp(40px, 5.5vw, 64px);
+  font-weight: 800; letter-spacing: -0.04em; line-height: 1.05;
+  margin: 0 0 22px;
+}
+.pageTitle .grad {
+  background: var(--brand-grad);
+  -webkit-background-clip: text; background-clip: text;
+  color: transparent;
+}
+.pageLead {
+  font-size: clamp(18px, 1.7vw, 21px);
+  color: var(--body); line-height: 1.7;
+  margin: 0 auto;
+  letter-spacing: -0.01em;
+  max-width: 680px;
+}
+
+/* Cards */
+.contactContainer {
+  padding: 32px clamp(20px, 4vw, 48px) 120px;
+  max-width: 1080px;
+  margin: 0 auto;
+}
+.contactGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  margin-bottom: 56px;
+}
+@media (max-width: 800px) {
+  .contactGrid { grid-template-columns: 1fr; }
+}
+
+.contactCard {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  padding: 36px 32px;
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 24px;
+  text-decoration: none;
+  color: var(--ink);
+  box-shadow: 0 8px 24px -8px rgba(0,0,0,0.06);
+  transition: transform .3s, box-shadow .3s, border-color .3s;
+}
+.contactCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 24px 48px -12px rgba(0,0,0,0.12);
+}
+.contactCard--kakao:hover {
+  border-color: rgba(254,229,0,0.5);
+  background: #FFFCEC;
+}
+.contactCard--email:hover {
+  border-color: rgba(99,102,241,0.4);
+  background: #FAFAFE;
+}
+
+.contactIcon {
+  width: 72px; height: 72px;
+  border-radius: 18px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.5) inset, 0 8px 20px -4px rgba(0,0,0,0.18);
+}
+.contactIcon--kakao {
+  background: var(--kakao);
+  color: #191919;
+}
+.contactIcon--email {
+  background: var(--brand-grad);
+  color: #fff;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.5) inset, 0 8px 20px -4px rgba(99,102,241,0.4);
+}
+
+.contactBody { flex: 1; min-width: 0; }
+.contactName {
+  font-size: clamp(20px, 2vw, 24px);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  margin: 0 0 10px;
+  color: var(--ink);
+}
+.contactDesc {
+  font-size: clamp(15px, 1.4vw, 17px);
+  color: var(--body);
+  line-height: 1.6;
+  margin: 0 0 16px;
+  letter-spacing: -0.005em;
+}
+.contactCTA {
+  display: inline-block;
+  font-size: clamp(14px, 1.3vw, 16px);
+  font-weight: 700;
+  color: var(--brand);
+  letter-spacing: -0.01em;
+  transition: gap .2s;
+}
+.contactCard--kakao .contactCTA { color: #B89400; }
+
+/* 운영 안내 박스 */
+.contactNotice {
+  padding: 32px 36px;
+  background: var(--bg-soft);
+  border: 1.5px solid rgba(99,102,241,0.18);
+  border-radius: 20px;
+  box-shadow: 0 8px 24px -8px rgba(99,102,241,0.1);
+}
+.noticeTitle {
+  font-size: clamp(18px, 1.7vw, 20px);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  margin: 0 0 18px;
+  color: var(--ink);
+}
+.noticeList {
+  list-style: none;
+  margin: 0; padding: 0;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.noticeList li {
+  font-size: clamp(15px, 1.4vw, 17px);
+  color: var(--body);
+  line-height: 1.7;
+  letter-spacing: -0.005em;
+  padding-left: 16px;
+  position: relative;
+}
+.noticeList li::before {
+  content: '·';
+  position: absolute;
+  left: 4px;
+  color: var(--brand);
+  font-weight: 800;
+}
+.noticeList li strong {
+  color: var(--ink);
+  font-weight: 700;
+}

@@ -20,15 +20,15 @@
 }
 .labsPageHero .pageEyebrow {
   display: inline-flex; align-items: center; gap: 12px;
-  font-size: 13px; font-weight: 700; color: var(--brand);
+  font-size: 15px; font-weight: 700; color: var(--brand);
   letter-spacing: 0.18em; text-transform: uppercase;
-  margin: 0 0 20px;
+  margin: 0 0 22px;
 }
 .labsPageHero .pageEyebrow .line { width: 36px; height: 2px; background: var(--brand-grad); border-radius: 2px; }
 .labsPageHero .pageTitle {
-  font-size: clamp(36px, 5vw, 60px);
+  font-size: clamp(40px, 5.5vw, 64px);
   font-weight: 800; letter-spacing: -0.04em; line-height: 1.05;
-  margin: 0 0 16px;
+  margin: 0 0 22px;
   color: var(--ink);
 }
 .labsPageHero .pageTitle .grad {
@@ -37,8 +37,9 @@
   color: transparent;
 }
 .labsPageHero .pageLead {
-  font-size: 17px; color: var(--body); line-height: 1.6;
-  margin: 0; letter-spacing: -0.01em; max-width: 720px;
+  font-size: clamp(18px, 1.7vw, 21px);
+  color: var(--body); line-height: 1.7;
+  margin: 0; letter-spacing: -0.01em; max-width: 760px;
 }
 
 .labsContainer { padding: 24px clamp(20px, 4vw, 48px) 120px; max-width: 1280px; margin: 0 auto; }

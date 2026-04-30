@@ -3,6 +3,7 @@
 import type { ReactNode } from 'react'
 import { useEffect, useRef, useState, Fragment } from 'react'
 import Link from 'next/link'
+import { V3Header } from './v3-header'
 import './landing-v3.css'
 
 const KAKAO_OPEN_CHAT = 'https://open.kakao.com/o/s7kkWTfh'
@@ -112,9 +113,9 @@ const LABS = [
   { href: '/labs/career-explorer.html',   color: '#7DBF7C', label: 'AI 직업\n탐색기',  r: 1, c: 0 },
   { href: '/labs/ai-word-quiz.html',      color: '#A8D5E5', label: 'AI 단어\n퀴즈',    r: 1, c: 1 },
   { href: '/labs/ai-or-human.html',       color: '#5BA9D9', label: 'AI일까?\n사람일까?', r: 1, c: 2 },
-  { href: '/labs/timer.html',             color: '#A89A6E', label: '뽀모도로\n타이머',   r: 2, c: 0 },
-  { href: '/labs',                        color: '#8C5E3A', label: '전체\n보기 →',    r: 2, c: 1, more: true },
-  { href: '/labs',                        color: '#F4D74A', label: '곧 출시\n예정',    r: 2, c: 2 },
+  { href: '/labs',                        color: '#8C5E3A', label: '전체\n보기 →',    r: 2, c: 0, more: true },
+  { href: '/labs',                        color: '#F4D74A', label: '곧 출시\n예정',    r: 2, c: 1 },
+  { href: '/labs',                        color: '#A89A6E', label: '곧 출시\n예정',    r: 2, c: 2 },
 ]
 
 const WHYS = [
@@ -155,9 +156,9 @@ const LAB_ICONS: Record<number, ReactNode> = {
   3: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/><path d="M3 13h18"/><path d="M11 13v2h2v-2"/></svg>,
   4: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M9 7h7M9 11h5"/></svg>,
   5: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 10h.01M15 10h.01"/><path d="M8 16c1.5-1 6.5-1 8 0"/></svg>,
-  6: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5"/><path d="M9 2h6"/><path d="M19 5l1.5-1.5"/></svg>,
-  7: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8"/></svg>,
-  8: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7"/><circle cx="12" cy="12" r="9"/></svg>,
+  6: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8"/></svg>,
+  7: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7"/><circle cx="12" cy="12" r="9"/></svg>,
+  8: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 6v12M6 12h12"/><circle cx="12" cy="12" r="9"/></svg>,
 }
 
 export default function LandingPageV3() {
@@ -208,23 +209,7 @@ export default function LandingPageV3() {
 
   return (
     <div className="landingV3Root">
-      {/* HEADER (fixed dark pill) */}
-      <header className="header">
-        <div className="headerInner">
-          <Link className="logo" href="/">AI놀자</Link>
-          <nav className="nav">
-            <Link href="/store">강의/책</Link>
-            <Link href="/labs">AI실험실</Link>
-            <Link href="/tools">도구</Link>
-            <Link href="/contact">문의</Link>
-          </nav>
-          <div className="headerRight">
-            <Link className="loginLink" href="/login">로그인</Link>
-            <span className="headerDivider"></span>
-            <Link className="signupLink" href="/signup">회원가입</Link>
-          </div>
-        </div>
-      </header>
+      <V3Header />
 
       {/* HERO */}
       <section className="hero">

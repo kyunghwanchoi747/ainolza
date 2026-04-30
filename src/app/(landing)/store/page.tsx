@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { getDday } from '@/lib/products'
 import { listProductsForStore } from '@/lib/products-db'
 import { StoreBanner } from '@/components/store/store-banner'
+import { V3Header } from '@/components/landing/v3-header'
 
 export const metadata: Metadata = {
   title: '강의/책',
@@ -30,14 +31,15 @@ export default async function StorePage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <section className="pt-20 md:pt-28 pb-24 px-6">
+      <V3Header />
+      <section className="pt-32 md:pt-40 pb-24 px-6">
         <div className="max-w-[1200px] mx-auto">
 
           {/* 배너 슬라이드 */}
           <StoreBanner items={bannerItems} />
 
           {/* 상품 카드 그리드 */}
-          <h2 className="text-xl font-bold text-ink mb-6">전체 콘텐츠</h2>
+          <h2 className="text-2xl md:text-3xl font-extrabold text-ink mb-8">전체 콘텐츠</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {products.map((p) => {
               const ext = p.imageExt || 'png'

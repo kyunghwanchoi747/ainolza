@@ -5,6 +5,7 @@ import { getDday, PRODUCTS } from '@/lib/products'
 import { getProductForStore } from '@/lib/products-db'
 import { ProductFaqList } from '@/components/store/product-faq-list'
 import { ReviewSection } from '@/components/store/review-section'
+import { V3Header } from '@/components/landing/v3-header'
 
 export const dynamic = 'force-dynamic'
 
@@ -88,10 +89,11 @@ export default async function ProductDetailPage({
 
   return (
     <div className="min-h-screen bg-white">
+      <V3Header />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
       {/* 헤더 — 좌측 썸네일 큰 이미지 + 우측 정보 */}
-      <section className="pt-16 md:pt-20 pb-16 px-6">
+      <section className="pt-32 md:pt-40 pb-16 px-6">
         <div className="max-w-[1200px] mx-auto">
           <Link
             href="/store"
