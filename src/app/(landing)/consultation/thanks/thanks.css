@@ -94,16 +94,18 @@
 }
 .thanksNotice {
   display: inline-block;
-  padding: 16px 24px;
-  background: rgba(255,255,255,0.7);
+  padding: 20px 28px;
+  background: rgba(255,255,255,0.85);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(0,0,0,0.06);
+  border: 1.5px solid rgba(99,102,241,0.25);
   border-radius: 16px;
-  font-size: 15px;
-  color: var(--sub);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--ink);
   line-height: 1.7;
-  letter-spacing: -0.005em;
-  max-width: 640px;
+  letter-spacing: -0.01em;
+  max-width: 720px;
+  box-shadow: 0 8px 24px -8px rgba(99,102,241,0.18);
 }
 
 /* ─── 공통 섹션 ─── */
