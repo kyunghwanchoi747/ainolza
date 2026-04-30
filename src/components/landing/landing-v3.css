@@ -444,11 +444,12 @@
     .seeAll:hover { color: var(--brand); gap: 10px; }
 
     .toolGrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
-    @media (max-width: 1024px) {
+    /* 768px ~ 1024px: 태블릿도 4열 유지 (구글 랩스 방식) */
+    @media (max-width: 768px) {
       .toolGrid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
       .toolCard { aspect-ratio: 4 / 5; }
     }
-    @media (max-width: 520px)  {
+    @media (max-width: 480px) {
       .toolGrid { grid-template-columns: 1fr; gap: 12px; }
       .toolCard { aspect-ratio: 4 / 3; }
     }
