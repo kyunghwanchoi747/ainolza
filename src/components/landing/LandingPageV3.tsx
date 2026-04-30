@@ -36,9 +36,10 @@ const COURSES = [
     badge: '온라인 비즈니스',
     title: '온라인 수익화 클래스',
     desc: 'AI시대 나에게 알맞는 온라인 수익화 방법. 아무나 받지 않습니다. 인터뷰 진행 후 결제.',
-    meta: ['12주 · 주 1회', '온·오프라인 포함', '잔소리 심함, 각오된 사람만'],
+    meta: ['온·오프라인 포함', '잔소리 심함, 각오된 사람만', '상담 후 결정'],
     priceOld: '',
-    price: '5,000,000~',
+    price: '',
+    priceLabel: '상담 후 결정',
     hot: true,
   },
 ]
@@ -406,7 +407,11 @@ export default function LandingPageV3() {
                   <div className="priceRow">
                     <div>
                       {c.priceOld && <p className="priceOld">₩ {c.priceOld}</p>}
-                      <p className="priceNow">₩ {c.price}</p>
+                      {c.price ? (
+                        <p className="priceNow">₩ {c.price}</p>
+                      ) : (
+                        <p className="priceNow" style={{ fontSize: '18px' }}>{c.priceLabel}</p>
+                      )}
                     </div>
                     <Link href={c.href} className="btnCoral sm">자세히 보기 <Icons.Arrow /></Link>
                   </div>

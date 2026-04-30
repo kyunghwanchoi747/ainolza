@@ -671,9 +671,7 @@
     /* keep nav hover white on the dark header even in B&W mode */
     .nav a:hover { color: #fff !important; }
     .heroPill { color: #1a1a1a !important; }
-    .courseHead {
-      background: linear-gradient(135deg, #F5F5F7 0%, #EAEAEC 100%) !important;
-    }
+    /* courseHead 기본 그라데이션은 인라인 background로 덮어쓰도록 !important 제거 */
     .courseHead::before {
       background: #1a1a1a !important;
       opacity: 0.06 !important;
