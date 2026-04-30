@@ -10,6 +10,7 @@ const KAKAO_OPEN_CHAT = 'https://open.kakao.com/o/s7kkWTfh'
 
 type Course = {
   href: string
+  external?: boolean
   bg: string
   badge: string
   title: string
@@ -389,7 +390,13 @@ export default function LandingPageV3({ courses }: { courses?: Course[] } = {}) 
                         <p className="priceNow" style={{ fontSize: '18px' }}>{c.priceLabel}</p>
                       )}
                     </div>
-                    <Link href={c.href} className="btnCoral sm">자세히 보기 <Icons.Arrow /></Link>
+                    {c.external ? (
+                      <a href={c.href} target="_blank" rel="noopener noreferrer" className="btnCoral sm">
+                        {c.priceLabel === '상담 후 결정' ? '신청하기' : '자세히 보기'} <Icons.Arrow />
+                      </a>
+                    ) : (
+                      <Link href={c.href} className="btnCoral sm">자세히 보기 <Icons.Arrow /></Link>
+                    )}
                   </div>
                 </div>
               </div>

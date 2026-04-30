@@ -10,6 +10,11 @@ const COURSE_BG_MAP: Record<string, string> = {
   'online-business-class': '/landing-v3/course-business.png',
 }
 
+// 상세 페이지 대신 외부 폼/링크로 직행하는 상품
+const EXTERNAL_HREF: Record<string, string> = {
+  'online-business-class': 'https://docs.google.com/forms/d/e/1FAIpQLSdzkHyHk_yBi_tzH1mdJwZkzcK5taLYYoSm0abdRMr_jv0SUw/viewform?usp=header',
+}
+
 export default async function Home() {
   const products = await listProductsForStore()
 
@@ -26,8 +31,10 @@ export default async function Home() {
 
   const homeCourses = classProducts.map((p, i) => {
     const isHotByFeatured = !!(p as any)._dbFeatured
+    const externalHref = EXTERNAL_HREF[p.slug]
     return {
-      href: `/store/${p.slug}`,
+      href: externalHref || `/store/${p.slug}`,
+      external: !!externalHref,
       bg: COURSE_BG_MAP[p.slug] || `/landing-v3/course-vibe-101.png`,
       badge: p.category || '강의',
       title: p.title.replace(/\n/g, ' '),

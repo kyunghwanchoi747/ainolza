@@ -24,6 +24,11 @@ const STORE_CARD_THUMB: Record<string, string> = {
   'online-business-class': '/landing-v3/course-business-square.png',
 }
 
+// 상세 페이지 대신 외부 폼/링크로 직행하는 상품
+const EXTERNAL_LINK_OVERRIDE: Record<string, string> = {
+  'online-business-class': 'https://docs.google.com/forms/d/e/1FAIpQLSdzkHyHk_yBi_tzH1mdJwZkzcK5taLYYoSm0abdRMr_jv0SUw/viewform?usp=header',
+}
+
 export default async function StorePage() {
   const products = await listProductsForStore()
 
@@ -51,15 +56,22 @@ export default async function StorePage() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {products.map((p) => {
               const ext = p.imageExt || 'png'
-              // 슬러그 매핑이 있으면 새 V3 이미지를 우선 사용 (강의/책 카드 배너만)
               const thumbnail = STORE_CARD_THUMB[p.slug] || p._dbThumbnailUrl || `/store/${p.slug}/thumbnail.${ext}`
               const dday = getDday(p.discountUntil)
+              const externalLink = EXTERNAL_LINK_OVERRIDE[p.slug]
+              const cardClass = "group rounded-3xl border-2 border-line overflow-hidden hover:border-[#D4756E]/40 hover:shadow-2xl hover:-translate-y-1 active:translate-y-0 transition-all bg-white cursor-pointer"
+              const CardWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) =>
+                externalLink ? (
+                  <a key={p.slug} href={externalLink} target="_blank" rel="noopener noreferrer" className={cardClass}>
+                    {children}
+                  </a>
+                ) : (
+                  <Link key={p.slug} href={`/store/${p.slug}`} className={cardClass}>
+                    {children}
+                  </Link>
+                )
               return (
-                <Link
-                  key={p.slug}
-                  href={`/store/${p.slug}`}
-                  className="group rounded-3xl border-2 border-line overflow-hidden hover:border-[#D4756E]/40 hover:shadow-2xl hover:-translate-y-1 active:translate-y-0 transition-all bg-white cursor-pointer"
-                >
+                <CardWrapper key={p.slug}>
                   <div className="relative aspect-square bg-surface overflow-hidden flex items-center justify-center p-5">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
@@ -104,7 +116,7 @@ export default async function StorePage() {
                       )}
                     </div>
                   </div>
-                </Link>
+                </CardWrapper>
               )
             })}
           </div>
