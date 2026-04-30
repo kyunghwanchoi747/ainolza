@@ -79,6 +79,7 @@ export interface Config {
     enrollments: Enrollment;
     orders: Order;
     reviews: Review;
+    classrooms: Classroom;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -98,6 +99,7 @@ export interface Config {
     enrollments: EnrollmentsSelect<false> | EnrollmentsSelect<true>;
     orders: OrdersSelect<false> | OrdersSelect<true>;
     reviews: ReviewsSelect<false> | ReviewsSelect<true>;
+    classrooms: ClassroomsSelect<false> | ClassroomsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -262,7 +264,28 @@ export interface Product {
         id?: string | null;
       }[]
     | null;
-  classroomSlug?: ('' | 'vibe-coding-101' | 'vibe-coding-advanced') | null;
+  /**
+   * 강의 상품인 경우 결제 완료 시 여기 입력한 슬러그의 강의실 입장 권한이 자동 부여됩니다. 책/전자책은 비워두세요. 기수가 다르면 별도 강의실을 만들어 슬러그를 등록하세요. 예: vibe-coding-advanced-2
+   */
+  grantedClassroomSlugs?:
+    | {
+        slug: string;
+        id?: string | null;
+      }[]
+    | null;
+  classroomSlug?: string | null;
+  /**
+   * 전자책 상품일 때 사용. 결제 완료한 회원이 마이페이지에서 다운로드할 수 있는 링크. 구글 드라이브 공유 링크 등을 입력하세요.
+   */
+  downloadUrl?: string | null;
+  /**
+   * 예: "파일 용량이 크니 다운로드 후 보관해 주세요." 마이페이지와 결제 완료 메일에 표시됩니다.
+   */
+  downloadNote?: string | null;
+  /**
+   * 체크하면 결제 시 배송지 입력 폼이 노출됩니다.
+   */
+  requiresShipping?: boolean | null;
   /**
    * 카드 목록에 표시되는 정사각형 이미지
    */
@@ -425,6 +448,15 @@ export interface Order {
   refundAmount?: number | null;
   cashReceiptType?: ('none' | 'income' | 'expense') | null;
   cashReceiptNumber?: string | null;
+  shippingRecipient?: string | null;
+  shippingPhone?: string | null;
+  shippingZipcode?: string | null;
+  shippingAddress?: string | null;
+  shippingAddressDetail?: string | null;
+  shippingMessage?: string | null;
+  shippingStatus?: ('pending' | 'preparing' | 'shipping' | 'delivered') | null;
+  trackingNumber?: string | null;
+  shippingCarrier?: string | null;
   adminMemo?: string | null;
   classrooms?: ('vibe-coding-101' | 'vibe-coding-advanced')[] | null;
   books?: ('personal-intelligence' | 'uncomfortable-ai' | 'prompt-15' | 'notebooklm-guide')[] | null;
@@ -443,6 +475,71 @@ export interface Review {
   content: string;
   siteUrl?: string | null;
   status: 'pending' | 'approved' | 'rejected';
+  order?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "classrooms".
+ */
+export interface Classroom {
+  id: number;
+  /**
+   * 예: AI 바이브 코딩 [심화] 2기 — 백지 위의 바이브코더
+   */
+  title: string;
+  /**
+   * 예: 바이브 코딩 심화 2기
+   */
+  shortTitle: string;
+  /**
+   * 예: vibe-coding-advanced-2 — 이 값으로 /classroom/{slug} URL이 만들어짐
+   */
+  slug: string;
+  /**
+   * 1기, 2기 등. 같은 강의의 다른 차수를 구분
+   */
+  cohort?: number | null;
+  description?: string | null;
+  level?: ('입문' | '심화' | '특강') | null;
+  /**
+   * 강의실 상단에 표시. 예: 매주 수 21시, 4회차
+   */
+  schedule?: string | null;
+  /**
+   * 있으면 강의실 상단에 강조 표시
+   */
+  liveUrl?: string | null;
+  resourceUrl?: string | null;
+  /**
+   * 각 회차의 영상, 가이드북, 비밀자료를 등록
+   */
+  sessions?:
+    | {
+        week: number;
+        title: string;
+        date?: string | null;
+        /**
+         * 있으면 우선 표시. 예: 1186484969
+         */
+        vimeoId?: string | null;
+        /**
+         * vimeoId 없을 때만 표시. 라이브 종료 후엔 vimeoId로 교체
+         */
+        youtubeLiveUrl?: string | null;
+        guidebookUrl?: string | null;
+        secretEnabled?: boolean | null;
+        secretPassword?: string | null;
+        secretNotionUrl?: string | null;
+        /**
+         * 기본값: '비밀 자료 열기'
+         */
+        secretLabel?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  status: 'active' | 'draft' | 'closed';
   order?: number | null;
   updatedAt: string;
   createdAt: string;
@@ -518,6 +615,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'reviews';
         value: number | Review;
+      } | null)
+    | ({
+        relationTo: 'classrooms';
+        value: number | Classroom;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -654,7 +755,16 @@ export interface ProductsSelect<T extends boolean = true> {
         answer?: T;
         id?: T;
       };
+  grantedClassroomSlugs?:
+    | T
+    | {
+        slug?: T;
+        id?: T;
+      };
   classroomSlug?: T;
+  downloadUrl?: T;
+  downloadNote?: T;
+  requiresShipping?: T;
   thumbnail?: T;
   detailImages?:
     | T
@@ -792,6 +902,15 @@ export interface OrdersSelect<T extends boolean = true> {
   refundAmount?: T;
   cashReceiptType?: T;
   cashReceiptNumber?: T;
+  shippingRecipient?: T;
+  shippingPhone?: T;
+  shippingZipcode?: T;
+  shippingAddress?: T;
+  shippingAddressDetail?: T;
+  shippingMessage?: T;
+  shippingStatus?: T;
+  trackingNumber?: T;
+  shippingCarrier?: T;
   adminMemo?: T;
   classrooms?: T;
   books?: T;
@@ -808,6 +927,40 @@ export interface ReviewsSelect<T extends boolean = true> {
   rating?: T;
   content?: T;
   siteUrl?: T;
+  status?: T;
+  order?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "classrooms_select".
+ */
+export interface ClassroomsSelect<T extends boolean = true> {
+  title?: T;
+  shortTitle?: T;
+  slug?: T;
+  cohort?: T;
+  description?: T;
+  level?: T;
+  schedule?: T;
+  liveUrl?: T;
+  resourceUrl?: T;
+  sessions?:
+    | T
+    | {
+        week?: T;
+        title?: T;
+        date?: T;
+        vimeoId?: T;
+        youtubeLiveUrl?: T;
+        guidebookUrl?: T;
+        secretEnabled?: T;
+        secretPassword?: T;
+        secretNotionUrl?: T;
+        secretLabel?: T;
+        id?: T;
+      };
   status?: T;
   order?: T;
   updatedAt?: T;

@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python)",
+      "Bash(cp -r \"src/app/\\(frontend\\)/store\" \"src/app/\\(landing\\)/store\")",
+      "Bash(rm -rf \"src/app/\\(frontend\\)/store\")",
+      "Bash(rm -rf \"public/landing-v2\" \"public/mock-landing\" \"ai_design_extracted\" \"ai-nolja\" \"AI_ Design System\" \"AI_ Design System.zip\")",
+      "Bash(rm -f test_delete.py test-delete.ts test.env script_error.txt dev.db.bak.20260430 build.log build_full.log build_opennext.log build_output.txt deploy.log dev.log opennext_build.log opennext_build_cmd.txt tsc_errors.txt)"
+    ]
+  }
+}
