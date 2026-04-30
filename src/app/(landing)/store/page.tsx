@@ -17,11 +17,11 @@ function formatPrice(p: number): string {
 }
 
 // 상품 카드(배너)용 신규 V3 썸네일 — 슬러그 기준 매핑
-// 이 이미지는 /store 목록 페이지 카드에만 사용. 상세 페이지 썸네일은 그대로(상세는 DB 값 유지).
+// 강의/책 목록은 정사각형 카드 → -square 파일을 사용 (홈 CLASS는 가로 배너 유지)
 const STORE_CARD_THUMB: Record<string, string> = {
-  'vibe-coding-101': '/landing-v3/course-vibe-101.png',
-  'vibe-coding-advanced': '/landing-v3/course-vibe-advanced.png',
-  'online-business-class': '/landing-v3/course-business.png',
+  'vibe-coding-101': '/landing-v3/course-vibe-101-square.png',
+  'vibe-coding-advanced': '/landing-v3/course-vibe-advanced-square.png',
+  'online-business-class': '/landing-v3/course-business-square.png',
 }
 
 export default async function StorePage() {
