@@ -16,6 +16,14 @@ function formatPrice(p: number): string {
   return p.toLocaleString('ko-KR') + '원'
 }
 
+// 상품 카드(배너)용 신규 V3 썸네일 — 슬러그 기준 매핑
+// 이 이미지는 /store 목록 페이지 카드에만 사용. 상세 페이지 썸네일은 그대로(상세는 DB 값 유지).
+const STORE_CARD_THUMB: Record<string, string> = {
+  'vibe-coding-101': '/landing-v3/course-vibe-101.png',
+  'vibe-coding-advanced': '/landing-v3/course-vibe-advanced.png',
+  'online-business-class': '/landing-v3/course-business.png',
+}
+
 export default async function StorePage() {
   const products = await listProductsForStore()
 
@@ -43,7 +51,8 @@ export default async function StorePage() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {products.map((p) => {
               const ext = p.imageExt || 'png'
-              const thumbnail = p._dbThumbnailUrl || `/store/${p.slug}/thumbnail.${ext}`
+              // 슬러그 매핑이 있으면 새 V3 이미지를 우선 사용 (강의/책 카드 배너만)
+              const thumbnail = STORE_CARD_THUMB[p.slug] || p._dbThumbnailUrl || `/store/${p.slug}/thumbnail.${ext}`
               const dday = getDday(p.discountUntil)
               return (
                 <Link

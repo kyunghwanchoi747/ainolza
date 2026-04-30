@@ -8,7 +8,20 @@ import './landing-v3.css'
 
 const KAKAO_OPEN_CHAT = 'https://open.kakao.com/o/s7kkWTfh'
 
-const COURSES = [
+type Course = {
+  href: string
+  bg: string
+  badge: string
+  title: string
+  desc: string
+  meta: string[]
+  priceOld?: string
+  price?: string
+  priceLabel?: string
+  hot?: boolean
+}
+
+const FALLBACK_COURSES: Course[] = [
   {
     href: '/store/vibe-coding-101',
     bg: '/landing-v3/course-vibe-101.png',
@@ -19,29 +32,6 @@ const COURSES = [
     priceOld: '120,000',
     price: '69,800',
     hot: false,
-  },
-  {
-    href: '/store/vibe-coding-advanced',
-    bg: '/landing-v3/course-vibe-advanced.png',
-    badge: '바이브 코딩 [심화]',
-    title: '백지 위의 바이브코더',
-    desc: '웹사이트, 자동화 도구, 나만의 SaaS 제작 나만의 AI 서비스 만들기',
-    meta: ['4주 · 주 1회', '온라인 실시간', '직장인 맞춤'],
-    priceOld: '350,000',
-    price: '298,000',
-    hot: false,
-  },
-  {
-    href: '/store',
-    bg: '/landing-v3/course-business.png',
-    badge: '온라인 비즈니스',
-    title: '온라인 수익화 클래스',
-    desc: 'AI시대 나에게 알맞는 온라인 수익화 방법. 아무나 받지 않습니다. 인터뷰 진행 후 결제.',
-    meta: ['온·오프라인 포함', '잔소리 심함, 각오된 사람만', '상담 후 결정'],
-    priceOld: '',
-    price: '',
-    priceLabel: '상담 후 결정',
-    hot: true,
   },
 ]
 
@@ -161,7 +151,8 @@ const LAB_ICONS: Record<number, ReactNode> = {
   8: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 6v12M6 12h12"/><circle cx="12" cy="12" r="9"/></svg>,
 }
 
-export default function LandingPageV3() {
+export default function LandingPageV3({ courses }: { courses?: Course[] } = {}) {
+  const COURSES = courses && courses.length > 0 ? courses : FALLBACK_COURSES
   const [currentSlide, setCurrentSlide] = useState(0)
   const counter1 = useRef<HTMLSpanElement>(null)
   const counter2 = useRef<HTMLSpanElement>(null)
