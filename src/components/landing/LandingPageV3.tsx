@@ -332,23 +332,9 @@ export default function LandingPageV3() {
                     {TOOL_ICONS[i]}
                   </div>
                   <div className="toolCaption">
+                    {t.badge && <span className="toolBadge">{t.badge}</span>}
                     <h3 className="toolName">{t.name}</h3>
                     <p className="toolDesc">{t.desc}</p>
-                    {t.badge && (
-                      <p style={{
-                        marginTop: 10,
-                        fontSize: 12,
-                        fontWeight: 800,
-                        color: 'var(--brand-dark)',
-                        background: 'rgba(99,102,241,0.1)',
-                        padding: '5px 10px',
-                        borderRadius: 9999,
-                        display: 'inline-block',
-                        letterSpacing: '-0.01em',
-                      }}>
-                        {t.badge}
-                      </p>
-                    )}
                   </div>
                 </>
               )
