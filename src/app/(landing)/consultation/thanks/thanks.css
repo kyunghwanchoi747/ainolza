@@ -1,0 +1,350 @@
+/* ─── Consultation Thanks Page ─── */
+.thanksRoot {
+  --brand: #6366F1;
+  --brand-dark: #4F46E5;
+  --brand-light: #EEEFFF;
+  --brand-grad: linear-gradient(135deg, #818CF8 0%, #6366F1 50%, #7C3AED 100%);
+  --ink: #1a1a1a;
+  --body: #515154;
+  --sub: #86868B;
+  --bg-soft: #F5F5F7;
+  font-family: Pretendard, -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  color: var(--ink);
+  background: #fff;
+  letter-spacing: -0.015em;
+}
+.thanksRoot * { box-sizing: border-box; }
+
+/* ─── HERO ─── */
+.thanksHero {
+  position: relative;
+  padding: clamp(140px, 14vw, 180px) clamp(20px, 4vw, 48px) clamp(80px, 8vw, 120px);
+  background: linear-gradient(180deg, #FAFAFB 0%, #F0F1F8 100%);
+  text-align: center;
+  overflow: hidden;
+}
+.thanksHero::before {
+  content: '';
+  position: absolute;
+  top: -180px; right: -120px;
+  width: 480px; height: 480px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(99,102,241,0.18) 0%, transparent 70%);
+  filter: blur(80px);
+  pointer-events: none;
+}
+.thanksHero::after {
+  content: '';
+  position: absolute;
+  bottom: -200px; left: -120px;
+  width: 480px; height: 480px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(124,58,237,0.14) 0%, transparent 70%);
+  filter: blur(80px);
+  pointer-events: none;
+}
+.thanksContainer {
+  position: relative;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.thanksCheckBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 88px; height: 88px;
+  border-radius: 50%;
+  background: var(--brand-grad);
+  color: #fff;
+  margin-bottom: 28px;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.5) inset,
+    0 12px 32px -8px rgba(99,102,241,0.45);
+  animation: thanksPop 0.7s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes thanksPop {
+  0% { transform: scale(0.5); opacity: 0; }
+  60% { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.thanksEyebrow {
+  font-size: 13px; font-weight: 700; color: var(--brand);
+  letter-spacing: 0.18em; text-transform: uppercase;
+  margin: 0 0 14px;
+}
+.thanksTitle {
+  font-size: clamp(32px, 5vw, 52px);
+  font-weight: 800; letter-spacing: -0.04em; line-height: 1.15;
+  margin: 0 0 28px;
+  color: var(--ink);
+}
+.thanksLead {
+  font-size: clamp(16px, 1.6vw, 19px);
+  color: var(--body); line-height: 1.8;
+  margin: 0 auto 18px;
+  max-width: 680px;
+  letter-spacing: -0.01em;
+}
+.thanksLead strong { color: var(--ink); font-weight: 800; }
+.thanksLeadSub {
+  font-size: clamp(14px, 1.3vw, 16px);
+  color: var(--sub); line-height: 1.7;
+  margin: 0 auto 36px;
+  max-width: 680px;
+}
+.thanksNotice {
+  display: inline-block;
+  padding: 16px 24px;
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(0,0,0,0.06);
+  border-radius: 16px;
+  font-size: 13px;
+  color: var(--sub);
+  line-height: 1.7;
+  letter-spacing: -0.005em;
+  max-width: 600px;
+}
+
+/* ─── 공통 섹션 ─── */
+.thanksSection {
+  padding: clamp(80px, 10vw, 120px) clamp(20px, 4vw, 48px);
+  background: #fff;
+}
+.thanksSectionAlt {
+  background: linear-gradient(180deg, #F5F5F7 0%, #FAFAFB 100%);
+}
+.sectionEyebrow {
+  display: inline-flex; align-items: center; gap: 12px;
+  font-size: 13px; font-weight: 700; color: var(--brand);
+  letter-spacing: 0.18em; text-transform: uppercase;
+  margin: 0 0 18px;
+}
+.sectionEyebrow .line {
+  width: 36px; height: 2px;
+  background: var(--brand-grad);
+  border-radius: 2px;
+}
+.sectionTitle {
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 800; letter-spacing: -0.035em; line-height: 1.2;
+  margin: 0 0 16px;
+  color: var(--ink);
+}
+.sectionTitle .grad {
+  background: var(--brand-grad);
+  -webkit-background-clip: text; background-clip: text;
+  color: transparent;
+}
+.sectionLead {
+  font-size: clamp(15px, 1.5vw, 17px);
+  color: var(--body); line-height: 1.7;
+  margin: 0 0 56px;
+  max-width: 720px;
+  letter-spacing: -0.01em;
+}
+.sectionLead strong { color: var(--ink); font-weight: 700; }
+
+/* ─── 책 카드 ─── */
+.bookGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 32px;
+}
+@media (max-width: 900px) {
+  .bookGrid { grid-template-columns: 1fr; }
+}
+.bookCard {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 28px;
+  padding: 28px;
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.06);
+  border-radius: 24px;
+  box-shadow: 0 12px 32px -8px rgba(0,0,0,0.06);
+  transition: transform .35s cubic-bezier(.4,0,.2,1), box-shadow .35s;
+}
+.bookCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 24px 48px -12px rgba(0,0,0,0.12);
+}
+@media (max-width: 600px) {
+  .bookCard { grid-template-columns: 1fr; gap: 20px; }
+}
+.bookImageWrap {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #f8f8fa;
+  border: 1px solid rgba(0,0,0,0.06);
+}
+.bookImageWrap img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+}
+.bookBody {
+  display: flex; flex-direction: column;
+}
+.bookTagB {
+  align-self: flex-start;
+  padding: 5px 12px; border-radius: 9999px;
+  background: var(--brand-light); color: var(--brand-dark);
+  font-size: 11px; font-weight: 800;
+  letter-spacing: 0.04em;
+  margin-bottom: 12px;
+}
+.bookName {
+  font-size: clamp(20px, 2.2vw, 26px);
+  font-weight: 800; letter-spacing: -0.03em;
+  margin: 0 0 14px; color: var(--ink);
+}
+.bookSummary {
+  font-size: clamp(13px, 1.2vw, 15px);
+  color: var(--body); line-height: 1.7;
+  margin: 0 0 22px;
+  letter-spacing: -0.005em;
+  flex: 1;
+}
+.bookSummary strong { color: var(--ink); font-weight: 700; }
+.bookActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.bookBtnPrimary {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 22px; border-radius: 9999px;
+  background: var(--brand-grad);
+  color: #fff;
+  font-size: 14px; font-weight: 800;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  box-shadow: 0 8px 20px -4px rgba(99,102,241,0.4);
+  transition: all .25s;
+}
+.bookBtnPrimary:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.08);
+  box-shadow: 0 14px 28px -6px rgba(99,102,241,0.55);
+}
+.bookBtnSecondary {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 22px; border-radius: 9999px;
+  background: #fff;
+  color: var(--ink);
+  border: 1.5px solid rgba(0,0,0,0.12);
+  font-size: 14px; font-weight: 700;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  transition: all .25s;
+}
+.bookBtnSecondary:hover {
+  background: var(--ink);
+  color: #fff;
+  border-color: var(--ink);
+}
+
+/* ─── Next Step 카드 (3개) ─── */
+.nextGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-bottom: 48px;
+}
+@media (max-width: 900px) { .nextGrid { grid-template-columns: 1fr; } }
+
+.nextCard {
+  position: relative;
+  display: flex; flex-direction: column;
+  padding: 32px 28px;
+  background: #fff;
+  border-radius: 24px;
+  text-decoration: none;
+  color: var(--ink);
+  border: 1px solid rgba(0,0,0,0.06);
+  box-shadow: 0 8px 24px -8px rgba(0,0,0,0.08);
+  transition: transform .3s, box-shadow .3s;
+  overflow: hidden;
+}
+.nextCard::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--cardGrad, transparent);
+  opacity: 0;
+  transition: opacity .3s;
+  pointer-events: none;
+  z-index: 0;
+}
+.nextCard:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 24px 48px -12px rgba(0,0,0,0.18);
+}
+.nextCard1 { --cardGrad: linear-gradient(135deg, #818CF8 0%, #6366F1 100%); }
+.nextCard2 { --cardGrad: linear-gradient(135deg, #34D399 0%, #14B8A6 100%); }
+.nextCard3 { --cardGrad: linear-gradient(135deg, #FFA751 0%, #FF6B6B 100%); }
+.nextCard:hover::before { opacity: 1; }
+.nextCard:hover h3,
+.nextCard:hover p,
+.nextCard:hover .nextLink,
+.nextCard:hover .nextIcon { color: #fff; }
+.nextCard:hover .nextIcon { background: rgba(255,255,255,0.2); }
+
+.nextCard > * { position: relative; z-index: 1; }
+
+.nextIcon {
+  width: 64px; height: 64px;
+  border-radius: 16px;
+  background: var(--brand-light);
+  color: var(--brand);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 20px;
+  transition: all .3s;
+}
+.nextCard h3 {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  margin: 0 0 8px;
+  color: var(--ink);
+  transition: color .3s;
+}
+.nextCard p {
+  font-size: 14px;
+  color: var(--body);
+  line-height: 1.6;
+  margin: 0 0 18px;
+  flex: 1;
+  transition: color .3s;
+}
+.nextLink {
+  font-size: 14px; font-weight: 700;
+  color: var(--brand);
+  letter-spacing: -0.01em;
+  transition: color .3s;
+}
+
+/* ─── 홈 돌아가기 ─── */
+.thanksHomeCta {
+  text-align: center;
+  margin-top: 40px;
+}
+.thanksHomeBtn {
+  display: inline-block;
+  padding: 14px 32px;
+  border-radius: 9999px;
+  background: transparent;
+  color: var(--ink);
+  border: 1.5px solid rgba(0,0,0,0.15);
+  font-size: 15px; font-weight: 700;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  transition: all .25s;
+}
+.thanksHomeBtn:hover {
+  background: var(--ink);
+  color: #fff;
+  border-color: var(--ink);
+}
