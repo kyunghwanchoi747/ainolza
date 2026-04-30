@@ -43,11 +43,65 @@ const COURSES = [
   },
 ]
 
+const TOOL_ICONS: ReactNode[] = [
+  // 1. 무료 판례 검색 AI — 저울 아이콘
+  <svg key="0" viewBox="0 0 120 120" width="100%" height="100%" fill="none" stroke="rgba(255,255,255,0.96)" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="60" y1="22" x2="60" y2="92" />
+    <line x1="42" y1="92" x2="78" y2="92" />
+    <circle cx="60" cy="22" r="3.5" fill="rgba(255,255,255,0.96)" />
+    <line x1="22" y1="32" x2="98" y2="32" />
+    <path d="M22 32 L12 60 Q22 70 32 60 Z" fill="rgba(255,255,255,0.25)" />
+    <path d="M98 32 L88 60 Q98 70 108 60 Z" fill="rgba(255,255,255,0.25)" />
+  </svg>,
+  // 2. 전세계 실시간 웹사이트 순위 — 차트 아이콘
+  <svg key="1" viewBox="0 0 120 120" width="100%" height="100%" fill="none" stroke="rgba(255,255,255,0.96)" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="18" y="22" width="84" height="76" rx="10" fill="rgba(255,255,255,0.18)" />
+    <line x1="30" y1="86" x2="30" y2="78" />
+    <line x1="46" y1="86" x2="46" y2="62" />
+    <line x1="62" y1="86" x2="62" y2="50" />
+    <line x1="78" y1="86" x2="78" y2="42" />
+    <line x1="94" y1="86" x2="94" y2="34" />
+    <polyline points="30,72 46,58 62,46 78,40 94,34" strokeWidth={4} />
+    <circle cx="94" cy="34" r="4" fill="rgba(255,255,255,0.96)" />
+  </svg>,
+  // 3. NotebookLM Web Importer — 노트북 아이콘
+  <svg key="2" viewBox="0 0 120 120" width="100%" height="100%" fill="none" stroke="rgba(255,255,255,0.96)" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="28" y="20" width="64" height="84" rx="6" fill="rgba(255,255,255,0.22)" />
+    <line x1="40" y1="20" x2="40" y2="104" />
+    <line x1="50" y1="40" x2="82" y2="40" />
+    <line x1="50" y1="56" x2="82" y2="56" />
+    <line x1="50" y1="72" x2="74" y2="72" />
+    <path d="M22 28 Q22 22 28 22 L28 102 Q22 102 22 96 Z" fill="rgba(255,255,255,0.35)" />
+  </svg>,
+  // 4. NotebookLM Bulk Delete — 휴지통 아이콘
+  <svg key="3" viewBox="0 0 120 120" width="100%" height="100%" fill="none" stroke="rgba(255,255,255,0.96)" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M30 36 L34 102 Q34 108 40 108 L80 108 Q86 108 86 102 L90 36" fill="rgba(255,255,255,0.22)" />
+    <line x1="22" y1="36" x2="98" y2="36" />
+    <path d="M48 28 L48 22 Q48 18 52 18 L68 18 Q72 18 72 22 L72 28" />
+    <line x1="50" y1="54" x2="50" y2="92" />
+    <line x1="60" y1="54" x2="60" y2="92" />
+    <line x1="70" y1="54" x2="70" y2="92" />
+  </svg>,
+]
+
 const TOOLS = [
   { tag: '웹 서비스', tagClass: 'web', name: '무료 판례 검색 AI', desc: '대법원 판례를 자연어로 검색하고 AI가 핵심을 정리', href: 'https://caseai.co.kr/' },
   { tag: '웹 서비스', tagClass: 'web', name: '전세계 실시간 웹사이트 순위', desc: '전 세계에서 떠오르는 웹사이트를 실시간 추적', href: 'https://risingsites.com/' },
-  { tag: 'Chrome 확장', tagClass: 'chrome', name: 'NotebookLM Web Importer', desc: '웹페이지를 NotebookLM으로 한 번에 가져오는 확장', href: '#' },
-  { tag: 'Chrome 확장', tagClass: 'chrome-blue', name: 'NotebookLM Bulk Delete', desc: 'NotebookLM의 노트를 일괄 삭제하는 확장', href: '#' },
+  {
+    tag: 'Chrome 확장',
+    tagClass: 'chrome',
+    name: 'NotebookLM Web Importer',
+    desc: '웹페이지를 NotebookLM으로 한 번에 가져오는 확장',
+    href: 'https://chromewebstore.google.com/detail/NotebookLM%20Web%20Importer%20%28AI%20Nolza%29/pnnlnelknnpdljlkabehdmiapniffdlo?hl=ko&utm_source=ext_sidebar',
+    badge: '⭐ 5.0 · 3,000+ 사용자',
+  },
+  {
+    tag: 'Chrome 확장',
+    tagClass: 'chrome-blue',
+    name: 'NotebookLM Bulk Delete',
+    desc: 'NotebookLM의 노트를 일괄 삭제하는 확장',
+    href: 'https://chromewebstore.google.com/detail/notebooklm-bulk-delete/jbjckccejjhlmcbmkiheicdpajbgdooo?hl=ko&utm_source=ext_sidebar',
+  },
 ]
 
 const LABS = [
@@ -114,7 +168,7 @@ export default function LandingPageV3() {
 
   // Social Proof Carousel
   useEffect(() => {
-    const SLIDES = 5
+    const SLIDES = 6
     const SLIDE_MS = 4500
     const BOOK_MS = 3000
     let timer: ReturnType<typeof setTimeout> | null = null
@@ -238,9 +292,19 @@ export default function LandingPageV3() {
               <p className="bookDesc"><strong>구글 워크스페이스</strong>를<br/>제대로 활용하는 방법</p>
             </div>
           </div>
+          {/* Slide 6: NotebookLM Web Importer */}
+          <div className={`socialSlide${currentSlide === 5 ? ' active' : ''}`}>
+            <div className="slideStack" style={{ gap: 24, alignItems: 'center', textAlign: 'center' }}>
+              <div className="stars-big" style={{ letterSpacing: '3.9px' }}>★ ★ ★ ★ ★</div>
+              <div className="bigNum">3,000<small>+</small></div>
+              <div className="slideLabel" style={{ width: '100%', maxWidth: 540 }}>
+                <strong>NotebookLM Web Importer</strong> · ⭐ 5.0 평점 · 3,000명 이상 사용 중
+              </div>
+            </div>
+          </div>
         </div>
         <div className="socialDots">
-          {[0, 1, 2, 3, 4].map((i) => (
+          {[0, 1, 2, 3, 4, 5].map((i) => (
             <button key={i} type="button" className={`socialDot${currentSlide === i ? ' active' : ''}`} onClick={() => setCurrentSlide(i)} aria-label={`슬라이드 ${i + 1}`} />
           ))}
         </div>
@@ -258,7 +322,6 @@ export default function LandingPageV3() {
           </div>
           <div className="toolGrid">
             {TOOLS.map((t, i) => {
-              const isExternal = /^https?:/.test(t.href)
               const Inner = (
                 <>
                   <div className="toolTopRow">
@@ -266,23 +329,31 @@ export default function LandingPageV3() {
                     <Icons.Ext />
                   </div>
                   <div className="toolVisual">
-                    {/* SVG visuals — 단순화 */}
-                    <svg viewBox="0 0 120 120" width="100%" height="100%" fill="none" stroke="rgba(255,255,255,0.96)" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
-                      <rect x="20" y="32" width="80" height="60" rx="6" fill="rgba(255,255,255,0.18)"/>
-                      <circle cx="38" cy="52" r="5" fill="rgba(255,255,255,0.4)"/>
-                      <path d="M20 80l24-22 16 16 14-12 26 22v8H20z" fill="rgba(255,255,255,0.25)"/>
-                    </svg>
+                    {TOOL_ICONS[i]}
                   </div>
                   <div className="toolCaption">
                     <h3 className="toolName">{t.name}</h3>
                     <p className="toolDesc">{t.desc}</p>
+                    {t.badge && (
+                      <p style={{
+                        marginTop: 10,
+                        fontSize: 12,
+                        fontWeight: 800,
+                        color: 'var(--brand-dark)',
+                        background: 'rgba(99,102,241,0.1)',
+                        padding: '5px 10px',
+                        borderRadius: 9999,
+                        display: 'inline-block',
+                        letterSpacing: '-0.01em',
+                      }}>
+                        {t.badge}
+                      </p>
+                    )}
                   </div>
                 </>
               )
-              return isExternal ? (
+              return (
                 <a key={i} className="toolCard sheen" href={t.href} target="_blank" rel="noopener noreferrer">{Inner}</a>
-              ) : (
-                <Link key={i} className="toolCard sheen" href={t.href}>{Inner}</Link>
               )
             })}
           </div>
