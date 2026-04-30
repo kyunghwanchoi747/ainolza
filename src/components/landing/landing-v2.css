@@ -177,10 +177,10 @@
     .hero {
       position: relative; overflow: hidden;
       padding: clamp(96px, 12vw, 140px) clamp(20px, 4vw, 48px) clamp(64px, 10vw, 100px);
-      background-image: url('assets/hero-bg-robot.png');
-      background-size: cover;
-      background-position: center right;
-      background-repeat: no-repeat;
+      background:
+        radial-gradient(circle at 80% 30%, rgba(212,117,110,0.18) 0%, transparent 50%),
+        radial-gradient(circle at 20% 70%, rgba(184,96,79,0.12) 0%, transparent 55%),
+        linear-gradient(135deg, #FDF7F5 0%, #F5F5F7 100%);
       min-height: clamp(560px, 70vh, 760px);
     }
     .heroGrid {
