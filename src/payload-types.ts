@@ -470,7 +470,14 @@ export interface Order {
 export interface Review {
   id: number;
   product?: (number | null) | Product;
-  user: number | User;
+  /**
+   * 회원이 직접 작성한 경우 자동 연결됩니다. 매니저가 임의로 추가하는 경우 비워두고 displayName을 사용하세요.
+   */
+  user?: (number | null) | User;
+  /**
+   * 매니저가 임의로 후기를 추가할 때 사용. 회원 후기인 경우 비워두면 회원 이름이 사용됩니다.
+   */
+  displayName?: string | null;
   rating: number;
   content: string;
   siteUrl?: string | null;
@@ -924,6 +931,7 @@ export interface OrdersSelect<T extends boolean = true> {
 export interface ReviewsSelect<T extends boolean = true> {
   product?: T;
   user?: T;
+  displayName?: T;
   rating?: T;
   content?: T;
   siteUrl?: T;

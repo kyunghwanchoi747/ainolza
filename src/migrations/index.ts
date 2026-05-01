@@ -2,6 +2,7 @@ import * as migration_20260303_064707 from './20260303_064707';
 import * as migration_20260408_043249 from './20260408_043249';
 import * as migration_20260409_004239_classrooms_books from './20260409_004239_classrooms_books';
 import * as migration_20260409_065546_products_extended from './20260409_065546_products_extended';
+import * as migration_20260502_034500_reviews_displayname from './20260502_034500_reviews_displayname';
 
 export const migrations = [
   {
@@ -23,5 +24,10 @@ export const migrations = [
     up: migration_20260409_065546_products_extended.up,
     down: migration_20260409_065546_products_extended.down,
     name: '20260409_065546_products_extended'
+  },
+  {
+    up: migration_20260502_034500_reviews_displayname.up,
+    down: migration_20260502_034500_reviews_displayname.down,
+    name: '20260502_034500_reviews_displayname'
   },
 ];

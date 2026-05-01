@@ -47,7 +47,7 @@ async function listApprovedReviews(): Promise<ReviewItem[]> {
 
     return (result.docs || []).map((r: any, i: number) => {
       const user = typeof r.user === 'object' ? r.user : null
-      const rawName = user?.name || user?.email?.split('@')[0] || '익명'
+      const rawName = r.displayName || user?.name || user?.email?.split('@')[0] || '익명'
       const { name, initial } = maskName(rawName)
       return {
         quote: r.content || '',

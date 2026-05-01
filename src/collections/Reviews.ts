@@ -35,8 +35,19 @@ export const Reviews: CollectionConfig = {
       name: 'user',
       type: 'relationship',
       relationTo: 'users',
-      required: true,
-      label: '작성자',
+      required: false,
+      label: '작성자 (회원)',
+      admin: {
+        description: '회원이 직접 작성한 경우 자동 연결됩니다. 매니저가 임의로 추가하는 경우 비워두고 displayName을 사용하세요.',
+      },
+    },
+    {
+      name: 'displayName',
+      type: 'text',
+      label: '표시 이름 (매니저 임의 작성용)',
+      admin: {
+        description: '매니저가 임의로 후기를 추가할 때 사용. 회원 후기인 경우 비워두면 회원 이름이 사용됩니다.',
+      },
     },
     {
       name: 'rating',

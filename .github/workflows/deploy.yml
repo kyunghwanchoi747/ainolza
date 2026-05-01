@@ -24,6 +24,11 @@ jobs:
       - name: Install dependencies
         run: npm install --legacy-peer-deps
 
+      - name: Run Payload migrations on D1 (production)
+        run: npx cross-env NODE_ENV=production PAYLOAD_SECRET=ignore payload migrate
+        env:
+          PAYLOAD_SECRET: ignore
+
       - name: Remove SQLite packages (not needed for D1 production)
         run: rm -rf node_modules/@payloadcms/db-sqlite node_modules/@libsql
 
