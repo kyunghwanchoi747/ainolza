@@ -1051,14 +1051,28 @@
     }
     @media (max-width: 720px) {
       .header { top: 14px; width: calc(100% - 24px); border-radius: 9999px; }
-      .headerInner { padding: 0 14px; height: 52px; gap: 12px; }
-      .logo { font-size: 16px; }
-      .nav { display: none; }
-      .headerRight { gap: 10px; }
-      .loginLink, .signupLink { font-size: 12.5px; }
+      .headerInner { padding: 0 14px; height: 52px; gap: 10px; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      .headerInner::-webkit-scrollbar { display: none; }
+      .logo { font-size: 15px; flex-shrink: 0; }
+      .nav { display: flex; gap: 14px; font-size: 12px; flex-shrink: 0; }
+      .nav a { white-space: nowrap; }
+      .headerRight { gap: 8px; flex-shrink: 0; }
+      .loginLink, .signupLink { font-size: 12px; }
       .headerDivider { height: 12px; }
       .h2, .ctaTitle { font-size: clamp(26px, 6vw, 32px); }
       .pill { font-size: 12px; padding: 8px 14px; margin-bottom: 20px; }
+
+      /* Social proof — bigNum 모바일 축소 + 책 슬라이드 세로 배치 */
+      .socialStage { height: 360px; padding: 0 16px; }
+      .bigNum { font-size: clamp(80px, 22vw, 120px); }
+      .bigNum small { font-size: clamp(28px, 8vw, 40px); }
+      .slideLabel { font-size: 16px; padding: 0 16px; }
+      .stars-big { font-size: 22px; }
+      .bookSlide { flex-direction: column; gap: 16px; padding: 0 16px; }
+      .bookCover { height: 160px; }
+      .bookSlide .slideStack { align-items: center; text-align: center; gap: 8px; }
+      .bookTitle { font-size: 26px; }
+      .bookDesc { font-size: 14px; }
     }
     @media (max-width: 420px) {
       .heroCopy { padding: 20px 16px; }
