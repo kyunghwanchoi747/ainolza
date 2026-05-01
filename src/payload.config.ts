@@ -48,13 +48,11 @@ if (isBuildPhase) {
   // All pages are force-dynamic so no actual DB queries run during build.
   dbAdapter = sqliteD1Adapter({ binding: {} as any })
   r2Binding = {} as any
-} else if (isProduction || isWorkerRuntime) {
-  // Cloudflare Workers runtime: use real D1 + R2 bindings
-  const cloudflare = await getCloudflareContext({ async: true })
-  dbAdapter = sqliteD1Adapter({ binding: cloudflare.env.D1 })
-  r2Binding = (cloudflare.env as any).R2
 } else if (isCLI) {
-  // Payload CLI (migrate, etc): use D1 via wrangler proxy
+  // Payload CLI (migrate, etc): use D1 via wrangler proxy.
+  // CLI must be checked BEFORE production/worker-runtime branch — CI runs
+  // `payload migrate` with NODE_ENV=production which would otherwise fall into
+  // the worker branch and call getCloudflareContext() outside a worker.
   const globalAny: any = global
   if (!globalAny.cloudflare) {
     globalAny.cloudflare = await getCloudflareContextFromWrangler()
@@ -62,6 +60,11 @@ if (isBuildPhase) {
   const cf = globalAny.cloudflare as CloudflareContext
   dbAdapter = sqliteD1Adapter({ binding: cf.env.D1 })
   r2Binding = (cf.env as any).R2
+} else if (isProduction || isWorkerRuntime) {
+  // Cloudflare Workers runtime: use real D1 + R2 bindings
+  const cloudflare = await getCloudflareContext({ async: true })
+  dbAdapter = sqliteD1Adapter({ binding: cloudflare.env.D1 })
+  r2Binding = (cloudflare.env as any).R2
 } else {
   // Local dev: use SQLite. Computed string prevents esbuild from resolving this.
   const sqlitePkg = ['@payloadcms', 'db-sqlite'].join('/')
