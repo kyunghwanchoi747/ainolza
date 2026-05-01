@@ -22,6 +22,15 @@ type Course = {
   hot?: boolean
 }
 
+export type ReviewItem = {
+  quote: string
+  name: string
+  meta: string
+  initial: string
+  color: string
+  siteUrl?: string
+}
+
 const FALLBACK_COURSES: Course[] = [
   {
     href: '/store/vibe-coding-101',
@@ -120,7 +129,7 @@ const WHYS = [
     icon: <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8"/></svg> },
 ]
 
-const REVIEWS = [
+const FALLBACK_REVIEWS: ReviewItem[] = [
   {
     quote: '바이브 코딩 입문을 수강한 후 신세계를 경험해 보았습니다. 내 웹 사이트 만들고, 아 이거다 싶어 지금은 바이브 코딩 심화 수강중입니다. 무엇보다 강사님에 교육 철학 과정이 좋았습니다. 처음 접하시는분들은 제가 왜 이말을 하게 되는지 알게 되실겁니다.!!',
     name: '염**', meta: 'tip-pick.com', initial: '염', color: '#6366F1', siteUrl: 'https://tip-pick.com/',
@@ -152,8 +161,9 @@ const LAB_ICONS: Record<number, ReactNode> = {
   8: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 6v12M6 12h12"/><circle cx="12" cy="12" r="9"/></svg>,
 }
 
-export default function LandingPageV3({ courses }: { courses?: Course[] } = {}) {
+export default function LandingPageV3({ courses, reviews }: { courses?: Course[]; reviews?: ReviewItem[] } = {}) {
   const COURSES = courses && courses.length > 0 ? courses : FALLBACK_COURSES
+  const REVIEWS = reviews && reviews.length > 0 ? reviews : FALLBACK_REVIEWS
   const [currentSlide, setCurrentSlide] = useState(0)
   const counter1 = useRef<HTMLSpanElement>(null)
   const counter2 = useRef<HTMLSpanElement>(null)

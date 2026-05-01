@@ -1,5 +1,6 @@
-import LandingPageV3 from '@/components/landing/LandingPageV3'
+import LandingPageV3, { type ReviewItem } from '@/components/landing/LandingPageV3'
 import { listProductsForStore } from '@/lib/products-db'
+import { getPayloadClient } from '@/lib/payload'
 
 export const dynamic = 'force-dynamic'
 
@@ -15,8 +16,59 @@ const EXTERNAL_HREF: Record<string, string> = {
   'online-business-class': 'https://docs.google.com/forms/d/e/1FAIpQLSdzkHyHk_yBi_tzH1mdJwZkzcK5taLYYoSm0abdRMr_jv0SUw/viewform?usp=header',
 }
 
+const REVIEW_COLORS = ['#6366F1', '#7C3AED', '#EC4899', '#F59E0B', '#10B981', '#06B6D4']
+
+function maskName(raw: string): { name: string; initial: string } {
+  const trimmed = (raw || '').trim()
+  if (!trimmed) return { name: '익명', initial: '?' }
+  const first = Array.from(trimmed)[0]
+  return { name: `${first}**`, initial: first }
+}
+
+function hostFromUrl(url?: string): string {
+  if (!url) return ''
+  try {
+    return new URL(url).hostname.replace(/^www\./, '')
+  } catch {
+    return ''
+  }
+}
+
+async function listApprovedReviews(): Promise<ReviewItem[]> {
+  try {
+    const payload = await getPayloadClient()
+    const result = await payload.find({
+      collection: 'reviews',
+      where: { status: { equals: 'approved' } },
+      sort: 'order',
+      limit: 12,
+      depth: 1,
+    })
+
+    return (result.docs || []).map((r: any, i: number) => {
+      const user = typeof r.user === 'object' ? r.user : null
+      const rawName = user?.name || user?.email?.split('@')[0] || '익명'
+      const { name, initial } = maskName(rawName)
+      return {
+        quote: r.content || '',
+        name,
+        meta: hostFromUrl(r.siteUrl) || '수강생',
+        initial,
+        color: REVIEW_COLORS[i % REVIEW_COLORS.length],
+        siteUrl: r.siteUrl || undefined,
+      }
+    })
+  } catch (e) {
+    console.error('[home reviews]', (e as Error).message)
+    return []
+  }
+}
+
 export default async function Home() {
-  const products = await listProductsForStore()
+  const [products, reviews] = await Promise.all([
+    listProductsForStore(),
+    listApprovedReviews(),
+  ])
 
   // class 타입 + featured 우선, 최대 3개 (홈 노출용)
   const classProducts = products
@@ -47,5 +99,5 @@ export default async function Home() {
     }
   })
 
-  return <LandingPageV3 courses={homeCourses} />
+  return <LandingPageV3 courses={homeCourses} reviews={reviews} />
 }
