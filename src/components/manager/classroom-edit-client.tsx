@@ -233,7 +233,7 @@ export function ClassroomEditClient({ initial }: { initial: Initial }) {
         <CardContent className="space-y-4">
           {sessions.length === 0 ? (
             <div className="text-center py-8 text-sm text-muted-foreground">
-              등록된 회차가 없습니다. "회차 추가"로 시작하세요.
+              등록된 회차가 없습니다. &lsquo;회차 추가&rsquo; 버튼으로 시작하세요.
             </div>
           ) : (
             sessions.map((s, idx) => (
