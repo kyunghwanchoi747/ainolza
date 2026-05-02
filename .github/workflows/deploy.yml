@@ -29,6 +29,11 @@ jobs:
         env:
           PAYLOAD_SECRET: ignore
 
+      - name: Seed classroom sessions (idempotent)
+        run: npx cross-env NODE_ENV=production PAYLOAD_SECRET=ignore tsx scripts/seed-classroom-sessions.ts
+        env:
+          PAYLOAD_SECRET: ignore
+
       - name: Remove SQLite packages (not needed for D1 production)
         run: rm -rf node_modules/@payloadcms/db-sqlite node_modules/@libsql
 
