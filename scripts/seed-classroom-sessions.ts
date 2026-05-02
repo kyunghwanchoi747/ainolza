@@ -28,6 +28,7 @@ const SEEDS: Seed[] = [
     classroomSlug: 'vibe-coding-advanced',
     week: 4,
     fields: {
+      vimeoId: '1188615703',
       guidebookUrl:
         'https://www.notion.so/4-353c7863bde280ab9f94c50912345863?source=copy_link',
     },
