@@ -12,6 +12,7 @@ import {
   ShoppingBag,
   MessageSquare,
   Download,
+  GraduationCap,
 } from 'lucide-react'
 import {
   CommandDialog,
@@ -90,6 +91,10 @@ export function CommandSearch({ open, onOpenChange }: CommandSearchProps) {
             <Download className="mr-2 h-4 w-4" />
             프로그램 관리
             <CommandShortcut>G R</CommandShortcut>
+          </CommandItem>
+          <CommandItem onSelect={() => runCommand(() => router.push('/manager/classrooms'))}>
+            <GraduationCap className="mr-2 h-4 w-4" />
+            강의실 관리
           </CommandItem>
           <CommandItem onSelect={() => runCommand(() => router.push('/manager/settings'))}>
             <Settings className="mr-2 h-4 w-4" />

@@ -20,6 +20,7 @@ import {
   KeyRound,
   Users,
   Video,
+  GraduationCap,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -50,6 +51,7 @@ const mainNavItems: NavItem[] = [
   { href: '/manager/students', label: '수강생', icon: Users },
   { href: '/manager/meeting', label: '회의실', icon: Video },
   { href: '/manager/reviews', label: '후기 관리', icon: MessageSquare },
+  { href: '/manager/classrooms', label: '강의실', icon: GraduationCap },
   { href: '/manager/access', label: '강의실 권한', icon: KeyRound },
   { href: '/manager/enrollments', label: '수강신청', icon: ClipboardList, shortcut: 'G N' },
   { href: '/manager/seo', label: 'SEO', icon: Search, shortcut: 'G S' },
