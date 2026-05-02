@@ -1,0 +1,47 @@
+name: Admin Task (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      task:
+        description: '실행할 작업'
+        required: true
+        default: 'update-classroom-session'
+        type: choice
+        options:
+          - update-classroom-session
+      classroom_slug:
+        description: '강의실 slug (예: vibe-coding-advanced)'
+        required: false
+        default: 'vibe-coding-advanced'
+      week:
+        description: '회차 번호'
+        required: false
+        default: '4'
+      field:
+        description: '필드 이름 (guidebookUrl/vimeoId 등)'
+        required: false
+        default: 'guidebookUrl'
+      value:
+        description: '값'
+        required: false
+        default: ''
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      PAYLOAD_SECRET: ignore
+      NODE_ENV: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+      - name: Run task
+        run: npx tsx scripts/update-classroom-session.ts "${{ inputs.classroom_slug }}" "${{ inputs.week }}" "${{ inputs.field }}" "${{ inputs.value }}"
