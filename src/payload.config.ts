@@ -30,10 +30,12 @@ const realpath = (value: string) => {
   try { return fs.existsSync(value) ? fs.realpathSync(value) : undefined } catch { return undefined }
 }
 
-const isCLI = process.argv.some((value) => {
-  const rp = realpath(value)
-  return rp ? rp.endsWith(path.join('payload', 'bin.js')) : false
-})
+const isCLI =
+  process.env.PAYLOAD_CLI === '1' ||
+  process.argv.some((value) => {
+    const rp = realpath(value)
+    return rp ? rp.endsWith(path.join('payload', 'bin.js')) : false
+  })
 const isProduction = process.env.NODE_ENV === 'production'
 // BUILD_PHASE는 CI 빌드에서만 의미가 있음
 // 워커 런타임에서는 globalThis.caches가 존재하므로 이걸로 빌드 환경을 구분
