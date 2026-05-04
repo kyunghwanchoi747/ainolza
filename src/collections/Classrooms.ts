@@ -14,6 +14,10 @@ export const Classrooms: CollectionConfig = {
   access: {
     // 누구나 강의실 메타정보 읽기 가능 (목록 등)
     read: () => true,
+    // 생성/수정/삭제는 admin만
+    create: ({ req: { user } }) => (user as { role?: string })?.role === 'admin',
+    update: ({ req: { user } }) => (user as { role?: string })?.role === 'admin',
+    delete: ({ req: { user } }) => (user as { role?: string })?.role === 'admin',
   },
   admin: {
     useAsTitle: 'title',

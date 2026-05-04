@@ -203,6 +203,13 @@ export default async function ClassroomDetailPage({
           <Link href="/classroom" className="text-sm text-sub hover:text-brand">
             ← 강의실 목록
           </Link>
+          {/* 이전 기수(closed) 안내 — 만료일 안내 위에 우선 노출 */}
+          {classroom.status === 'closed' && (
+            <div className="mt-4 px-4 py-3 rounded-xl text-sm font-medium flex items-center gap-2 bg-[#f5f5f5] text-sub border border-line">
+              <span>📚</span>
+              <span>이전 기수 강의실입니다. 결제 시 부여된 수강 기간 동안 녹화본·자료를 시청할 수 있습니다.</span>
+            </div>
+          )}
           {/* 만료일 안내 */}
           <div className={`mt-4 px-4 py-3 rounded-xl text-sm font-medium flex items-center gap-2 ${daysLeft <= 14 ? 'bg-orange-50 text-orange-700 border border-orange-200' : 'bg-blue-50 text-blue-700 border border-blue-100'}`}>
             <span>{daysLeft <= 14 ? '⚠️' : '📅'}</span>

@@ -70,9 +70,9 @@ export const Orders: CollectionConfig = {
             try { await sendPaymentCompletedToBuyer(req.payload, d) } catch (e) { console.error('[PAID BUYER]', (e as Error).message) }
         // try { await logEmailSent(req.payload, { to: d.buyerEmail, subject: `결제완료 수강안내`, type: 'payment-buyer', relatedId: oid }) } catch {}  // TODO: 로깅 재활성화
 
-            // 심화반 단톡방 안내
+            // 심화반 단톡방 안내 (모든 기수: vibe-coding-advanced, vibe-coding-advanced-2, ...)
             const cls = Array.isArray(d.classrooms) ? d.classrooms : []
-            if (cls.includes('vibe-coding-advanced')) {
+            if (cls.some((s: string) => typeof s === 'string' && s.startsWith('vibe-coding-advanced'))) {
               try { await sendAdvancedClassGroupChat(req.payload, d) } catch (e) { console.error('[심화반 단톡방]', (e as Error).message) }
         // try { await logEmailSent(req.payload, { to: d.buyerEmail, subject: '심화반 단톡방 안내', type: 'other', relatedId: oid }) } catch {}  // TODO: 로깅 재활성화
             }
@@ -198,14 +198,26 @@ export const Orders: CollectionConfig = {
     // 메모
     { name: 'adminMemo', type: 'textarea', label: '관리자 메모' },
     // 강의실 / 도서 액세스 권한 (다중 선택)
+    // NOTE: 새 기수 추가 시 여기 옵션을 함께 추가해야 함. Payload select는
+    // 정의되지 않은 값이 들어오면 검증 거부. 향후 4기까지 미리 등록해둠.
     {
       name: 'classrooms',
       type: 'select',
       hasMany: true,
       label: '강의실',
       options: [
-        { label: '바이브 코딩 101 (입문)', value: 'vibe-coding-101' },
-        { label: '바이브 코딩 심화', value: 'vibe-coding-advanced' },
+        // 1기
+        { label: '바이브 코딩 101 (입문) — 1기', value: 'vibe-coding-101' },
+        { label: '바이브 코딩 심화 — 1기', value: 'vibe-coding-advanced' },
+        // 2기
+        { label: '바이브 코딩 101 (입문) — 2기', value: 'vibe-coding-101-2' },
+        { label: '바이브 코딩 심화 — 2기', value: 'vibe-coding-advanced-2' },
+        // 3기
+        { label: '바이브 코딩 101 (입문) — 3기', value: 'vibe-coding-101-3' },
+        { label: '바이브 코딩 심화 — 3기', value: 'vibe-coding-advanced-3' },
+        // 4기
+        { label: '바이브 코딩 101 (입문) — 4기', value: 'vibe-coding-101-4' },
+        { label: '바이브 코딩 심화 — 4기', value: 'vibe-coding-advanced-4' },
       ],
     },
     {

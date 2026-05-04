@@ -3,6 +3,7 @@ import { GraduationCap, ArrowRight } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { getPayloadClient } from '@/lib/payload'
+import { ClassroomCloneButton } from '@/components/manager/classroom-clone-button'
 
 export const dynamic = 'force-dynamic'
 
@@ -93,8 +94,8 @@ export default async function ManagerClassroomsPage() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center justify-between">
-                  <div className="text-sm text-muted-foreground">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="text-sm text-muted-foreground min-w-0">
                     회차 {c.sessionsCount}개{' '}
                     {c.sessionsCount > 0 && (
                       <span className="text-xs">
@@ -102,13 +103,21 @@ export default async function ManagerClassroomsPage() {
                       </span>
                     )}
                   </div>
-                  <Link
-                    href={`/manager/classrooms/${c.id}/edit`}
-                    className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
-                  >
-                    회차 관리
-                    <ArrowRight className="h-3 w-3" />
-                  </Link>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <ClassroomCloneButton
+                      sourceId={c.id}
+                      sourceSlug={c.slug}
+                      sourceShortTitle={c.shortTitle}
+                      sourceCohort={c.cohort}
+                    />
+                    <Link
+                      href={`/manager/classrooms/${c.id}/edit`}
+                      className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+                    >
+                      회차 관리
+                      <ArrowRight className="h-3 w-3" />
+                    </Link>
+                  </div>
                 </div>
               </CardContent>
             </Card>

@@ -48,6 +48,11 @@ export default async function ClassroomListPage() {
     listActiveClassrooms(),
   ])
 
+  // 종료된 기수(closed)는 본인 권한 있을 때만 노출. active 상태는 모두에게 노출.
+  const visible = classrooms.filter(
+    (c) => c.status !== 'closed' || owned.has(c.slug),
+  )
+
   return (
     <div className="min-h-screen bg-white">
       <div className="max-w-5xl mx-auto px-6 py-16">
@@ -63,15 +68,23 @@ export default async function ClassroomListPage() {
         </div>
 
         <div className="grid gap-6 md:grid-cols-2">
-          {classrooms.map((c) => {
+          {visible.map((c) => {
             const isOwned = owned.has(c.slug)
+            const isClosed = c.status === 'closed'
             return (
               <div
                 key={c.slug}
                 className="border border-line rounded-2xl p-6 bg-white hover:shadow-md transition-shadow"
               >
-                <div className="inline-block px-3 py-1 text-xs font-medium rounded-full bg-brand-light text-brand mb-3">
-                  {c.level}
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="inline-block px-3 py-1 text-xs font-medium rounded-full bg-brand-light text-brand">
+                    {c.level}
+                  </div>
+                  {isClosed && (
+                    <div className="inline-block px-3 py-1 text-xs font-medium rounded-full bg-[#f5f5f5] text-sub">
+                      이전 기수
+                    </div>
+                  )}
                 </div>
                 <h2 className="text-xl font-bold text-ink mb-2">{c.shortTitle}</h2>
                 <p className="text-body text-sm mb-6 leading-relaxed">{c.description}</p>
