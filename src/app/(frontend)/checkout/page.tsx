@@ -165,9 +165,9 @@ function CheckoutContent() {
         currency: 'CURRENCY_KRW',
         payMethod,
         customer: {
-          fullName: user?.name || '',
-          email: user?.email || '',
-          phoneNumber: user?.phone || '',
+          ...(user?.name ? { fullName: user.name } : {}),
+          ...(user?.email ? { email: user.email } : {}),
+          ...(user?.phone ? { phoneNumber: user.phone } : {}),
         },
         redirectUrl: `${window.location.origin}/checkout/complete?orderNumber=${orderData.orderNumber}`,
       } as any)
