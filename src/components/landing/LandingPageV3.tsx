@@ -4,6 +4,7 @@ import type { ReactNode } from 'react'
 import { useEffect, useRef, useState, Fragment } from 'react'
 import Link from 'next/link'
 import { V3Header } from './v3-header'
+import { SiteFooter } from '@/components/layout/site-footer'
 import './landing-v3.css'
 
 const KAKAO_OPEN_CHAT = 'https://open.kakao.com/o/s7kkWTfh'
@@ -497,23 +498,7 @@ export default function LandingPageV3({ courses, reviews }: { courses?: Course[]
       </section>
 
       {/* FOOTER */}
-      <footer className="footer">
-        <div className="footerInner">
-          <p className="footerLogo">AI놀자</p>
-          <div className="footerLinks">
-            {['이용약관', '개인정보처리방침', 'FAQ', '사업자 정보'].map((l, i, arr) => (
-              <Fragment key={l}>
-                <a href="#">{l}</a>
-                {i < arr.length - 1 && <span>·</span>}
-              </Fragment>
-            ))}
-          </div>
-          <p className="footerFine">
-            에이아이놀자 · 대표: 최경환 · 070-8028-2616 · ainolza@naver.com<br/>
-            © 2026 AI놀자. All rights reserved.
-          </p>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   )
 }
