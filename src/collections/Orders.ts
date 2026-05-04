@@ -27,7 +27,7 @@ export const Orders: CollectionConfig = {
           // 관리자 알림
           try { await sendOrderCreatedToAdmin(req.payload, d) } catch (e) { console.error('[ORDER CREATE NOTIFY]', (e as Error).message) }
 
-          // 구매자 입금 안내 메일 (포트원 결제 연동 전까지)
+          // 구매자에게 신청 접수 알림 (결제 후 확정 안내)
           if (d.buyerEmail) {
             try {
               await sendEnrollmentConfirmToBuyer(
