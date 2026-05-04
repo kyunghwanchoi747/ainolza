@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayloadClient } from '@/lib/payload'
+import { sendVirtualAccountIssued } from '@/lib/email-templates'
 
 /**
  * PortOne V2 결제 검증
@@ -135,6 +136,24 @@ export async function POST(request: NextRequest) {
       data: updateData,
       overrideAccess: true,
     })
+
+    // 8. 가상계좌 발급된 경우 → 구매자에게 입금 안내 메일
+    if (paymentData.virtualAccount) {
+      try {
+        await sendVirtualAccountIssued(payload, {
+          orderNumber: order.orderNumber,
+          buyerName: order.buyerName,
+          buyerEmail: order.buyerEmail,
+          productName: order.productName,
+          amount: order.amount,
+          vbankName: paymentData.virtualAccount.bank,
+          vbankNum: paymentData.virtualAccount.accountNumber,
+          vbankDate: paymentData.virtualAccount.expiredAt,
+        })
+      } catch (e) {
+        console.error('[VBANK MAIL]', (e as Error).message)
+      }
+    }
 
     return NextResponse.json({
       ok: true,

@@ -450,3 +450,64 @@ export async function sendRefundRequestedToAdmin(
     ),
   })
 }
+
+/** 가상계좌(무통장입금) 발급 → 구매자에게 입금 안내 메일 */
+export async function sendVirtualAccountIssued(
+  payload: Payload,
+  order: {
+    orderNumber?: string
+    buyerName?: string
+    buyerEmail?: string
+    productName?: string
+    amount?: number | null
+    vbankName?: string | null
+    vbankNum?: string | null
+    vbankDate?: string | Date | null
+  },
+) {
+  if (!order.buyerEmail) return
+  const expiry = order.vbankDate
+    ? new Date(order.vbankDate).toLocaleString('ko-KR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    : ''
+  const name = order.buyerName || order.buyerEmail.split('@')[0]
+  await payload.sendEmail({
+    to: order.buyerEmail,
+    subject: `[AI놀자] 가상계좌 발급 완료 — 입금 후 신청이 확정됩니다`,
+    html: wrap(
+      `${name}님, 가상계좌가 발급되었습니다`,
+      `
+      <p style="color:#666;font-size:15px;line-height:1.7;margin:0 0 16px;">
+        <strong>${order.productName || '주문'}</strong> 결제를 위한 가상계좌가 발급되었습니다.<br>
+        아래 계좌로 입금해 주시면 자동으로 결제가 완료되어 신청이 확정됩니다.
+      </p>
+
+      <table cellpadding="8" cellspacing="0" style="width:100%;background:#FFF1F0;border:2px solid #D4756E;border-radius:12px;margin:0 0 20px;font-size:14px;color:#333;">
+        <tr><td style="width:90px;color:#888;font-weight:bold;">은행</td><td><strong>${order.vbankName || '-'}</strong></td></tr>
+        <tr><td style="color:#888;font-weight:bold;">계좌번호</td><td><strong style="font-size:18px;color:#1a1a1a;letter-spacing:0.5px;">${order.vbankNum || '-'}</strong></td></tr>
+        <tr><td style="color:#888;font-weight:bold;">입금금액</td><td><strong style="font-size:18px;color:#D4756E;">${priceKR(order.amount || 0)}</strong></td></tr>
+        ${expiry ? `<tr><td style="color:#888;font-weight:bold;">입금기한</td><td style="color:#D4756E;"><strong>${expiry}</strong> 까지</td></tr>` : ''}
+        ${order.orderNumber ? `<tr><td style="color:#888;font-weight:bold;">주문번호</td><td style="font-family:monospace;color:#666;">${order.orderNumber}</td></tr>` : ''}
+      </table>
+
+      <div style="background:#fafafa;border-radius:10px;padding:14px 16px;margin:0 0 24px;font-size:13px;color:#666;line-height:1.8;">
+        • 입금 확인은 자동으로 처리되며 보통 <strong style="color:#333;">1~5분 이내</strong>에 완료됩니다.<br>
+        • 입금기한이 지나면 가상계좌가 자동으로 만료되어 입금되지 않습니다.<br>
+        • 다른 사람 명의로 입금하셔도 결제는 정상 처리되지만, 입금자명이 신청자 본인 이름과 같으면 확인이 빠릅니다.
+      </div>
+
+      <div style="text-align:center;margin:24px 0;">
+        <a href="${SITE_URL}/mypage" style="display:inline-block;background:#D4756E;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:12px;font-size:15px;font-weight:bold;">마이페이지에서 확인하기</a>
+      </div>
+
+      <p style="color:#999;font-size:12px;line-height:1.6;margin:24px 0 0;">
+        문의사항은 <a href="${KAKAO_OPEN_CHAT}" style="color:#D4756E;">카카오톡 오픈채팅</a>으로 부탁드립니다.
+      </p>`,
+    ),
+  })
+}
