@@ -420,6 +420,21 @@ function CheckoutContent() {
                   <p className="text-xs text-sub leading-relaxed mb-4">
                     결제 전 이용 및 정보 제공 약관 등의 내용을 확인했으며 이에 동의합니다.
                   </p>
+
+                  {/* 전체 동의 */}
+                  <label className="flex items-center gap-2 cursor-pointer mb-3 pb-3 border-b border-line">
+                    <input
+                      type="checkbox"
+                      checked={allAgreed}
+                      onChange={(e) => {
+                        const v = e.target.checked
+                        setAgreed({ terms: v, refund: v, privacy: v })
+                      }}
+                      className="accent-[#D4756E] w-4 h-4"
+                    />
+                    <span className="text-sm font-bold text-ink">전체 동의</span>
+                  </label>
+
                   <div className="space-y-2">
                     <label className="flex items-start gap-2 cursor-pointer">
                       <input
