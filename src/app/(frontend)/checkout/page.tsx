@@ -198,8 +198,11 @@ function CheckoutContent() {
       }
 
       router.push(`/checkout/complete?orderNumber=${verifyData.orderNumber || orderData.orderNumber}`)
-    } catch {
-      alert('결제 처리 중 오류가 발생했습니다.')
+    } catch (e) {
+      const err = e as { code?: string; message?: string; pgCode?: string; pgMessage?: string }
+      console.error('[CHECKOUT ERROR]', err)
+      const detail = err?.pgMessage || err?.message || err?.code || ''
+      alert(`결제 처리 중 오류가 발생했습니다.${detail ? `\n\n원인: ${detail}` : ''}`)
     } finally {
       setLoading(false)
     }
