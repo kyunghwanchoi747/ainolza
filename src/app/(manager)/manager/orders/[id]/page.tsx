@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
+import { RefundApprovalButton } from '@/components/manager/refund-approval-button'
 
 const statusOptions = [
   { value: 'pending', label: '주문접수', color: '#F59E0B' },
@@ -129,12 +130,25 @@ export default function OrderDetailPage() {
         {/* 환불 정보 */}
         {(order.refundReason || order.status === 'refund_requested' || order.status === 'refunded') && (
           <div className="rounded-xl border border-red-200 bg-red-50 p-6 space-y-4">
-            <h2 className="font-bold text-lg text-red-600">환불 정보</h2>
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="font-bold text-lg text-red-600">환불 정보</h2>
+              {order.status === 'refund_requested' && (
+                <RefundApprovalButton orderId={order.id} orderNumber={order.orderNumber} />
+              )}
+              {order.status === 'refunded' && (
+                <span className="text-xs font-medium px-3 py-1 rounded-full bg-gray-100 text-gray-600">환불 완료</span>
+              )}
+            </div>
             <div className="space-y-3 text-sm">
               <div><span className="text-muted-foreground">환불 사유:</span> <span>{order.refundReason || '-'}</span></div>
               {order.refundAmount && <div className="flex justify-between"><span className="text-muted-foreground">환불 금액</span><span>{order.refundAmount?.toLocaleString()}원</span></div>}
               {order.refundedAt && <div className="flex justify-between"><span className="text-muted-foreground">환불일</span><span>{new Date(order.refundedAt).toLocaleDateString('ko-KR')}</span></div>}
             </div>
+            {order.status === 'refund_requested' && (
+              <p className="text-xs text-red-700 bg-white/60 rounded-lg p-3 border border-red-100 leading-relaxed">
+                <strong>환불 승인</strong> 버튼을 클릭하면 PortOne을 통해 카드사 승인 취소가 자동 진행됩니다. 가상계좌 결제는 환불 계좌 정보가 추가로 필요할 수 있습니다.
+              </p>
+            )}
           </div>
         )}
       </div>
