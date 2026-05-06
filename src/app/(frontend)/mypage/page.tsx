@@ -61,7 +61,8 @@ export default function MyPage() {
       fetch('/api/payments', { credentials: 'include' }).then(r => r.ok ? r.json() : null),
       fetch('/api/classrooms?limit=100&depth=0', { credentials: 'include' }).then(r => r.ok ? r.json() : null),
       fetch('/api/products?where[productType][equals]=ebook&limit=100&depth=0', { credentials: 'include' }).then(r => r.ok ? r.json() : null),
-      fetch('/api/products?where[status][equals]=published&limit=100&depth=0', { credentials: 'include' }).then(r => r.ok ? r.json() : null),
+      // 모든 상품 (draft 포함) — 1기 종료된 상품도 마이페이지엔 표시되어야 함
+      fetch('/api/products?limit=200&depth=0', { credentials: 'include' }).then(r => r.ok ? r.json() : null),
     ])
       .then(([userData, orderData, classroomData, ebookData, allProductsData]: any[]) => {
         if (userData?.user) {
