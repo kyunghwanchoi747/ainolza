@@ -157,14 +157,42 @@ export default async function ProductDetailPage({
                 )}
               </div>
 
-              {/* 서비스 제공기간 */}
-              <div className="mb-4 p-4 rounded-2xl bg-[#F0F9FF] border border-[#BAE6FD]">
-                <p className="text-[#0369A1] text-sm font-extrabold mb-1">📅 서비스 제공기간</p>
-                <p className="text-[#0C4A6E] text-sm leading-relaxed">
-                  결제일로부터 <strong>100일</strong>간 수강 가능합니다.<br />
-                  (예: 1월 1일 결제 → 4월 11일까지 이용)
-                </p>
-              </div>
+              {/* 상품 유형별 안내 박스 */}
+              {product.type === 'class' && (
+                <div className="mb-4 p-4 rounded-2xl bg-[#F0F9FF] border border-[#BAE6FD]">
+                  <p className="text-[#0369A1] text-sm font-extrabold mb-1">📅 서비스 제공기간</p>
+                  <p className="text-[#0C4A6E] text-sm leading-relaxed">
+                    결제일로부터 <strong>100일</strong>간 수강 가능합니다.<br />
+                    (예: 1월 1일 결제 → 4월 11일까지 이용)
+                  </p>
+                </div>
+              )}
+              {product.type === 'ebook' && (
+                <div className="mb-4 p-4 rounded-2xl bg-[#F0FDF4] border border-[#BBF7D0]">
+                  <p className="text-[#15803D] text-sm font-extrabold mb-1">⚡ 즉시 다운로드</p>
+                  <p className="text-[#14532D] text-sm leading-relaxed">
+                    결제 완료 즉시 마이페이지에서 PDF 다운로드가 가능합니다.<br />
+                    저작권 보호를 위해 무단 복제·배포는 금지됩니다.
+                  </p>
+                </div>
+              )}
+              {product.type === 'book' && (
+                <div className="mb-4 p-4 rounded-2xl bg-[#FFFBEB] border border-[#FDE68A]">
+                  <p className="text-[#B45309] text-sm font-extrabold mb-1">📦 배송 안내</p>
+                  <p className="text-[#78350F] text-sm leading-relaxed">
+                    결제 후 <strong>2~3 영업일 이내</strong>에 발송됩니다.<br />
+                    (도서·산간 지역은 1~2일 추가 소요)
+                  </p>
+                </div>
+              )}
+              {product.type === 'bundle' && (
+                <div className="mb-4 p-4 rounded-2xl bg-[#FAF5FF] border border-[#E9D5FF]">
+                  <p className="text-[#7E22CE] text-sm font-extrabold mb-1">🎁 번들 구성 안내</p>
+                  <p className="text-[#581C87] text-sm leading-relaxed">
+                    강의는 결제일로부터 <strong>100일간 수강</strong>, 전자책은 <strong>즉시 다운로드</strong>가 가능합니다.
+                  </p>
+                </div>
+              )}
 
               {/* 액션 버튼들 */}
               <div className="space-y-3">
