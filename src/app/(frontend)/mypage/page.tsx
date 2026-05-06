@@ -35,6 +35,13 @@ export default function MyPage() {
   const [loading, setLoading] = useState(true)
   const [showOrders, setShowOrders] = useState(false)
   const [myReviews, setMyReviews] = useState<any[]>([])
+  // 모든 게시 상품 (productSlug 누락 주문의 fallback 매핑용)
+  const [allProducts, setAllProducts] = useState<{
+    slug: string
+    title: string
+    productType?: string
+    grantedClassroomSlugs: string[]
+  }[]>([])
   // 작성/수정 폼 — 어떤 상품에 대해 작성 중인지
   const [reviewForm, setReviewForm] = useState<{
     productId: number
@@ -54,8 +61,9 @@ export default function MyPage() {
       fetch('/api/payments', { credentials: 'include' }).then(r => r.ok ? r.json() : null),
       fetch('/api/classrooms?limit=100&depth=0', { credentials: 'include' }).then(r => r.ok ? r.json() : null),
       fetch('/api/products?where[productType][equals]=ebook&limit=100&depth=0', { credentials: 'include' }).then(r => r.ok ? r.json() : null),
+      fetch('/api/products?where[status][equals]=published&limit=100&depth=0', { credentials: 'include' }).then(r => r.ok ? r.json() : null),
     ])
-      .then(([userData, orderData, classroomData, ebookData]: any[]) => {
+      .then(([userData, orderData, classroomData, ebookData, allProductsData]: any[]) => {
         if (userData?.user) {
           setUser(userData.user)
           setOrders(orderData?.orders || [])
@@ -74,6 +82,21 @@ export default function MyPage() {
             legacyDownloadUrl: d.downloadUrl,
             downloadNote: d.downloadNote,
           })))
+          const all = (allProductsData?.docs || []) as any[]
+          setAllProducts(all.map((d) => {
+            const arr = Array.isArray(d.grantedClassroomSlugs) ? d.grantedClassroomSlugs : []
+            const grantedClassroomSlugs: string[] = []
+            for (const item of arr) {
+              const slug = typeof item === 'object' ? item.slug : item
+              if (slug && !grantedClassroomSlugs.includes(slug)) grantedClassroomSlugs.push(slug)
+            }
+            return {
+              slug: d.slug,
+              title: d.title,
+              productType: d.productType,
+              grantedClassroomSlugs,
+            }
+          }))
         } else {
           router.push('/login')
         }
@@ -477,18 +500,52 @@ export default function MyPage() {
           {/* 수강/구매 상품별 후기 */}
           {(() => {
             // 구매한 상품 목록 (paid·active·completed) — 중복 제거
+            // productSlug가 비어있으면 classrooms 또는 productName으로 역매핑 (legacy 주문 호환)
             const purchased = new Map<string, { productId: number; productSlug: string; productName: string; productType?: string }>()
+            const productBySlug = new Map(allProducts.map(p => [p.slug, p]))
+            // grantedClassroomSlugs.includes(classroomSlug) 매칭용 인덱스
+            const productByClassroomSlug = new Map<string, typeof allProducts[0]>()
+            for (const p of allProducts) {
+              for (const cs of p.grantedClassroomSlugs) {
+                if (!productByClassroomSlug.has(cs)) productByClassroomSlug.set(cs, p)
+              }
+            }
+            const productByName = new Map(allProducts.map(p => [p.title, p]))
+
             for (const o of orders) {
               if (!['paid', 'active', 'completed'].includes(o.status)) continue
-              const slug = o.productSlug
+              let slug: string | undefined = o.productSlug
+              let productMeta = slug ? productBySlug.get(slug) : undefined
+
+              // Fallback 1: classrooms 배열 → grantedClassroomSlugs 역매핑
+              if (!productMeta) {
+                const classroomList: string[] = Array.isArray(o.classrooms) ? o.classrooms : []
+                for (const cs of classroomList) {
+                  const m = productByClassroomSlug.get(cs)
+                  if (m) {
+                    productMeta = m
+                    slug = m.slug
+                    break
+                  }
+                }
+              }
+
+              // Fallback 2: productName 정확 매칭 ([테스트] 접두사 제거 후 비교)
+              if (!productMeta && o.productName) {
+                const cleaned = String(o.productName).replace(/^\[테스트\]\s*/, '').trim()
+                const m = productByName.get(cleaned)
+                if (m) {
+                  productMeta = m
+                  slug = m.slug
+                }
+              }
+
               if (!slug || purchased.has(slug)) continue
-              // productId가 Order에 없을 수도 있음 → 후기 작성 시 slug로 product 조회 필요
-              // 일단 productId는 후기에서 가져오거나, 작성 시점에 slug로 매핑
               purchased.set(slug, {
                 productId: 0, // 작성 클릭 시 lookup
                 productSlug: slug,
-                productName: o.productName || slug,
-                productType: o.productType,
+                productName: productMeta?.title || o.productName || slug,
+                productType: productMeta?.productType || o.productType,
               })
             }
             // 작성한 후기를 product slug 기준 매핑
