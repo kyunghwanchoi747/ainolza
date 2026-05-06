@@ -23,6 +23,7 @@ import { Orders } from './collections/Orders'
 import { EmailLogs } from './collections/EmailLogs'
 import { Reviews } from './collections/Reviews'
 import { Classrooms } from './collections/Classrooms'
+import { Ebooks } from './collections/Ebooks'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -93,7 +94,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, DesignPages, Products, ProductCategories, Posts, Comments, Programs, SiteSettings, Enrollments, Orders, Reviews, Classrooms],
+  collections: [Users, Media, DesignPages, Products, ProductCategories, Posts, Comments, Programs, SiteSettings, Enrollments, Orders, Reviews, Classrooms, Ebooks],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || 'dev-secret-change-in-production',
   db: dbAdapter,
@@ -104,7 +105,8 @@ export default buildConfig({
           bucket: r2Binding,
           collections: {
             media: true,
-          },
+            ebooks: true,
+          } as any,
         }),
       ]
     : [],

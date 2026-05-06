@@ -10,7 +10,8 @@ type ClassroomMeta = { slug: string; shortTitle: string; level: string; descript
 type EbookMeta = {
   slug: string
   title: string
-  downloadUrl?: string
+  hasFile?: boolean // R2에 ebookFile 등록 여부
+  legacyDownloadUrl?: string // 구 외부 링크 (ebookFile 없을 때 fallback)
   downloadNote?: string
 }
 
@@ -63,7 +64,8 @@ export default function MyPage() {
           setEbookMeta(ebooks.map((d) => ({
             slug: d.slug,
             title: d.title,
-            downloadUrl: d.downloadUrl,
+            hasFile: !!d.ebookFile,
+            legacyDownloadUrl: d.downloadUrl,
             downloadNote: d.downloadNote,
           })))
         } else {
@@ -212,16 +214,22 @@ export default function MyPage() {
     return classroomMeta.filter((c) => slugs.has(c.slug))
   }, [orders, classroomMeta])
 
-  // 보유한 전자책 (paid/active/completed 주문 + productType ebook)
+  // 보유한 전자책 — slug별 가장 최근 paid 주문 1건과 매칭 (orderId 필요)
   const ownedEbooks = useMemo(() => {
-    const slugs = new Set<string>()
+    const latestOrderBySlug = new Map<string, any>()
     for (const o of orders) {
       if (!['paid', 'active', 'completed'].includes(o.status)) continue
       if ((o as any).productType !== 'ebook') continue
       const slug = (o as any).productSlug
-      if (slug) slugs.add(String(slug))
+      if (!slug) continue
+      const prev = latestOrderBySlug.get(slug)
+      const oTime = new Date(o.createdAt || 0).getTime()
+      const pTime = prev ? new Date(prev.createdAt || 0).getTime() : 0
+      if (!prev || oTime > pTime) latestOrderBySlug.set(slug, o)
     }
-    return ebookMeta.filter((b) => slugs.has(b.slug))
+    return ebookMeta
+      .filter((b) => latestOrderBySlug.has(b.slug))
+      .map((b) => ({ ...b, orderId: latestOrderBySlug.get(b.slug)!.id as number | string }))
   }, [orders, ebookMeta])
 
   // 종이책 주문 (배송 추적용)
@@ -334,37 +342,60 @@ export default function MyPage() {
                 <h3 className="font-medium text-ink">내 전자책</h3>
                 <span className="text-xs text-sub">({ownedEbooks.length}권)</span>
               </div>
+
+              {/* 저작권 안내 — 다운로드 버튼 위 한 번만 노출 */}
+              <div className="mb-3 px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-[11px] text-red-700 leading-relaxed">
+                <strong className="block mb-0.5 text-red-800">⚠ 저작권 보호 안내</strong>
+                본 전자책의 무단 복제·배포·공유·전송은 「저작권법」 제136조에 따라
+                <strong> 5년 이하의 징역 또는 5천만원 이하의 벌금</strong>에 처해질 수 있습니다.
+                다운로드 링크는 본인 외 공유하지 마세요.
+              </div>
+
               <div className="space-y-2">
-                {ownedEbooks.map((b) => (
-                  <div
-                    key={b.slug}
-                    className="p-4 rounded-xl border border-line"
-                  >
-                    <div className="flex items-start justify-between gap-3 mb-2">
-                      <div className="min-w-0 flex-1">
-                        <div className="inline-block px-2 py-0.5 text-[10px] font-medium rounded-full bg-blue-50 text-blue-600 mb-1">전자책</div>
-                        <p className="font-medium text-ink text-sm">{b.title}</p>
+                {ownedEbooks.map((b) => {
+                  const canDownload = b.hasFile || !!b.legacyDownloadUrl
+                  return (
+                    <div
+                      key={b.slug}
+                      className="p-4 rounded-xl border border-line"
+                    >
+                      <div className="flex items-start justify-between gap-3 mb-2">
+                        <div className="min-w-0 flex-1">
+                          <div className="inline-block px-2 py-0.5 text-[10px] font-medium rounded-full bg-blue-50 text-blue-600 mb-1">전자책</div>
+                          <p className="font-medium text-ink text-sm">{b.title}</p>
+                        </div>
+                        {canDownload ? (
+                          b.hasFile ? (
+                            // R2 보안 다운로드 (인증·권한 검증 후 워커에서 직접 스트리밍)
+                            <a
+                              href={`/api/download/${b.orderId}`}
+                              className="px-3 py-1.5 rounded-lg bg-brand text-white text-xs font-bold hover:bg-brand-dark transition-colors whitespace-nowrap"
+                            >
+                              다운로드
+                            </a>
+                          ) : (
+                            // 레거시 외부 링크 (구 상품 호환)
+                            <a
+                              href={b.legacyDownloadUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="px-3 py-1.5 rounded-lg bg-brand text-white text-xs font-bold hover:bg-brand-dark transition-colors whitespace-nowrap"
+                            >
+                              다운로드
+                            </a>
+                          )
+                        ) : (
+                          <span className="text-xs text-sub">준비 중</span>
+                        )}
                       </div>
-                      {b.downloadUrl ? (
-                        <a
-                          href={b.downloadUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="px-3 py-1.5 rounded-lg bg-brand text-white text-xs font-bold hover:bg-brand-dark transition-colors whitespace-nowrap"
-                        >
-                          다운로드
-                        </a>
-                      ) : (
-                        <span className="text-xs text-sub">준비 중</span>
+                      {b.downloadNote && (
+                        <p className="text-[11px] text-orange-600 mt-2 leading-relaxed">
+                          ⚠ {b.downloadNote}
+                        </p>
                       )}
                     </div>
-                    {b.downloadNote && (
-                      <p className="text-[11px] text-orange-600 mt-2 leading-relaxed">
-                        ⚠ {b.downloadNote}
-                      </p>
-                    )}
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             </div>
           )}

@@ -111,43 +111,23 @@ export async function sendPaymentCompletedToBuyer(
   const productType = (order.productType || '').toLowerCase()
   const hasClassroom = Array.isArray(order.classrooms) && order.classrooms.length > 0
 
-  // 전자책 — 상품 정보에서 다운로드 안내 가져오기
+  // 전자책 — 마이페이지 안내로 통일 (직접 링크 미발송, 매 다운로드 시 인증 검증)
   let ebookDownloadHtml = ''
-  if (productType === 'ebook' && order.productSlug) {
-    try {
-      const result = await payload.find({
-        collection: 'products',
-        where: { slug: { equals: order.productSlug } },
-        limit: 1,
-        depth: 0,
-        overrideAccess: true,
-      })
-      const product = result.docs[0] as any
-      const downloadUrl = product?.downloadUrl
-      const downloadNote = product?.downloadNote || '파일 용량이 크니 반드시 다운로드 후 보관해 주세요.'
-      if (downloadUrl) {
-        ebookDownloadHtml = `
-          <h3 style="color:#333;font-size:15px;margin:24px 0 8px;">📚 전자책 다운로드</h3>
-          <p style="color:#666;font-size:14px;line-height:1.7;margin:0 0 12px;">
-            아래 링크에서 전자책을 다운로드 받으실 수 있습니다.
-          </p>
-          <p style="color:#B45309;font-size:13px;line-height:1.7;margin:0 0 20px;background:#FFF8F1;padding:12px 14px;border-radius:8px;border:1px solid #FFD8A8;">
-            ⚠ ${downloadNote}
-          </p>
-          <div style="text-align:center;margin:24px 0;">
-            <a href="${downloadUrl}" style="display:inline-block;background:#D4756E;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:10px;font-size:14px;font-weight:bold;">전자책 다운로드</a>
-          </div>
-          <p style="color:#666;font-size:13px;line-height:1.7;margin:0 0 16px;text-align:center;">
-            마이페이지에서도 언제든지 다운로드하실 수 있습니다.<br>
-            <a href="${SITE_URL}/mypage" style="color:#D4756E;">마이페이지 가기</a>
-          </p>`
-      } else {
-        ebookDownloadHtml = `
-          <p style="color:#666;font-size:14px;line-height:1.7;margin:0 0 16px;">
-            전자책 다운로드 링크는 곧 마이페이지에 등록됩니다.
-          </p>`
-      }
-    } catch { /* ignore */ }
+  if (productType === 'ebook') {
+    ebookDownloadHtml = `
+      <h3 style="color:#333;font-size:15px;margin:24px 0 8px;">📚 전자책 다운로드 안내</h3>
+      <p style="color:#666;font-size:14px;line-height:1.7;margin:0 0 16px;">
+        아래 마이페이지에서 전자책을 다운로드 받으실 수 있습니다.<br>
+        <strong style="color:#333;">로그인된 본인 계정에서만</strong> 다운로드 가능합니다.
+      </p>
+      <p style="color:#B45309;font-size:13px;line-height:1.7;margin:0 0 20px;background:#FEF2F2;padding:12px 14px;border-radius:8px;border:1px solid #FECACA;">
+        ⚠ <strong>저작권 보호 안내</strong><br>
+        본 전자책의 무단 복제·배포·공유·전송은 「저작권법」 제136조에 따라
+        5년 이하의 징역 또는 5천만원 이하의 벌금에 처해질 수 있습니다.
+      </p>
+      <div style="text-align:center;margin:24px 0;">
+        <a href="${SITE_URL}/mypage" style="display:inline-block;background:#D4756E;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:10px;font-size:14px;font-weight:bold;">마이페이지에서 다운로드</a>
+      </div>`
   }
 
   // 종이책 — 배송 안내

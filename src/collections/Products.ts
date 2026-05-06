@@ -129,14 +129,25 @@ export const Products: CollectionConfig = {
       admin: { hidden: true },
     },
 
-    // 전자책 다운로드 URL (productType='ebook' 일 때)
+    // 전자책 PDF 파일 (productType='ebook' 일 때) — R2 비공개 저장
+    {
+      name: 'ebookFile',
+      type: 'upload',
+      relationTo: 'ebooks' as any,
+      label: '전자책 PDF 파일 (R2 보안 저장)',
+      admin: {
+        description:
+          '전자책 상품일 때 PDF를 직접 업로드하세요. 매 다운로드 요청마다 인증을 거쳐 1회성 스트리밍으로 제공됩니다. (구글 드라이브 등 외부 링크보다 보안 강력)',
+      },
+    },
+    // 구버전 호환 — 외부 다운로드 URL (구글 드라이브 등). ebookFile이 없을 때만 사용
     {
       name: 'downloadUrl',
       type: 'text',
-      label: '전자책 다운로드 URL (구글 드라이브 등)',
+      label: '구 다운로드 URL (구글 드라이브 등 — 비권장)',
       admin: {
         description:
-          '전자책 상품일 때 사용. 결제 완료한 회원이 마이페이지에서 다운로드할 수 있는 링크. 구글 드라이브 공유 링크 등을 입력하세요.',
+          '레거시 전자책에만 사용. 새 상품은 위 ebookFile에 PDF를 직접 업로드하세요. ebookFile이 있으면 이 값은 무시됩니다.',
       },
     },
     {
