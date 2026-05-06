@@ -18,6 +18,9 @@ function CheckoutContent() {
   const [loading, setLoading] = useState(false)
   const [agreed, setAgreed] = useState({ terms: false, refund: false, privacy: false })
   const [payMethod, setPayMethod] = useState<PayMethod>('CARD')
+  // 휴대폰 — KG이니시스 V2 일반결제는 phoneNumber 필수.
+  // 회원 프로필에 있으면 자동 채움, 없으면 결제 직전 입력받고 프로필에도 저장.
+  const [buyerPhone, setBuyerPhone] = useState('')
 
   // slug 만 받고 나머지는 DB에서 조회 (URL의 amount/product 등은 무시 — 위변조 방지)
   const productSlug = searchParams.get('slug') || 'vibe-coding-101'
@@ -55,6 +58,7 @@ function CheckoutContent() {
       .then((data: any) => {
         if (data?.user) {
           setUser(data.user)
+          setBuyerPhone(data.user.phone || '')
           setShipping((s) => ({
             ...s,
             recipient: s.recipient || data.user.name || '',
@@ -99,6 +103,9 @@ function CheckoutContent() {
   }, [productSlug])
 
   const allAgreed = agreed.terms && agreed.refund && agreed.privacy
+  // 휴대폰 형식 검증: 010(또는 011/016/017/018/019)-3~4자리-4자리
+  const phoneNormalized = buyerPhone.replace(/[^0-9]/g, '')
+  const phoneValid = /^01[016789]\d{7,8}$/.test(phoneNormalized)
   const shippingValid =
     !requiresShipping ||
     (shipping.recipient.trim() &&
@@ -108,11 +115,29 @@ function CheckoutContent() {
 
   const handlePayment = async () => {
     if (!allAgreed) return
+    if (!phoneValid) {
+      alert('휴대폰 번호를 정확히 입력해주세요. (예: 010-1234-5678)')
+      return
+    }
     if (requiresShipping && !shippingValid) {
       alert('배송지 정보를 모두 입력해주세요.')
       return
     }
     setLoading(true)
+
+    // 휴대폰을 회원 프로필에도 저장 (다음 결제 자동 채움). 실패해도 결제 진행.
+    if (user?.id && phoneNormalized && phoneNormalized !== (user.phone || '').replace(/[^0-9]/g, '')) {
+      try {
+        await fetch(`/api/users/${user.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ phone: phoneNormalized }),
+        })
+      } catch {
+        // 프로필 저장 실패는 결제에 영향 없음
+      }
+    }
 
     try {
       // 1. 주문 생성
@@ -128,7 +153,7 @@ function CheckoutContent() {
           originalAmount,
           buyerName: user?.name || '',
           buyerEmail: user?.email || '',
-          buyerPhone: user?.phone || '',
+          buyerPhone: phoneNormalized,
           ...(requiresShipping
             ? {
                 shippingRecipient: shipping.recipient.trim(),
@@ -167,7 +192,7 @@ function CheckoutContent() {
         customer: {
           ...(user?.name ? { fullName: user.name } : {}),
           ...(user?.email ? { email: user.email } : {}),
-          ...(user?.phone ? { phoneNumber: user.phone } : {}),
+          phoneNumber: phoneNormalized,
         },
         redirectUrl: `${window.location.origin}/checkout/complete?orderNumber=${orderData.orderNumber}`,
       } as any)
@@ -270,7 +295,7 @@ function CheckoutContent() {
               {/* 주문자 정보 */}
               <div className="p-5 md:p-6 rounded-2xl bg-white border border-line">
                 <h2 className="text-base font-bold text-ink mb-4">주문자 정보</h2>
-                <div className="space-y-2 text-sm">
+                <div className="space-y-3 text-sm">
                   <div className="flex">
                     <span className="text-sub w-20 shrink-0">이름</span>
                     <span className="text-ink">{user.name || '-'}</span>
@@ -279,12 +304,33 @@ function CheckoutContent() {
                     <span className="text-sub w-20 shrink-0">이메일</span>
                     <span className="text-ink break-all">{user.email}</span>
                   </div>
-                  {user.phone && (
-                    <div className="flex">
-                      <span className="text-sub w-20 shrink-0">연락처</span>
-                      <span className="text-ink">{user.phone}</span>
+                  <div>
+                    <div className="flex items-center mb-1.5">
+                      <span className="text-sub w-20 shrink-0">
+                        휴대폰 <span className="text-brand">*</span>
+                      </span>
+                      <input
+                        type="tel"
+                        inputMode="numeric"
+                        value={buyerPhone}
+                        onChange={(e) => setBuyerPhone(e.target.value)}
+                        placeholder="010-1234-5678"
+                        className={`flex-1 px-3 py-2 border rounded-lg text-ink focus:outline-none ${
+                          buyerPhone && !phoneValid
+                            ? 'border-red-300 focus:border-red-500'
+                            : 'border-line focus:border-brand'
+                        }`}
+                      />
                     </div>
-                  )}
+                    <p className="text-xs text-sub ml-20">
+                      결제 진행과 주문 안내를 위해 필요합니다. 한 번 입력하면 다음 결제부터 자동 입력됩니다.
+                    </p>
+                    {buyerPhone && !phoneValid && (
+                      <p className="text-xs text-red-500 ml-20 mt-1">
+                        올바른 휴대폰 번호 형식이 아닙니다.
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -478,7 +524,7 @@ function CheckoutContent() {
                 {/* 결제 버튼 */}
                 <button
                   onClick={handlePayment}
-                  disabled={!allAgreed || loading || (requiresShipping && !shippingValid)}
+                  disabled={!allAgreed || !phoneValid || loading || (requiresShipping && !shippingValid)}
                   className="w-full py-4 bg-brand text-white font-bold rounded-xl hover:bg-brand-dark transition-all disabled:opacity-40 disabled:cursor-not-allowed text-base md:text-lg shadow-md"
                 >
                   {loading ? '처리 중...' : `${amount.toLocaleString()}원 결제하기`}
