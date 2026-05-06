@@ -513,16 +513,35 @@ export default function MyPage() {
             }
             const productByName = new Map(allProducts.map(p => [p.title, p]))
 
+            // classroomSlug → product 매칭 (4단계 폴백)
+            const matchClassroomToProduct = (classroomSlug: string): typeof allProducts[0] | undefined => {
+              // 1) grantedClassroomSlugs에 정확히 포함된 상품
+              const direct = productByClassroomSlug.get(classroomSlug)
+              if (direct) return direct
+              // 2) 상품 slug가 classroomSlug와 정확히 일치 (예: 둘 다 'vibe-coding-101')
+              const exact = productBySlug.get(classroomSlug)
+              if (exact) return exact
+              // 3) classroomSlug가 어떤 상품 slug로 시작 (예: classroom='vibe-coding-101-2', product='vibe-coding-101')
+              for (const p of allProducts) {
+                if (classroomSlug.startsWith(p.slug + '-') || classroomSlug === p.slug) return p
+              }
+              // 4) 상품 slug가 classroomSlug로 시작 (역방향)
+              for (const p of allProducts) {
+                if (p.slug.startsWith(classroomSlug + '-') || p.slug === classroomSlug) return p
+              }
+              return undefined
+            }
+
             for (const o of orders) {
               if (!['paid', 'active', 'completed'].includes(o.status)) continue
               let slug: string | undefined = o.productSlug
               let productMeta = slug ? productBySlug.get(slug) : undefined
 
-              // Fallback 1: classrooms 배열 → grantedClassroomSlugs 역매핑
+              // Fallback 1: classrooms 배열 → 다단계 매칭
               if (!productMeta) {
                 const classroomList: string[] = Array.isArray(o.classrooms) ? o.classrooms : []
                 for (const cs of classroomList) {
-                  const m = productByClassroomSlug.get(cs)
+                  const m = matchClassroomToProduct(cs)
                   if (m) {
                     productMeta = m
                     slug = m.slug
