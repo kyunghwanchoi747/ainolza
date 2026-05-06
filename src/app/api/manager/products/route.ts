@@ -43,6 +43,10 @@ export async function POST(req: NextRequest) {
     const body: any = await req.json()
     const { title, slug, description, price, category, thumbnail, content, status, featured, productType, ebookFile } = body
 
+    // ebookFile은 ebooks 컬렉션 row의 정수 id — string으로 들어오면 number로 캐스팅
+    const ebookFileId =
+      productType === 'ebook' && ebookFile ? Number(ebookFile) || null : null
+
     const created = await (payload as any).create({
       collection: 'products',
       data: {
@@ -56,7 +60,7 @@ export async function POST(req: NextRequest) {
         status: status || 'draft',
         featured: featured || false,
         productType: productType || 'class',
-        ebookFile: productType === 'ebook' ? (ebookFile || null) : null,
+        ebookFile: ebookFileId,
       },
     })
     return NextResponse.json(created)
@@ -80,6 +84,16 @@ export async function PUT(req: NextRequest) {
     const updateData: Record<string, any> = {}
     for (const [key, value] of Object.entries(fields)) {
       if (value !== undefined) updateData[key] = value
+    }
+    // ebookFile relation: 빈 문자열·"null" → null, 숫자 문자열 → number
+    if ('ebookFile' in updateData) {
+      const v = updateData.ebookFile
+      if (v === '' || v === null || v === 'null' || v === undefined) {
+        updateData.ebookFile = null
+      } else {
+        const n = Number(v)
+        updateData.ebookFile = Number.isFinite(n) && n > 0 ? n : null
+      }
     }
 
     const updated = await payload.update({ collection: 'products', id, data: updateData })
