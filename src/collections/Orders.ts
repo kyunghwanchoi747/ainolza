@@ -18,9 +18,12 @@ export const Orders: CollectionConfig = {
   },
   hooks: {
     afterChange: [
-      async ({ doc, operation, previousDoc, req }): Promise<void> => {
+      async ({ doc, operation, previousDoc, req, context }): Promise<void> => {
         const d = doc as any
         const oid = d.orderNumber || String(d.id)
+
+        // 레거시 임포트 등 알림 발송이 필요 없는 경우 — 호출 시 context.skipNotify=true 전달
+        if ((context as { skipNotify?: boolean })?.skipNotify) return
 
         // 각 알림을 개별 try/catch — 하나 실패해도 주문 처리에 영향 없음
         if (operation === 'create') {
