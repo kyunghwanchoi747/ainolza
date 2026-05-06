@@ -3,20 +3,47 @@ import { getPayloadClient } from '@/lib/payload'
 import { requireAdmin } from '@/lib/auth'
 
 /**
- * 관리자 전용 — 특정 회원에게 강의실 액세스 권한을 부여한다.
- * 내부적으로는 status='paid', amount=0, productName='[테스트] ...' 인
- * Order 1건을 생성한다.
+ * 관리자 전용 — 특정 회원에게 상품 권한을 부여한다.
+ * status='paid', amount=0, orderNumber=TEST_*** 인 Order 1건 생성.
+ *
+ * 입력:
+ *  - productSlug: 상품 slug (강의/전자책/종이책 모두). 권장.
+ *  - classroomSlug: (구버전 호환) 강의실 slug 직접 지정. 자동으로 productSlug 매핑됨.
+ *
+ * productSlug → 해당 상품의 grantedClassroomSlugs를 Order.classrooms에 복사
+ *   + productSlug, productName, productType도 Order에 저장
+ *   → 마이페이지에서 강의실/전자책/종이책 모두 정상 노출
  */
 export async function POST(request: NextRequest) {
   const adminCheck = await requireAdmin(request)
   if (adminCheck) return adminCheck
 
   try {
-    const body = (await request.json()) as { userId?: number; email?: string; classroomSlug?: string }
-    const { userId, email, classroomSlug } = body
+    const body = (await request.json()) as {
+      userId?: number
+      email?: string
+      productSlug?: string
+      classroomSlug?: string // 구버전 호환
+    }
+    const { userId, email } = body
+    let { productSlug } = body
 
-    if (!classroomSlug) {
-      return NextResponse.json({ error: 'classroomSlug 필수' }, { status: 400 })
+    if (!productSlug && body.classroomSlug) {
+      // 구버전 호환: classroomSlug 만으로 들어오면 grantedClassroomSlugs에 해당 slug가 포함된 첫 상품 찾기
+      const payload = await getPayloadClient()
+      const products = await payload.find({
+        collection: 'products',
+        where: { 'grantedClassroomSlugs.slug': { equals: body.classroomSlug } },
+        limit: 1,
+        depth: 0,
+        overrideAccess: true,
+      })
+      const matched = products.docs[0] as any
+      if (matched?.slug) productSlug = matched.slug
+    }
+
+    if (!productSlug) {
+      return NextResponse.json({ error: 'productSlug 필수' }, { status: 400 })
     }
     if (!userId && !email) {
       return NextResponse.json({ error: 'userId 또는 email 필요' }, { status: 400 })
@@ -24,17 +51,25 @@ export async function POST(request: NextRequest) {
 
     const payload = await getPayloadClient()
 
-    // DB에서 강의실 존재 확인
-    const classroomResult = await payload.find({
-      collection: 'classrooms' as any,
-      where: { slug: { equals: classroomSlug } },
+    // 상품 조회
+    const productResult = await payload.find({
+      collection: 'products',
+      where: { slug: { equals: productSlug } },
       limit: 1,
       depth: 0,
       overrideAccess: true,
     })
-    const classroom = classroomResult.docs[0] as any
-    if (!classroom) {
-      return NextResponse.json({ error: '존재하지 않는 강의실' }, { status: 400 })
+    const product = productResult.docs[0] as any
+    if (!product) {
+      return NextResponse.json({ error: '존재하지 않는 상품' }, { status: 400 })
+    }
+
+    // 상품에 연결된 강의실 slug 추출 (grantedClassroomSlugs 배열)
+    const grantedClassroomSlugs: string[] = []
+    const arr = Array.isArray(product.grantedClassroomSlugs) ? product.grantedClassroomSlugs : []
+    for (const item of arr) {
+      const slug = typeof item === 'object' ? item.slug : item
+      if (slug && !grantedClassroomSlugs.includes(slug)) grantedClassroomSlugs.push(slug)
     }
 
     // 회원 찾기
@@ -58,14 +93,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '회원을 찾을 수 없습니다' }, { status: 404 })
     }
 
-    // 이미 권한이 있는지 체크 (중복 부여 방지)
+    // 이미 같은 상품 권한이 있는지 체크 (중복 부여 방지)
     const existing = await payload.find({
       collection: 'orders',
       where: {
         and: [
           { user: { equals: user.id } },
           { status: { equals: 'paid' } },
-          { classrooms: { in: [classroomSlug] } },
+          { productSlug: { equals: productSlug } },
         ],
       },
       limit: 1,
@@ -74,7 +109,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         ok: true,
         already: true,
-        message: '이미 해당 강의실 권한이 있습니다.',
+        message: `이미 [${product.title}] 권한이 있습니다.`,
         orderId: existing.docs[0].id,
       })
     }
@@ -89,28 +124,32 @@ export async function POST(request: NextRequest) {
         buyerEmail: user.email,
         buyerPhone: user.phone || '',
         user: user.id,
-        productName: `[테스트] ${classroom.shortTitle}`,
-        productType: 'class' as const,
+        productName: `[테스트] ${product.title}`,
+        productSlug: product.slug,
+        productType: product.productType || 'class',
         amount: 0,
         status: 'paid' as const,
-        classrooms: [classroomSlug],
-        adminMemo: `관리자(${(adminCheck === null ? 'admin' : '')}) 가 테스트용으로 부여한 강의실 권한입니다.`,
+        classrooms: grantedClassroomSlugs.length > 0 ? grantedClassroomSlugs : undefined,
+        adminMemo: `관리자가 테스트용으로 부여한 [${product.title}] 권한입니다.`,
       } as any,
     })
 
     // 어드민에게 권한 부여 알림 메일
     try {
       const adminTo = process.env.ADMIN_EMAIL || 'rex39@naver.com'
+      const grantedLabel = grantedClassroomSlugs.length > 0
+        ? ` (강의실: ${grantedClassroomSlugs.join(', ')})`
+        : ''
       await payload.sendEmail({
         to: adminTo,
-        subject: `[AI놀자] 강의실 권한 부여: ${user.name || user.email}`,
-        html: `<p>회원: ${user.name || ''} (${user.email})<br>부여된 강의실: ${classroom.shortTitle}<br>주문번호: ${orderNumber}</p>`,
+        subject: `[AI놀자] 상품 권한 부여: ${user.name || user.email}`,
+        html: `<p>회원: ${user.name || ''} (${user.email})<br>부여된 상품: ${product.title}${grantedLabel}<br>주문번호: ${orderNumber}</p>`,
       })
     } catch (e) { console.error('[GRANT NOTIFY]', (e as Error).message) }
 
     return NextResponse.json({
       ok: true,
-      message: `${user.email} 에게 ${classroom.shortTitle} 권한을 부여했습니다.`,
+      message: `${user.email} 에게 [${product.title}] 권한을 부여했습니다.`,
       orderId: order.id,
     })
   } catch (err) {

@@ -12,23 +12,37 @@ type User = {
   name?: string
 }
 
-type Classroom = {
+type ProductOption = {
   slug: string
-  label: string
+  title: string
+  productType: string // 'class' | 'ebook' | 'book' | 'bundle'
+  classroomSlugs: string[] // grantedClassroomSlugs
 }
 
 type UserOrder = {
   id: number
   orderNumber: string
   productName: string
+  productSlug?: string
+  productType?: string
   classrooms?: string[]
   status: string
   amount: number
   isTest: boolean
 }
 
-const labelOf = (slug: string, options: Classroom[]) =>
-  options.find((c) => c.slug === slug)?.label || slug
+const typeLabel = (t: string) =>
+  t === 'class' ? '강의' : t === 'ebook' ? '전자책' : t === 'book' ? '종이책' : t === 'bundle' ? '번들' : t
+
+const typeBadgeColor = (t: string): 'default' | 'secondary' | 'success' | 'warning' | 'outline' => {
+  switch (t) {
+    case 'class': return 'default'
+    case 'ebook': return 'secondary'
+    case 'book': return 'warning'
+    case 'bundle': return 'success'
+    default: return 'outline'
+  }
+}
 
 export default function AccessGrantPage() {
   const [emailQuery, setEmailQuery] = useState('')
@@ -36,29 +50,39 @@ export default function AccessGrantPage() {
   const [results, setResults] = useState<User[]>([])
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   const [selectedSlug, setSelectedSlug] = useState<string>('')
-  const [classroomOptions, setClassroomOptions] = useState<Classroom[]>([])
+  const [productOptions, setProductOptions] = useState<ProductOption[]>([])
   const [granting, setGranting] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
-  const [grantedHistory, setGrantedHistory] = useState<{ orderId: number; email: string; classroom: string }[]>([])
+  const [grantedHistory, setGrantedHistory] = useState<{ orderId: number; email: string; productLabel: string }[]>([])
   const [userOrders, setUserOrders] = useState<UserOrder[]>([])
   const [loadingOrders, setLoadingOrders] = useState(false)
 
-  // 강의실 목록 DB에서 로드
+  // 게시 중인 모든 상품 로드 (강의/전자책/종이책/번들 전부)
   useEffect(() => {
-    fetch('/api/classrooms?limit=100&depth=0&where[status][not_equals]=draft', { credentials: 'include' })
+    fetch('/api/products?where[status][equals]=published&limit=100&depth=0', { credentials: 'include' })
       .then(r => r.ok ? r.json() : null)
       .then((data: any) => {
-        const opts: Classroom[] = (data?.docs || []).map((d: any) => ({
-          slug: d.slug,
-          label: d.shortTitle || d.title,
-        }))
-        setClassroomOptions(opts)
+        const opts: ProductOption[] = (data?.docs || []).map((d: any) => {
+          const arr = Array.isArray(d.grantedClassroomSlugs) ? d.grantedClassroomSlugs : []
+          const classroomSlugs: string[] = []
+          for (const item of arr) {
+            const slug = typeof item === 'object' ? item.slug : item
+            if (slug && !classroomSlugs.includes(slug)) classroomSlugs.push(slug)
+          }
+          return {
+            slug: d.slug,
+            title: d.title,
+            productType: d.productType || 'class',
+            classroomSlugs,
+          }
+        })
+        setProductOptions(opts)
         if (opts.length > 0) setSelectedSlug(opts[0].slug)
       })
       .catch(() => {})
   }, [])
 
-  // 선택된 회원의 현재 보유 강의실 (paid 주문) 조회
+  // 선택된 회원의 주문 목록 (paid)
   const loadUserOrders = async (userId: number) => {
     setLoadingOrders(true)
     try {
@@ -71,6 +95,8 @@ export default function AccessGrantPage() {
         id: o.id,
         orderNumber: o.orderNumber,
         productName: o.productName,
+        productSlug: o.productSlug,
+        productType: o.productType,
         classrooms: o.classrooms || [],
         status: o.status,
         amount: o.amount || 0,
@@ -118,7 +144,7 @@ export default function AccessGrantPage() {
 
   const grant = async () => {
     if (!selectedUser || !selectedSlug) {
-      setMessage({ type: 'error', text: '회원과 강의실을 선택해주세요.' })
+      setMessage({ type: 'error', text: '회원과 상품을 선택해주세요.' })
       return
     }
     setGranting(true)
@@ -128,7 +154,7 @@ export default function AccessGrantPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ userId: selectedUser.id, classroomSlug: selectedSlug }),
+        body: JSON.stringify({ userId: selectedUser.id, productSlug: selectedSlug }),
       })
       const data = (await res.json()) as {
         ok?: boolean
@@ -141,23 +167,20 @@ export default function AccessGrantPage() {
         setMessage({ type: 'error', text: data.error || '권한 부여 실패' })
         return
       }
+      const product = productOptions.find((p) => p.slug === selectedSlug)
+      const productLabel = product?.title || selectedSlug
       setMessage({
         type: 'success',
         text: data.already
-          ? `${selectedUser.email} 은(는) 이미 ${classroomOptions.find((c) => c.slug === selectedSlug)?.label} 권한이 있습니다.`
+          ? `${selectedUser.email} 은(는) 이미 [${productLabel}] 권한이 있습니다.`
           : data.message || '권한이 부여되었습니다.',
       })
       if (data.orderId && !data.already) {
         setGrantedHistory((h) => [
-          {
-            orderId: data.orderId,
-            email: selectedUser.email,
-            classroom: classroomOptions.find((c) => c.slug === selectedSlug)?.label || selectedSlug,
-          },
+          { orderId: data.orderId!, email: selectedUser.email, productLabel },
           ...h,
         ])
       }
-      // 부여 후 목록 갱신
       await loadUserOrders(selectedUser.id)
     } catch (err) {
       setMessage({ type: 'error', text: (err as Error).message })
@@ -166,11 +189,14 @@ export default function AccessGrantPage() {
     }
   }
 
-  const revoke = async (orderId: number, classroomSlug: string, isTest: boolean) => {
-    if (!confirm('이 강의실 권한을 회수하시겠습니까?')) return
+  const revokeOrder = async (orderId: number, isTest: boolean) => {
+    if (!isTest) {
+      setMessage({ type: 'error', text: '실제 구매 주문은 회수할 수 없습니다. 환불 처리를 이용하세요.' })
+      return
+    }
+    if (!confirm('이 테스트 주문을 삭제(회수)하시겠습니까?')) return
     try {
       const params = new URLSearchParams({ orderId: String(orderId) })
-      if (!isTest) params.set('classroomSlug', classroomSlug)
       const res = await fetch(`/api/manager/grant-classroom?${params.toString()}`, {
         method: 'DELETE',
         credentials: 'include',
@@ -191,10 +217,10 @@ export default function AccessGrantPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">강의실 권한 부여</h1>
+        <h1 className="text-3xl font-bold tracking-tight">상품 권한 부여</h1>
         <p className="text-muted-foreground mt-1">
-          테스트용으로 특정 회원에게 강의실 액세스 권한을 부여합니다. 내부적으로 amount=0인
-          테스트 주문(`paid` 상태)을 생성하므로 매출 통계에는 영향을 주지 않습니다 (필터링 권장).
+          테스트용으로 특정 회원에게 상품(강의/전자책/종이책) 액세스 권한을 부여합니다.
+          내부적으로 amount=0인 테스트 주문(<code>TEST_*</code>)을 생성하므로 매출 통계엔 영향 없습니다.
         </p>
       </div>
 
@@ -247,10 +273,9 @@ export default function AccessGrantPage() {
       {selectedUser && (
         <Card>
           <CardHeader>
-            <CardTitle>현재 보유 강의실</CardTitle>
+            <CardTitle>현재 보유 상품</CardTitle>
             <CardDescription>
-              결제완료(paid) 상태인 주문에서 추출한 강의실 액세스 목록입니다.
-              테스트 주문(TEST_)만 회수할 수 있습니다 (실제 구매는 회수 불가).
+              결제완료(paid) 주문 목록입니다. 테스트 주문(<code>TEST_*</code>)만 회수할 수 있습니다.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -260,46 +285,53 @@ export default function AccessGrantPage() {
               <p className="text-sm text-muted-foreground">결제완료 주문이 없습니다.</p>
             ) : (
               <div className="space-y-2">
-                {userOrders.map((o) => {
-                  const slugs = o.classrooms || []
-                  return (
-                    <div
-                      key={o.id}
-                      className={`p-3 border rounded-md ${o.isTest ? 'bg-amber-50 border-amber-200' : ''}`}
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0 flex-1">
+                {userOrders.map((o) => (
+                  <div
+                    key={o.id}
+                    className={`p-3 border rounded-md ${o.isTest ? 'bg-amber-50 border-amber-200' : ''}`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 mb-0.5 flex-wrap">
                           <p className="text-sm font-medium truncate">{o.productName}</p>
-                          <p className="text-xs text-muted-foreground mt-0.5">
-                            {o.orderNumber} · {o.amount.toLocaleString()}원
-                            {o.isTest && (
-                              <span className="ml-2 px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 text-[10px] font-medium">
-                                TEST
-                              </span>
-                            )}
-                          </p>
-                          {slugs.length > 0 && (
-                            <div className="flex flex-wrap gap-2 mt-2">
-                              {slugs.map((s) => (
-                                <div key={s} className="flex items-center gap-1">
-                                  <Badge variant="secondary" className="text-xs">{labelOf(s, classroomOptions)}</Badge>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-5 px-1.5 text-xs text-red-500 hover:text-red-700 hover:bg-red-50"
-                                    onClick={() => revoke(o.id, s, o.isTest)}
-                                  >
-                                    회수
-                                  </Button>
-                                </div>
-                              ))}
-                            </div>
+                          {o.productType && (
+                            <Badge variant={typeBadgeColor(o.productType)} className="text-[10px]">
+                              {typeLabel(o.productType)}
+                            </Badge>
+                          )}
+                          {o.isTest && (
+                            <span className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 text-[10px] font-medium">
+                              TEST
+                            </span>
                           )}
                         </div>
+                        <p className="text-xs text-muted-foreground">
+                          {o.orderNumber} · {o.amount.toLocaleString()}원
+                          {o.productSlug && ` · ${o.productSlug}`}
+                        </p>
+                        {Array.isArray(o.classrooms) && o.classrooms.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-1.5">
+                            {o.classrooms.map((s) => (
+                              <Badge key={s} variant="outline" className="text-[10px]">
+                                {s}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
                       </div>
+                      {o.isTest && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 px-2 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 shrink-0"
+                          onClick={() => revokeOrder(o.id, o.isTest)}
+                        >
+                          회수
+                        </Button>
+                      )}
                     </div>
-                  )
-                })}
+                  </div>
+                ))}
               </div>
             )}
           </CardContent>
@@ -308,29 +340,45 @@ export default function AccessGrantPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>2. 강의실 선택</CardTitle>
+          <CardTitle>2. 상품 선택</CardTitle>
+          <CardDescription>강의·전자책·종이책 모두 부여 가능합니다.</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-2">
-            {classroomOptions.map((c) => (
-              <label
-                key={c.slug}
-                className={`flex items-center gap-3 p-3 border rounded-md cursor-pointer hover:bg-muted/50 ${
-                  selectedSlug === c.slug ? 'bg-primary/5 border-primary' : ''
-                }`}
-              >
-                <input
-                  type="radio"
-                  name="classroom"
-                  value={c.slug}
-                  checked={selectedSlug === c.slug}
-                  onChange={(e) => setSelectedSlug(e.target.value)}
-                />
-                <span className="text-sm font-medium">{c.label}</span>
-                <span className="text-xs text-muted-foreground ml-auto">{c.slug}</span>
-              </label>
-            ))}
-          </div>
+          {productOptions.length === 0 ? (
+            <p className="text-sm text-muted-foreground">게시 중인 상품이 없습니다.</p>
+          ) : (
+            <div className="space-y-2">
+              {productOptions.map((p) => (
+                <label
+                  key={p.slug}
+                  className={`flex items-start gap-3 p-3 border rounded-md cursor-pointer hover:bg-muted/50 ${
+                    selectedSlug === p.slug ? 'bg-primary/5 border-primary' : ''
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="product"
+                    value={p.slug}
+                    checked={selectedSlug === p.slug}
+                    onChange={(e) => setSelectedSlug(e.target.value)}
+                    className="mt-1"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-sm font-medium">{p.title}</span>
+                      <Badge variant={typeBadgeColor(p.productType)} className="text-[10px]">
+                        {typeLabel(p.productType)}
+                      </Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                      {p.slug}
+                      {p.classroomSlugs.length > 0 && ` → 강의실: ${p.classroomSlugs.join(', ')}`}
+                    </p>
+                  </div>
+                </label>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -371,9 +419,9 @@ export default function AccessGrantPage() {
                 >
                   <div className="text-sm">
                     <span className="font-medium">{g.email}</span>
-                    <span className="text-muted-foreground"> · {g.classroom}</span>
+                    <span className="text-muted-foreground"> · {g.productLabel}</span>
                   </div>
-                  <Button variant="outline" size="sm" onClick={() => revoke(g.orderId, classroomOptions.find(c => c.label === g.classroom)?.slug || '', true)}>
+                  <Button variant="outline" size="sm" onClick={() => revokeOrder(g.orderId, true)}>
                     회수
                   </Button>
                 </div>
