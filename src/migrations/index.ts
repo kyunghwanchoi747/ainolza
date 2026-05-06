@@ -4,6 +4,7 @@ import * as migration_20260409_004239_classrooms_books from './20260409_004239_c
 import * as migration_20260409_065546_products_extended from './20260409_065546_products_extended';
 import * as migration_20260502_034500_reviews_displayname from './20260502_034500_reviews_displayname';
 import * as migration_20260506_054000_ebooks from './20260506_054000_ebooks';
+import * as migration_20260506_080000_ebooks_locked_rels from './20260506_080000_ebooks_locked_rels';
 
 export const migrations = [
   {
@@ -35,5 +36,10 @@ export const migrations = [
     up: migration_20260506_054000_ebooks.up,
     down: migration_20260506_054000_ebooks.down,
     name: '20260506_054000_ebooks'
+  },
+  {
+    up: migration_20260506_080000_ebooks_locked_rels.up,
+    down: migration_20260506_080000_ebooks_locked_rels.down,
+    name: '20260506_080000_ebooks_locked_rels'
   },
 ];
