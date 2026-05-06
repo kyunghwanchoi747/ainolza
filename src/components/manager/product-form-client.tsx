@@ -20,6 +20,12 @@ interface Category {
   slug: string
 }
 
+interface EbookOption {
+  id: string
+  title: string
+  filename?: string
+}
+
 interface ProductFormClientProps {
   mode: 'create' | 'edit'
   initialData?: {
@@ -32,8 +38,11 @@ interface ProductFormClientProps {
     content?: string
     status?: string
     featured?: boolean
+    productType?: string
+    ebookFile?: string
   }
   categories: Category[]
+  ebooks?: EbookOption[]
 }
 
 function generateSlug(title: string): string {
@@ -49,6 +58,7 @@ export function ProductFormClient({
   mode,
   initialData,
   categories,
+  ebooks = [],
 }: ProductFormClientProps) {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -61,6 +71,8 @@ export function ProductFormClient({
   const [content, setContent] = useState(initialData?.content || '')
   const [status, setStatus] = useState(initialData?.status || 'draft')
   const [featured, setFeatured] = useState(initialData?.featured || false)
+  const [productType, setProductType] = useState(initialData?.productType || 'class')
+  const [ebookFile, setEbookFile] = useState(initialData?.ebookFile || '')
 
   const handleTitleBlur = () => {
     if (!slug && title) {
@@ -88,6 +100,9 @@ export function ProductFormClient({
       content: content.trim(),
       status,
       featured,
+      productType,
+      // ebook 유형일 때만 ebookFile 전송 (다른 유형은 null로 비움)
+      ebookFile: productType === 'ebook' ? (ebookFile || null) : null,
     }
 
     try {
@@ -184,6 +199,58 @@ export function ProductFormClient({
               placeholder="0"
             />
           </div>
+
+          {/* 상품 유형 */}
+          <div className="space-y-2">
+            <label htmlFor="productType" className="text-sm font-medium">
+              상품 유형
+            </label>
+            <select
+              id="productType"
+              value={productType}
+              onChange={(e) => setProductType(e.target.value)}
+              className="w-full rounded-md border p-2.5 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+            >
+              <option value="class">강의</option>
+              <option value="ebook">전자책</option>
+              <option value="book">종이책</option>
+              <option value="bundle">번들</option>
+            </select>
+          </div>
+
+          {/* 전자책 PDF 파일 — productType=ebook일 때만 노출 */}
+          {productType === 'ebook' && (
+            <div className="space-y-2">
+              <label htmlFor="ebookFile" className="text-sm font-medium">
+                전자책 PDF 파일 (R2 보안 저장)
+              </label>
+              {ebooks.length === 0 ? (
+                <p className="text-xs text-muted-foreground rounded-md border border-dashed p-3">
+                  업로드된 전자책 파일이 없습니다. <strong>/admin → Ebooks → Create New</strong>에서 PDF를 먼저 업로드한 후 이 칸에서 선택해 주세요.
+                </p>
+              ) : (
+                <>
+                  <select
+                    id="ebookFile"
+                    value={ebookFile}
+                    onChange={(e) => setEbookFile(e.target.value)}
+                    className="w-full rounded-md border p-2.5 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                  >
+                    <option value="">— 선택 안 함 —</option>
+                    {ebooks.map((eb) => (
+                      <option key={eb.id} value={eb.id}>
+                        {eb.title}
+                        {eb.filename ? ` (${eb.filename})` : ''}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-muted-foreground">
+                    결제 완료 회원이 마이페이지에서 다운로드합니다. 매 요청마다 권한 검증을 거쳐 R2에서 직접 스트리밍됩니다.
+                  </p>
+                </>
+              )}
+            </div>
+          )}
 
           {/* 카테고리 */}
           <div className="space-y-2">

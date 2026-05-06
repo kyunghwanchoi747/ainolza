@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
   try {
     const payload = await getPayloadClient()
     const body: any = await req.json()
-    const { title, slug, description, price, category, thumbnail, content, status, featured } = body
+    const { title, slug, description, price, category, thumbnail, content, status, featured, productType, ebookFile } = body
 
     const created = await (payload as any).create({
       collection: 'products',
@@ -55,6 +55,8 @@ export async function POST(req: NextRequest) {
         content,
         status: status || 'draft',
         featured: featured || false,
+        productType: productType || 'class',
+        ebookFile: productType === 'ebook' ? (ebookFile || null) : null,
       },
     })
     return NextResponse.json(created)

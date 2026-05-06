@@ -13,14 +13,22 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
 
   let product: any = null
   let categories: { id: string; name: string; slug: string }[] = []
+  let ebooks: { id: string; title: string; filename?: string }[] = []
 
   try {
     const payload = await getPayloadClient()
 
-    // 상품과 카테고리를 병렬로 가져옴
-    const [productResult, categoriesResult] = await Promise.all([
-      payload.findByID({ collection: 'products', id }),
+    // 상품·카테고리·전자책 목록 병렬 조회
+    const [productResult, categoriesResult, ebooksResult] = await Promise.all([
+      payload.findByID({ collection: 'products', id, depth: 1 }),
       payload.find({ collection: 'product-categories', sort: 'name', limit: 100 }),
+      payload.find({
+        collection: 'ebooks' as any,
+        sort: '-updatedAt',
+        limit: 100,
+        depth: 0,
+        overrideAccess: true,
+      }),
     ])
 
     product = productResult
@@ -29,6 +37,11 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
       name: doc.name || '',
       slug: doc.slug || '',
     }))
+    ebooks = (ebooksResult.docs as any[]).map((doc) => ({
+      id: String(doc.id),
+      title: doc.title || '(제목 없음)',
+      filename: doc.filename,
+    }))
   } catch {
     notFound()
   }
@@ -36,6 +49,13 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
   if (!product) {
     notFound()
   }
+
+  const ebookFileId =
+    typeof product.ebookFile === 'object' && product.ebookFile
+      ? String(product.ebookFile.id)
+      : product.ebookFile
+        ? String(product.ebookFile)
+        : ''
 
   const initialData = {
     id: String(product.id),
@@ -47,6 +67,8 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
     content: product.content || '',
     status: product.status || 'draft',
     featured: product.featured || false,
+    productType: product.productType || 'class',
+    ebookFile: ebookFileId,
   }
 
   return (
@@ -54,6 +76,7 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
       mode="edit"
       initialData={initialData}
       categories={categories}
+      ebooks={ebooks}
     />
   )
 }
