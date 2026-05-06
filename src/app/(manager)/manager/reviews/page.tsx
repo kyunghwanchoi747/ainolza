@@ -101,6 +101,32 @@ export default function ManagerReviewsPage() {
     setReviews(prev => prev.filter(r => r.id !== id))
   }
 
+  // 후기의 product 변경 (인라인 매핑)
+  const handleChangeProduct = async (reviewId: number, productIdRaw: string) => {
+    const productId = productIdRaw ? Number(productIdRaw) : null
+    const res = await fetch(`/api/reviews/${reviewId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ product: productId }),
+    })
+    if (!res.ok) {
+      alert('상품 매핑에 실패했습니다.')
+      return
+    }
+    // 로컬 상태 즉시 갱신 (재로드 비용 절감)
+    setReviews(prev => prev.map(r => {
+      if (r.id !== reviewId) return r
+      const product = productId ? products.find(p => p.id === productId) : null
+      return {
+        ...r,
+        product: product
+          ? { id: product.id, title: product.title, productType: product.productType }
+          : null,
+      }
+    }))
+  }
+
   const handleMove = async (index: number, dir: 'up' | 'down') => {
     const next = [...reviews]
     const swapIdx = dir === 'up' ? index - 1 : index + 1
@@ -281,6 +307,12 @@ export default function ManagerReviewsPage() {
             const date = r.createdAt ? new Date(r.createdAt).toLocaleDateString('ko-KR') : ''
             const isCustom = !!r.displayName && !r.user
             const productInfo = productLabelOf(r)
+            const currentProductId =
+              typeof r.product === 'object' && r.product
+                ? r.product.id
+                : typeof r.product === 'number'
+                  ? r.product
+                  : ''
             return (
               <div key={r.id} className="flex gap-3 items-start p-4 rounded-xl border bg-white">
                 <div className="flex flex-col gap-1 pt-1">
@@ -326,6 +358,23 @@ export default function ManagerReviewsPage() {
                       <ExternalLink className="w-3 h-3" />{r.siteUrl}
                     </a>
                   )}
+
+                  {/* 인라인 상품 매핑 select — 변경 즉시 저장 */}
+                  <div className="mt-2 flex items-center gap-2">
+                    <label className="text-[11px] text-muted-foreground shrink-0">상품 매핑:</label>
+                    <select
+                      value={String(currentProductId || '')}
+                      onChange={e => handleChangeProduct(r.id, e.target.value)}
+                      className="flex-1 max-w-xs px-2 py-1 rounded-md border text-xs bg-white"
+                    >
+                      <option value="">— 상품 미지정 (홈 추천 후기) —</option>
+                      {products.map(p => (
+                        <option key={p.id} value={p.id}>
+                          [{typeLabel(p.productType)}] {p.title}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
 
                 <button

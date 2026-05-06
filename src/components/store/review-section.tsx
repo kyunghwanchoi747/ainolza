@@ -48,10 +48,13 @@ export function ReviewSection({ productSlug, productId }: ReviewSectionProps) {
         )
         if (ordersRes.ok) {
           const ordersData = (await ordersRes.json()) as { docs?: any[] }
-          // classrooms이나 productName으로 매칭
+          // 우선순위: productSlug 정확 매칭 > classrooms 포함 > productName 포함
           const hasPurchased = (ordersData.docs || []).some((o: any) => {
-            const cls = o.classrooms || []
-            return cls.includes(productSlug) || (o.productName || '').includes(productSlug)
+            if (o.productSlug && o.productSlug === productSlug) return true
+            const cls = Array.isArray(o.classrooms) ? o.classrooms : []
+            if (cls.includes(productSlug)) return true
+            if ((o.productName || '').includes(productSlug)) return true
+            return false
           })
           setCanWrite(hasPurchased)
         }
