@@ -34,13 +34,19 @@ export default function MyPage() {
   const [ebookMeta, setEbookMeta] = useState<EbookMeta[]>([])
   const [loading, setLoading] = useState(true)
   const [showOrders, setShowOrders] = useState(false)
-  const [myReview, setMyReview] = useState<any>(null)
-  const [showReviewForm, setShowReviewForm] = useState(false)
-  const [reviewRating, setReviewRating] = useState(5)
-  const [reviewContent, setReviewContent] = useState('')
-  const [reviewSiteUrl, setReviewSiteUrl] = useState('')
+  const [myReviews, setMyReviews] = useState<any[]>([])
+  // 작성/수정 폼 — 어떤 상품에 대해 작성 중인지
+  const [reviewForm, setReviewForm] = useState<{
+    productId: number
+    productName: string
+    productType?: string
+    reviewId?: number // 있으면 수정 모드
+    rating: number
+    content: string
+    siteUrl: string
+  } | null>(null)
   const [reviewSubmitting, setReviewSubmitting] = useState(false)
-  const [reviewSubmitted, setReviewSubmitted] = useState(false)
+  const [reviewReloadKey, setReviewReloadKey] = useState(0)
 
   useEffect(() => {
     Promise.all([
@@ -76,22 +82,16 @@ export default function MyPage() {
       .finally(() => setLoading(false))
   }, [router])
 
-  // 내 후기 불러오기
+  // 내가 작성한 후기 목록 (depth=1 → product 정보 포함)
   useEffect(() => {
     if (!user?.id) return
-    fetch(`/api/reviews?where[user][equals]=${user.id}&limit=1`, { credentials: 'include' })
+    fetch(`/api/reviews?where[user][equals]=${user.id}&limit=100&depth=1`, { credentials: 'include' })
       .then(r => r.ok ? r.json() : null)
       .then((data: any) => {
-        if (data?.docs?.length > 0) {
-          const r = data.docs[0]
-          setMyReview(r)
-          setReviewRating(r.rating)
-          setReviewContent(r.content)
-          setReviewSiteUrl(r.siteUrl || '')
-        }
+        setMyReviews(data?.docs || [])
       })
-      .catch(() => {})
-  }, [user?.id, reviewSubmitted])
+      .catch(() => setMyReviews([]))
+  }, [user?.id, reviewReloadKey])
 
   const handleLogout = async () => {
     await fetch('/api/users/logout', { method: 'POST', credentials: 'include' })
@@ -154,13 +154,21 @@ export default function MyPage() {
 
   const handleReviewSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!user || !reviewContent.trim()) return
+    if (!user || !reviewForm || !reviewForm.content.trim()) return
     setReviewSubmitting(true)
     try {
-      const body = { rating: reviewRating, content: reviewContent.trim(), siteUrl: reviewSiteUrl.trim() || null }
+      const body: Record<string, any> = {
+        rating: reviewForm.rating,
+        content: reviewForm.content.trim(),
+        siteUrl: reviewForm.siteUrl.trim() || null,
+        product: reviewForm.productId,
+        status: 'approved',
+      }
       let res: Response
-      if (myReview) {
-        res = await fetch(`/api/reviews/${myReview.id}`, {
+      if (reviewForm.reviewId) {
+        // 수정 — product는 변경 안 함 (이미 매핑된 상태)
+        delete body.product
+        res = await fetch(`/api/reviews/${reviewForm.reviewId}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
@@ -175,11 +183,30 @@ export default function MyPage() {
         })
       }
       if (res.ok || res.status === 201) {
-        setReviewSubmitted(prev => !prev)
-        setShowReviewForm(false)
+        setReviewReloadKey(k => k + 1)
+        setReviewForm(null)
+      } else {
+        alert('후기 저장에 실패했습니다.')
       }
-    } catch {}
-    finally { setReviewSubmitting(false) }
+    } catch {
+      alert('후기 저장 중 오류가 발생했습니다.')
+    } finally {
+      setReviewSubmitting(false)
+    }
+  }
+
+  // 후기 삭제
+  const handleReviewDelete = async (reviewId: number) => {
+    if (!confirm('이 후기를 삭제하시겠습니까?')) return
+    try {
+      const res = await fetch(`/api/reviews/${reviewId}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      })
+      if (res.ok) setReviewReloadKey(k => k + 1)
+    } catch {
+      alert('삭제에 실패했습니다.')
+    }
   }
 
   const SERVICE_DAYS = 100
@@ -447,100 +474,268 @@ export default function MyPage() {
             </div>
           )}
 
-          {/* 수강 후기 */}
-          <div className="mb-6 p-6 rounded-2xl border border-line bg-surface">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <MessageSquare className="w-5 h-5 text-brand" />
-                <h3 className="font-medium text-ink">수강 후기</h3>
-              </div>
-              {!showReviewForm && (
-                <button
-                  onClick={() => setShowReviewForm(true)}
-                  className="text-xs px-3 py-1.5 rounded-lg bg-brand text-white font-medium hover:bg-brand-dark transition-colors"
-                >
-                  {myReview ? '후기 수정' : '후기 작성'}
-                </button>
-              )}
-            </div>
+          {/* 수강/구매 상품별 후기 */}
+          {(() => {
+            // 구매한 상품 목록 (paid·active·completed) — 중복 제거
+            const purchased = new Map<string, { productId: number; productSlug: string; productName: string; productType?: string }>()
+            for (const o of orders) {
+              if (!['paid', 'active', 'completed'].includes(o.status)) continue
+              const slug = o.productSlug
+              if (!slug || purchased.has(slug)) continue
+              // productId가 Order에 없을 수도 있음 → 후기 작성 시 slug로 product 조회 필요
+              // 일단 productId는 후기에서 가져오거나, 작성 시점에 slug로 매핑
+              purchased.set(slug, {
+                productId: 0, // 작성 클릭 시 lookup
+                productSlug: slug,
+                productName: o.productName || slug,
+                productType: o.productType,
+              })
+            }
+            // 작성한 후기를 product slug 기준 매핑
+            const reviewByProductSlug = new Map<string, any>()
+            for (const r of myReviews) {
+              const p = typeof r.product === 'object' && r.product ? r.product : null
+              if (p?.slug) reviewByProductSlug.set(p.slug, r)
+            }
 
-            {/* 기존 후기 표시 */}
-            {myReview && !showReviewForm && (
-              <div className="p-4 rounded-xl bg-white border border-line">
-                <div className="flex items-center gap-1 mb-2">
-                  {[1,2,3,4,5].map(n => (
-                    <Star key={n} className={`w-4 h-4 ${n <= myReview.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-200'}`} />
-                  ))}
+            const purchasedList = Array.from(purchased.values())
+
+            // 작성된 후기인데 구매 목록에 없는 경우(상품이 사라졌거나 매핑 누락) — 별도로 표시
+            const orphanReviews = myReviews.filter((r) => {
+              const p = typeof r.product === 'object' && r.product ? r.product : null
+              if (!p?.slug) return true // 상품 미지정 후기
+              return !purchased.has(p.slug)
+            })
+
+            const openCreateForm = async (slug: string, fallback: { productName: string; productType?: string }) => {
+              // slug로 productId 조회 (캐시 없음 → 1회 fetch)
+              try {
+                const res = await fetch(`/api/products?where[slug][equals]=${encodeURIComponent(slug)}&limit=1&depth=0`, { credentials: 'include' })
+                const data = (await res.json()) as { docs?: any[] }
+                const p = data.docs?.[0]
+                if (!p?.id) {
+                  alert('상품 정보를 불러올 수 없습니다.')
+                  return
+                }
+                setReviewForm({
+                  productId: p.id,
+                  productName: p.title || fallback.productName,
+                  productType: p.productType || fallback.productType,
+                  rating: 5,
+                  content: '',
+                  siteUrl: '',
+                })
+              } catch {
+                alert('상품 정보를 불러올 수 없습니다.')
+              }
+            }
+
+            const openEditForm = (review: any) => {
+              const p = typeof review.product === 'object' && review.product ? review.product : null
+              setReviewForm({
+                productId: p?.id || 0,
+                productName: p?.title || '내 후기',
+                productType: p?.productType,
+                reviewId: review.id,
+                rating: review.rating || 5,
+                content: review.content || '',
+                siteUrl: review.siteUrl || '',
+              })
+            }
+
+            return (
+              <div className="mb-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <MessageSquare className="w-5 h-5 text-brand" />
+                  <h3 className="font-medium text-ink">내 후기</h3>
+                  <span className="text-xs text-sub">({myReviews.length}개)</span>
                 </div>
-                <p className="text-sm text-body leading-relaxed whitespace-pre-line mb-2">{myReview.content}</p>
-                {myReview.siteUrl && (
-                  <a href={myReview.siteUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-brand hover:underline break-all">
-                    🔗 {myReview.siteUrl}
-                  </a>
+
+                {/* 후기 작성 폼 (상품 선택된 상태) */}
+                {reviewForm && (
+                  <form onSubmit={handleReviewSubmit} className="mb-4 p-5 rounded-2xl border-2 border-brand/30 bg-brand-light/30 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <p className="font-bold text-ink text-sm">
+                        {reviewForm.reviewId ? '후기 수정' : '후기 작성'} —{' '}
+                        <span className="text-brand">{reviewForm.productName}</span>
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => setReviewForm(null)}
+                        className="text-xs text-sub hover:text-ink"
+                      >
+                        취소 ✕
+                      </button>
+                    </div>
+                    <div>
+                      <p className="text-xs text-sub mb-1.5">별점</p>
+                      <div className="flex gap-1">
+                        {[1,2,3,4,5].map(n => (
+                          <button key={n} type="button" onClick={() => setReviewForm(f => f ? { ...f, rating: n } : f)}>
+                            <Star className={`w-7 h-7 transition-colors ${n <= reviewForm.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`} />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-xs text-sub mb-1.5">후기 내용</p>
+                      <textarea
+                        value={reviewForm.content}
+                        onChange={e => setReviewForm(f => f ? { ...f, content: e.target.value } : f)}
+                        rows={4}
+                        required
+                        placeholder={`${reviewForm.productName} 사용 경험을 자유롭게 작성해주세요`}
+                        className="w-full px-4 py-3 rounded-xl border-2 border-line bg-white text-ink placeholder-hint focus:outline-none focus:border-brand transition-colors resize-none text-sm"
+                      />
+                    </div>
+                    <div>
+                      <p className="text-xs text-sub mb-1.5">내 사이트 URL <span className="text-hint">(선택)</span></p>
+                      <input
+                        type="url"
+                        value={reviewForm.siteUrl}
+                        onChange={e => setReviewForm(f => f ? { ...f, siteUrl: e.target.value } : f)}
+                        placeholder="https://my-site.com"
+                        className="w-full px-4 py-3 rounded-xl border-2 border-line bg-white text-ink placeholder-hint focus:outline-none focus:border-brand transition-colors text-sm"
+                      />
+                    </div>
+                    <div className="flex gap-3">
+                      <button
+                        type="submit"
+                        disabled={reviewSubmitting || !reviewForm.content.trim()}
+                        className="px-5 py-2.5 bg-brand text-white font-bold rounded-xl hover:bg-brand-dark transition-all disabled:opacity-50 text-sm"
+                      >
+                        {reviewSubmitting ? '저장 중...' : '저장'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setReviewForm(null)}
+                        className="px-5 py-2.5 border border-line text-sub font-medium rounded-xl hover:bg-white transition-all text-sm"
+                      >
+                        취소
+                      </button>
+                    </div>
+                  </form>
+                )}
+
+                {/* 구매한 상품별 카드 */}
+                {purchasedList.length === 0 ? (
+                  <div className="p-4 rounded-xl border border-dashed border-line text-center">
+                    <p className="text-sm text-sub">구매한 상품이 없습니다. 결제 후 후기를 작성할 수 있어요.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {purchasedList.map((p) => {
+                      const review = reviewByProductSlug.get(p.productSlug)
+                      const typeLabel =
+                        p.productType === 'class' ? '강의' :
+                        p.productType === 'ebook' ? '전자책' :
+                        p.productType === 'book' ? '종이책' :
+                        p.productType === 'bundle' ? '번들' : ''
+                      return (
+                        <div key={p.productSlug} className="p-4 rounded-xl border border-line bg-white">
+                          <div className="flex items-start justify-between gap-3 mb-2">
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                {typeLabel && (
+                                  <span className="inline-block px-2 py-0.5 text-[10px] font-medium rounded-full bg-brand-light text-brand">
+                                    {typeLabel}
+                                  </span>
+                                )}
+                                <p className="font-medium text-ink text-sm">{p.productName}</p>
+                              </div>
+                            </div>
+                            {review ? (
+                              <div className="flex gap-1.5 shrink-0">
+                                <button
+                                  onClick={() => openEditForm(review)}
+                                  className="text-xs px-3 py-1.5 rounded-lg border border-line text-sub font-medium hover:bg-surface transition-colors"
+                                >
+                                  수정
+                                </button>
+                                <button
+                                  onClick={() => handleReviewDelete(review.id)}
+                                  className="text-xs px-3 py-1.5 rounded-lg border border-red-200 text-red-500 font-medium hover:bg-red-50 transition-colors"
+                                >
+                                  삭제
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                onClick={() => openCreateForm(p.productSlug, { productName: p.productName, productType: p.productType })}
+                                className="text-xs px-3 py-1.5 rounded-lg bg-brand text-white font-medium hover:bg-brand-dark transition-colors shrink-0"
+                              >
+                                후기 작성
+                              </button>
+                            )}
+                          </div>
+                          {review ? (
+                            <div className="mt-2 pt-3 border-t border-line">
+                              <div className="flex items-center gap-1 mb-2">
+                                {[1,2,3,4,5].map(n => (
+                                  <Star key={n} className={`w-3.5 h-3.5 ${n <= review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-200'}`} />
+                                ))}
+                              </div>
+                              <p className="text-sm text-body leading-relaxed whitespace-pre-line line-clamp-3">{review.content}</p>
+                              {review.siteUrl && (
+                                <a href={review.siteUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-brand hover:underline break-all mt-2 inline-block">
+                                  🔗 {review.siteUrl}
+                                </a>
+                              )}
+                            </div>
+                          ) : (
+                            <p className="text-xs text-sub mt-1">아직 작성한 후기가 없습니다.</p>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+
+                {/* 구매 목록에 없지만 작성된 후기 (상품 미지정 또는 상품 삭제됨) */}
+                {orphanReviews.length > 0 && (
+                  <div className="mt-4">
+                    <p className="text-xs text-sub mb-2">
+                      ↓ 상품과 매핑되지 않은 후기 ({orphanReviews.length}개)
+                    </p>
+                    <div className="space-y-2">
+                      {orphanReviews.map((r) => {
+                        const p = typeof r.product === 'object' && r.product ? r.product : null
+                        return (
+                          <div key={r.id} className="p-4 rounded-xl border border-dashed border-line bg-surface">
+                            <div className="flex items-start justify-between gap-3 mb-2">
+                              <p className="text-xs text-sub">
+                                {p?.title ? `이전 상품: ${p.title}` : '상품 미지정 후기'}
+                              </p>
+                              <div className="flex gap-1.5 shrink-0">
+                                <button
+                                  onClick={() => openEditForm(r)}
+                                  className="text-xs px-3 py-1.5 rounded-lg border border-line text-sub font-medium hover:bg-white transition-colors"
+                                >
+                                  수정
+                                </button>
+                                <button
+                                  onClick={() => handleReviewDelete(r.id)}
+                                  className="text-xs px-3 py-1.5 rounded-lg border border-red-200 text-red-500 font-medium hover:bg-red-50 transition-colors"
+                                >
+                                  삭제
+                                </button>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-1 mb-2">
+                              {[1,2,3,4,5].map(n => (
+                                <Star key={n} className={`w-3.5 h-3.5 ${n <= r.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-200'}`} />
+                              ))}
+                            </div>
+                            <p className="text-sm text-body leading-relaxed whitespace-pre-line line-clamp-3">{r.content}</p>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
                 )}
               </div>
-            )}
-
-            {/* 후기 미작성 */}
-            {!myReview && !showReviewForm && (
-              <p className="text-sm text-sub text-center py-4">
-                AI놀자 수강 후기를 남기고 내 사이트를 홍보해보세요!
-              </p>
-            )}
-
-            {/* 작성/수정 폼 */}
-            {showReviewForm && (
-              <form onSubmit={handleReviewSubmit} className="space-y-4">
-                <div>
-                  <p className="text-sm text-sub mb-2">별점</p>
-                  <div className="flex gap-1">
-                    {[1,2,3,4,5].map(n => (
-                      <button key={n} type="button" onClick={() => setReviewRating(n)}>
-                        <Star className={`w-7 h-7 transition-colors ${n <= reviewRating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`} />
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <p className="text-sm text-sub mb-2">후기 내용</p>
-                  <textarea
-                    value={reviewContent}
-                    onChange={e => setReviewContent(e.target.value)}
-                    rows={4}
-                    required
-                    placeholder="수강 경험을 자유롭게 작성해주세요"
-                    className="w-full px-4 py-3 rounded-xl border-2 border-line bg-white text-ink placeholder-hint focus:outline-none focus:border-brand transition-colors resize-none text-sm"
-                  />
-                </div>
-                <div>
-                  <p className="text-sm text-sub mb-2">내 사이트 URL <span className="text-hint">(선택 — 홈 화면에 링크 노출)</span></p>
-                  <input
-                    type="url"
-                    value={reviewSiteUrl}
-                    onChange={e => setReviewSiteUrl(e.target.value)}
-                    placeholder="https://my-site.com"
-                    className="w-full px-4 py-3 rounded-xl border-2 border-line bg-white text-ink placeholder-hint focus:outline-none focus:border-brand transition-colors text-sm"
-                  />
-                </div>
-                <div className="flex gap-3">
-                  <button
-                    type="submit"
-                    disabled={reviewSubmitting || !reviewContent.trim()}
-                    className="px-5 py-2.5 bg-brand text-white font-bold rounded-xl hover:bg-brand-dark transition-all disabled:opacity-50 text-sm"
-                  >
-                    {reviewSubmitting ? '저장 중...' : '저장'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowReviewForm(false)}
-                    className="px-5 py-2.5 border border-line text-sub font-medium rounded-xl hover:bg-white transition-all text-sm"
-                  >
-                    취소
-                  </button>
-                </div>
-              </form>
-            )}
-          </div>
+            )
+          })()}
 
           {/* 주문 내역 */}
           <div className="mb-6">
