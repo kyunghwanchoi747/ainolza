@@ -5,6 +5,7 @@ import { useEffect, useRef, useState, Fragment } from 'react'
 import Link from 'next/link'
 import { V3Header } from './v3-header'
 import { SiteFooter } from '@/components/layout/site-footer'
+import { ReviewsSlider } from './reviews-slider'
 import './landing-v3.css'
 
 const KAKAO_OPEN_CHAT = 'https://open.kakao.com/o/s7kkWTfh'
@@ -30,6 +31,8 @@ export type ReviewItem = {
   initial: string
   color: string
   siteUrl?: string
+  productLabel?: string // 예: "퍼스널 인텔리전스"
+  productType?: string  // 'class' | 'ebook' | 'book' | 'bundle'
 }
 
 const FALLBACK_COURSES: Course[] = [
@@ -445,37 +448,8 @@ export default function LandingPageV3({ courses, reviews }: { courses?: Course[]
         </div>
       </section>
 
-      {/* TESTIMONIALS (다크 섹션) */}
-      <section className="section" style={{ padding: '35px 24px 120px' }}>
-        <div className="container">
-          <div className="headingCenter">
-            <p className="eyebrow">REAL STORIES</p>
-            <h2 className="h2">수강생들의 생생한 후기</h2>
-          </div>
-          <div className="reviewSlider">
-            <div className="reviewViewport">
-              <div className="reviewTrack" style={{ display: 'flex', gap: 24, justifyContent: 'center', flexWrap: 'wrap' }}>
-                {REVIEWS.map((r, i) => (
-                  <div key={i} className="reviewCard glass sheen" style={{ flex: '0 0 calc((100% - 48px) / 3)', minWidth: 320, maxWidth: 380 }}>
-                    <div className="stars">
-                      {[0, 1, 2, 3, 4].map((j) => <Icons.Star key={j} />)}
-                    </div>
-                    <p className="reviewQuote">&ldquo;{r.quote}&rdquo;</p>
-                    <div className="reviewer">
-                      <div className="avatar" style={{ background: r.color }}>{r.initial}</div>
-                      <div style={{ minWidth: 0, flex: 1 }}>
-                        <p className="reviewerName">{r.name}</p>
-                        <p className="reviewerMeta">{r.meta}</p>
-                      </div>
-                      <a href={r.siteUrl} target="_blank" rel="noopener noreferrer" className="reviewerTag" style={{ textDecoration: 'none' }}>사이트 보기 →</a>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* TESTIMONIALS — 가로 슬라이드 */}
+      <ReviewsSlider reviews={REVIEWS} />
 
       {/* FINAL CTA */}
       <section className="finalCta" style={{ padding: '37px 24px 44px' }}>

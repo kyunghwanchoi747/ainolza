@@ -9,6 +9,7 @@ type Review = {
   content: string
   createdAt: string
   user?: { name?: string; email?: string } | null
+  displayName?: string | null
 }
 
 interface ReviewSectionProps {
@@ -16,12 +17,15 @@ interface ReviewSectionProps {
   productId: number
 }
 
+const BEST_COUNT = 3
+
 export function ReviewSection({ productSlug, productId }: ReviewSectionProps) {
   const [reviews, setReviews] = useState<Review[]>([])
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState<{ id: number; name?: string; email: string } | null>(null)
   const [canWrite, setCanWrite] = useState(false) // 구매자만 작성 가능
   const [showForm, setShowForm] = useState(false)
+  const [showAll, setShowAll] = useState(false) // 전체 후기 펼치기
   const [rating, setRating] = useState(5)
   const [content, setContent] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -73,6 +77,7 @@ export function ReviewSection({ productSlug, productId }: ReviewSectionProps) {
               content: d.content,
               createdAt: d.createdAt,
               user: typeof d.user === 'object' ? d.user : null,
+              displayName: d.displayName || null,
             })),
           )
         }
@@ -218,40 +223,115 @@ export function ReviewSection({ productSlug, productId }: ReviewSectionProps) {
               {canWrite ? '첫 번째 후기를 남겨주세요!' : '수강생 분들의 후기를 기다리고 있어요.'}
             </p>
           </div>
-        ) : (
-          <div className="space-y-4">
-            {reviews.map((r) => {
-              const name = r.user?.name || r.user?.email?.split('@')[0] || '수강생'
-              const date = r.createdAt ? new Date(r.createdAt).toLocaleDateString('ko-KR') : ''
-              return (
-                <div key={r.id} className="p-5 rounded-2xl border border-line bg-white">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-surface flex items-center justify-center text-sm font-bold text-sub">
-                        {name.charAt(0)}
-                      </div>
-                      <div>
-                        <p className="font-bold text-ink text-sm">{name}</p>
-                        <p className="text-xs text-sub">{date}</p>
-                      </div>
-                    </div>
-                    <div className="flex gap-0.5">
-                      {[1, 2, 3, 4, 5].map((n) => (
-                        <Star
-                          key={n}
-                          className={`w-4 h-4 ${
-                            n <= r.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-200'
-                          }`}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                  <p className="text-body text-sm leading-relaxed whitespace-pre-line">{r.content}</p>
+        ) : (() => {
+          // 별점 높은 + 내용 긴 순으로 BEST 3 추출
+          const ranked = [...reviews].sort((a, b) => {
+            if (b.rating !== a.rating) return b.rating - a.rating
+            return (b.content?.length || 0) - (a.content?.length || 0)
+          })
+          const bestReviews = ranked.slice(0, BEST_COUNT)
+          const hasMore = reviews.length > BEST_COUNT
+          const reviewName = (r: Review) =>
+            r.displayName || r.user?.name || r.user?.email?.split('@')[0] || '수강생'
+
+          return (
+            <>
+              {/* BEST 후기 3개 — 카드 그리드 */}
+              <div className="mb-8">
+                <div className="flex items-baseline justify-between mb-4">
+                  <p className="text-sm font-bold text-ink">BEST 후기</p>
+                  <p className="text-xs text-sub">별점·내용 길이 순</p>
                 </div>
-              )
-            })}
-          </div>
-        )}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {bestReviews.map((r) => {
+                    const name = reviewName(r)
+                    return (
+                      <div
+                        key={r.id}
+                        className="p-5 rounded-2xl border border-brand/30 bg-brand-light/40"
+                      >
+                        <div className="flex gap-0.5 mb-2">
+                          {[1, 2, 3, 4, 5].map((n) => (
+                            <Star
+                              key={n}
+                              className={`w-3.5 h-3.5 ${
+                                n <= r.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-200'
+                              }`}
+                            />
+                          ))}
+                        </div>
+                        <p className="font-bold text-ink text-sm mb-1">{name}</p>
+                        <p className="text-body text-sm leading-relaxed line-clamp-5 whitespace-pre-line">
+                          {r.content}
+                        </p>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* 전체 후기 토글 + 목록 */}
+              {hasMore && !showAll && (
+                <div className="text-center pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowAll(true)}
+                    className="px-6 py-3 border border-line text-ink font-medium rounded-xl hover:bg-surface transition-all text-sm cursor-pointer"
+                  >
+                    전체 후기 {reviews.length}개 보기 →
+                  </button>
+                </div>
+              )}
+
+              {showAll && (
+                <div className="mt-4">
+                  <div className="flex items-baseline justify-between mb-4">
+                    <p className="text-sm font-bold text-ink">전체 후기 {reviews.length}개</p>
+                    <button
+                      type="button"
+                      onClick={() => setShowAll(false)}
+                      className="text-xs text-sub hover:text-brand cursor-pointer"
+                    >
+                      접기 ↑
+                    </button>
+                  </div>
+                  <div className="space-y-4">
+                    {reviews.map((r) => {
+                      const name = reviewName(r)
+                      const date = r.createdAt ? new Date(r.createdAt).toLocaleDateString('ko-KR') : ''
+                      return (
+                        <div key={r.id} className="p-5 rounded-2xl border border-line bg-white">
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-3">
+                              <div className="w-9 h-9 rounded-full bg-surface flex items-center justify-center text-sm font-bold text-sub">
+                                {name.charAt(0)}
+                              </div>
+                              <div>
+                                <p className="font-bold text-ink text-sm">{name}</p>
+                                <p className="text-xs text-sub">{date}</p>
+                              </div>
+                            </div>
+                            <div className="flex gap-0.5">
+                              {[1, 2, 3, 4, 5].map((n) => (
+                                <Star
+                                  key={n}
+                                  className={`w-4 h-4 ${
+                                    n <= r.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-200'
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                          <p className="text-body text-sm leading-relaxed whitespace-pre-line">{r.content}</p>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+            </>
+          )
+        })()}
       </div>
     </section>
   )

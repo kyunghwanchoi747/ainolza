@@ -3,6 +3,12 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Star, Trash2, ArrowUp, ArrowDown, ExternalLink, Plus, X } from 'lucide-react'
 
+type ProductOption = {
+  id: number
+  title: string
+  productType: string
+}
+
 type Review = {
   id: number
   rating: number
@@ -12,10 +18,15 @@ type Review = {
   order: number
   createdAt: string
   user?: { name?: string; email?: string } | null
+  product?: { id: number; title?: string; productType?: string } | number | null
 }
+
+const typeLabel = (t?: string) =>
+  t === 'class' ? '강의' : t === 'ebook' ? '전자책' : t === 'book' ? '종이책' : t === 'bundle' ? '번들' : ''
 
 export default function ManagerReviewsPage() {
   const [reviews, setReviews] = useState<Review[]>([])
+  const [products, setProducts] = useState<ProductOption[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [submitting, setSubmitting] = useState(false)
@@ -24,14 +35,18 @@ export default function ManagerReviewsPage() {
     rating: 5,
     content: '',
     siteUrl: '',
+    productId: '', // '' = 미지정 (전체 추천 후기)
   })
 
   const load = useCallback(async () => {
     setLoading(true)
     try {
-      const res = await fetch('/api/reviews?where[status][equals]=approved&limit=100', { credentials: 'include' })
-      if (res.ok) {
-        const data = await res.json() as { docs?: any[] }
+      const [reviewsRes, productsRes] = await Promise.all([
+        fetch('/api/reviews?where[status][equals]=approved&limit=100&depth=1', { credentials: 'include' }),
+        fetch('/api/products?where[status][equals]=published&limit=100&depth=0', { credentials: 'include' }),
+      ])
+      if (reviewsRes.ok) {
+        const data = await reviewsRes.json() as { docs?: any[] }
         setReviews(
           (data.docs || []).map((d: any) => ({
             id: d.id,
@@ -42,7 +57,18 @@ export default function ManagerReviewsPage() {
             order: d.order ?? 0,
             createdAt: d.createdAt,
             user: typeof d.user === 'object' ? d.user : null,
+            product: d.product || null,
           })).sort((a: Review, b: Review) => a.order - b.order)
+        )
+      }
+      if (productsRes.ok) {
+        const pdata = await productsRes.json() as { docs?: any[] }
+        setProducts(
+          (pdata.docs || []).map((p: any) => ({
+            id: p.id,
+            title: p.title || '(제목 없음)',
+            productType: p.productType || 'class',
+          }))
         )
       }
     } finally {
@@ -51,6 +77,23 @@ export default function ManagerReviewsPage() {
   }, [])
 
   useEffect(() => { load() }, [load])
+
+  const productMap = new Map(products.map((p) => [p.id, p]))
+  const productLabelOf = (review: Review): { title: string; type: string } | null => {
+    if (!review.product) return null
+    const id = typeof review.product === 'object' ? review.product.id : review.product
+    if (typeof id !== 'number') return null
+    const p = productMap.get(id)
+    if (p) return { title: p.title, type: typeLabel(p.productType) }
+    // depth=1 응답에 product가 객체로 옴
+    if (typeof review.product === 'object' && review.product.title) {
+      return {
+        title: review.product.title,
+        type: typeLabel(review.product.productType),
+      }
+    }
+    return null
+  }
 
   const handleDelete = async (id: number) => {
     if (!confirm('이 후기를 삭제할까요?')) return
@@ -93,24 +136,26 @@ export default function ManagerReviewsPage() {
     }
     setSubmitting(true)
     try {
+      const body: Record<string, any> = {
+        displayName: form.displayName.trim(),
+        rating: Number(form.rating),
+        content: form.content.trim(),
+        siteUrl: form.siteUrl.trim() || undefined,
+        order: 100,
+      }
+      if (form.productId) body.product = Number(form.productId)
       const res = await fetch('/api/reviews', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({
-          displayName: form.displayName.trim(),
-          rating: Number(form.rating),
-          content: form.content.trim(),
-          siteUrl: form.siteUrl.trim() || undefined,
-          order: 100, // 새로 추가하면 뒤로
-        }),
+        body: JSON.stringify(body),
       })
       if (!res.ok) {
         const err = await res.json().catch(() => ({})) as { error?: string }
         alert(err.error || '저장에 실패했습니다.')
         return
       }
-      setForm({ displayName: '', rating: 5, content: '', siteUrl: '' })
+      setForm({ displayName: '', rating: 5, content: '', siteUrl: '', productId: '' })
       setShowForm(false)
       await load()
     } finally {
@@ -123,7 +168,9 @@ export default function ManagerReviewsPage() {
       <div className="mb-6 flex items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold">후기 관리</h1>
-          <p className="text-sm text-muted-foreground mt-1">홈 화면에 표시되는 순서를 조정하거나 삭제할 수 있습니다.</p>
+          <p className="text-sm text-muted-foreground mt-1">
+            상품별로 분류된 후기를 관리합니다. 상품을 지정하지 않으면 홈 화면 추천 후기로만 노출됩니다.
+          </p>
         </div>
         <button
           onClick={() => setShowForm(v => !v)}
@@ -136,6 +183,25 @@ export default function ManagerReviewsPage() {
 
       {showForm && (
         <form onSubmit={handleSubmit} className="mb-6 p-5 rounded-xl border bg-white space-y-4">
+          {/* 상품 선택 */}
+          <div>
+            <label className="block text-xs font-medium mb-1 text-gray-700">
+              상품 <span className="text-gray-400 font-normal">(선택 안 하면 홈 추천 후기로만 노출)</span>
+            </label>
+            <select
+              value={form.productId}
+              onChange={e => setForm({ ...form, productId: e.target.value })}
+              className="w-full px-3 py-2 rounded-lg border text-sm bg-white"
+            >
+              <option value="">— 상품 미지정 (홈 추천 후기) —</option>
+              {products.map(p => (
+                <option key={p.id} value={p.id}>
+                  [{typeLabel(p.productType)}] {p.title}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium mb-1 text-gray-700">이름 (홈에는 첫 글자만 노출됨)</label>
@@ -214,6 +280,7 @@ export default function ManagerReviewsPage() {
             const name = r.displayName || r.user?.name || r.user?.email?.split('@')[0] || '수강생'
             const date = r.createdAt ? new Date(r.createdAt).toLocaleDateString('ko-KR') : ''
             const isCustom = !!r.displayName && !r.user
+            const productInfo = productLabelOf(r)
             return (
               <div key={r.id} className="flex gap-3 items-start p-4 rounded-xl border bg-white">
                 <div className="flex flex-col gap-1 pt-1">
@@ -238,6 +305,13 @@ export default function ManagerReviewsPage() {
                     <span className="font-medium text-sm">{name}</span>
                     {isCustom && (
                       <span className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-600 font-medium">매니저 작성</span>
+                    )}
+                    {productInfo ? (
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 font-medium">
+                        {productInfo.type ? `[${productInfo.type}] ` : ''}{productInfo.title}
+                      </span>
+                    ) : (
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 font-medium">상품 미지정</span>
                     )}
                     <span className="text-xs text-muted-foreground">{date}</span>
                     <div className="flex gap-0.5 ml-1">

@@ -49,6 +49,7 @@ async function listApprovedReviews(): Promise<ReviewItem[]> {
       const user = typeof r.user === 'object' ? r.user : null
       const rawName = r.displayName || user?.name || user?.email?.split('@')[0] || '익명'
       const { name, initial } = maskName(rawName)
+      const product = typeof r.product === 'object' && r.product ? r.product : null
       return {
         quote: r.content || '',
         name,
@@ -56,6 +57,8 @@ async function listApprovedReviews(): Promise<ReviewItem[]> {
         initial,
         color: REVIEW_COLORS[i % REVIEW_COLORS.length],
         siteUrl: r.siteUrl || undefined,
+        productLabel: product?.title || undefined,
+        productType: product?.productType || undefined,
       }
     })
   } catch (e) {

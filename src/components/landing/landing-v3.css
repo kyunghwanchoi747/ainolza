@@ -635,12 +635,19 @@
     }
     .reviewArrow:hover { background: var(--brand); color: #fff; transform: translateY(-50%) scale(1.05); }
     .reviewArrow:disabled { opacity: 0.35; cursor: not-allowed; }
-    .reviewArrow.prev { left: -22px; }
-    .reviewArrow.next { right: -22px; }
+    .reviewArrow.prev,
+    .reviewArrowLeft { left: -22px; }
+    .reviewArrow.next,
+    .reviewArrowRight { right: -22px; }
     @media (max-width: 720px) {
-      .reviewArrow.prev { left: 8px; }
-      .reviewArrow.next { right: 8px; }
+      .reviewArrow.prev,
+      .reviewArrowLeft { left: 8px; }
+      .reviewArrow.next,
+      .reviewArrowRight { right: 8px; }
     }
+    /* 슬라이더 트랙 스크롤바 숨김 */
+    .hideScrollbar::-webkit-scrollbar { display: none; }
+    .hideScrollbar { -ms-overflow-style: none; }
     .reviewDots {
       display: flex; gap: 8px; justify-content: center; margin-top: 24px;
     }
