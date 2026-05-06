@@ -152,6 +152,8 @@ export const Orders: CollectionConfig = {
         { label: '주문취소', value: 'cancelled' },
       ],
     },
+    // 결제완료 일시 — 수강기간/만료 계산 기준
+    { name: 'paidAt', type: 'date', label: '결제일시' },
     // PortOne 연동 필드
     { name: 'impUid', type: 'text', label: 'PortOne imp_uid' },
     { name: 'merchantUid', type: 'text', label: 'Merchant UID' },

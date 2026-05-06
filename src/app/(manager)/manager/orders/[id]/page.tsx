@@ -94,6 +94,7 @@ export default function OrderDetailPage() {
             )}
             <div className="flex justify-between"><span className="text-muted-foreground">결제수단</span><span>{order.payMethod || '-'}</span></div>
             <div className="flex justify-between"><span className="text-muted-foreground">주문일시</span><span>{order.createdAt ? new Date(order.createdAt).toLocaleString('ko-KR') : '-'}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">결제일시</span><span>{order.paidAt ? new Date(order.paidAt).toLocaleString('ko-KR') : '-'}</span></div>
           </div>
         </div>
 

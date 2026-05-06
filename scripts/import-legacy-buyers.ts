@@ -112,6 +112,28 @@ function parseMd(filePath: string): Row[] {
   return rows
 }
 
+// D1 일시 502/타임아웃 대비 — 동일 작업 최대 3회 재시도 + 백오프
+async function withRetry<T>(fn: () => Promise<T>, label: string, maxAttempts = 3): Promise<T> {
+  let lastErr: unknown
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      return await fn()
+    } catch (e) {
+      lastErr = e
+      const msg = (e as Error).message || ''
+      // 일시 에러만 재시도 (502, 503, timeout, network)
+      const isTransient = /502|503|504|timeout|fetch failed|ECONNRESET|ETIMEDOUT/i.test(msg)
+      if (!isTransient || attempt === maxAttempts) throw e
+      const delay = 500 * attempt + Math.floor(Math.random() * 500)
+      console.warn(`[retry] ${label} attempt ${attempt} failed (${msg.slice(0, 80)}), retrying in ${delay}ms`)
+      await new Promise((r) => setTimeout(r, delay))
+    }
+  }
+  throw lastErr
+}
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
+
 async function main() {
   console.log('[import] starting. DRY_RUN =', DRY_RUN)
 
@@ -150,49 +172,64 @@ async function main() {
       continue
     }
 
-    // 회원 조회
-    const userResult = await payload.find({
-      collection: 'users',
-      where: { email: { equals: row.email } },
-      limit: 1,
-      overrideAccess: true,
-    })
+    // 회원 조회 (재시도)
+    const userResult = await withRetry(
+      () =>
+        payload.find({
+          collection: 'users',
+          where: { email: { equals: row.email } },
+          limit: 1,
+          overrideAccess: true,
+        }),
+      `find user ${row.email}`,
+    )
     const user = userResult.docs[0] as any
     if (!user) {
       skipNoMember++
       skippedEmails.push(`${row.email} (${mapping.productSlug})`)
+      await sleep(50)
       continue
     }
 
     const orderNumber = `LEGACY_${mapping.productSlug.toUpperCase().replace(/-/g, '_')}_${row.externalOrderNumber}`
 
-    // 같은 LEGACY 주문 있으면 skip
-    const existingByNumber = await payload.find({
-      collection: 'orders',
-      where: { orderNumber: { equals: orderNumber } },
-      limit: 1,
-      overrideAccess: true,
-    })
+    // 같은 LEGACY 주문 있으면 skip (재시도)
+    const existingByNumber = await withRetry(
+      () =>
+        payload.find({
+          collection: 'orders',
+          where: { orderNumber: { equals: orderNumber } },
+          limit: 1,
+          overrideAccess: true,
+        }),
+      `find order ${orderNumber}`,
+    )
     if (existingByNumber.totalDocs > 0) {
       skipDuplicate++
+      await sleep(50)
       continue
     }
 
-    // 같은 회원이 같은 productSlug paid 주문 있으면 skip
-    const existingByProduct = await payload.find({
-      collection: 'orders',
-      where: {
-        and: [
-          { user: { equals: user.id } },
-          { productSlug: { equals: mapping.productSlug } },
-          { status: { equals: 'paid' } },
-        ],
-      },
-      limit: 1,
-      overrideAccess: true,
-    })
+    // 같은 회원이 같은 productSlug paid 주문 있으면 skip (재시도)
+    const existingByProduct = await withRetry(
+      () =>
+        payload.find({
+          collection: 'orders',
+          where: {
+            and: [
+              { user: { equals: user.id } },
+              { productSlug: { equals: mapping.productSlug } },
+              { status: { equals: 'paid' } },
+            ],
+          },
+          limit: 1,
+          overrideAccess: true,
+        }),
+      `find duplicate ${row.email}/${mapping.productSlug}`,
+    )
     if (existingByProduct.totalDocs > 0) {
       skipDuplicate++
+      await sleep(50)
       continue
     }
 
@@ -201,34 +238,40 @@ async function main() {
         `[dry] ${row.email} → ${mapping.productSlug} (${orderNumber}, ${row.amount}원, ${row.orderDate.toISOString().slice(0, 10)})`,
       )
       created++
+      await sleep(50)
       continue
     }
 
     try {
-      await payload.create({
-        collection: 'orders',
-        data: {
-          orderNumber,
-          buyerName: row.buyerName || user.name || row.email.split('@')[0],
-          buyerEmail: row.email,
-          buyerPhone: row.phone,
-          user: user.id,
-          productName: mapping.productName,
-          productSlug: mapping.productSlug,
-          productType: mapping.productType,
-          amount: row.amount,
-          status: 'paid' as const,
-          paidAt: row.orderDate.toISOString() as any, // 원본 주문일 → 자동 만료
-          adminMemo: `레거시 임포트 — 외부 주문 ${row.externalOrderNumber} (${row.optionName}). 후기 작성 전용.`,
-        } as any,
-        overrideAccess: true,
-        // afterChange hook의 메일 발송 차단
-        context: { skipNotify: true },
-      })
+      await withRetry(
+        () =>
+          payload.create({
+            collection: 'orders',
+            data: {
+              orderNumber,
+              buyerName: row.buyerName || user.name || row.email.split('@')[0],
+              buyerEmail: row.email,
+              buyerPhone: row.phone,
+              user: user.id,
+              productName: mapping.productName,
+              productSlug: mapping.productSlug,
+              productType: mapping.productType,
+              amount: row.amount,
+              status: 'paid' as const,
+              paidAt: row.orderDate.toISOString() as any, // 원본 주문일 → 자동 만료
+              adminMemo: `레거시 임포트 — 외부 주문 ${row.externalOrderNumber} (${row.optionName}). 후기 작성 전용.`,
+            } as any,
+            overrideAccess: true,
+            // afterChange hook의 메일 발송 차단
+            context: { skipNotify: true },
+          }),
+        `create order ${orderNumber}`,
+      )
       created++
     } catch (e) {
       console.error('[import] create failed', row.email, mapping.productSlug, (e as Error).message)
     }
+    await sleep(50)
   }
 
   console.log('========== import summary ==========')
