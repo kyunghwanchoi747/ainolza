@@ -19,8 +19,9 @@ function CheckoutContent() {
   const [agreed, setAgreed] = useState({ terms: false, refund: false, privacy: false })
   const [payMethod, setPayMethod] = useState<PayMethod>('CARD')
   // 휴대폰 — KG이니시스 V2 일반결제는 phoneNumber 필수.
-  // 회원 프로필에 있으면 자동 채움, 없으면 결제 직전 입력받고 프로필에도 저장.
+  // 회원 프로필에 있으면 자동 채움(자동 확정), 없으면 직접 입력 후 [확인] 눌러야 확정.
   const [buyerPhone, setBuyerPhone] = useState('')
+  const [phoneConfirmed, setPhoneConfirmed] = useState(false)
 
   // slug 만 받고 나머지는 DB에서 조회 (URL의 amount/product 등은 무시 — 위변조 방지)
   const productSlug = searchParams.get('slug') || 'vibe-coding-101'
@@ -58,7 +59,10 @@ function CheckoutContent() {
       .then((data: any) => {
         if (data?.user) {
           setUser(data.user)
-          setBuyerPhone(data.user.phone || '')
+          const existingPhone = data.user.phone || ''
+          setBuyerPhone(existingPhone)
+          // 회원 프로필에 이미 휴대폰이 있으면 별도 확인 없이 확정 상태
+          if (existingPhone) setPhoneConfirmed(true)
           setShipping((s) => ({
             ...s,
             recipient: s.recipient || data.user.name || '',
@@ -117,6 +121,10 @@ function CheckoutContent() {
     if (!allAgreed) return
     if (!phoneValid) {
       alert('휴대폰 번호를 정확히 입력해주세요. (예: 010-1234-5678)')
+      return
+    }
+    if (!phoneConfirmed) {
+      alert('휴대폰 번호 옆 [확인] 버튼을 눌러주세요.')
       return
     }
     if (requiresShipping && !shippingValid) {
@@ -305,27 +313,59 @@ function CheckoutContent() {
                     <span className="text-ink break-all">{user.email}</span>
                   </div>
                   <div>
-                    <div className="flex items-center mb-1.5">
-                      <span className="text-sub w-20 shrink-0">
+                    <div className="flex items-start gap-2 mb-1.5">
+                      <span className="text-sub w-20 shrink-0 pt-2">
                         휴대폰 <span className="text-brand">*</span>
                       </span>
-                      <input
-                        type="tel"
-                        inputMode="numeric"
-                        value={buyerPhone}
-                        onChange={(e) => setBuyerPhone(e.target.value)}
-                        placeholder="010-1234-5678"
-                        className={`flex-1 px-3 py-2 border rounded-lg text-ink focus:outline-none ${
-                          buyerPhone && !phoneValid
-                            ? 'border-red-300 focus:border-red-500'
-                            : 'border-line focus:border-brand'
-                        }`}
-                      />
+                      {phoneConfirmed ? (
+                        // 확정 상태 — 표시 + 수정 버튼
+                        <div className="flex-1 flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-green-50 border border-green-200">
+                          <span className="text-ink font-medium">
+                            {buyerPhone}
+                          </span>
+                          <span className="flex items-center gap-2 shrink-0">
+                            <span className="text-xs text-green-600 font-medium">✓ 확인됨</span>
+                            <button
+                              type="button"
+                              onClick={() => setPhoneConfirmed(false)}
+                              className="text-xs text-sub hover:text-brand underline"
+                            >
+                              수정
+                            </button>
+                          </span>
+                        </div>
+                      ) : (
+                        // 미확정 — 입력 + 확인 버튼
+                        <div className="flex-1 flex gap-2">
+                          <input
+                            type="tel"
+                            inputMode="numeric"
+                            value={buyerPhone}
+                            onChange={(e) => setBuyerPhone(e.target.value)}
+                            placeholder="010-1234-5678"
+                            className={`flex-1 px-3 py-2 border rounded-lg text-ink focus:outline-none ${
+                              buyerPhone && !phoneValid
+                                ? 'border-red-300 focus:border-red-500'
+                                : 'border-line focus:border-brand'
+                            }`}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => phoneValid && setPhoneConfirmed(true)}
+                            disabled={!phoneValid}
+                            className="shrink-0 px-4 py-2 bg-brand text-white text-sm font-medium rounded-lg hover:bg-brand-dark transition-colors disabled:bg-[#ddd] disabled:cursor-not-allowed"
+                          >
+                            확인
+                          </button>
+                        </div>
+                      )}
                     </div>
-                    <p className="text-xs text-sub ml-20">
-                      결제 진행과 주문 안내를 위해 필요합니다. 한 번 입력하면 다음 결제부터 자동 입력됩니다.
-                    </p>
-                    {buyerPhone && !phoneValid && (
+                    {!phoneConfirmed && (
+                      <p className="text-xs text-sub ml-20">
+                        결제 진행과 주문 안내를 위해 필요합니다. 입력 후 <strong>확인</strong> 버튼을 눌러주세요.
+                      </p>
+                    )}
+                    {!phoneConfirmed && buyerPhone && !phoneValid && (
                       <p className="text-xs text-red-500 ml-20 mt-1">
                         올바른 휴대폰 번호 형식이 아닙니다.
                       </p>
@@ -524,7 +564,7 @@ function CheckoutContent() {
                 {/* 결제 버튼 */}
                 <button
                   onClick={handlePayment}
-                  disabled={!allAgreed || !phoneValid || loading || (requiresShipping && !shippingValid)}
+                  disabled={!allAgreed || !phoneConfirmed || !phoneValid || loading || (requiresShipping && !shippingValid)}
                   className="w-full py-4 bg-brand text-white font-bold rounded-xl hover:bg-brand-dark transition-all disabled:opacity-40 disabled:cursor-not-allowed text-base md:text-lg shadow-md"
                 >
                   {loading ? '처리 중...' : `${amount.toLocaleString()}원 결제하기`}
