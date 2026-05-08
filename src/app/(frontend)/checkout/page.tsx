@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
 import * as PortOne from '@portone/browser-sdk/v2'
+import { resolveCurrentPrice } from '@/lib/price-schedule'
 
 const PORTONE_STORE_ID = process.env.NEXT_PUBLIC_PORTONE_STORE_ID || ''
 const PORTONE_CHANNEL_KEY = process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY || ''
@@ -91,11 +92,17 @@ function CheckoutContent() {
             const ext = doc.imageExt || 'png'
             thumbnailUrl = `/store/${doc.slug}/thumbnail.${ext}`
           }
+          // 가격 스케줄 적용 — 현재 시각 기준 자동 결정
+          const resolved = resolveCurrentPrice({
+            price: doc.price,
+            originalPrice: doc.originalPrice,
+            priceSchedule: doc.priceSchedule || [],
+          })
           setDbProduct({
             title: doc.title,
             subtitle: doc.subtitle,
-            price: doc.price,
-            originalPrice: doc.originalPrice,
+            price: resolved.price,
+            originalPrice: resolved.originalPrice,
             productType: doc.productType,
             requiresShipping: !!doc.requiresShipping,
             thumbnailUrl,

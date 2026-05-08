@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayloadClient } from '@/lib/payload'
 import { rateLimit, getClientIP } from '@/lib/rate-limit'
+import { resolveCurrentPrice } from '@/lib/price-schedule'
 
 // 주문 생성 (결제 전)
 export async function POST(request: NextRequest) {
@@ -33,7 +34,6 @@ export async function POST(request: NextRequest) {
       productSlug,
       productType,
       amount,
-      originalAmount,
       buyerName,
       buyerEmail,
       buyerPhone,
@@ -45,15 +45,49 @@ export async function POST(request: NextRequest) {
       shippingMessage,
     } = body
 
-    if (!productName || !amount || !buyerName || !buyerEmail) {
+    if (!productName || !buyerName || !buyerEmail) {
       return NextResponse.json({ error: '필수 항목을 입력해주세요.' }, { status: 400 })
+    }
+    if (!productSlug) {
+      return NextResponse.json({ error: '상품 정보가 없습니다.' }, { status: 400 })
+    }
+
+    // 가격은 서버에서 권위적으로 결정 — 클라이언트 amount는 신뢰하지 않음.
+    // productSlug로 DB 조회 → priceSchedule 적용 → 현재 시각의 적용 가격 사용.
+    const payloadEarly = await getPayloadClient()
+    const productResult = await payloadEarly.find({
+      collection: 'products',
+      where: { slug: { equals: productSlug } },
+      limit: 1,
+      overrideAccess: true,
+    })
+    const productDoc = productResult.docs[0] as any
+    if (!productDoc) {
+      return NextResponse.json({ error: '존재하지 않는 상품입니다.' }, { status: 400 })
+    }
+    const resolved = resolveCurrentPrice({
+      price: productDoc.price ?? null,
+      originalPrice: productDoc.originalPrice ?? null,
+      priceSchedule: productDoc.priceSchedule || [],
+    })
+    const authoritativeAmount = resolved.price
+    const authoritativeOriginal = resolved.originalPrice ?? authoritativeAmount
+    if (!authoritativeAmount || authoritativeAmount <= 0) {
+      return NextResponse.json({ error: '가격이 설정되지 않은 상품입니다.' }, { status: 400 })
+    }
+    // 클라이언트가 보낸 amount와 1원이라도 다르면 거부 → UI 결제버튼/서버 가격 일치 보장
+    if (typeof amount === 'number' && amount !== authoritativeAmount) {
+      return NextResponse.json(
+        { error: '가격이 변경되었습니다. 페이지를 새로고침 후 다시 진행해주세요.' },
+        { status: 409 },
+      )
     }
 
     // 주문번호 생성
     const now = new Date()
     const orderNumber = `ORD${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}_${Date.now().toString(36).toUpperCase()}`
 
-    const payload = await getPayloadClient()
+    const payload = payloadEarly
 
     // 로그인 사용자 확인
     let userId = null
@@ -67,8 +101,8 @@ export async function POST(request: NextRequest) {
       productName,
       productSlug: productSlug || '',
       productType: (productType || 'class') as 'class' | 'ebook' | 'book' | 'bundle',
-      amount,
-      originalAmount: originalAmount || amount,
+      amount: authoritativeAmount,
+      originalAmount: authoritativeOriginal,
       buyerName,
       buyerEmail,
       buyerPhone: buyerPhone || '',

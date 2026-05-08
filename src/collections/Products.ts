@@ -62,6 +62,28 @@ export const Products: CollectionConfig = {
       label: '할인 마감일',
       admin: { description: '있으면 D-N 카운트다운이 카드/상세에 표시됨' },
     },
+    // 단계별 자동 가격 인상 — 시작일시가 도래하면 해당 가격이 자동 적용됨.
+    // 비어있으면 위 price 값이 그대로 사용됨. 항목들은 시작일시 오름차순으로 정렬해서 입력.
+    {
+      name: 'priceSchedule',
+      type: 'array',
+      label: '가격 스케줄 (자동 인상)',
+      admin: {
+        description:
+          '예) 슈퍼얼리버드/얼리버드/정가 단계별 가격을 시작일시와 함께 등록. 시작일시가 되면 자동으로 해당 가격이 적용됩니다. 비워두면 위 "판매가"가 그대로 적용됩니다. 입력 순서는 자유 — 시스템이 시간순으로 자동 정렬합니다.',
+      },
+      fields: [
+        {
+          name: 'startAt',
+          type: 'date',
+          required: true,
+          label: '시작 일시',
+          admin: { date: { pickerAppearance: 'dayAndTime' } },
+        },
+        { name: 'price', type: 'number', required: true, label: '가격 (원)', min: 0 },
+        { name: 'label', type: 'text', label: '단계 라벨 (예: 슈퍼 얼리버드)' },
+      ],
+    },
 
     // 액션 버튼 (여러 개 가능)
     {

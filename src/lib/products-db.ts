@@ -5,6 +5,7 @@
 import type { Product, ProductAction } from './products'
 import { PRODUCTS, getProduct as getFileProduct } from './products'
 import { getPayloadClient } from './payload'
+import { resolveCurrentPrice, type PriceScheduleEntry } from './price-schedule'
 
 type DbProduct = {
   id: number | string
@@ -39,9 +40,26 @@ type DbProduct = {
   tags?: Array<{ id?: string; label: string }> | null
   duration?: string | null
   faq?: Array<{ id?: string; question: string; answer: string }> | null
+  priceSchedule?: Array<{
+    id?: string
+    startAt: string
+    price: number
+    label?: string | null
+  }> | null
 }
 
 function dbToProduct(d: DbProduct): Product {
+  // 스케줄 → 현재 가격으로 평탄화. 결제·노출 모두 동일한 값을 보도록 한 곳에서 결정.
+  const schedule: PriceScheduleEntry[] = (d.priceSchedule || []).map((s) => ({
+    startAt: s.startAt,
+    price: s.price,
+    label: s.label || undefined,
+  }))
+  const resolved = resolveCurrentPrice({
+    price: d.price ?? null,
+    originalPrice: d.originalPrice ?? null,
+    priceSchedule: schedule,
+  })
   const actions: ProductAction[] = (d.actions || []).map((a) => ({
     label: a.label,
     url: a.url,
@@ -71,10 +89,22 @@ function dbToProduct(d: DbProduct): Product {
     title: d.title,
     subtitle: d.subtitle || undefined,
     shortDescription: d.shortDescription || undefined,
-    price: d.price ?? undefined,
+    // 스케줄 적용 후 현재 가격
+    price: resolved.price,
     originalPrice: d.originalPrice ?? undefined,
     priceLabel: d.priceLabel || undefined,
     discountUntil: d.discountUntil || undefined,
+    // 단계 라벨 + 다음 인상 정보 (UI 노출용)
+    ...(resolved.label ? { _dbStageLabel: resolved.label } : {}),
+    ...(resolved.nextChange
+      ? {
+          _dbNextChange: {
+            startAt: resolved.nextChange.startAt,
+            price: resolved.nextChange.price,
+            label: resolved.nextChange.label,
+          },
+        }
+      : {}),
     actions,
     classroomSlug: (d.classroomSlug || undefined) as Product['classroomSlug'],
     detailImageCount: detailUrls.length || undefined,
@@ -102,6 +132,8 @@ function dbToProduct(d: DbProduct): Product {
     _dbDuration?: string
     _dbFaq?: Array<{ question: string; answer: string }>
     _dbFeatured?: boolean
+    _dbStageLabel?: string
+    _dbNextChange?: { startAt: string; price: number; label?: string }
   }
 }
 
@@ -113,6 +145,8 @@ export type ProductWithDbImages = Product & {
   _dbDuration?: string
   _dbFaq?: Array<{ question: string; answer: string }>
   _dbFeatured?: boolean
+  _dbStageLabel?: string
+  _dbNextChange?: { startAt: string; price: number; label?: string }
 }
 
 /**
