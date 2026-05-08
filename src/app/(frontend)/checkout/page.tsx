@@ -37,6 +37,12 @@ function CheckoutContent() {
     thumbnailUrl?: string
   } | null>(null)
   const [productLoading, setProductLoading] = useState(true)
+  // 결제 자격 — 심화 단독 등 prerequisite 상품일 때만 의미 있음
+  const [eligibility, setEligibility] = useState<{
+    eligible: boolean
+    reason?: string
+    prerequisiteSlug?: string
+  } | null>(null)
 
   // 배송지 정보 (종이책 등)
   const [shipping, setShipping] = useState({
@@ -112,6 +118,17 @@ function CheckoutContent() {
       })
       .catch(() => {})
       .finally(() => setProductLoading(false))
+  }, [productSlug])
+
+  // 결제 자격 사전 확인 — prerequisite 상품일 때만 차단됨, 그 외엔 무조건 eligible=true
+  useEffect(() => {
+    if (!productSlug) return
+    fetch(`/api/eligibility?slug=${encodeURIComponent(productSlug)}`, { credentials: 'include' })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data: any) => {
+        if (data) setEligibility({ eligible: !!data.eligible, reason: data.reason, prerequisiteSlug: data.prerequisiteSlug })
+      })
+      .catch(() => {})
   }, [productSlug])
 
   const allAgreed = agreed.terms && agreed.refund && agreed.privacy
@@ -279,6 +296,22 @@ function CheckoutContent() {
           <div className="grid lg:grid-cols-[1fr_380px] gap-6">
             {/* ─── 좌측: 주문 상품 + 주문자 + 배송지 ─── */}
             <div className="space-y-6">
+              {/* 자격 미달 안내 — 심화 단독 등 prerequisite 상품일 때만 표시 */}
+              {eligibility && !eligibility.eligible && (
+                <div className="rounded-2xl border-2 border-amber-300 bg-amber-50 p-5">
+                  <div className="font-bold text-amber-800 mb-2">⚠️ 이 강의는 입문 수강생만 신청 가능합니다</div>
+                  <p className="text-sm text-amber-900 mb-3 leading-relaxed">
+                    {eligibility.reason || '이 강의는 입문 수강을 먼저 결제해야 신청할 수 있습니다.'}
+                  </p>
+                  <Link
+                    href="/store/vibe-coding-101"
+                    className="inline-block px-4 py-2 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-sm font-bold"
+                  >
+                    입문 강의 보러가기 →
+                  </Link>
+                </div>
+              )}
+
               {/* 번들 업셀 — 입문 단독 슬러그일 때만 자동 표시 */}
               <BundleUpsell
                 currentSlug={productSlug}
@@ -579,10 +612,21 @@ function CheckoutContent() {
                 {/* 결제 버튼 */}
                 <button
                   onClick={handlePayment}
-                  disabled={!allAgreed || !phoneConfirmed || !phoneValid || loading || (requiresShipping && !shippingValid)}
+                  disabled={
+                    !allAgreed ||
+                    !phoneConfirmed ||
+                    !phoneValid ||
+                    loading ||
+                    (requiresShipping && !shippingValid) ||
+                    (eligibility !== null && !eligibility.eligible)
+                  }
                   className="w-full py-4 bg-brand text-white font-bold rounded-xl hover:bg-brand-dark transition-all disabled:opacity-40 disabled:cursor-not-allowed text-base md:text-lg shadow-md"
                 >
-                  {loading ? '처리 중...' : `${amount.toLocaleString()}원 결제하기`}
+                  {loading
+                    ? '처리 중...'
+                    : eligibility !== null && !eligibility.eligible
+                      ? '입문 수강생만 결제 가능'
+                      : `${amount.toLocaleString()}원 결제하기`}
                 </button>
               </div>
             </div>

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayloadClient } from '@/lib/payload'
 import { sendVirtualAccountIssued } from '@/lib/email-templates'
+import { resolveGrantedClassrooms } from '@/lib/classroom-grant'
 
 /**
  * PortOne V2 결제 검증
@@ -89,8 +90,8 @@ export async function POST(request: NextRequest) {
     }
     const payMethod = payMethodMap[methodType] || undefined
 
-    // 6. 결제 완료 시 — 상품에 연결된 강의실 권한 자동 부여
-    const grantedClassroomSlugs: string[] = Array.isArray(order.classrooms) ? [...order.classrooms] : []
+    // 6. 결제 완료 시 — 상품에 연결된 강의실 권한 자동 부여 (헬퍼로 일원화)
+    let grantedClassroomSlugs: string[] = Array.isArray(order.classrooms) ? [...order.classrooms] : []
     if (newStatus === 'paid' && order.productSlug) {
       try {
         const productResult = await payload.find({
@@ -101,15 +102,19 @@ export async function POST(request: NextRequest) {
           overrideAccess: true,
         })
         const product = productResult.docs[0] as any
-        const arr = Array.isArray(product?.grantedClassroomSlugs) ? product.grantedClassroomSlugs : []
-        for (const item of arr) {
-          const slug = typeof item === 'object' ? item.slug : item
-          if (slug && !grantedClassroomSlugs.includes(slug)) {
-            grantedClassroomSlugs.push(slug)
-          }
-        }
+        grantedClassroomSlugs = resolveGrantedClassrooms(
+          order.productSlug,
+          product?.grantedClassroomSlugs,
+          grantedClassroomSlugs,
+        )
       } catch (e) {
         console.error('[VERIFY GRANT CLASSROOM]', (e as Error).message)
+        // product 조회 실패해도 fallback만이라도 부여
+        grantedClassroomSlugs = resolveGrantedClassrooms(
+          order.productSlug,
+          null,
+          grantedClassroomSlugs,
+        )
       }
     }
 

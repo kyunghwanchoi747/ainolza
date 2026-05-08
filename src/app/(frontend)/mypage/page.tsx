@@ -265,6 +265,30 @@ export default function MyPage() {
     return classroomMeta.filter((c) => slugs.has(c.slug))
   }, [orders, classroomMeta])
 
+  // 입문 수강 이력 + 심화 미보유 — 심화 단독 신청 권유용
+  const isEntryGraduate = useMemo(() => {
+    return orders.some(
+      (o) =>
+        ['paid', 'active', 'completed'].includes(o.status) &&
+        (o.productSlug === 'vibe-coding-101' ||
+          (Array.isArray((o as any).classrooms) &&
+            (o as any).classrooms.some((s: string) => typeof s === 'string' && s.startsWith('vibe-coding-101')))),
+    )
+  }, [orders])
+
+  const hasAdvanced = useMemo(() => {
+    return orders.some(
+      (o) =>
+        ['paid', 'active', 'completed'].includes(o.status) &&
+        (o.productSlug === 'vibe-coding-advanced' ||
+          o.productSlug === 'vibe-coding-bundle-2' ||
+          (Array.isArray((o as any).classrooms) &&
+            (o as any).classrooms.some((s: string) => typeof s === 'string' && s.startsWith('vibe-coding-advanced')))),
+    )
+  }, [orders])
+
+  const showAdvancedInvite = isEntryGraduate && !hasAdvanced
+
   // 보유한 전자책 — slug별 가장 최근 paid 주문 1건과 매칭 (orderId 필요)
   const ownedEbooks = useMemo(() => {
     const latestOrderBySlug = new Map<string, any>()
@@ -317,6 +341,26 @@ export default function MyPage() {
               {user.phone && <div className="flex items-center gap-3"><Phone className="w-4 h-4 text-sub" /><span className="text-body">{user.phone}</span></div>}
             </div>
           </div>
+
+          {/* 심화 권유 — 입문 수강자 + 심화 미보유에게만 노출 */}
+          {showAdvancedInvite && (
+            <div className="p-5 mb-6 rounded-2xl border-2 border-blue-300 bg-gradient-to-br from-blue-50 to-indigo-50">
+              <div className="flex items-center gap-2 text-blue-700 font-bold text-base mb-1.5">
+                <span aria-hidden>🎓</span>
+                <span>심화반 신청 자격이 있습니다</span>
+              </div>
+              <p className="text-sm text-gray-700 leading-relaxed mb-3">
+                입문 수강을 마치셨네요. 입문 1기 수강생 80명 중 절반인 40명이 심화까지 진행했습니다.
+                4주 4회차로 본인의 사이트를 본격적으로 운영해보세요.
+              </p>
+              <Link
+                href="/checkout?slug=vibe-coding-advanced"
+                className="inline-block px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold"
+              >
+                심화반 신청하기 →
+              </Link>
+            </div>
+          )}
 
           {/* 내 강의실 */}
           <div className="mb-6">

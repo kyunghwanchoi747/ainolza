@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import * as PortOne from '@portone/server-sdk'
 import { getPayloadClient } from '@/lib/payload'
+import { resolveGrantedClassrooms } from '@/lib/classroom-grant'
 
 /**
  * PortOne V2 결제 웹훅
@@ -94,6 +95,7 @@ export async function POST(request: NextRequest) {
 
     // 가상계좌 입금 완료 → 상품의 grantedClassroomSlugs를 Order.classrooms에 자동 부여
     if (order.productSlug) {
+      const existing = Array.isArray(order.classrooms) ? [...order.classrooms] : []
       try {
         const productResult = await payloadClient.find({
           collection: 'products',
@@ -103,15 +105,17 @@ export async function POST(request: NextRequest) {
           overrideAccess: true,
         })
         const product = productResult.docs[0] as any
-        const granted: string[] = Array.isArray(order.classrooms) ? [...order.classrooms] : []
-        const arr = Array.isArray(product?.grantedClassroomSlugs) ? product.grantedClassroomSlugs : []
-        for (const item of arr) {
-          const slug = typeof item === 'object' ? item.slug : item
-          if (slug && !granted.includes(slug)) granted.push(slug)
-        }
+        const granted = resolveGrantedClassrooms(
+          order.productSlug,
+          product?.grantedClassroomSlugs,
+          existing,
+        )
         if (granted.length > 0) updateData.classrooms = granted
       } catch (e) {
         console.error('[WEBHOOK GRANT CLASSROOM]', (e as Error).message)
+        // 상품 조회 실패 시에도 fallback으로 부여
+        const granted = resolveGrantedClassrooms(order.productSlug, null, existing)
+        if (granted.length > 0) updateData.classrooms = granted
       }
     }
   } else if (payment?.status === 'FAILED' && order.status !== 'failed') {

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getPayloadClient } from '@/lib/payload'
 import { rateLimit, getClientIP } from '@/lib/rate-limit'
 import { resolveCurrentPrice } from '@/lib/price-schedule'
+import { checkEligibility } from '@/lib/eligibility'
 
 // 주문 생성 (결제 전)
 export async function POST(request: NextRequest) {
@@ -90,11 +91,20 @@ export async function POST(request: NextRequest) {
     const payload = payloadEarly
 
     // 로그인 사용자 확인
-    let userId = null
+    let userId: number | string | null = null
     try {
       const { user } = await payload.auth({ headers: request.headers })
       if (user) userId = user.id
     } catch { /* 비로그인 */ }
+
+    // 선수강 자격 검증 — 심화 단독 등 prerequisite 상품 차단
+    const eligibility = await checkEligibility(payload, productSlug, userId)
+    if (!eligibility.eligible) {
+      return NextResponse.json(
+        { error: eligibility.reason || '결제 자격이 없습니다.' },
+        { status: 403 },
+      )
+    }
 
     const orderData: Record<string, any> = {
       orderNumber,
