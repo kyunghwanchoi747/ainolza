@@ -6,6 +6,7 @@ import { getProductForStore } from '@/lib/products-db'
 import { ProductFaqList } from '@/components/store/product-faq-list'
 import { ReviewSection } from '@/components/store/review-section'
 import { V3Header } from '@/components/landing/v3-header'
+import { EligibilityGatedCta } from '@/components/store/eligibility-gated-cta'
 
 export const dynamic = 'force-dynamic'
 
@@ -208,30 +209,36 @@ export default async function ProductDetailPage({
                   카카오톡으로 문의하기
                 </a>
 
-                {product.actions.map((a, i) => {
-                  const baseCls = a.primary
-                    ? 'block w-full py-5 bg-brand text-white font-extrabold rounded-2xl text-center hover:bg-brand-dark hover:scale-[1.02] active:scale-[0.98] transition-all text-base md:text-lg cursor-pointer shadow-md'
-                    : 'block w-full py-5 border-2 border-[#333] text-ink font-extrabold rounded-2xl text-center hover:bg-ink hover:text-white hover:scale-[1.02] active:scale-[0.98] transition-all text-base md:text-lg cursor-pointer'
-                  const finalUrl = withSlug(a.url, product.slug)
-                  if (a.external || /^https?:/.test(a.url)) {
+                <EligibilityGatedCta
+                  productSlug={product.slug}
+                  fallbackHref="/store/vibe-coding-101"
+                  fallbackLabel="입문 강의 보러가기 →"
+                >
+                  {product.actions.map((a, i) => {
+                    const baseCls = a.primary
+                      ? 'block w-full py-5 bg-brand text-white font-extrabold rounded-2xl text-center hover:bg-brand-dark hover:scale-[1.02] active:scale-[0.98] transition-all text-base md:text-lg cursor-pointer shadow-md'
+                      : 'block w-full py-5 border-2 border-[#333] text-ink font-extrabold rounded-2xl text-center hover:bg-ink hover:text-white hover:scale-[1.02] active:scale-[0.98] transition-all text-base md:text-lg cursor-pointer'
+                    const finalUrl = withSlug(a.url, product.slug)
+                    if (a.external || /^https?:/.test(a.url)) {
+                      return (
+                        <a
+                          key={i}
+                          href={finalUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={baseCls}
+                        >
+                          {a.label}
+                        </a>
+                      )
+                    }
                     return (
-                      <a
-                        key={i}
-                        href={finalUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={baseCls}
-                      >
+                      <Link key={i} href={finalUrl} className={baseCls}>
                         {a.label}
-                      </a>
+                      </Link>
                     )
-                  }
-                  return (
-                    <Link key={i} href={finalUrl} className={baseCls}>
-                      {a.label}
-                    </Link>
-                  )
-                })}
+                  })}
+                </EligibilityGatedCta>
               </div>
             </div>
           </div>
@@ -299,30 +306,36 @@ export default async function ProductDetailPage({
             </svg>
             카카오톡으로 문의하기
           </a>
-          {product.actions.map((a, i) => {
-            const baseCls = a.primary
-              ? 'block w-full py-5 bg-brand text-white font-extrabold rounded-2xl text-center hover:bg-brand-dark hover:scale-[1.02] active:scale-[0.98] transition-all text-base md:text-lg cursor-pointer shadow-md'
-              : 'block w-full py-5 border-2 border-[#333] text-ink font-extrabold rounded-2xl text-center hover:bg-ink hover:text-white hover:scale-[1.02] active:scale-[0.98] transition-all text-base md:text-lg cursor-pointer'
-            const finalUrl = withSlug(a.url, product.slug)
-            if (a.external || /^https?:/.test(a.url)) {
+          <EligibilityGatedCta
+            productSlug={product.slug}
+            fallbackHref="/store/vibe-coding-101"
+            fallbackLabel="입문 강의 보러가기 →"
+          >
+            {product.actions.map((a, i) => {
+              const baseCls = a.primary
+                ? 'block w-full py-5 bg-brand text-white font-extrabold rounded-2xl text-center hover:bg-brand-dark hover:scale-[1.02] active:scale-[0.98] transition-all text-base md:text-lg cursor-pointer shadow-md'
+                : 'block w-full py-5 border-2 border-[#333] text-ink font-extrabold rounded-2xl text-center hover:bg-ink hover:text-white hover:scale-[1.02] active:scale-[0.98] transition-all text-base md:text-lg cursor-pointer'
+              const finalUrl = withSlug(a.url, product.slug)
+              if (a.external || /^https?:/.test(a.url)) {
+                return (
+                  <a
+                    key={i}
+                    href={finalUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={baseCls}
+                  >
+                    {a.label}
+                  </a>
+                )
+              }
               return (
-                <a
-                  key={i}
-                  href={finalUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={baseCls}
-                >
+                <Link key={i} href={finalUrl} className={baseCls}>
                   {a.label}
-                </a>
+                </Link>
               )
-            }
-            return (
-              <Link key={i} href={finalUrl} className={baseCls}>
-                {a.label}
-              </Link>
-            )
-          })}
+            })}
+          </EligibilityGatedCta>
         </div>
       </section>
     </div>
