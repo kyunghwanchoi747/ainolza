@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
 import * as PortOne from '@portone/browser-sdk/v2'
 import { resolveCurrentPrice } from '@/lib/price-schedule'
+import { BundleUpsell } from '@/components/checkout/bundle-upsell'
 
 const PORTONE_STORE_ID = process.env.NEXT_PUBLIC_PORTONE_STORE_ID || ''
 const PORTONE_CHANNEL_KEY = process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY || ''
@@ -278,6 +279,13 @@ function CheckoutContent() {
           <div className="grid lg:grid-cols-[1fr_380px] gap-6">
             {/* ─── 좌측: 주문 상품 + 주문자 + 배송지 ─── */}
             <div className="space-y-6">
+              {/* 번들 업셀 — 입문 단독 슬러그일 때만 자동 표시 */}
+              <BundleUpsell
+                currentSlug={productSlug}
+                bundleSlug="vibe-coding-bundle-2"
+                currentPrice={amount}
+              />
+
               {/* 주문 상품 정보 */}
               <div className="p-5 md:p-6 rounded-2xl bg-white border border-line">
                 <h2 className="text-base font-bold text-ink mb-4">주문 상품 정보</h2>
