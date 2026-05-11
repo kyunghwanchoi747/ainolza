@@ -64,6 +64,29 @@ export default function OrderDetailPage() {
     }
   }
 
+  // 무통장 [입금확인] — status를 paid로 즉시 전환. afterChange hook이
+  // 권한 부여 + 결제완료 메일 발송까지 자동 처리.
+  const handleConfirmDeposit = async () => {
+    if (!confirm('이 주문을 입금 확인 처리하시겠습니까? 강의실 권한 부여와 결제완료 메일이 자동 발송됩니다.')) return
+    setSaving(true)
+    try {
+      const res = await fetch(`/api/orders/${params.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ status: 'paid' }),
+      })
+      if (!res.ok) throw new Error()
+      alert('입금 확인 처리 완료.')
+      setStatus('paid')
+      setOrder({ ...order, status: 'paid' })
+    } catch {
+      alert('처리에 실패했습니다.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
   if (loading) return <div className="p-8 text-center text-muted-foreground">로딩 중...</div>
   if (!order) return <div className="p-8 text-center text-muted-foreground">주문을 찾을 수 없습니다.</div>
 
@@ -120,9 +143,24 @@ export default function OrderDetailPage() {
             )}
             {order.vbankName && (
               <>
-                <div className="flex justify-between"><span className="text-muted-foreground">가상계좌</span><span>{order.vbankName} {order.vbankNum}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">{order.pgProvider === 'direct-bank' ? '입금 계좌' : '가상계좌'}</span><span>{order.vbankName} {order.vbankNum}</span></div>
                 <div className="flex justify-between"><span className="text-muted-foreground">입금기한</span><span>{order.vbankDate ? new Date(order.vbankDate).toLocaleString('ko-KR') : '-'}</span></div>
               </>
+            )}
+            {order.pgProvider === 'direct-bank' && (
+              <div className="flex justify-between items-center bg-amber-50 -mx-2 px-3 py-2 rounded-md">
+                <span className="text-amber-900 font-bold text-sm">입금자명</span>
+                <span className="font-mono text-base font-extrabold text-red-600">{order.orderNumber?.slice(-6)}</span>
+              </div>
+            )}
+            {order.pgProvider === 'direct-bank' && order.status === 'pending' && (
+              <button
+                onClick={handleConfirmDeposit}
+                disabled={saving}
+                className="w-full mt-2 px-4 py-3 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl disabled:opacity-50"
+              >
+                {saving ? '처리 중...' : '✓ 입금 확인 → 결제완료 처리'}
+              </button>
             )}
             <div className="flex justify-between"><span className="text-muted-foreground">현금영수증</span><span>{order.cashReceiptType === 'none' ? '미발행' : order.cashReceiptType === 'income' ? '소득공제용' : order.cashReceiptType === 'expense' ? '지출증빙용' : '-'}</span></div>
           </div>

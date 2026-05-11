@@ -11,8 +11,11 @@ import { BundleUpsell } from '@/components/checkout/bundle-upsell'
 const PORTONE_STORE_ID = process.env.NEXT_PUBLIC_PORTONE_STORE_ID || ''
 const PORTONE_CHANNEL_KEY = process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY || ''
 
-// UI 키 — KAKAOPAY는 PortOne 호출 시 EASY_PAY + easyPayProvider로 분기
-type PayMethod = 'CARD' | 'TRANSFER' | 'VIRTUAL_ACCOUNT' | 'KAKAOPAY'
+// UI 키
+//  - KAKAOPAY: PortOne 호출 시 EASY_PAY + easyPayProvider 로 분기
+//  - DIRECT_BANK: PortOne 미호출. 사용자 토스뱅크 계좌로 직접 입금받는 무통장.
+//                주문번호 끝 6자리를 입금자명으로 사용하여 매칭.
+type PayMethod = 'CARD' | 'TRANSFER' | 'DIRECT_BANK' | 'KAKAOPAY'
 
 function CheckoutContent() {
   const router = useRouter()
@@ -188,6 +191,7 @@ function CheckoutContent() {
           buyerName: user?.name || '',
           buyerEmail: user?.email || '',
           buyerPhone: phoneNormalized,
+          payMethod, // 'CARD' | 'TRANSFER' | 'DIRECT_BANK' | 'KAKAOPAY'
           ...(requiresShipping
             ? {
                 shippingRecipient: shipping.recipient.trim(),
@@ -205,6 +209,12 @@ function CheckoutContent() {
       if (!orderData.ok) {
         alert(orderData.error || '주문 생성에 실패했습니다.')
         setLoading(false)
+        return
+      }
+
+      // 무통장 입금: PortOne 미호출, 입금 안내 페이지로 이동
+      if (payMethod === 'DIRECT_BANK') {
+        router.push(`/checkout/bank?orderNumber=${orderData.orderNumber}`)
         return
       }
 
@@ -533,7 +543,7 @@ function CheckoutContent() {
                       // { key: 'KAKAOPAY', label: '카카오페이' },
                       { key: 'CARD', label: '신용카드' },
                       { key: 'TRANSFER', label: '계좌이체' },
-                      { key: 'VIRTUAL_ACCOUNT', label: '가상계좌(무통장입금)' },
+                      { key: 'DIRECT_BANK', label: '무통장 입금 (직접 입금)' },
                     ] as { key: PayMethod; label: string }[]).map((m) => {
                       const isKakao = m.key === 'KAKAOPAY'
                       const selected = payMethod === m.key

@@ -22,6 +22,7 @@ export async function POST(request: NextRequest) {
       buyerName: string
       buyerEmail: string
       buyerPhone?: string
+      payMethod?: string
       shippingRecipient?: string
       shippingPhone?: string
       shippingZipcode?: string
@@ -38,6 +39,7 @@ export async function POST(request: NextRequest) {
       buyerName,
       buyerEmail,
       buyerPhone,
+      payMethod,
       shippingRecipient,
       shippingPhone,
       shippingZipcode,
@@ -119,6 +121,18 @@ export async function POST(request: NextRequest) {
       user: userId,
       status: 'pending',
       merchantUid: orderNumber,
+    }
+
+    // 무통장 입금 — payMethod=trans, vbankDate에 24시간 마감 저장.
+    // 마감 시각이 지나면 cron이 자동 취소 처리.
+    if (payMethod === 'DIRECT_BANK') {
+      orderData.payMethod = 'trans'
+      orderData.pgProvider = 'direct-bank'
+      const expiry = new Date(Date.now() + 24 * 60 * 60 * 1000)
+      orderData.vbankDate = expiry.toISOString()
+      orderData.vbankName = '토스뱅크'
+      orderData.vbankNum = '1000-1041-3507'
+      orderData.adminMemo = `무통장 입금 대기 — 입금자명: 주문번호 끝6자리 (${orderNumber.slice(-6)}), 예금주: 최경환`
     }
 
     // 배송 정보가 있으면 저장 (종이책 등)
