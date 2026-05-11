@@ -434,23 +434,52 @@ export async function sendPaymentCompletedToAdmin(
 /** 환불 요청 → 관리자 알림 */
 export async function sendRefundRequestedToAdmin(
   payload: Payload,
-  order: { id: number | string; orderNumber: string; buyerName?: string | null; buyerEmail: string; productName: string; amount?: number | null; refundReason?: string | null },
+  order: {
+    id: number | string
+    orderNumber: string
+    buyerName?: string | null
+    buyerEmail: string
+    productName: string
+    amount?: number | null
+    refundReason?: string | null
+    pgProvider?: string | null
+    refundBank?: string | null
+    refundAccountNum?: string | null
+    refundAccountHolder?: string | null
+  },
 ) {
+  const isDirectBank = order.pgProvider === 'direct-bank'
   await payload.sendEmail({
     to: adminEmail(),
-    subject: `[AI놀자 알림] 🚨 환불 요청 ${order.orderNumber}`,
+    subject: `[AI놀자 알림] 환불 요청 ${order.orderNumber}`,
     html: wrap(
-      '🚨 환불 요청이 들어왔습니다',
+      '환불 요청이 들어왔습니다',
       `
       <table cellpadding="6" cellspacing="0" style="width:100%;background:#fafafa;border-radius:10px;padding:8px;margin:0 0 24px;font-size:13px;color:#666;">
         <tr><td style="width:90px;color:#999;">주문번호</td><td>${order.orderNumber}</td></tr>
         <tr><td style="color:#999;">상품</td><td>${order.productName}</td></tr>
-        <tr><td style="color:#999;">금액</td><td><strong style="color:#D4756E;">${priceKR(order.amount || 0)}</strong></td></tr>
+        <tr><td style="color:#999;">금액</td><td><strong style="color:#333;">${priceKR(order.amount || 0)}</strong></td></tr>
         <tr><td style="color:#999;">구매자</td><td>${order.buyerName || '-'} (${order.buyerEmail})</td></tr>
         <tr><td style="color:#999;vertical-align:top;">사유</td><td style="color:#333;">${order.refundReason || '(사유 미입력)'}</td></tr>
       </table>
+      ${
+        isDirectBank
+          ? `
+      <div style="border-top:1px solid #e5e5e5;border-bottom:1px solid #e5e5e5;padding:14px 0;margin:0 0 24px;">
+        <div style="font-weight:bold;color:#333;margin-bottom:8px;">무통장 환불 — 송금할 계좌</div>
+        <table cellpadding="4" cellspacing="0" style="font-size:13px;color:#555;">
+          <tr><td style="color:#999;width:90px;">은행</td><td><strong>${order.refundBank || '-'}</strong></td></tr>
+          <tr><td style="color:#999;">계좌번호</td><td><strong style="font-family:monospace;">${order.refundAccountNum || '-'}</strong></td></tr>
+          <tr><td style="color:#999;">예금주</td><td><strong>${order.refundAccountHolder || '-'}</strong></td></tr>
+        </table>
+        <div style="margin-top:8px;font-size:12px;color:#888;">
+          어드민에서 [환불 승인] 후 위 계좌로 직접 송금해 주세요.
+        </div>
+      </div>`
+          : ''
+      }
       <div style="text-align:center;margin:24px 0;">
-        <a href="${SITE_URL}/admin/collections/orders/${order.id}" style="display:inline-block;background:#EF4444;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:10px;font-size:14px;font-weight:bold;">처리하러 가기</a>
+        <a href="${SITE_URL}/admin/collections/orders/${order.id}" style="display:inline-block;background:#333;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:10px;font-size:14px;font-weight:bold;">처리하러 가기</a>
       </div>`,
     ),
   })

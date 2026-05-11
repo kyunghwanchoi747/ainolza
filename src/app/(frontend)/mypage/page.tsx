@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { User, Mail, Phone, LogOut, ShoppingBag, ChevronDown, ChevronUp, GraduationCap, Star, MessageSquare } from 'lucide-react'
+import { RefundRequestModal } from '@/components/mypage/refund-request-modal'
 
 type ClassroomMeta = { slug: string; shortTitle: string; level: string; description?: string }
 
@@ -155,26 +156,21 @@ export default function MyPage() {
     }
   }
 
-  const handleRefundRequest = async (orderId: string) => {
-    const reason = prompt('환불 사유를 입력해주세요:')
-    if (!reason) return
+  // 환불 신청 모달 상태
+  const [refundTarget, setRefundTarget] = useState<{
+    orderId: string
+    orderNumber: string
+    amount: number
+    isDirectBank: boolean
+  } | null>(null)
 
-    try {
-      const res = await fetch('/api/payments/refund', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ orderId, reason }),
-      })
-      if (res.ok) {
-        alert('환불 요청이 접수되었습니다.')
-        window.location.reload()
-      } else {
-        alert('환불 요청에 실패했습니다.')
-      }
-    } catch {
-      alert('오류가 발생했습니다.')
-    }
+  const openRefundModal = (order: any) => {
+    setRefundTarget({
+      orderId: String(order.id),
+      orderNumber: order.orderNumber,
+      amount: order.amount || 0,
+      isDirectBank: order.pgProvider === 'direct-bank',
+    })
   }
 
   // 무통장 미결제(pending + direct-bank) 주문 — 취소 요청
@@ -937,7 +933,7 @@ export default function MyPage() {
                               <span className="text-xs text-sub">관리자 승인 대기</span>
                             )}
                             {(order.status === 'paid' || order.status === 'active') && (
-                              <button onClick={() => handleRefundRequest(order.id)} className="text-xs text-sub hover:text-ink underline">환불 신청</button>
+                              <button onClick={() => openRefundModal(order)} className="text-xs text-sub hover:text-ink underline">환불 신청</button>
                             )}
                           </div>
                         </div>
@@ -1000,6 +996,20 @@ export default function MyPage() {
           </button>
         </div>
       </section>
+
+      {/* 환불 신청 모달 */}
+      <RefundRequestModal
+        open={!!refundTarget}
+        orderId={refundTarget?.orderId || ''}
+        orderNumber={refundTarget?.orderNumber || ''}
+        amount={refundTarget?.amount || 0}
+        isDirectBank={!!refundTarget?.isDirectBank}
+        onClose={() => setRefundTarget(null)}
+        onDone={() => {
+          setRefundTarget(null)
+          window.location.reload()
+        }}
+      />
     </div>
   )
 }

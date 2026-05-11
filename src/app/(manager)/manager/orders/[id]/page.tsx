@@ -214,6 +214,14 @@ export default function OrderDetailPage() {
               <div><span className="text-muted-foreground">환불 사유:</span> <span>{order.refundReason || '-'}</span></div>
               {order.refundAmount && <div className="flex justify-between"><span className="text-muted-foreground">환불 금액</span><span>{order.refundAmount?.toLocaleString()}원</span></div>}
               {order.refundedAt && <div className="flex justify-between"><span className="text-muted-foreground">환불일</span><span>{new Date(order.refundedAt).toLocaleDateString('ko-KR')}</span></div>}
+              {order.pgProvider === 'direct-bank' && (order.refundBank || order.refundAccountNum || order.refundAccountHolder) && (
+                <div className="pt-3 border-t space-y-2">
+                  <div className="text-xs font-bold text-ink">환불 받을 계좌 (회원 입력)</div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">은행</span><span className="font-medium">{order.refundBank || '-'}</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">계좌번호</span><span className="font-mono">{order.refundAccountNum || '-'}</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">예금주</span><span className="font-medium">{order.refundAccountHolder || '-'}</span></div>
+                </div>
+              )}
             </div>
             {order.status === 'refund_requested' && (
               <p className="text-xs text-muted-foreground leading-relaxed pt-3 border-t">

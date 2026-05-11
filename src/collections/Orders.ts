@@ -171,6 +171,10 @@ export const Orders: CollectionConfig = {
     { name: 'refundReason', type: 'textarea', label: '환불 사유' },
     { name: 'refundedAt', type: 'date', label: '환불일' },
     { name: 'refundAmount', type: 'number', label: '환불금액' },
+    // 무통장 환불용 — 회원이 받을 계좌 정보 (회원이 환불 신청 시 입력)
+    { name: 'refundBank', type: 'text', label: '환불 받을 은행' },
+    { name: 'refundAccountNum', type: 'text', label: '환불 받을 계좌번호' },
+    { name: 'refundAccountHolder', type: 'text', label: '환불 받을 예금주' },
     // 현금영수증
     {
       name: 'cashReceiptType',
