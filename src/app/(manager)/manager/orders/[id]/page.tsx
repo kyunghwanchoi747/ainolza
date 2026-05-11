@@ -148,18 +148,18 @@ export default function OrderDetailPage() {
               </>
             )}
             {order.pgProvider === 'direct-bank' && (
-              <div className="flex justify-between items-center bg-amber-50 -mx-2 px-3 py-2 rounded-md">
-                <span className="text-amber-900 font-bold text-sm">입금자명</span>
-                <span className="font-mono text-base font-extrabold text-red-600">{order.orderNumber?.slice(-6)}</span>
+              <div className="flex justify-between items-baseline py-2 border-t border-line mt-1">
+                <span className="text-sm font-bold text-ink">입금자명</span>
+                <span className="text-base font-bold text-ink">{order.depositorName || order.buyerName || '미설정'}</span>
               </div>
             )}
             {order.pgProvider === 'direct-bank' && order.status === 'pending' && (
               <button
                 onClick={handleConfirmDeposit}
                 disabled={saving}
-                className="w-full mt-2 px-4 py-3 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl disabled:opacity-50"
+                className="w-full mt-3 px-4 py-3 bg-ink hover:bg-ink/90 text-white font-bold rounded-md disabled:opacity-50"
               >
-                {saving ? '처리 중...' : '✓ 입금 확인 → 결제완료 처리'}
+                {saving ? '처리 중...' : '입금 확인 → 결제완료 처리'}
               </button>
             )}
             <div className="flex justify-between"><span className="text-muted-foreground">현금영수증</span><span>{order.cashReceiptType === 'none' ? '미발행' : order.cashReceiptType === 'income' ? '소득공제용' : order.cashReceiptType === 'expense' ? '지출증빙용' : '-'}</span></div>

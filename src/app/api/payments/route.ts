@@ -132,7 +132,9 @@ export async function POST(request: NextRequest) {
       orderData.vbankDate = expiry.toISOString()
       orderData.vbankName = '토스뱅크'
       orderData.vbankNum = '1000-1041-3507'
-      orderData.adminMemo = `무통장 입금 대기 — 입금자명: 주문번호 끝6자리 (${orderNumber.slice(-6)}), 예금주: 최경환`
+      // 입금자명 기본값 = 회원 이름. 회원이 안내 화면에서 수정 가능.
+      orderData.depositorName = buyerName || ''
+      orderData.adminMemo = `무통장 입금 대기 — 입금자명: ${buyerName || '(미설정)'}, 예금주: 최경환`
     }
 
     // 배송 정보가 있으면 저장 (종이책 등)

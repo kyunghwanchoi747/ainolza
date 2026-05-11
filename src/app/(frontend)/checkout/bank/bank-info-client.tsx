@@ -3,9 +3,10 @@
 import { useEffect, useState } from 'react'
 
 type Props = {
+  orderId: string
   orderNumber: string
   amount: number
-  depositorName: string
+  initialDepositorName: string
   vbankDate?: string
 }
 
@@ -18,9 +19,13 @@ function formatRemaining(ms: number): string {
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
 }
 
-export function BankInfoClient({ orderNumber, amount, depositorName, vbankDate }: Props) {
+export function BankInfoClient({ orderId, amount, initialDepositorName, vbankDate }: Props) {
   const [copied, setCopied] = useState<string | null>(null)
   const [now, setNow] = useState(() => Date.now())
+  const [depositorName, setDepositorName] = useState(initialDepositorName)
+  const [editing, setEditing] = useState(false)
+  const [draft, setDraft] = useState(initialDepositorName)
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 1000)
@@ -35,101 +40,179 @@ export function BankInfoClient({ orderNumber, amount, depositorName, vbankDate }
   const copy = async (text: string, key: string) => {
     try {
       await navigator.clipboard.writeText(text)
-      setCopied(key)
-      setTimeout(() => setCopied(null), 1500)
     } catch {
-      // fallback
       const ta = document.createElement('textarea')
       ta.value = text
       document.body.appendChild(ta)
       ta.select()
       document.execCommand('copy')
       document.body.removeChild(ta)
-      setCopied(key)
-      setTimeout(() => setCopied(null), 1500)
+    }
+    setCopied(key)
+    setTimeout(() => setCopied(null), 1500)
+  }
+
+  const saveDepositor = async () => {
+    const trimmed = draft.trim()
+    if (!trimmed) {
+      alert('입금자명을 입력해 주세요.')
+      return
+    }
+    if (trimmed === depositorName) {
+      setEditing(false)
+      return
+    }
+    setSaving(true)
+    try {
+      const res = await fetch(`/api/orders/${orderId}/depositor`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ depositorName: trimmed }),
+      })
+      if (!res.ok) throw new Error()
+      setDepositorName(trimmed)
+      setEditing(false)
+    } catch {
+      alert('변경에 실패했습니다. 잠시 후 다시 시도해 주세요.')
+    } finally {
+      setSaving(false)
     }
   }
 
   return (
-    <div className="p-5 rounded-2xl border-2 border-blue-300 bg-blue-50 space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="font-bold text-blue-900">입금 정보</h2>
-        <div className={`text-sm font-bold ${expired ? 'text-gray-500' : 'text-red-600'}`}>
+    <div className="mt-2 py-5 border-t border-line">
+      <div className="flex items-baseline justify-between mb-5">
+        <h2 className="text-base font-bold text-ink">입금 계좌</h2>
+        <span className={`text-xs ${expired ? 'text-sub' : 'text-ink'}`}>
           {expired ? '입금 마감' : `남은 시간 ${remainingText}`}
-        </div>
+        </span>
       </div>
 
-      <Field
-        label="은행"
-        value="토스뱅크"
-        onCopy={() => copy('토스뱅크', 'bank')}
-        copied={copied === 'bank'}
-      />
-      <Field
-        label="계좌번호"
-        value="1000-1041-3507"
-        big
-        onCopy={() => copy('100010413507', 'account')}
-        copied={copied === 'account'}
-      />
-      <Field
-        label="예금주"
-        value="최경환"
-        onCopy={() => copy('최경환', 'holder')}
-        copied={copied === 'holder'}
-      />
-      <Field
-        label="입금자명 ★"
-        value={depositorName}
-        highlight
-        onCopy={() => copy(depositorName, 'depositor')}
-        copied={copied === 'depositor'}
-      />
-      <Field
-        label="입금 금액"
-        value={`${amount.toLocaleString()}원`}
-        big
-        onCopy={() => copy(String(amount), 'amount')}
-        copied={copied === 'amount'}
-      />
+      <div className="space-y-3.5">
+        <Row
+          label="은행"
+          value="토스뱅크"
+          onCopy={() => copy('토스뱅크', 'bank')}
+          copied={copied === 'bank'}
+        />
+        <Row
+          label="계좌번호"
+          value="1000-1041-3507"
+          onCopy={() => copy('100010413507', 'account')}
+          copied={copied === 'account'}
+          mono
+          emphasize
+        />
+        <Row
+          label="예금주"
+          value="최경환"
+          onCopy={() => copy('최경환', 'holder')}
+          copied={copied === 'holder'}
+        />
+        <Row
+          label="입금 금액"
+          value={`${amount.toLocaleString()}원`}
+          onCopy={() => copy(String(amount), 'amount')}
+          copied={copied === 'amount'}
+          emphasize
+        />
 
-      <div className="text-xs text-blue-800 pt-2 border-t border-blue-200">
-        주문번호: <span className="font-mono">{orderNumber}</span>
+        {/* 입금자명 — 수정 가능 */}
+        <div className="pt-2 border-t border-line">
+          <div className="flex items-baseline justify-between gap-3 mb-2">
+            <span className="text-sm text-sub">입금자명</span>
+            {!editing && (
+              <button
+                type="button"
+                onClick={() => {
+                  setDraft(depositorName)
+                  setEditing(true)
+                }}
+                className="text-xs text-sub underline hover:text-ink"
+              >
+                수정
+              </button>
+            )}
+          </div>
+          {editing ? (
+            <div className="flex gap-2">
+              <input
+                value={draft}
+                onChange={(e) => setDraft(e.target.value)}
+                maxLength={20}
+                placeholder="입금하실 분 이름"
+                className="flex-1 px-3 py-2 border border-line focus:border-ink focus:outline-none text-base"
+                autoFocus
+              />
+              <button
+                type="button"
+                onClick={saveDepositor}
+                disabled={saving}
+                className="px-4 py-2 bg-ink text-white text-sm font-medium hover:bg-ink/90 disabled:opacity-50"
+              >
+                {saving ? '저장 중' : '저장'}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setEditing(false)
+                  setDraft(depositorName)
+                }}
+                disabled={saving}
+                className="px-3 py-2 border border-line text-sm text-sub hover:text-ink"
+              >
+                취소
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-baseline justify-between">
+              <span className="text-base font-medium text-ink">{depositorName || '미설정'}</span>
+              <button
+                type="button"
+                onClick={() => copy(depositorName, 'depositor')}
+                className="text-xs text-sub underline hover:text-ink"
+              >
+                {copied === 'depositor' ? '복사됨' : '복사'}
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
 }
 
-function Field({
+function Row({
   label,
   value,
-  big,
-  highlight,
   onCopy,
   copied,
+  mono,
+  emphasize,
 }: {
   label: string
   value: string
-  big?: boolean
-  highlight?: boolean
   onCopy: () => void
   copied: boolean
+  mono?: boolean
+  emphasize?: boolean
 }) {
   return (
-    <div className="flex items-center justify-between gap-3">
-      <div className="text-sm text-blue-900 shrink-0 w-24">{label}</div>
-      <div className="flex items-center gap-2 flex-1 justify-end">
+    <div className="flex items-baseline justify-between gap-3">
+      <span className="text-sm text-sub shrink-0">{label}</span>
+      <div className="flex items-baseline gap-3 flex-1 justify-end">
         <span
-          className={`${big ? 'text-xl font-extrabold' : 'font-bold'} ${
-            highlight ? 'text-red-600' : 'text-blue-900'
-          }`}
+          className={`${emphasize ? 'text-lg font-bold' : 'font-medium'} ${
+            mono ? 'font-mono' : ''
+          } text-ink`}
         >
           {value}
         </span>
         <button
           type="button"
           onClick={onCopy}
-          className="text-xs px-2 py-1 rounded-md bg-white border border-blue-300 text-blue-700 hover:bg-blue-100"
+          className="text-xs text-sub underline hover:text-ink shrink-0"
         >
           {copied ? '복사됨' : '복사'}
         </button>

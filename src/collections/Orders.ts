@@ -159,10 +159,13 @@ export const Orders: CollectionConfig = {
     { name: 'merchantUid', type: 'text', label: 'Merchant UID' },
     { name: 'pgProvider', type: 'text', label: 'PG사' },
     { name: 'receiptUrl', type: 'text', label: '영수증 URL' },
-    // 가상계좌
-    { name: 'vbankName', type: 'text', label: '가상계좌 은행' },
-    { name: 'vbankNum', type: 'text', label: '가상계좌 번호' },
+    // 가상계좌 / 무통장 직접입금
+    { name: 'vbankName', type: 'text', label: '입금 은행' },
+    { name: 'vbankNum', type: 'text', label: '입금 계좌번호' },
     { name: 'vbankDate', type: 'date', label: '입금기한' },
+    // 입금자명 — 무통장(direct-bank) 결제 시 회원이 토스뱅크에 입금할 이름.
+    // 기본값은 회원 이름, 회원이 결제 후 안내 화면에서 수정 가능. 수정 시 관리자 알림.
+    { name: 'depositorName', type: 'text', label: '입금자명' },
     // 환불
     { name: 'refundReason', type: 'textarea', label: '환불 사유' },
     { name: 'refundedAt', type: 'date', label: '환불일' },

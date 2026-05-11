@@ -355,10 +355,10 @@ export async function sendEnrollmentToAdmin(
 /** 신규 주문 접수 → 관리자 알림 */
 export async function sendOrderCreatedToAdmin(
   payload: Payload,
-  order: { id: number | string; orderNumber: string; buyerName?: string | null; buyerEmail: string; buyerPhone?: string | null; productName: string; amount?: number | null; status?: string | null; pgProvider?: string | null; payMethod?: string | null },
+  order: { id: number | string; orderNumber: string; buyerName?: string | null; buyerEmail: string; buyerPhone?: string | null; productName: string; amount?: number | null; status?: string | null; pgProvider?: string | null; payMethod?: string | null; depositorName?: string | null },
 ) {
   const isDirectBank = order.pgProvider === 'direct-bank'
-  const depositorName = order.orderNumber.slice(-6)
+  const depositorName = order.depositorName || order.buyerName || '(미설정)'
   const subject = isDirectBank
     ? `[AI놀자 알림] 🏦 무통장 입금 대기 ${order.orderNumber}`
     : `[AI놀자 알림] 새 주문 ${order.orderNumber}`
@@ -384,14 +384,14 @@ export async function sendOrderCreatedToAdmin(
       ${
         isDirectBank
           ? `
-      <div style="background:#FFFBEB;border:1px solid #FCD34D;border-radius:10px;padding:14px;margin:0 0 24px;">
-        <div style="font-weight:bold;color:#92400E;margin-bottom:8px;">⚠️ 무통장 입금 확인 필요</div>
-        <table cellpadding="4" cellspacing="0" style="font-size:13px;color:#78350F;">
-          <tr><td style="width:90px;">입금자명</td><td><strong style="color:#B91C1C;font-size:15px;">${depositorName}</strong> (주문번호 끝 6자리)</td></tr>
-          <tr><td>입금 계좌</td><td>토스뱅크 1000-1041-3507 (최경환)</td></tr>
-          <tr><td>마감</td><td>주문일시로부터 24시간</td></tr>
+      <div style="border-top:1px solid #e5e5e5;border-bottom:1px solid #e5e5e5;padding:14px 0;margin:0 0 24px;">
+        <div style="font-weight:bold;color:#333;margin-bottom:8px;">무통장 입금 확인 필요</div>
+        <table cellpadding="4" cellspacing="0" style="font-size:13px;color:#555;">
+          <tr><td style="width:90px;color:#999;">입금자명</td><td><strong style="color:#333;font-size:15px;">${depositorName}</strong></td></tr>
+          <tr><td style="color:#999;">입금 계좌</td><td>토스뱅크 1000-1041-3507 (최경환)</td></tr>
+          <tr><td style="color:#999;">마감</td><td>주문일시로부터 24시간</td></tr>
         </table>
-        <div style="margin-top:8px;font-size:12px;color:#92400E;">
+        <div style="margin-top:8px;font-size:12px;color:#888;">
           입금 확인 후 어드민에서 [입금확인] 버튼을 눌러 처리해 주세요.
         </div>
       </div>`

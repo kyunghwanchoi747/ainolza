@@ -7,6 +7,7 @@ import * as migration_20260506_054000_ebooks from './20260506_054000_ebooks';
 import * as migration_20260506_080000_ebooks_locked_rels from './20260506_080000_ebooks_locked_rels';
 import * as migration_20260507_000000_orders_paid_at from './20260507_000000_orders_paid_at';
 import * as migration_20260508_000000_products_price_schedule from './20260508_000000_products_price_schedule';
+import * as migration_20260512_000000_orders_depositor_name from './20260512_000000_orders_depositor_name';
 
 export const migrations = [
   {
@@ -53,5 +54,10 @@ export const migrations = [
     up: migration_20260508_000000_products_price_schedule.up,
     down: migration_20260508_000000_products_price_schedule.down,
     name: '20260508_000000_products_price_schedule'
+  },
+  {
+    up: migration_20260512_000000_orders_depositor_name.up,
+    down: migration_20260512_000000_orders_depositor_name.down,
+    name: '20260512_000000_orders_depositor_name'
   },
 ];
