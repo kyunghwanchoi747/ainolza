@@ -8,6 +8,7 @@ import { ReviewSection } from '@/components/store/review-section'
 import { V3Header } from '@/components/landing/v3-header'
 import { EligibilityGatedCta } from '@/components/store/eligibility-gated-cta'
 import { PriceStageCountdown } from '@/components/store/price-stage-countdown'
+import { PrimaryButtonCard, KakaoButton, OutlineButton } from '@/components/design-system/buttons'
 
 export const dynamic = 'force-dynamic'
 
@@ -232,7 +233,7 @@ export default async function ProductDetailPage({
                 </div>
               )}
 
-              {/* 액션 버튼들 — 시안: 수강 신청하기(흰+검정 보더)가 위, 카카오톡(노랑)이 아래 */}
+              {/* 액션 버튼들 — 디자인 시스템 컴포넌트 사용 */}
               <div className="space-y-3">
                 <EligibilityGatedCta
                   productSlug={product.slug}
@@ -240,41 +241,23 @@ export default async function ProductDetailPage({
                   fallbackLabel="입문 강의 보러가기 →"
                 >
                   {product.actions.map((a, i) => {
-                    // 시안 스타일: primary 버튼은 흰 배경 + 보더 없음 + 부드러운 shadow로 떠 있는 감각.
-                    const baseCls = a.primary
-                      ? 'block w-full py-5 bg-white text-ink font-extrabold rounded-2xl text-center text-lg md:text-xl tracking-tight cursor-pointer transition-all shadow-[0_2px_8px_rgba(0,0,0,0.06),0_12px_32px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08),0_16px_40px_rgba(0,0,0,0.12)] hover:-translate-y-[1px]'
-                      : 'block w-full py-5 border border-line text-ink font-extrabold rounded-2xl text-center text-base md:text-lg cursor-pointer hover:bg-surface transition-all'
                     const finalUrl = withSlug(a.url, product.slug)
-                    if (a.external || /^https?:/.test(a.url)) {
-                      return (
-                        <a
-                          key={i}
-                          href={finalUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={baseCls}
-                        >
-                          {a.label} {a.primary ? '→' : ''}
-                        </a>
-                      )
-                    }
-                    return (
-                      <Link key={i} href={finalUrl} className={baseCls}>
-                        {a.label} {a.primary ? '→' : ''}
-                      </Link>
+                    const label = `${a.label}${a.primary ? ' →' : ''}`
+                    return a.primary ? (
+                      <PrimaryButtonCard key={i} href={finalUrl} external={!!a.external}>
+                        {label}
+                      </PrimaryButtonCard>
+                    ) : (
+                      <OutlineButton key={i} href={finalUrl} external={!!a.external}>
+                        {label}
+                      </OutlineButton>
                     )
                   })}
                 </EligibilityGatedCta>
 
-                <a
-                  href="https://open.kakao.com/o/s7kkWTfh"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 w-full py-5 bg-[#FEE500] text-[#191919] font-extrabold rounded-2xl hover:bg-[#FFE000] transition-all text-base md:text-lg cursor-pointer"
-                >
-                  <span className="inline-flex items-center justify-center w-[18px] h-[18px] rounded bg-[#191919] text-[#FEE500] text-[10px] font-extrabold">K</span>
+                <KakaoButton href="https://open.kakao.com/o/s7kkWTfh">
                   카카오톡으로 문의하기
-                </a>
+                </KakaoButton>
               </div>
             </div>
           </div>
@@ -325,53 +308,35 @@ export default async function ProductDetailPage({
         </section>
       )}
 
-      {/* 하단 다시 한 번 액션 버튼 */}
+      {/* 하단 다시 한 번 액션 버튼 — 동일 디자인 시스템 적용 */}
       <section className="py-16 px-6 border-t border-line">
         <div className="max-w-[600px] mx-auto space-y-3">
           <p className="text-center text-body mb-6 text-base md:text-lg">
             궁금한 점이 있으시면 카카오톡으로 편하게 문의주세요.
           </p>
-          <a
-            href="https://open.kakao.com/o/s7kkWTfh"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-center gap-2 w-full py-5 bg-[#FEE500] text-[#191919] font-extrabold rounded-2xl hover:bg-[#FFE000] hover:scale-[1.02] active:scale-[0.98] transition-all text-base md:text-lg cursor-pointer shadow-md"
-          >
-            <svg className="w-6 h-6" viewBox="0 0 24 24">
-              <path fill="#191919" d="M12 3C6.48 3 2 6.48 2 10.8c0 2.78 1.85 5.22 4.63 6.6-.2.72-.73 2.65-.84 3.06-.13.5.18.49.39.36.16-.1 2.59-1.76 3.63-2.47.72.1 1.45.15 2.19.15 5.52 0 10-3.48 10-7.7S17.52 3 12 3z" />
-            </svg>
-            카카오톡으로 문의하기
-          </a>
           <EligibilityGatedCta
             productSlug={product.slug}
             fallbackHref="/store/vibe-coding-101"
             fallbackLabel="입문 강의 보러가기 →"
           >
             {product.actions.map((a, i) => {
-              const baseCls = a.primary
-                ? 'block w-full py-5 bg-brand text-white font-extrabold rounded-2xl text-center hover:bg-brand-dark hover:scale-[1.02] active:scale-[0.98] transition-all text-base md:text-lg cursor-pointer shadow-md'
-                : 'block w-full py-5 border-2 border-[#333] text-ink font-extrabold rounded-2xl text-center hover:bg-ink hover:text-white hover:scale-[1.02] active:scale-[0.98] transition-all text-base md:text-lg cursor-pointer'
               const finalUrl = withSlug(a.url, product.slug)
-              if (a.external || /^https?:/.test(a.url)) {
-                return (
-                  <a
-                    key={i}
-                    href={finalUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={baseCls}
-                  >
-                    {a.label}
-                  </a>
-                )
-              }
-              return (
-                <Link key={i} href={finalUrl} className={baseCls}>
-                  {a.label}
-                </Link>
+              const label = `${a.label}${a.primary ? ' →' : ''}`
+              return a.primary ? (
+                <PrimaryButtonCard key={i} href={finalUrl} external={!!a.external}>
+                  {label}
+                </PrimaryButtonCard>
+              ) : (
+                <OutlineButton key={i} href={finalUrl} external={!!a.external}>
+                  {label}
+                </OutlineButton>
               )
             })}
           </EligibilityGatedCta>
+
+          <KakaoButton href="https://open.kakao.com/o/s7kkWTfh">
+            카카오톡으로 문의하기
+          </KakaoButton>
         </div>
       </section>
     </div>
