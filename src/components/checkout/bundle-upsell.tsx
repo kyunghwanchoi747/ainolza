@@ -71,8 +71,7 @@ export function BundleUpsell({
 
   if (!enabled || dismissed || !bundle) return null
 
-  // 단독 가격 + 심화 단독 가격 ≈ ?  → 번들이 얼마나 이득인지 계산
-  // 보수적으로 "번들 가격 - 입문 가격 = 심화 추가 비용" 표시
+  // "번들 가격 - 입문 가격 = 심화 추가 비용" 표시
   const additionalForUpgrade = bundle.price - currentPrice
   if (additionalForUpgrade <= 0) return null
 
@@ -97,7 +96,7 @@ export function BundleUpsell({
           </div>
           <div className="text-sm text-gray-700 leading-relaxed">
             1기 입문 수강생 80명 중 <strong className="text-blue-700">절반인 40명이 심화까지 진행</strong>했습니다.
-            처음부터 6주 풀패키지로 신청하면 단독 합산 대비 <strong>20,000원 할인</strong>이 적용됩니다.
+            처음부터 6주 풀패키지로 신청하면 단독 합산 대비 <strong>최대 170,000원 절약</strong>됩니다.
           </div>
         </div>
         <button
