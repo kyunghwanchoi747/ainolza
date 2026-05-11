@@ -7,6 +7,7 @@ import { ProductFaqList } from '@/components/store/product-faq-list'
 import { ReviewSection } from '@/components/store/review-section'
 import { V3Header } from '@/components/landing/v3-header'
 import { EligibilityGatedCta } from '@/components/store/eligibility-gated-cta'
+import { PriceStageCountdown } from '@/components/store/price-stage-countdown'
 
 export const dynamic = 'force-dynamic'
 
@@ -143,16 +144,29 @@ export default async function ProductDetailPage({
                     {product.priceLabel}
                   </p>
                 ) : product.price ? (
-                  <div className="flex items-baseline gap-4">
-                    <p className="text-4xl md:text-5xl text-brand font-extrabold">
-                      {formatPrice(product.price)}
-                    </p>
-                    {product.originalPrice && product.originalPrice > product.price && (
-                      <p className="text-lg text-sub line-through font-medium">
-                        {formatPrice(product.originalPrice)}
+                  <>
+                    <div className="flex items-baseline gap-4">
+                      <p className="text-4xl md:text-5xl text-brand font-extrabold">
+                        {formatPrice(product.price)}
                       </p>
+                      {product.originalPrice && product.originalPrice > product.price && (
+                        <p className="text-lg text-sub line-through font-medium">
+                          {formatPrice(product.originalPrice)}
+                        </p>
+                      )}
+                    </div>
+                    {product._dbNextChange && (
+                      <div className="mt-3">
+                        <PriceStageCountdown
+                          nextStartAt={product._dbNextChange.startAt}
+                          nextPrice={product._dbNextChange.price}
+                          nextLabel={product._dbNextChange.label}
+                          currentLabel={product._dbStageLabel}
+                          variant="full"
+                        />
+                      </div>
                     )}
-                  </div>
+                  </>
                 ) : (
                   <p className="text-base text-sub">가격 정보 준비 중</p>
                 )}
