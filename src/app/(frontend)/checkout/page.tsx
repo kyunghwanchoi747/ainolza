@@ -11,7 +11,8 @@ import { BundleUpsell } from '@/components/checkout/bundle-upsell'
 const PORTONE_STORE_ID = process.env.NEXT_PUBLIC_PORTONE_STORE_ID || ''
 const PORTONE_CHANNEL_KEY = process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY || ''
 
-type PayMethod = 'CARD' | 'TRANSFER' | 'VIRTUAL_ACCOUNT' | 'EASY_PAY'
+// UI 키 — KAKAOPAY는 PortOne 호출 시 EASY_PAY + easyPayProvider로 분기
+type PayMethod = 'CARD' | 'TRANSFER' | 'VIRTUAL_ACCOUNT' | 'KAKAOPAY'
 
 function CheckoutContent() {
   const router = useRouter()
@@ -213,22 +214,26 @@ function CheckoutContent() {
         return
       }
 
-      // 2. PortOne V2 결제창 호출
-      const paymentResponse = await PortOne.requestPayment({
+      // 2. PortOne V2 결제창 호출 — KAKAOPAY는 EASY_PAY + 카카오페이 provider로 분기
+      const portoneArgs: any = {
         storeId: PORTONE_STORE_ID,
         channelKey: PORTONE_CHANNEL_KEY,
         paymentId: orderData.merchantUid,
         orderName: productName,
         totalAmount: amount,
         currency: 'CURRENCY_KRW',
-        payMethod,
+        payMethod: payMethod === 'KAKAOPAY' ? 'EASY_PAY' : payMethod,
         customer: {
           ...(user?.name ? { fullName: user.name } : {}),
           ...(user?.email ? { email: user.email } : {}),
           phoneNumber: phoneNormalized,
         },
         redirectUrl: `${window.location.origin}/checkout/complete?orderNumber=${orderData.orderNumber}`,
-      } as any)
+      }
+      if (payMethod === 'KAKAOPAY') {
+        portoneArgs.easyPay = { easyPayProvider: 'KAKAOPAY' }
+      }
+      const paymentResponse = await PortOne.requestPayment(portoneArgs)
 
       if (paymentResponse?.code !== undefined) {
         // 결제 실패 / 취소
@@ -524,30 +529,49 @@ function CheckoutContent() {
                   <h2 className="text-base font-bold text-ink mb-4">결제수단</h2>
                   <div className="space-y-2">
                     {([
+                      { key: 'KAKAOPAY', label: '카카오페이' },
                       { key: 'CARD', label: '신용카드' },
                       { key: 'TRANSFER', label: '계좌이체' },
                       { key: 'VIRTUAL_ACCOUNT', label: '가상계좌(무통장입금)' },
-                    ] as { key: PayMethod; label: string }[]).map((m) => (
-                      <label
-                        key={m.key}
-                        className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
-                          payMethod === m.key
-                            ? 'border-[#D4756E] bg-brand/5'
-                            : 'border-line hover:border-brand/40'
-                        }`}
-                      >
-                        <input
-                          type="radio"
-                          name="payMethod"
-                          checked={payMethod === m.key}
-                          onChange={() => setPayMethod(m.key)}
-                          className="accent-[#D4756E]"
-                        />
-                        <span className={`text-sm font-medium ${payMethod === m.key ? 'text-brand' : 'text-ink'}`}>
-                          {m.label}
-                        </span>
-                      </label>
-                    ))}
+                    ] as { key: PayMethod; label: string }[]).map((m) => {
+                      const isKakao = m.key === 'KAKAOPAY'
+                      const selected = payMethod === m.key
+                      return (
+                        <label
+                          key={m.key}
+                          className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all ${
+                            isKakao
+                              ? selected
+                                ? 'border-[#FEE500] bg-[#FEE500]/30'
+                                : 'border-[#FEE500]/60 bg-[#FEE500]/10 hover:bg-[#FEE500]/20'
+                              : selected
+                                ? 'border-[#D4756E] bg-brand/5'
+                                : 'border-line hover:border-brand/40'
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name="payMethod"
+                            checked={selected}
+                            onChange={() => setPayMethod(m.key)}
+                            className={isKakao ? 'accent-[#191919]' : 'accent-[#D4756E]'}
+                          />
+                          {isKakao && (
+                            <svg className="w-5 h-5" viewBox="0 0 24 24" aria-hidden="true">
+                              <path fill="#191919" d="M12 3C6.48 3 2 6.48 2 10.8c0 2.78 1.85 5.22 4.63 6.6-.2.72-.73 2.65-.84 3.06-.13.5.18.49.39.36.16-.1 2.59-1.76 3.63-2.47.72.1 1.45.15 2.19.15 5.52 0 10-3.48 10-7.7S17.52 3 12 3z" />
+                            </svg>
+                          )}
+                          <span className={`text-sm font-bold ${isKakao ? 'text-[#191919]' : selected ? 'text-brand' : 'text-ink'}`}>
+                            {m.label}
+                          </span>
+                          {isKakao && (
+                            <span className="ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#191919] text-[#FEE500]">
+                              빠른 결제
+                            </span>
+                          )}
+                        </label>
+                      )
+                    })}
                   </div>
                 </div>
 
