@@ -65,6 +65,10 @@ script_error.txt
 tsc_errors.txt
 PROGRESS.md
 
+# Design handoff — claude.ai/design 시안 zip 풀어두는 작업 폴더 (README만 커밋)
+/design-handoff/*
+!/design-handoff/README.md
+
 # ===== 개인정보 보호 (절대 커밋 금지) =====
 회원*.zip
 회원*.xls
