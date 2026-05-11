@@ -529,7 +529,8 @@ function CheckoutContent() {
                   <h2 className="text-base font-bold text-ink mb-4">결제수단</h2>
                   <div className="space-y-2">
                     {([
-                      { key: 'KAKAOPAY', label: '카카오페이' },
+                      // 카카오페이 활성화 대기 중 — PortOne 신청 진행중. 활성화되면 주석 해제.
+                      // { key: 'KAKAOPAY', label: '카카오페이' },
                       { key: 'CARD', label: '신용카드' },
                       { key: 'TRANSFER', label: '계좌이체' },
                       { key: 'VIRTUAL_ACCOUNT', label: '가상계좌(무통장입금)' },
