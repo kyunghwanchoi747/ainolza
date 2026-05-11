@@ -23,6 +23,7 @@ const statusLabels: Record<string, { label: string; color: string }> = {
   refund_requested: { label: '환불요청', color: '#EF4444' },
   refunded: { label: '환불완료', color: '#9CA3AF' },
   failed: { label: '결제실패', color: '#EF4444' },
+  cancel_requested: { label: '취소요청', color: '#F59E0B' },
   cancelled: { label: '취소', color: '#9CA3AF' },
 }
 
@@ -170,6 +171,29 @@ export default function MyPage() {
         window.location.reload()
       } else {
         alert('환불 요청에 실패했습니다.')
+      }
+    } catch {
+      alert('오류가 발생했습니다.')
+    }
+  }
+
+  // 무통장 미결제(pending + direct-bank) 주문 — 취소 요청
+  const handleCancelRequest = async (orderId: string) => {
+    if (!confirm('주문 취소를 요청하시겠습니까? 관리자 승인 후 취소 처리됩니다.')) return
+    const reason = prompt('취소 사유를 입력해주세요. (선택)') || ''
+    try {
+      const res = await fetch(`/api/orders/${orderId}/cancel`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ reason }),
+      })
+      if (res.ok) {
+        alert('취소 요청이 접수되었습니다. 관리자 승인 후 처리됩니다.')
+        window.location.reload()
+      } else {
+        const data = await res.json().catch(() => ({}))
+        alert((data as { error?: string }).error || '취소 요청에 실패했습니다.')
       }
     } catch {
       alert('오류가 발생했습니다.')
@@ -898,8 +922,22 @@ export default function MyPage() {
                             {order.receiptUrl && (
                               <a href={order.receiptUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-sub hover:text-ink underline">영수증</a>
                             )}
+                            {/* 무통장 미결제: 입금 안내 다시 보기 + 취소 요청 */}
+                            {order.status === 'pending' && order.pgProvider === 'direct-bank' && (
+                              <>
+                                <Link href={`/checkout/bank?orderNumber=${order.orderNumber}`} className="text-xs text-sub hover:text-ink underline">
+                                  입금 안내
+                                </Link>
+                                <button onClick={() => handleCancelRequest(order.id)} className="text-xs text-sub hover:text-ink underline">
+                                  취소 요청
+                                </button>
+                              </>
+                            )}
+                            {order.status === 'cancel_requested' && (
+                              <span className="text-xs text-sub">관리자 승인 대기</span>
+                            )}
                             {(order.status === 'paid' || order.status === 'active') && (
-                              <button onClick={() => handleRefundRequest(order.id)} className="text-xs text-red-400 hover:text-red-600 underline">환불 신청</button>
+                              <button onClick={() => handleRefundRequest(order.id)} className="text-xs text-sub hover:text-ink underline">환불 신청</button>
                             )}
                           </div>
                         </div>

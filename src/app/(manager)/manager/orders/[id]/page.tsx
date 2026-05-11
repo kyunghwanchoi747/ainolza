@@ -14,6 +14,7 @@ const statusOptions = [
   { value: 'refund_requested', label: '환불요청', color: '#EF4444' },
   { value: 'refunded', label: '환불완료', color: '#9CA3AF' },
   { value: 'failed', label: '결제실패', color: '#EF4444' },
+  { value: 'cancel_requested', label: '취소요청', color: '#F59E0B' },
   { value: 'cancelled', label: '취소', color: '#9CA3AF' },
 ]
 
@@ -59,6 +60,28 @@ export default function OrderDetailPage() {
       alert('저장되었습니다.')
     } catch {
       alert('저장에 실패했습니다.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  // 회원이 요청한 주문 취소를 승인 — status: cancel_requested → cancelled
+  const handleApproveCancel = async () => {
+    if (!confirm('이 주문의 취소 요청을 승인하시겠습니까?')) return
+    setSaving(true)
+    try {
+      const res = await fetch(`/api/orders/${params.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ status: 'cancelled' }),
+      })
+      if (!res.ok) throw new Error()
+      alert('취소 승인 처리 완료.')
+      setStatus('cancelled')
+      setOrder({ ...order, status: 'cancelled' })
+    } catch {
+      alert('처리에 실패했습니다.')
     } finally {
       setSaving(false)
     }
@@ -160,6 +183,15 @@ export default function OrderDetailPage() {
                 className="w-full mt-3 px-4 py-3 bg-ink hover:bg-ink/90 text-white font-bold rounded-md disabled:opacity-50"
               >
                 {saving ? '처리 중...' : '입금 확인 → 결제완료 처리'}
+              </button>
+            )}
+            {order.status === 'cancel_requested' && (
+              <button
+                onClick={handleApproveCancel}
+                disabled={saving}
+                className="w-full mt-3 px-4 py-3 border border-ink text-ink hover:bg-ink hover:text-white font-bold rounded-md disabled:opacity-50 transition"
+              >
+                {saving ? '처리 중...' : '취소 요청 승인 → 주문 취소 처리'}
               </button>
             )}
             <div className="flex justify-between"><span className="text-muted-foreground">현금영수증</span><span>{order.cashReceiptType === 'none' ? '미발행' : order.cashReceiptType === 'income' ? '소득공제용' : order.cashReceiptType === 'expense' ? '지출증빙용' : '-'}</span></div>

@@ -149,6 +149,7 @@ export const Orders: CollectionConfig = {
         { label: '환불요청', value: 'refund_requested' },
         { label: '환불완료', value: 'refunded' },
         { label: '결제실패', value: 'failed' },
+        { label: '취소요청', value: 'cancel_requested' },
         { label: '주문취소', value: 'cancelled' },
       ],
     },
