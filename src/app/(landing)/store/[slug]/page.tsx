@@ -120,21 +120,6 @@ export default async function ProductDetailPage({
                   </div>
                 )}
               </div>
-              {/* 통계 박스 — 시안 그대로 (1,000+ / 4.9/5 / 100일) */}
-              {product.type === 'class' && (
-                <div className="mt-4 px-5 py-4 rounded-2xl bg-surface border border-line grid grid-cols-3 gap-2">
-                  {[
-                    { v: '1,000+', l: '수강생' },
-                    { v: '4.9/5', l: '평균 만족도' },
-                    { v: '100일', l: '수강 기간' },
-                  ].map((s, i) => (
-                    <div key={i} className={`text-center ${i === 0 ? '' : 'border-l border-line'}`}>
-                      <div className="text-xl md:text-[22px] font-extrabold text-ink tracking-tight">{s.v}</div>
-                      <div className="text-[12px] text-sub mt-0.5">{s.l}</div>
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
 
             {/* 정보 영역 */}
@@ -167,7 +152,14 @@ export default async function ProductDetailPage({
                   {(product._dbStageLabel || (product.originalPrice && product.originalPrice > product.price)) && (
                     <div className="flex items-center gap-2 mb-3">
                       {product._dbStageLabel && (
-                        <span className="inline-flex px-3 py-1 rounded-full bg-white border border-red-500 text-red-600 text-[13px] font-extrabold">
+                        <span
+                          className="inline-flex px-3 py-1 rounded-full bg-white text-red-600 text-[13px] font-extrabold"
+                          style={{
+                            border: '1px solid #FCA5A5',
+                            borderTopColor: '#DC2626',
+                            borderTopWidth: '1.5px',
+                          }}
+                        >
                           {product._dbStageLabel}
                         </span>
                       )}
@@ -248,10 +240,10 @@ export default async function ProductDetailPage({
                   fallbackLabel="입문 강의 보러가기 →"
                 >
                   {product.actions.map((a, i) => {
-                    // 시안 스타일: primary 버튼은 흰 배경 + 검정 보더 + 검정 글씨.
+                    // 시안 스타일: primary 버튼은 흰 배경 + 보더 없음 + 부드러운 shadow로 떠 있는 감각.
                     const baseCls = a.primary
-                      ? 'block w-full py-5 bg-white border-2 border-ink text-ink font-extrabold rounded-2xl text-center hover:bg-ink hover:text-white transition-all text-base md:text-lg cursor-pointer'
-                      : 'block w-full py-5 border border-line text-ink font-extrabold rounded-2xl text-center hover:bg-surface transition-all text-base md:text-lg cursor-pointer'
+                      ? 'block w-full py-5 bg-white text-ink font-extrabold rounded-2xl text-center text-lg md:text-xl tracking-tight cursor-pointer transition-all shadow-[0_2px_8px_rgba(0,0,0,0.06),0_12px_32px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08),0_16px_40px_rgba(0,0,0,0.12)] hover:-translate-y-[1px]'
+                      : 'block w-full py-5 border border-line text-ink font-extrabold rounded-2xl text-center text-base md:text-lg cursor-pointer hover:bg-surface transition-all'
                     const finalUrl = withSlug(a.url, product.slug)
                     if (a.external || /^https?:/.test(a.url)) {
                       return (
