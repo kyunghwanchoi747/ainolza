@@ -97,7 +97,7 @@ export function BundleUpsell({
           </div>
           <div className="text-sm text-gray-700 leading-relaxed">
             1기 입문 수강생 80명 중 <strong className="text-blue-700">절반인 40명이 심화까지 진행</strong>했습니다.
-            처음부터 번들로 신청하면 단독 합산 대비 <strong>최대 80,000원 할인</strong>이 적용됩니다.
+            처음부터 6주 풀패키지로 신청하면 단독 합산 대비 <strong>20,000원 할인</strong>이 적용됩니다.
           </div>
         </div>
         <button
@@ -117,7 +117,7 @@ export function BundleUpsell({
           <div className="text-xs text-gray-500 mt-1">2주 / 2회차</div>
         </div>
         <div className="rounded-lg bg-blue-600 text-white p-3 ring-2 ring-blue-300">
-          <div className="text-xs text-blue-100 mb-1">번들로 변경 ★</div>
+          <div className="text-xs text-blue-100 mb-1">6주 풀패키지 ★</div>
           <div className="font-extrabold">
             {bundle.price.toLocaleString()}원
             <span className="text-xs font-normal ml-1 text-blue-100">
@@ -133,7 +133,7 @@ export function BundleUpsell({
         onClick={handleSwitch}
         className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 transition text-white font-bold"
       >
-        번들로 변경하기 →
+        6주 풀패키지로 변경하기 →
       </button>
     </div>
   )
