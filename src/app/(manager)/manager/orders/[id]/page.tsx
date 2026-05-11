@@ -200,14 +200,14 @@ export default function OrderDetailPage() {
 
         {/* 환불 정보 */}
         {(order.refundReason || order.status === 'refund_requested' || order.status === 'refunded') && (
-          <div className="rounded-xl border border-red-200 bg-red-50 p-6 space-y-4">
+          <div className="rounded-xl border p-6 space-y-4">
             <div className="flex items-center justify-between gap-3">
-              <h2 className="font-bold text-lg text-red-600">환불 정보</h2>
+              <h2 className="font-bold text-lg">환불 정보</h2>
               {order.status === 'refund_requested' && (
-                <RefundApprovalButton orderId={order.id} orderNumber={order.orderNumber} />
+                <RefundApprovalButton orderId={order.id} orderNumber={order.orderNumber} pgProvider={order.pgProvider} />
               )}
               {order.status === 'refunded' && (
-                <span className="text-xs font-medium px-3 py-1 rounded-full bg-gray-100 text-gray-600">환불 완료</span>
+                <span className="text-xs font-medium px-3 py-1 rounded-md bg-gray-100 text-gray-600">환불 완료</span>
               )}
             </div>
             <div className="space-y-3 text-sm">
@@ -216,8 +216,10 @@ export default function OrderDetailPage() {
               {order.refundedAt && <div className="flex justify-between"><span className="text-muted-foreground">환불일</span><span>{new Date(order.refundedAt).toLocaleDateString('ko-KR')}</span></div>}
             </div>
             {order.status === 'refund_requested' && (
-              <p className="text-xs text-red-700 bg-white/60 rounded-lg p-3 border border-red-100 leading-relaxed">
-                <strong>환불 승인</strong> 버튼을 클릭하면 PortOne을 통해 카드사 승인 취소가 자동 진행됩니다. 가상계좌 결제는 환불 계좌 정보가 추가로 필요할 수 있습니다.
+              <p className="text-xs text-muted-foreground leading-relaxed pt-3 border-t">
+                {order.pgProvider === 'direct-bank'
+                  ? '이 주문은 무통장 입금 건입니다. [환불 승인] 후 입금받은 금액을 구매자 계좌로 직접 송금해 주세요. (PortOne 자동 취소 안 함)'
+                  : '[환불 승인] 클릭 시 PortOne을 통해 카드사 승인 취소가 자동 진행됩니다.'}
               </p>
             )}
           </div>

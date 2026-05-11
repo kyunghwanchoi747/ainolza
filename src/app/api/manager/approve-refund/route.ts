@@ -35,9 +35,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '환불 가능한 상태가 아닙니다.' }, { status: 400 })
     }
 
-    // TEST_ 주문은 PortOne 호출 없이 바로 status만 변경
+    // PortOne을 거치지 않는 주문은 status만 변경:
+    //  - TEST_ 주문 (테스트용)
+    //  - direct-bank (무통장 직접입금 — 관리자가 토스뱅크에서 수동 송금)
     const isTest = typeof order.orderNumber === 'string' && order.orderNumber.startsWith('TEST_')
-    if (!isTest) {
+    const isDirectBank = order.pgProvider === 'direct-bank'
+    if (!isTest && !isDirectBank) {
       // PortOne 환불 API 호출
       const portoneSecret = process.env.PORTONE_API_SECRET
       if (!portoneSecret) {
