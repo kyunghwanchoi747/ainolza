@@ -52,14 +52,19 @@ export function PriceStageCountdown({
 
   if (variant === 'full') {
     return (
-      <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm">
-        <div className="font-semibold text-red-700">
-          {currentLabel ? `${currentLabel} 마감까지` : '가격 인상까지'} {remainingText}
+      <div className="rounded-xl border border-ink bg-white px-4 py-3">
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <span className="font-extrabold text-red-600 text-base">
+            {currentLabel ? `${currentLabel} 마감까지` : '가격 인상까지'}
+          </span>
+          <span className="font-extrabold text-ink tabular-nums tracking-wide">
+            {remainingText}
+          </span>
         </div>
-        <div className="text-red-600 mt-1">
-          이후 {nextLabel ? `${nextLabel} ` : ''}
-          <span className="font-bold">{nextPrice.toLocaleString()}원</span>으로 인상됩니다.
-        </div>
+        <p className="mt-1.5 text-sm text-sub leading-relaxed">
+          이후 {nextLabel ? <span className="font-semibold text-ink">{nextLabel}</span> : '다음 단계'}{' '}
+          <span className="font-bold text-red-600">{nextPrice.toLocaleString()}원</span>으로 인상됩니다.
+        </p>
       </div>
     )
   }

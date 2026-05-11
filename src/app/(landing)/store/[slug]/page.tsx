@@ -99,7 +99,7 @@ export default async function ProductDetailPage({
         <div className="max-w-[1200px] mx-auto">
           <Link
             href="/store"
-            className="text-sm text-sub hover:text-brand transition-colors mb-8 inline-block cursor-pointer font-medium"
+            className="text-base md:text-lg text-ink hover:text-brand transition-colors mb-8 inline-block cursor-pointer font-bold"
           >
             ← 강의/책 목록
           </Link>
@@ -121,90 +121,104 @@ export default async function ProductDetailPage({
             </div>
 
             {/* 정보 영역 */}
-            <div className="flex flex-col justify-center">
-              <p className="text-brand text-sm md:text-base font-bold mb-3 tracking-wide uppercase">
+            <div className="flex flex-col justify-start">
+              <p className="text-brand text-xs md:text-sm font-bold mb-3 tracking-[0.18em] uppercase">
                 {product.category}
               </p>
-              <h1 className="text-3xl md:text-5xl font-extrabold text-ink leading-[1.2] mb-5 whitespace-pre-line">
+              <h1 className="text-2xl md:text-[33px] font-extrabold text-ink leading-[1.2] mb-4 whitespace-pre-line tracking-tight">
                 {product.title}
               </h1>
               {product.subtitle && (
-                <p className="text-body text-lg md:text-xl mb-2 font-medium">
+                <p className="text-ink text-base md:text-lg mb-1.5 font-semibold">
                   {product.subtitle}
                 </p>
               )}
               {product.shortDescription && (
-                <p className="text-sub text-base mb-8">{product.shortDescription}</p>
+                <p className="text-sub text-sm mb-7 font-medium">{product.shortDescription}</p>
               )}
 
               {/* 가격 */}
-              <div className="mb-8">
-                {product.priceLabel ? (
+              {product.priceLabel ? (
+                <div className="mb-6">
                   <p className="text-2xl md:text-3xl text-brand font-extrabold">
                     {product.priceLabel}
                   </p>
-                ) : product.price ? (
-                  <>
-                    <div className="flex items-baseline gap-4">
-                      <p className="text-4xl md:text-5xl text-brand font-extrabold">
-                        {formatPrice(product.price)}
-                      </p>
+                </div>
+              ) : product.price ? (
+                <div className="mb-6 p-5 rounded-2xl border border-line bg-white">
+                  {/* 단계 라벨 + 할인율 */}
+                  {(product._dbStageLabel || (product.originalPrice && product.originalPrice > product.price)) && (
+                    <div className="flex items-center gap-2 mb-2">
+                      {product._dbStageLabel && (
+                        <span className="inline-flex px-2.5 py-1 rounded-full bg-white border border-line text-red-600 text-xs font-extrabold tracking-wider">
+                          {product._dbStageLabel}
+                        </span>
+                      )}
                       {product.originalPrice && product.originalPrice > product.price && (
-                        <p className="text-lg text-sub line-through font-medium">
-                          {formatPrice(product.originalPrice)}
-                        </p>
+                        <span className="text-ink text-sm font-semibold">
+                          {Math.round((1 - product.price / product.originalPrice) * 100)}% 할인
+                        </span>
                       )}
                     </div>
-                    {product._dbNextChange && (
-                      <div className="mt-3">
-                        <PriceStageCountdown
-                          nextStartAt={product._dbNextChange.startAt}
-                          nextPrice={product._dbNextChange.price}
-                          nextLabel={product._dbNextChange.label}
-                          currentLabel={product._dbStageLabel}
-                          variant="full"
-                        />
-                      </div>
+                  )}
+                  {/* 큰 가격 + 정가 strike */}
+                  <div className="flex items-baseline gap-3 flex-wrap">
+                    <p className="text-4xl md:text-[44px] text-ink font-extrabold tracking-tight">
+                      {formatPrice(product.price)}
+                    </p>
+                    {product.originalPrice && product.originalPrice > product.price && (
+                      <p className="text-lg md:text-xl text-hint line-through font-semibold">
+                        {formatPrice(product.originalPrice)}
+                      </p>
                     )}
-                  </>
-                ) : (
-                  <p className="text-base text-sub">가격 정보 준비 중</p>
-                )}
-              </div>
+                  </div>
+                  {/* 다음 인상 카운트다운 */}
+                  {product._dbNextChange && (
+                    <div className="mt-4">
+                      <PriceStageCountdown
+                        nextStartAt={product._dbNextChange.startAt}
+                        nextPrice={product._dbNextChange.price}
+                        nextLabel={product._dbNextChange.label}
+                        currentLabel={product._dbStageLabel}
+                        variant="full"
+                      />
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <p className="mb-6 text-base text-sub">가격 정보 준비 중</p>
+              )}
 
-              {/* 상품 유형별 안내 박스 */}
+              {/* 상품 유형별 안내 박스 — 무채색 톤으로 통일 */}
               {product.type === 'class' && (
-                <div className="mb-4 p-4 rounded-2xl bg-[#F0F9FF] border border-[#BAE6FD]">
-                  <p className="text-[#0369A1] text-sm font-extrabold mb-1">📅 서비스 제공기간</p>
-                  <p className="text-[#0C4A6E] text-sm leading-relaxed">
-                    결제일로부터 <strong>100일</strong>간 수강 가능합니다.<br />
-                    (예: 1월 1일 결제 → 4월 11일까지 이용)
+                <div className="mb-4 px-4 py-3 rounded-xl bg-surface border border-line">
+                  <p className="text-ink text-xs font-extrabold mb-1">서비스 제공기간</p>
+                  <p className="text-sub text-xs leading-relaxed">
+                    결제일로부터 <strong className="text-ink">100일</strong>간 수강 가능 · 예: 1월 1일 결제 → 4월 11일까지
                   </p>
                 </div>
               )}
               {product.type === 'ebook' && (
-                <div className="mb-4 p-4 rounded-2xl bg-[#F0FDF4] border border-[#BBF7D0]">
-                  <p className="text-[#15803D] text-sm font-extrabold mb-1">⚡ 즉시 다운로드</p>
-                  <p className="text-[#14532D] text-sm leading-relaxed">
-                    결제 완료 즉시 마이페이지에서 PDF 다운로드가 가능합니다.<br />
-                    저작권 보호를 위해 무단 복제·배포는 금지됩니다.
+                <div className="mb-4 px-4 py-3 rounded-xl bg-surface border border-line">
+                  <p className="text-ink text-xs font-extrabold mb-1">즉시 다운로드</p>
+                  <p className="text-sub text-xs leading-relaxed">
+                    결제 완료 즉시 마이페이지에서 PDF 다운로드 가능. 저작권 보호를 위해 무단 복제·배포는 금지됩니다.
                   </p>
                 </div>
               )}
               {product.type === 'book' && (
-                <div className="mb-4 p-4 rounded-2xl bg-[#FFFBEB] border border-[#FDE68A]">
-                  <p className="text-[#B45309] text-sm font-extrabold mb-1">📦 배송 안내</p>
-                  <p className="text-[#78350F] text-sm leading-relaxed">
-                    결제 후 <strong>2~3 영업일 이내</strong>에 발송됩니다.<br />
-                    (도서·산간 지역은 1~2일 추가 소요)
+                <div className="mb-4 px-4 py-3 rounded-xl bg-surface border border-line">
+                  <p className="text-ink text-xs font-extrabold mb-1">배송 안내</p>
+                  <p className="text-sub text-xs leading-relaxed">
+                    결제 후 <strong className="text-ink">2~3 영업일 이내</strong> 발송 (도서·산간 지역은 1~2일 추가 소요)
                   </p>
                 </div>
               )}
               {product.type === 'bundle' && (
-                <div className="mb-4 p-4 rounded-2xl bg-[#FAF5FF] border border-[#E9D5FF]">
-                  <p className="text-[#7E22CE] text-sm font-extrabold mb-1">🎁 번들 구성 안내</p>
-                  <p className="text-[#581C87] text-sm leading-relaxed">
-                    강의는 결제일로부터 <strong>100일간 수강</strong>, 전자책은 <strong>즉시 다운로드</strong>가 가능합니다.
+                <div className="mb-4 px-4 py-3 rounded-xl bg-surface border border-line">
+                  <p className="text-ink text-xs font-extrabold mb-1">번들 구성 안내</p>
+                  <p className="text-sub text-xs leading-relaxed">
+                    강의는 결제일로부터 <strong className="text-ink">100일간 수강</strong>, 전자책은 즉시 다운로드 가능합니다.
                   </p>
                 </div>
               )}
