@@ -105,17 +105,34 @@ export default async function ProductDetailPage({
           </Link>
 
           <div className="grid md:grid-cols-2 gap-12 mt-4">
-            {/* 썸네일 영역 */}
-            <div className="relative aspect-square rounded-3xl overflow-hidden bg-surface border-2 border-line flex items-center justify-center p-8">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={thumbnailUrl}
-                alt={product.title}
-                className="max-w-full max-h-full object-contain"
-              />
-              {dday !== null && (
-                <div className="absolute top-5 right-5 px-4 py-2 rounded-xl bg-brand text-white text-base font-extrabold shadow-lg">
-                  D-{dday}
+            {/* 좌측 — 썸네일 + 통계 박스 */}
+            <div>
+              <div className="relative aspect-square rounded-3xl overflow-hidden bg-surface border-2 border-line flex items-center justify-center p-8">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={thumbnailUrl}
+                  alt={product.title}
+                  className="max-w-full max-h-full object-contain"
+                />
+                {dday !== null && (
+                  <div className="absolute top-5 right-5 px-4 py-2 rounded-xl bg-brand text-white text-base font-extrabold shadow-lg">
+                    D-{dday}
+                  </div>
+                )}
+              </div>
+              {/* 통계 박스 — 시안 그대로 (1,000+ / 4.9/5 / 100일) */}
+              {product.type === 'class' && (
+                <div className="mt-4 px-5 py-4 rounded-2xl bg-surface border border-line grid grid-cols-3 gap-2">
+                  {[
+                    { v: '1,000+', l: '수강생' },
+                    { v: '4.9/5', l: '평균 만족도' },
+                    { v: '100일', l: '수강 기간' },
+                  ].map((s, i) => (
+                    <div key={i} className={`text-center ${i === 0 ? '' : 'border-l border-line'}`}>
+                      <div className="text-xl md:text-[22px] font-extrabold text-ink tracking-tight">{s.v}</div>
+                      <div className="text-[12px] text-sub mt-0.5">{s.l}</div>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
@@ -148,14 +165,14 @@ export default async function ProductDetailPage({
                 <div className="mb-6 p-5 rounded-2xl border border-line bg-white">
                   {/* 단계 라벨 + 할인율 */}
                   {(product._dbStageLabel || (product.originalPrice && product.originalPrice > product.price)) && (
-                    <div className="flex items-center gap-2 mb-2">
+                    <div className="flex items-center gap-2 mb-3">
                       {product._dbStageLabel && (
-                        <span className="inline-flex px-2.5 py-1 rounded-full bg-white border border-line text-red-600 text-xs font-extrabold tracking-wider">
+                        <span className="inline-flex px-3 py-1 rounded-full bg-white border border-red-500 text-red-600 text-[13px] font-extrabold">
                           {product._dbStageLabel}
                         </span>
                       )}
                       {product.originalPrice && product.originalPrice > product.price && (
-                        <span className="text-ink text-sm font-semibold">
+                        <span className="text-ink text-base font-semibold">
                           {Math.round((1 - product.price / product.originalPrice) * 100)}% 할인
                         </span>
                       )}
@@ -223,29 +240,18 @@ export default async function ProductDetailPage({
                 </div>
               )}
 
-              {/* 액션 버튼들 */}
+              {/* 액션 버튼들 — 시안: 수강 신청하기(흰+검정 보더)가 위, 카카오톡(노랑)이 아래 */}
               <div className="space-y-3">
-                <a
-                  href="https://open.kakao.com/o/s7kkWTfh"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 w-full py-5 bg-[#FEE500] text-[#191919] font-extrabold rounded-2xl hover:bg-[#FFE000] hover:scale-[1.02] active:scale-[0.98] transition-all text-base md:text-lg cursor-pointer shadow-md"
-                >
-                  <svg className="w-6 h-6" viewBox="0 0 24 24">
-                    <path fill="#191919" d="M12 3C6.48 3 2 6.48 2 10.8c0 2.78 1.85 5.22 4.63 6.6-.2.72-.73 2.65-.84 3.06-.13.5.18.49.39.36.16-.1 2.59-1.76 3.63-2.47.72.1 1.45.15 2.19.15 5.52 0 10-3.48 10-7.7S17.52 3 12 3z" />
-                  </svg>
-                  카카오톡으로 문의하기
-                </a>
-
                 <EligibilityGatedCta
                   productSlug={product.slug}
                   fallbackHref="/store/vibe-coding-101"
                   fallbackLabel="입문 강의 보러가기 →"
                 >
                   {product.actions.map((a, i) => {
+                    // 시안 스타일: primary 버튼은 흰 배경 + 검정 보더 + 검정 글씨.
                     const baseCls = a.primary
-                      ? 'block w-full py-5 bg-brand text-white font-extrabold rounded-2xl text-center hover:bg-brand-dark hover:scale-[1.02] active:scale-[0.98] transition-all text-base md:text-lg cursor-pointer shadow-md'
-                      : 'block w-full py-5 border-2 border-[#333] text-ink font-extrabold rounded-2xl text-center hover:bg-ink hover:text-white hover:scale-[1.02] active:scale-[0.98] transition-all text-base md:text-lg cursor-pointer'
+                      ? 'block w-full py-5 bg-white border-2 border-ink text-ink font-extrabold rounded-2xl text-center hover:bg-ink hover:text-white transition-all text-base md:text-lg cursor-pointer'
+                      : 'block w-full py-5 border border-line text-ink font-extrabold rounded-2xl text-center hover:bg-surface transition-all text-base md:text-lg cursor-pointer'
                     const finalUrl = withSlug(a.url, product.slug)
                     if (a.external || /^https?:/.test(a.url)) {
                       return (
@@ -256,17 +262,27 @@ export default async function ProductDetailPage({
                           rel="noopener noreferrer"
                           className={baseCls}
                         >
-                          {a.label}
+                          {a.label} {a.primary ? '→' : ''}
                         </a>
                       )
                     }
                     return (
                       <Link key={i} href={finalUrl} className={baseCls}>
-                        {a.label}
+                        {a.label} {a.primary ? '→' : ''}
                       </Link>
                     )
                   })}
                 </EligibilityGatedCta>
+
+                <a
+                  href="https://open.kakao.com/o/s7kkWTfh"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 w-full py-5 bg-[#FEE500] text-[#191919] font-extrabold rounded-2xl hover:bg-[#FFE000] transition-all text-base md:text-lg cursor-pointer"
+                >
+                  <span className="inline-flex items-center justify-center w-[18px] h-[18px] rounded bg-[#191919] text-[#FEE500] text-[10px] font-extrabold">K</span>
+                  카카오톡으로 문의하기
+                </a>
               </div>
             </div>
           </div>
