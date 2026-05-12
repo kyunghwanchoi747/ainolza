@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayloadClient } from '@/lib/payload'
 import { requireAdmin } from '@/lib/auth'
+import { resolveGrantedClassrooms } from '@/lib/classroom-grant'
 
 /**
  * 관리자 전용 — 특정 회원에게 상품 권한을 부여한다.
@@ -64,13 +65,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '존재하지 않는 상품' }, { status: 400 })
     }
 
-    // 상품에 연결된 강의실 slug 추출 (grantedClassroomSlugs 배열)
-    const grantedClassroomSlugs: string[] = []
-    const arr = Array.isArray(product.grantedClassroomSlugs) ? product.grantedClassroomSlugs : []
-    for (const item of arr) {
-      const slug = typeof item === 'object' ? item.slug : item
-      if (slug && !grantedClassroomSlugs.includes(slug)) grantedClassroomSlugs.push(slug)
-    }
+    // 상품에 연결된 강의실 slug 추출. grantedClassroomSlugs가 비어 있으면
+    // 결제 흐름과 동일하게 코드 fallback 매핑 사용 (현재 운영 기수의 강의실).
+    const grantedClassroomSlugs = resolveGrantedClassrooms(
+      product.slug,
+      product.grantedClassroomSlugs,
+      [],
+    )
 
     // 회원 찾기
     let user: any = null

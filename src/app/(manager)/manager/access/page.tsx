@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
+import { resolveGrantedClassrooms } from '@/lib/classroom-grant'
 
 type User = {
   id: number
@@ -63,12 +64,9 @@ export default function AccessGrantPage() {
       .then(r => r.ok ? r.json() : null)
       .then((data: any) => {
         const opts: ProductOption[] = (data?.docs || []).map((d: any) => {
-          const arr = Array.isArray(d.grantedClassroomSlugs) ? d.grantedClassroomSlugs : []
-          const classroomSlugs: string[] = []
-          for (const item of arr) {
-            const slug = typeof item === 'object' ? item.slug : item
-            if (slug && !classroomSlugs.includes(slug)) classroomSlugs.push(slug)
-          }
+          // grantedClassroomSlugs 비어 있을 경우 코드 fallback도 동일하게 반영하여 표시.
+          // 결제 흐름(verify/webhook)과 동일한 매핑 사용 → 화면 표시와 실제 부여 결과 일치.
+          const classroomSlugs = resolveGrantedClassrooms(d.slug, d.grantedClassroomSlugs, [])
           return {
             slug: d.slug,
             title: d.title,
