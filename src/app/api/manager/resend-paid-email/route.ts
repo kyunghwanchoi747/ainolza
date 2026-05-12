@@ -17,8 +17,15 @@ import {
  * 동작 조건: 주문 status='paid' 인 것만. 그 외 상태는 skip.
  */
 export async function POST(request: NextRequest) {
-  const adminCheck = await requireAdmin(request)
-  if (adminCheck) return adminCheck
+  // 매니저 인증 OR CRON_KEY 인증 — 운영 자동화/긴급 복구용
+  const url = new URL(request.url)
+  const providedKey = url.searchParams.get('key') || request.headers.get('x-cron-key') || ''
+  const expectedKey = process.env.CRON_KEY || ''
+  const hasCronAuth = expectedKey && providedKey === expectedKey
+  if (!hasCronAuth) {
+    const adminCheck = await requireAdmin(request)
+    if (adminCheck) return adminCheck
+  }
 
   try {
     const body = (await request.json()) as { orderNumbers?: string[]; orderIds?: number[] }
