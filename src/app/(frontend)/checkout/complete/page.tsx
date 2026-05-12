@@ -1,9 +1,11 @@
 import Link from 'next/link'
 import { getPayloadClient } from '@/lib/payload'
+import { resolveGrantedClassrooms } from '@/lib/classroom-grant'
 
 export const dynamic = 'force-dynamic'
 
 type OrderInfo = {
+  id?: number | string
   orderNumber?: string
   status?: string
   productName?: string
@@ -11,6 +13,8 @@ type OrderInfo = {
   vbankName?: string
   vbankNum?: string
   vbankDate?: string
+  pgProvider?: string
+  productSlug?: string
 } | null
 
 async function getOrder(orderNumber: string): Promise<OrderInfo> {
@@ -27,6 +31,7 @@ async function getOrder(orderNumber: string): Promise<OrderInfo> {
     const doc = result.docs[0] as any
     if (!doc) return null
     return {
+      id: doc.id,
       orderNumber: doc.orderNumber,
       status: doc.status,
       productName: doc.productName,
@@ -34,9 +39,113 @@ async function getOrder(orderNumber: string): Promise<OrderInfo> {
       vbankName: doc.vbankName,
       vbankNum: doc.vbankNum,
       vbankDate: doc.vbankDate,
+      pgProvider: doc.pgProvider,
+      productSlug: doc.productSlug,
     }
   } catch {
     return null
+  }
+}
+
+/**
+ * 안전망 — PortOne SDK가 redirect 방식으로 응답했거나 webhook이 늦은 경우,
+ * 이 페이지 진입 순간 PortOne API로 결제 상태 직접 조회 후 DB 동기화.
+ * - 이미 paid면 no-op
+ * - pending + 가상계좌/무통장이면 no-op (입금 대기 화면 정상 흐름)
+ * - pending + 카드 등 즉시결제 상품이면 PortOne 조회해서 PAID면 paid 전환
+ */
+async function reconcileIfNeeded(orderNumber: string): Promise<void> {
+  if (!orderNumber) return
+  const apiSecret = process.env.PORTONE_API_SECRET
+  if (!apiSecret) return // 시크릿 없으면 조용히 스킵
+
+  try {
+    const payload = await getPayloadClient()
+    const res = await payload.find({
+      collection: 'orders',
+      where: { orderNumber: { equals: orderNumber } },
+      limit: 1,
+      depth: 0,
+      overrideAccess: true,
+    })
+    const order = res.docs[0] as any
+    if (!order) return
+    if (order.status !== 'pending') return
+    // 가상계좌/무통장은 입금 대기가 정상. 카드/계좌이체 등 즉시결제만 동기화 대상.
+    if (order.pgProvider === 'direct-bank') return
+    if (order.vbankNum) return
+
+    const url = `https://api.portone.io/payments/${encodeURIComponent(order.merchantUid || order.orderNumber)}`
+    const r = await fetch(url, { headers: { Authorization: `PortOne ${apiSecret}` } })
+    if (!r.ok) return
+    const payment = (await r.json()) as any
+
+    const paidAmount = payment?.amount?.total ?? 0
+    if (payment?.status === 'PAID') {
+      if (paidAmount !== order.amount) {
+        console.error('[COMPLETE RECONCILE AMOUNT MISMATCH]', order.orderNumber)
+        return
+      }
+      const methodMap: Record<string, string> = {
+        PaymentMethodCard: 'card',
+        PaymentMethodTransfer: 'trans',
+        PaymentMethodVirtualAccount: 'vbank',
+        PaymentMethodEasyPay: 'kakaopay',
+        PaymentMethodMobile: 'phone',
+      }
+      const payMethod = methodMap[payment?.method?.type] || undefined
+
+      // 상품에 등록된 강의실 + fallback
+      let granted: string[] = Array.isArray(order.classrooms) ? [...order.classrooms] : []
+      try {
+        const prod = await payload.find({
+          collection: 'products',
+          where: { slug: { equals: order.productSlug } },
+          limit: 1,
+          depth: 0,
+          overrideAccess: true,
+        })
+        const product = prod.docs[0] as any
+        granted = resolveGrantedClassrooms(order.productSlug, product?.grantedClassroomSlugs, granted)
+      } catch {
+        granted = resolveGrantedClassrooms(order.productSlug, null, granted)
+      }
+
+      const update: Record<string, any> = {
+        status: 'paid',
+        impUid: payment?.id || order.merchantUid,
+        pgProvider: payment?.pgProvider || undefined,
+        receiptUrl: payment?.receiptUrl || undefined,
+        paidAt: payment?.paidAt || new Date().toISOString(),
+      }
+      if (payMethod) update.payMethod = payMethod
+      if (granted.length > 0) update.classrooms = granted
+
+      await payload.update({
+        collection: 'orders',
+        id: order.id,
+        data: update as any,
+        overrideAccess: true,
+      })
+    } else if (payment?.status === 'FAILED') {
+      await payload.update({
+        collection: 'orders',
+        id: order.id,
+        data: { status: 'failed' } as any,
+        overrideAccess: true,
+        context: { skipNotify: true },
+      })
+    } else if (payment?.status === 'CANCELLED') {
+      await payload.update({
+        collection: 'orders',
+        id: order.id,
+        data: { status: 'cancelled' } as any,
+        overrideAccess: true,
+        context: { skipNotify: true },
+      })
+    }
+  } catch (e) {
+    console.error('[COMPLETE RECONCILE]', (e as Error).message)
   }
 }
 
@@ -62,6 +171,9 @@ export default async function CompletePage({
 }) {
   const { orderNumber: orderNumberParam } = await searchParams
   const orderNumber = orderNumberParam || ''
+  // PortOne SDK가 redirect 방식으로 응답해 verify 호출이 누락된 경우 대비.
+  // 페이지 진입 순간 PortOne API로 결제 상태 직접 조회 후 동기화.
+  await reconcileIfNeeded(orderNumber)
   const order = await getOrder(orderNumber)
 
   // 가상계좌 발급 상태 — 입금 대기
