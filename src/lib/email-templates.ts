@@ -37,21 +37,28 @@ function priceKR(amount?: number): string {
   return amount.toLocaleString('ko-KR') + '원'
 }
 
+// AI놀자 디자인 시스템 톤을 그대로 메일에 적용.
+//  ink #1a1a1a (제목/강조 텍스트)
+//  sub #888888 (보조 텍스트)
+//  line #dddddd (구분선)
+//  surface #fafafa (배경 박스)
+//  brand #D4756E (헤더 워드마크 + CTA 버튼만)
+// 이모지 사용 금지(디자인 룰).
 const wrap = (title: string, bodyHtml: string) => `<!DOCTYPE html>
 <html lang="ko">
 <head><meta charset="UTF-8"></head>
-<body style="margin:0;padding:0;background:#f8f8f8;font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8f8f8;padding:40px 20px;">
+<body style="margin:0;padding:0;background:#fafafa;font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#fafafa;padding:40px 20px;">
     <tr><td align="center">
-      <table width="100%" style="max-width:560px;background:#ffffff;border-radius:16px;padding:48px 40px;">
+      <table width="100%" style="max-width:560px;background:#ffffff;border:1px solid #dddddd;border-radius:16px;padding:48px 40px;">
         <tr><td>
-          <div style="text-align:center;margin-bottom:24px;">
-            <h1 style="color:#D4756E;font-size:24px;font-weight:bold;margin:0;">AI놀자</h1>
+          <div style="margin-bottom:28px;">
+            <h1 style="color:#D4756E;font-size:18px;font-weight:bold;margin:0;letter-spacing:0.04em;">AI놀자</h1>
           </div>
-          <h2 style="color:#333;font-size:20px;font-weight:bold;margin:0 0 16px;">${title}</h2>
+          <h2 style="color:#1a1a1a;font-size:22px;font-weight:bold;margin:0 0 20px;line-height:1.4;letter-spacing:-0.01em;">${title}</h2>
           ${bodyHtml}
-          <hr style="border:none;border-top:1px solid #eee;margin:32px 0 16px;">
-          <p style="color:#999;font-size:11px;text-align:center;margin:0;">© AI놀자 · info@ainolza.kr</p>
+          <hr style="border:none;border-top:1px solid #dddddd;margin:36px 0 16px;">
+          <p style="color:#888888;font-size:11px;margin:0;">AI놀자 · info@ainolza.kr</p>
         </td></tr>
       </table>
     </td></tr>
@@ -68,22 +75,22 @@ export async function sendWelcomeEmail(payload: Payload, user: { email: string; 
   const name = user.name || user.email.split('@')[0]
   await payload.sendEmail({
     to: user.email,
-    subject: '[AI놀자] 가입을 환영합니다! 🎉',
+    subject: '[AI놀자] 가입을 환영합니다',
     html: wrap(
-      `${name}님, 환영합니다! 🎉`,
+      `${name}님, 환영합니다`,
       `
-      <p style="color:#666;font-size:15px;line-height:1.7;margin:0 0 16px;">
+      <p style="color:#888888;font-size:15px;line-height:1.7;margin:0 0 16px;">
         AI놀자에 가입해 주셔서 감사합니다.
       </p>
-      <p style="color:#666;font-size:14px;line-height:1.7;margin:0 0 24px;">
+      <p style="color:#888888;font-size:14px;line-height:1.7;margin:0 0 24px;">
         AI놀자는 평범한 사람을 위한 AI 활용 강의와 도구를 만드는 공간입니다.
         강의·전자책 구매부터 AI 도구 활용까지 다양한 콘텐츠를 만나보세요.
       </p>
       <div style="text-align:center;margin:32px 0;">
         <a href="${SITE_URL}/store" style="display:inline-block;background:#D4756E;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:10px;font-size:14px;font-weight:bold;">강의/책 보러가기</a>
       </div>
-      <p style="color:#999;font-size:12px;line-height:1.6;margin:24px 0 0;">
-        궁금한 점이 있으시면 <a href="${KAKAO_OPEN_CHAT}" style="color:#D4756E;">카카오톡 문의</a>로 연락주세요.
+      <p style="color:#888888;font-size:12px;line-height:1.6;margin:28px 0 0;">
+        궁금한 점이 있으시면 <a href="${KAKAO_OPEN_CHAT}" style="color:#D4756E;text-decoration:none;font-weight:bold;">카카오톡 문의</a>로 연락주세요.
       </p>`,
     ),
   })
@@ -115,17 +122,19 @@ export async function sendPaymentCompletedToBuyer(
   let ebookDownloadHtml = ''
   if (productType === 'ebook') {
     ebookDownloadHtml = `
-      <h3 style="color:#333;font-size:15px;margin:24px 0 8px;">📚 전자책 다운로드 안내</h3>
-      <p style="color:#666;font-size:14px;line-height:1.7;margin:0 0 16px;">
-        아래 마이페이지에서 전자책을 다운로드 받으실 수 있습니다.<br>
-        <strong style="color:#333;">로그인된 본인 계정에서만</strong> 다운로드 가능합니다.
+      <h3 style="color:#1a1a1a;font-size:15px;font-weight:bold;margin:28px 0 10px;">전자책 다운로드 안내</h3>
+      <p style="color:#888888;font-size:14px;line-height:1.7;margin:0 0 16px;">
+        마이페이지에서 전자책을 다운로드 받으실 수 있습니다.
+        <strong style="color:#1a1a1a;">로그인된 본인 계정에서만</strong> 다운로드 가능합니다.
       </p>
-      <p style="color:#B45309;font-size:13px;line-height:1.7;margin:0 0 20px;background:#FEF2F2;padding:12px 14px;border-radius:8px;border:1px solid #FECACA;">
-        ⚠ <strong>저작권 보호 안내</strong><br>
-        본 전자책의 무단 복제·배포·공유·전송은 「저작권법」 제136조에 따라
-        5년 이하의 징역 또는 5천만원 이하의 벌금에 처해질 수 있습니다.
-      </p>
-      <div style="text-align:center;margin:24px 0;">
+      <div style="border-top:1px solid #dddddd;border-bottom:1px solid #dddddd;padding:14px 0;margin:0 0 24px;">
+        <p style="color:#1a1a1a;font-size:13px;font-weight:bold;margin:0 0 6px;">저작권 보호 안내</p>
+        <p style="color:#888888;font-size:12px;line-height:1.7;margin:0;">
+          본 전자책의 무단 복제·배포·공유·전송은 「저작권법」 제136조에 따라
+          5년 이하의 징역 또는 5천만원 이하의 벌금에 처해질 수 있습니다.
+        </p>
+      </div>
+      <div style="text-align:center;margin:28px 0;">
         <a href="${SITE_URL}/mypage" style="display:inline-block;background:#D4756E;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:10px;font-size:14px;font-weight:bold;">마이페이지에서 다운로드</a>
       </div>`
   }
@@ -134,15 +143,15 @@ export async function sendPaymentCompletedToBuyer(
   let bookShippingHtml = ''
   if (productType === 'book' && order.shippingAddress) {
     bookShippingHtml = `
-      <h3 style="color:#333;font-size:15px;margin:24px 0 8px;">📦 배송 안내</h3>
-      <p style="color:#666;font-size:14px;line-height:1.7;margin:0 0 16px;">
+      <h3 style="color:#1a1a1a;font-size:15px;font-weight:bold;margin:28px 0 10px;">배송 안내</h3>
+      <p style="color:#888888;font-size:14px;line-height:1.7;margin:0 0 16px;">
         영업일 기준 2~3일 내에 발송됩니다. 운송장 번호가 등록되면 마이페이지에서 확인하실 수 있습니다.
       </p>
-      <table cellpadding="6" cellspacing="0" style="width:100%;background:#fafafa;border-radius:10px;padding:8px;margin:0 0 20px;font-size:13px;color:#666;">
-        <tr><td style="width:90px;color:#999;">받는 사람</td><td>${order.shippingRecipient || ''}</td></tr>
-        <tr><td style="color:#999;">주소</td><td>(${order.shippingZipcode || ''}) ${order.shippingAddress} ${order.shippingAddressDetail || ''}</td></tr>
+      <table cellpadding="6" cellspacing="0" style="width:100%;background:#fafafa;border-radius:10px;padding:8px;margin:0 0 24px;font-size:13px;color:#888888;">
+        <tr><td style="width:90px;color:#888888;">받는 사람</td><td style="color:#1a1a1a;">${order.shippingRecipient || ''}</td></tr>
+        <tr><td style="color:#888888;">주소</td><td style="color:#1a1a1a;">(${order.shippingZipcode || ''}) ${order.shippingAddress} ${order.shippingAddressDetail || ''}</td></tr>
       </table>
-      <div style="text-align:center;margin:24px 0;">
+      <div style="text-align:center;margin:28px 0;">
         <a href="${SITE_URL}/mypage" style="display:inline-block;background:#D4756E;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:10px;font-size:14px;font-weight:bold;">배송 현황 확인</a>
       </div>`
   }
@@ -151,22 +160,22 @@ export async function sendPaymentCompletedToBuyer(
   let classroomHtml = ''
   if (hasClassroom) {
     classroomHtml = `
-      <h3 style="color:#333;font-size:15px;margin:24px 0 8px;">🎓 수강 시작하기</h3>
-      <p style="color:#666;font-size:14px;line-height:1.7;margin:0 0 16px;">
-        마이페이지의 <strong>"내 강의실"</strong>에서 강의를 시청하실 수 있습니다.
+      <h3 style="color:#1a1a1a;font-size:15px;font-weight:bold;margin:28px 0 10px;">수강 시작하기</h3>
+      <p style="color:#888888;font-size:14px;line-height:1.7;margin:0 0 24px;">
+        마이페이지의 <strong style="color:#1a1a1a;">"내 강의실"</strong>에서 강의를 시청하실 수 있습니다.
         영상은 회차별로 정리되어 있으며, 각 회차마다 노션 가이드북이 함께 제공됩니다.
       </p>
-      <div style="text-align:center;margin:24px 0;">
+      <div style="text-align:center;margin:28px 0;">
         <a href="${SITE_URL}/mypage" style="display:inline-block;background:#D4756E;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:10px;font-size:14px;font-weight:bold;">내 강의실로 이동</a>
       </div>`
   }
 
   // 어떤 안내도 없으면 기본 마이페이지 안내
   const detailHtml = ebookDownloadHtml || bookShippingHtml || classroomHtml || `
-    <p style="color:#666;font-size:14px;line-height:1.7;margin:0 0 16px;">
+    <p style="color:#888888;font-size:14px;line-height:1.7;margin:0 0 16px;">
       마이페이지에서 주문 내역을 확인하실 수 있습니다.
     </p>
-    <div style="text-align:center;margin:24px 0;">
+    <div style="text-align:center;margin:28px 0;">
       <a href="${SITE_URL}/mypage" style="display:inline-block;background:#D4756E;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:10px;font-size:14px;font-weight:bold;">마이페이지</a>
     </div>`
 
@@ -174,19 +183,19 @@ export async function sendPaymentCompletedToBuyer(
     to: order.buyerEmail,
     subject: '[AI놀자] 결제가 완료되었습니다',
     html: wrap(
-      `${name}님, 결제가 완료되었습니다 ✨`,
+      `${name}님, 결제가 완료되었습니다`,
       `
-      <p style="color:#666;font-size:15px;line-height:1.7;margin:0 0 16px;">
+      <p style="color:#888888;font-size:15px;line-height:1.7;margin:0 0 20px;">
         주문해 주셔서 감사합니다. 결제가 정상 처리되었습니다.
       </p>
-      <table cellpadding="6" cellspacing="0" style="width:100%;background:#fafafa;border-radius:10px;padding:8px;margin:0 0 24px;font-size:13px;color:#666;">
-        <tr><td style="width:90px;color:#999;">주문번호</td><td>${order.orderNumber}</td></tr>
-        <tr><td style="color:#999;">상품</td><td><strong style="color:#333;">${order.productName}</strong></td></tr>
-        <tr><td style="color:#999;">결제금액</td><td><strong style="color:#D4756E;">${priceKR(order.amount || 0)}</strong></td></tr>
+      <table cellpadding="6" cellspacing="0" style="width:100%;background:#fafafa;border-radius:10px;padding:8px;margin:0 0 24px;font-size:13px;color:#888888;">
+        <tr><td style="width:90px;color:#888888;">주문번호</td><td style="color:#1a1a1a;font-family:monospace;">${order.orderNumber}</td></tr>
+        <tr><td style="color:#888888;">상품</td><td><strong style="color:#1a1a1a;">${order.productName}</strong></td></tr>
+        <tr><td style="color:#888888;">결제금액</td><td><strong style="color:#1a1a1a;">${priceKR(order.amount || 0)}</strong></td></tr>
       </table>
       ${detailHtml}
-      <p style="color:#999;font-size:12px;line-height:1.6;margin:24px 0 0;">
-        문의사항은 <a href="${KAKAO_OPEN_CHAT}" style="color:#D4756E;">카카오톡 오픈채팅</a>으로 부탁드립니다.
+      <p style="color:#888888;font-size:12px;line-height:1.6;margin:28px 0 0;">
+        문의사항은 <a href="${KAKAO_OPEN_CHAT}" style="color:#D4756E;text-decoration:none;font-weight:bold;">카카오톡 오픈채팅</a>으로 부탁드립니다.
       </p>`,
     ),
   })
@@ -248,8 +257,8 @@ export async function sendAdvancedClassGroupChat(
         아래 링크를 통해 오류 없이 입장해 주시기 바랍니다.
       </p>
       <table cellpadding="12" cellspacing="0" style="width:100%;background:#FFF1F0;border:2px solid #D4756E;border-radius:12px;margin:0 0 24px;font-size:15px;color:#1a1a1a;">
-        <tr><td style="color:#888;font-weight:bold;width:160px;">👉 단톡방 입장 링크</td><td><a href="https://open.kakao.com/o/gbmc0ppi" style="color:#D4756E;font-weight:bold;text-decoration:underline;">https://open.kakao.com/o/gbmc0ppi</a></td></tr>
-        <tr><td style="color:#888;font-weight:bold;">👉 참여 코드(비밀번호)</td><td><strong style="font-size:18px;">nolza232</strong></td></tr>
+        <tr><td style="color:#888888;font-weight:bold;width:160px;">단톡방 입장 링크</td><td><a href="https://open.kakao.com/o/gbmc0ppi" style="color:#D4756E;font-weight:bold;text-decoration:none;">https://open.kakao.com/o/gbmc0ppi</a></td></tr>
+        <tr><td style="color:#888888;font-weight:bold;">참여 코드(비밀번호)</td><td><strong style="font-size:18px;color:#1a1a1a;">nolza232</strong></td></tr>
       </table>
       <p style="color:#444;font-size:14px;line-height:1.8;margin:0 0 16px;">
         상세한 안내는 단톡방을 통해 순차적으로 공지해 드리겠습니다.
@@ -277,15 +286,15 @@ export async function sendUserSignupToAdmin(
         : '이메일 가입'
   await payload.sendEmail({
     to: adminEmail(),
-    subject: `[AI놀자 알림] 🆕 새 회원 가입 — ${user.email}`,
+    subject: `[AI놀자 알림] 새 회원 가입 — ${user.email}`,
     html: wrap(
-      '🆕 새 회원이 가입했습니다',
+      '새 회원이 가입했습니다',
       `
-      <table cellpadding="6" cellspacing="0" style="width:100%;background:#fafafa;border-radius:10px;padding:8px;margin:0 0 24px;font-size:13px;color:#666;">
-        <tr><td style="width:90px;color:#999;">이메일</td><td><strong style="color:#333;">${user.email}</strong></td></tr>
-        <tr><td style="color:#999;">이름</td><td>${user.name || '-'}</td></tr>
-        <tr><td style="color:#999;">연락처</td><td>${user.phone || '-'}</td></tr>
-        <tr><td style="color:#999;">가입경로</td><td>${provider}</td></tr>
+      <table cellpadding="6" cellspacing="0" style="width:100%;background:#fafafa;border-radius:10px;padding:8px;margin:0 0 24px;font-size:13px;color:#888888;">
+        <tr><td style="width:90px;color:#888888;">이메일</td><td><strong style="color:#1a1a1a;">${user.email}</strong></td></tr>
+        <tr><td style="color:#888888;">이름</td><td style="color:#1a1a1a;">${user.name || '-'}</td></tr>
+        <tr><td style="color:#888888;">연락처</td><td style="color:#1a1a1a;">${user.phone || '-'}</td></tr>
+        <tr><td style="color:#888888;">가입경로</td><td style="color:#1a1a1a;">${provider}</td></tr>
       </table>
       <div style="text-align:center;margin:24px 0;">
         <a href="${SITE_URL}/admin/collections/users/${user.id}" style="display:inline-block;background:#D4756E;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:10px;font-size:14px;font-weight:bold;">회원 상세 보기</a>
@@ -334,16 +343,16 @@ export async function sendEnrollmentToAdmin(
 ) {
   await payload.sendEmail({
     to: adminEmail(),
-    subject: `[AI놀자 알림] 📩 새 수강 신청 — ${enrollment.name} (${enrollment.program || '미지정'})`,
+    subject: `[AI놀자 알림] 새 수강 신청 — ${enrollment.name} (${enrollment.program || '미지정'})`,
     html: wrap(
-      '📩 새 수강 신청이 접수되었습니다',
+      '새 수강 신청이 접수되었습니다',
       `
-      <table cellpadding="6" cellspacing="0" style="width:100%;background:#fafafa;border-radius:10px;padding:8px;margin:0 0 24px;font-size:13px;color:#666;">
-        <tr><td style="width:90px;color:#999;">이름</td><td><strong style="color:#333;">${enrollment.name}</strong></td></tr>
-        <tr><td style="color:#999;">이메일</td><td>${enrollment.email}</td></tr>
-        <tr><td style="color:#999;">연락처</td><td>${enrollment.phone || '-'}</td></tr>
-        <tr><td style="color:#999;">프로그램</td><td><strong style="color:#D4756E;">${enrollment.program || '-'}</strong></td></tr>
-        ${enrollment.message ? `<tr><td style="color:#999;vertical-align:top;">문의사항</td><td style="color:#333;">${enrollment.message}</td></tr>` : ''}
+      <table cellpadding="6" cellspacing="0" style="width:100%;background:#fafafa;border-radius:10px;padding:8px;margin:0 0 24px;font-size:13px;color:#888888;">
+        <tr><td style="width:90px;color:#888888;">이름</td><td><strong style="color:#1a1a1a;">${enrollment.name}</strong></td></tr>
+        <tr><td style="color:#888888;">이메일</td><td style="color:#1a1a1a;">${enrollment.email}</td></tr>
+        <tr><td style="color:#888888;">연락처</td><td style="color:#1a1a1a;">${enrollment.phone || '-'}</td></tr>
+        <tr><td style="color:#888888;">프로그램</td><td><strong style="color:#1a1a1a;">${enrollment.program || '-'}</strong></td></tr>
+        ${enrollment.message ? `<tr><td style="color:#888888;vertical-align:top;">문의사항</td><td style="color:#1a1a1a;">${enrollment.message}</td></tr>` : ''}
       </table>
       <div style="text-align:center;margin:24px 0;">
         <a href="${SITE_URL}/admin/collections/enrollments/${enrollment.id}" style="display:inline-block;background:#D4756E;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:10px;font-size:14px;font-weight:bold;">신청 상세 보기</a>
@@ -429,20 +438,20 @@ export async function sendPaymentCompletedToAdmin(
 ) {
   await payload.sendEmail({
     to: adminEmail(),
-    subject: `[AI놀자 알림] 💰 결제 완료 ${order.orderNumber}`,
+    subject: `[AI놀자 알림] 결제 완료 ${order.orderNumber}`,
     html: wrap(
-      '💰 결제가 완료되었습니다',
+      '결제가 완료되었습니다',
       `
-      <table cellpadding="6" cellspacing="0" style="width:100%;background:#fafafa;border-radius:10px;padding:8px;margin:0 0 24px;font-size:13px;color:#666;">
-        <tr><td style="width:90px;color:#999;">주문번호</td><td>${order.orderNumber}</td></tr>
-        <tr><td style="color:#999;">상품</td><td><strong style="color:#333;">${order.productName}</strong></td></tr>
-        <tr><td style="color:#999;">금액</td><td><strong style="color:#10B981;">${priceKR(order.amount || 0)}</strong></td></tr>
-        <tr><td style="color:#999;">구매자</td><td>${order.buyerName || '-'} (${order.buyerEmail})</td></tr>
+      <table cellpadding="6" cellspacing="0" style="width:100%;background:#fafafa;border-radius:10px;padding:8px;margin:0 0 24px;font-size:13px;color:#888888;">
+        <tr><td style="width:90px;color:#888888;">주문번호</td><td style="color:#1a1a1a;font-family:monospace;">${order.orderNumber}</td></tr>
+        <tr><td style="color:#888888;">상품</td><td><strong style="color:#1a1a1a;">${order.productName}</strong></td></tr>
+        <tr><td style="color:#888888;">금액</td><td><strong style="color:#1a1a1a;">${priceKR(order.amount || 0)}</strong></td></tr>
+        <tr><td style="color:#888888;">구매자</td><td style="color:#1a1a1a;">${order.buyerName || '-'} (${order.buyerEmail})</td></tr>
       </table>
-      <p style="color:#666;font-size:13px;line-height:1.6;margin:0;">
-        ✓ 구매자에게 자동으로 수강 안내 메일이 발송되었습니다.
+      <p style="color:#888888;font-size:13px;line-height:1.6;margin:0 0 24px;">
+        구매자에게 자동으로 수강 안내 메일이 발송되었습니다.
       </p>
-      <div style="text-align:center;margin:24px 0;">
+      <div style="text-align:center;margin:28px 0;">
         <a href="${SITE_URL}/admin/collections/orders/${order.id}" style="display:inline-block;background:#D4756E;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:10px;font-size:14px;font-weight:bold;">주문 상세 보기</a>
       </div>`,
     ),
