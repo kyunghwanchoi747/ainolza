@@ -48,6 +48,13 @@ function CheckoutContent() {
     prerequisiteSlug?: string
   } | null>(null)
 
+  // 현금영수증 — 계좌이체/무통장 결제 시에만 노출
+  const [cashReceipt, setCashReceipt] = useState<{
+    requested: boolean
+    type: 'income' | 'expense' // 개인소득공제 / 사업자지출증빙
+    number: string
+  }>({ requested: false, type: 'income', number: '' })
+
   // 배송지 정보 (종이책 등)
   const [shipping, setShipping] = useState({
     recipient: '',
@@ -146,6 +153,16 @@ function CheckoutContent() {
       shipping.zipcode.trim() &&
       shipping.address.trim())
 
+  // 현금영수증 — 계좌이체/무통장일 때만 의미. 신청했으면 번호 형식 검증.
+  const needsCashReceiptUi = payMethod === 'TRANSFER' || payMethod === 'DIRECT_BANK'
+  const cashReceiptNumberRaw = cashReceipt.number.replace(/[^0-9]/g, '')
+  const cashReceiptValid =
+    !needsCashReceiptUi ||
+    !cashReceipt.requested ||
+    (cashReceipt.type === 'income'
+      ? /^01[016789]\d{7,8}$/.test(cashReceiptNumberRaw) || /^\d{13}$/.test(cashReceiptNumberRaw)
+      : /^\d{10}$/.test(cashReceiptNumberRaw))
+
   const handlePayment = async () => {
     if (!allAgreed) return
     if (!phoneValid) {
@@ -158,6 +175,14 @@ function CheckoutContent() {
     }
     if (requiresShipping && !shippingValid) {
       alert('배송지 정보를 모두 입력해주세요.')
+      return
+    }
+    if (needsCashReceiptUi && cashReceipt.requested && !cashReceiptValid) {
+      alert(
+        cashReceipt.type === 'income'
+          ? '현금영수증 번호는 휴대폰번호(11자리) 또는 현금영수증 카드번호(13자리)로 입력해주세요.'
+          : '사업자등록번호 10자리를 정확히 입력해주세요.',
+      )
       return
     }
     setLoading(true)
@@ -192,6 +217,13 @@ function CheckoutContent() {
           buyerEmail: user?.email || '',
           buyerPhone: phoneNormalized,
           payMethod, // 'CARD' | 'TRANSFER' | 'DIRECT_BANK' | 'KAKAOPAY'
+          // 현금영수증 (계좌이체/무통장 신청 시에만 의미)
+          ...(needsCashReceiptUi && cashReceipt.requested
+            ? {
+                cashReceiptType: cashReceipt.type, // 'income' | 'expense'
+                cashReceiptNumber: cashReceiptNumberRaw,
+              }
+            : {}),
           ...(requiresShipping
             ? {
                 shippingRecipient: shipping.recipient.trim(),
@@ -585,6 +617,111 @@ function CheckoutContent() {
                     })}
                   </div>
                 </div>
+
+                {/* 현금영수증 — 계좌이체/무통장 결제 시에만 노출 */}
+                {(payMethod === 'TRANSFER' || payMethod === 'DIRECT_BANK') && (
+                  <div className="p-5 md:p-6 rounded-2xl bg-white border border-line">
+                    <div className="flex items-baseline justify-between mb-4">
+                      <h2 className="text-base font-bold text-ink">현금영수증</h2>
+                      <div className="flex items-center gap-3 text-sm">
+                        <label className="flex items-center gap-1.5 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="cashReceipt"
+                            checked={cashReceipt.requested}
+                            onChange={() => setCashReceipt((c) => ({ ...c, requested: true }))}
+                            className="accent-ink"
+                          />
+                          <span className={cashReceipt.requested ? 'text-ink font-bold' : 'text-sub'}>신청</span>
+                        </label>
+                        <label className="flex items-center gap-1.5 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="cashReceipt"
+                            checked={!cashReceipt.requested}
+                            onChange={() => setCashReceipt((c) => ({ ...c, requested: false, number: '' }))}
+                            className="accent-ink"
+                          />
+                          <span className={!cashReceipt.requested ? 'text-ink font-bold' : 'text-sub'}>미신청</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    {cashReceipt.requested && (
+                      <div className="space-y-3">
+                        {/* 발급 유형 선택 */}
+                        <div className="flex flex-col sm:flex-row gap-2">
+                          <label
+                            className={`flex-1 flex items-center gap-2 px-4 py-3 rounded-lg border cursor-pointer transition ${
+                              cashReceipt.type === 'income'
+                                ? 'border-ink bg-surface'
+                                : 'border-line hover:border-sub'
+                            }`}
+                          >
+                            <input
+                              type="radio"
+                              name="cashReceiptType"
+                              checked={cashReceipt.type === 'income'}
+                              onChange={() => setCashReceipt((c) => ({ ...c, type: 'income', number: '' }))}
+                              className="accent-ink"
+                            />
+                            <span className={`text-sm ${cashReceipt.type === 'income' ? 'text-ink font-bold' : 'text-sub'}`}>
+                              개인소득공제용
+                            </span>
+                          </label>
+                          <label
+                            className={`flex-1 flex items-center gap-2 px-4 py-3 rounded-lg border cursor-pointer transition ${
+                              cashReceipt.type === 'expense'
+                                ? 'border-ink bg-surface'
+                                : 'border-line hover:border-sub'
+                            }`}
+                          >
+                            <input
+                              type="radio"
+                              name="cashReceiptType"
+                              checked={cashReceipt.type === 'expense'}
+                              onChange={() => setCashReceipt((c) => ({ ...c, type: 'expense', number: '' }))}
+                              className="accent-ink"
+                            />
+                            <span className={`text-sm ${cashReceipt.type === 'expense' ? 'text-ink font-bold' : 'text-sub'}`}>
+                              사업자지출증빙용(세금계산서 대용)
+                            </span>
+                          </label>
+                        </div>
+
+                        {/* 번호 입력 */}
+                        <div>
+                          <label className="block text-xs text-sub mb-1.5">
+                            {cashReceipt.type === 'income'
+                              ? '휴대폰번호 또는 현금영수증 카드번호'
+                              : '사업자등록번호'}
+                          </label>
+                          <input
+                            value={cashReceipt.number}
+                            onChange={(e) =>
+                              setCashReceipt((c) => ({
+                                ...c,
+                                number: e.target.value.replace(/[^\d-]/g, ''),
+                              }))
+                            }
+                            placeholder={
+                              cashReceipt.type === 'income'
+                                ? '010-0000-0000'
+                                : '000-00-00000'
+                            }
+                            inputMode="numeric"
+                            maxLength={20}
+                            className="w-full px-4 py-3 border border-line rounded-lg text-sm focus:outline-none focus:border-ink font-mono"
+                          />
+                        </div>
+
+                        <p className="text-xs text-sub leading-relaxed pt-1">
+                          입금 확인 후 입력하신 정보로 현금영수증이 발급됩니다.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* 약관 동의 */}
                 <div className="p-5 md:p-6 rounded-2xl bg-white border border-line">

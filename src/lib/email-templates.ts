@@ -355,16 +355,19 @@ export async function sendEnrollmentToAdmin(
 /** 신규 주문 접수 → 관리자 알림 */
 export async function sendOrderCreatedToAdmin(
   payload: Payload,
-  order: { id: number | string; orderNumber: string; buyerName?: string | null; buyerEmail: string; buyerPhone?: string | null; productName: string; amount?: number | null; status?: string | null; pgProvider?: string | null; payMethod?: string | null; depositorName?: string | null },
+  order: { id: number | string; orderNumber: string; buyerName?: string | null; buyerEmail: string; buyerPhone?: string | null; productName: string; amount?: number | null; status?: string | null; pgProvider?: string | null; payMethod?: string | null; depositorName?: string | null; cashReceiptType?: string | null; cashReceiptNumber?: string | null },
 ) {
   const isDirectBank = order.pgProvider === 'direct-bank'
   const depositorName = order.depositorName || order.buyerName || '(미설정)'
+  const hasCashReceipt =
+    (order.cashReceiptType === 'income' || order.cashReceiptType === 'expense') &&
+    !!order.cashReceiptNumber
   const subject = isDirectBank
-    ? `[AI놀자 알림] 🏦 무통장 입금 대기 ${order.orderNumber}`
+    ? `[AI놀자 알림] 무통장 입금 대기 ${order.orderNumber}`
     : `[AI놀자 알림] 새 주문 ${order.orderNumber}`
   const heading = isDirectBank
-    ? '🏦 무통장 입금 대기 주문이 접수되었습니다'
-    : '🆕 새 주문이 접수되었습니다'
+    ? '무통장 입금 대기 주문이 접수되었습니다'
+    : '새 주문이 접수되었습니다'
 
   await payload.sendEmail({
     to: adminEmail(),
@@ -375,7 +378,7 @@ export async function sendOrderCreatedToAdmin(
       <table cellpadding="6" cellspacing="0" style="width:100%;background:#fafafa;border-radius:10px;padding:8px;margin:0 0 24px;font-size:13px;color:#666;">
         <tr><td style="width:90px;color:#999;">주문번호</td><td>${order.orderNumber}</td></tr>
         <tr><td style="color:#999;">상품</td><td><strong style="color:#333;">${order.productName}</strong></td></tr>
-        <tr><td style="color:#999;">금액</td><td><strong style="color:#D4756E;">${priceKR(order.amount || 0)}</strong></td></tr>
+        <tr><td style="color:#999;">금액</td><td><strong style="color:#333;">${priceKR(order.amount || 0)}</strong></td></tr>
         <tr><td style="color:#999;">구매자</td><td>${order.buyerName || '-'}</td></tr>
         <tr><td style="color:#999;">이메일</td><td>${order.buyerEmail}</td></tr>
         <tr><td style="color:#999;">연락처</td><td>${order.buyerPhone || '-'}</td></tr>
@@ -397,8 +400,23 @@ export async function sendOrderCreatedToAdmin(
       </div>`
           : ''
       }
+      ${
+        hasCashReceipt
+          ? `
+      <div style="border-top:1px solid #e5e5e5;border-bottom:1px solid #e5e5e5;padding:14px 0;margin:0 0 24px;">
+        <div style="font-weight:bold;color:#333;margin-bottom:8px;">현금영수증 발급 요청</div>
+        <table cellpadding="4" cellspacing="0" style="font-size:13px;color:#555;">
+          <tr><td style="width:90px;color:#999;">유형</td><td><strong>${order.cashReceiptType === 'income' ? '개인소득공제용' : '사업자지출증빙용(세금계산서 대용)'}</strong></td></tr>
+          <tr><td style="color:#999;">번호</td><td><strong style="font-family:monospace;">${order.cashReceiptNumber}</strong></td></tr>
+        </table>
+        <div style="margin-top:8px;font-size:12px;color:#888;">
+          입금 확인 후 홈택스 또는 PortOne에서 발급해 주세요.
+        </div>
+      </div>`
+          : ''
+      }
       <div style="text-align:center;margin:24px 0;">
-        <a href="${SITE_URL}/admin/collections/orders/${order.id}" style="display:inline-block;background:#D4756E;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:10px;font-size:14px;font-weight:bold;">주문 상세 보기</a>
+        <a href="${SITE_URL}/admin/collections/orders/${order.id}" style="display:inline-block;background:#333;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:10px;font-size:14px;font-weight:bold;">주문 상세 보기</a>
       </div>`,
     ),
   })

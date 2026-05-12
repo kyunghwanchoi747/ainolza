@@ -23,6 +23,8 @@ export async function POST(request: NextRequest) {
       buyerEmail: string
       buyerPhone?: string
       payMethod?: string
+      cashReceiptType?: 'income' | 'expense' | 'none'
+      cashReceiptNumber?: string
       shippingRecipient?: string
       shippingPhone?: string
       shippingZipcode?: string
@@ -40,6 +42,8 @@ export async function POST(request: NextRequest) {
       buyerEmail,
       buyerPhone,
       payMethod,
+      cashReceiptType,
+      cashReceiptNumber,
       shippingRecipient,
       shippingPhone,
       shippingZipcode,
@@ -135,6 +139,25 @@ export async function POST(request: NextRequest) {
       // 입금자명 기본값 = 회원 이름. 회원이 안내 화면에서 수정 가능.
       orderData.depositorName = buyerName || ''
       orderData.adminMemo = `무통장 입금 대기 — 입금자명: ${buyerName || '(미설정)'}, 예금주: 최경환`
+    }
+
+    // 현금영수증 — 계좌이체/무통장 결제 시에만 의미. 정보 수집만 저장.
+    // 실제 발급은 어드민에서 수동 (자동 발급은 이니시스 부가서비스 활성화 후 별도 작업).
+    if (cashReceiptType === 'income' || cashReceiptType === 'expense') {
+      const num = (cashReceiptNumber || '').replace(/[^0-9]/g, '')
+      // 형식 재검증
+      const valid =
+        cashReceiptType === 'income'
+          ? /^01[016789]\d{7,8}$/.test(num) || /^\d{13}$/.test(num)
+          : /^\d{10}$/.test(num)
+      if (!valid) {
+        return NextResponse.json(
+          { error: '현금영수증 번호 형식이 올바르지 않습니다.' },
+          { status: 400 },
+        )
+      }
+      orderData.cashReceiptType = cashReceiptType
+      orderData.cashReceiptNumber = num
     }
 
     // 배송 정보가 있으면 저장 (종이책 등)

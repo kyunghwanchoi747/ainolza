@@ -194,7 +194,10 @@ export default function OrderDetailPage() {
                 {saving ? '처리 중...' : '취소 요청 승인 → 주문 취소 처리'}
               </button>
             )}
-            <div className="flex justify-between"><span className="text-muted-foreground">현금영수증</span><span>{order.cashReceiptType === 'none' ? '미발행' : order.cashReceiptType === 'income' ? '소득공제용' : order.cashReceiptType === 'expense' ? '지출증빙용' : '-'}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">현금영수증</span><span>{order.cashReceiptType === 'none' || !order.cashReceiptType ? '미발행' : order.cashReceiptType === 'income' ? '소득공제용' : order.cashReceiptType === 'expense' ? '지출증빙용' : '-'}</span></div>
+            {order.cashReceiptType && order.cashReceiptType !== 'none' && order.cashReceiptNumber && (
+              <div className="flex justify-between"><span className="text-muted-foreground">발급 번호</span><span className="font-mono">{order.cashReceiptNumber}</span></div>
+            )}
           </div>
         </div>
 
