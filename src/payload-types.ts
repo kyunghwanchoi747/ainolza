@@ -80,6 +80,10 @@ export interface Config {
     orders: Order;
     reviews: Review;
     classrooms: Classroom;
+    ebooks: Ebook;
+    referrals: Referral;
+    coupons: Coupon;
+    webhook_events: WebhookEvent;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -100,6 +104,10 @@ export interface Config {
     orders: OrdersSelect<false> | OrdersSelect<true>;
     reviews: ReviewsSelect<false> | ReviewsSelect<true>;
     classrooms: ClassroomsSelect<false> | ClassroomsSelect<true>;
+    ebooks: EbooksSelect<false> | EbooksSelect<true>;
+    referrals: ReferralsSelect<false> | ReferralsSelect<true>;
+    coupons: CouponsSelect<false> | CouponsSelect<true>;
+    webhook_events: WebhookEventsSelect<false> | WebhookEventsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -233,6 +241,17 @@ export interface Product {
    */
   discountUntil?: string | null;
   /**
+   * 예) 슈퍼얼리버드/얼리버드/정가 단계별 가격을 시작일시와 함께 등록. 시작일시가 되면 자동으로 해당 가격이 적용됩니다. 비워두면 위 "판매가"가 그대로 적용됩니다. 입력 순서는 자유 — 시스템이 시간순으로 자동 정렬합니다.
+   */
+  priceSchedule?:
+    | {
+        startAt: string;
+        price: number;
+        label?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
    * 구매하기, 외부 링크 등
    */
   actions?:
@@ -275,7 +294,11 @@ export interface Product {
     | null;
   classroomSlug?: string | null;
   /**
-   * 전자책 상품일 때 사용. 결제 완료한 회원이 마이페이지에서 다운로드할 수 있는 링크. 구글 드라이브 공유 링크 등을 입력하세요.
+   * 전자책 상품일 때 PDF를 직접 업로드하세요. 매 다운로드 요청마다 인증을 거쳐 1회성 스트리밍으로 제공됩니다. (구글 드라이브 등 외부 링크보다 보안 강력)
+   */
+  ebookFile?: (number | null) | Ebook;
+  /**
+   * 레거시 전자책에만 사용. 새 상품은 위 ebookFile에 PDF를 직접 업로드하세요. ebookFile이 있으면 이 값은 무시됩니다.
    */
   downloadUrl?: string | null;
   /**
@@ -308,6 +331,28 @@ export interface Product {
   content?: string | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ebooks".
+ */
+export interface Ebook {
+  id: number;
+  /**
+   * 예: 불편한 AI 전자책 v1.0
+   */
+  title: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -435,7 +480,17 @@ export interface Order {
   amount: number;
   originalAmount?: number | null;
   payMethod?: ('card' | 'vbank' | 'trans' | 'phone' | 'kakaopay' | 'naverpay' | 'tosspay') | null;
-  status: 'pending' | 'paid' | 'active' | 'completed' | 'refund_requested' | 'refunded' | 'failed' | 'cancelled';
+  status:
+    | 'pending'
+    | 'paid'
+    | 'active'
+    | 'completed'
+    | 'refund_requested'
+    | 'refunded'
+    | 'failed'
+    | 'cancel_requested'
+    | 'cancelled';
+  paidAt?: string | null;
   impUid?: string | null;
   merchantUid?: string | null;
   pgProvider?: string | null;
@@ -443,9 +498,19 @@ export interface Order {
   vbankName?: string | null;
   vbankNum?: string | null;
   vbankDate?: string | null;
+  depositorName?: string | null;
+  referredByCode?: string | null;
+  referrerUser?: (number | null) | User;
+  referralRewardKrw?: number | null;
+  referralPaidOutAt?: string | null;
+  couponCode?: string | null;
+  couponDiscountKrw?: number | null;
   refundReason?: string | null;
   refundedAt?: string | null;
   refundAmount?: number | null;
+  refundBank?: string | null;
+  refundAccountNum?: string | null;
+  refundAccountHolder?: string | null;
   cashReceiptType?: ('none' | 'income' | 'expense') | null;
   cashReceiptNumber?: string | null;
   shippingRecipient?: string | null;
@@ -458,7 +523,18 @@ export interface Order {
   trackingNumber?: string | null;
   shippingCarrier?: string | null;
   adminMemo?: string | null;
-  classrooms?: ('vibe-coding-101' | 'vibe-coding-advanced')[] | null;
+  classrooms?:
+    | (
+        | 'vibe-coding-101'
+        | 'vibe-coding-advanced'
+        | 'vibe-coding-101-2'
+        | 'vibe-coding-advanced-2'
+        | 'vibe-coding-101-3'
+        | 'vibe-coding-advanced-3'
+        | 'vibe-coding-101-4'
+        | 'vibe-coding-advanced-4'
+      )[]
+    | null;
   books?: ('personal-intelligence' | 'uncomfortable-ai' | 'prompt-15' | 'notebooklm-guide')[] | null;
   updatedAt: string;
   createdAt: string;
@@ -553,6 +629,81 @@ export interface Classroom {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "referrals".
+ */
+export interface Referral {
+  id: number;
+  /**
+   * 예: CHOI23. 발급 시 자동 생성됨
+   */
+  code: string;
+  user: number | User;
+  status: 'active' | 'disabled';
+  payoutBank?: string | null;
+  payoutAccountNum?: string | null;
+  payoutHolder?: string | null;
+  memo?: string | null;
+  /**
+   * 집계 시 자동 갱신. 정확한 값은 주문 조회로 산출.
+   */
+  totalReferrals?: number | null;
+  totalRewardKrw?: number | null;
+  paidOutKrw?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "coupons".
+ */
+export interface Coupon {
+  id: number;
+  /**
+   * 발급 시 자동 생성. 사용자가 직접 입력하지 않음.
+   */
+  code: string;
+  user: number | User;
+  discountType: 'percent' | 'amount';
+  discountPercent?: number | null;
+  discountAmount?: number | null;
+  source?: ('referral' | 'admin' | 'campaign') | null;
+  referralCode?: string | null;
+  status: 'active' | 'redeemed' | 'expired' | 'cancelled';
+  expiresAt?: string | null;
+  redeemedAt?: string | null;
+  redeemedOrderNumber?: string | null;
+  memo?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * PortOne 등 외부 웹훅 수신 로그. dedup·재처리·디버깅 용도.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "webhook_events".
+ */
+export interface WebhookEvent {
+  id: number;
+  /**
+   * PortOne의 webhook-id 헤더 값. 같은 ID는 두 번 처리되지 않음.
+   */
+  webhookId: string;
+  source: 'portone' | 'other';
+  eventType?: string | null;
+  paymentId?: string | null;
+  status: 'pending' | 'processing' | 'processed' | 'ignored' | 'failed';
+  attempts?: number | null;
+  lastError?: string | null;
+  processedAt?: string | null;
+  /**
+   * 디버깅용 raw body. 민감정보 없음(서명 검증 후 저장).
+   */
+  rawPayload?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -626,6 +777,22 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'classrooms';
         value: number | Classroom;
+      } | null)
+    | ({
+        relationTo: 'ebooks';
+        value: number | Ebook;
+      } | null)
+    | ({
+        relationTo: 'referrals';
+        value: number | Referral;
+      } | null)
+    | ({
+        relationTo: 'coupons';
+        value: number | Coupon;
+      } | null)
+    | ({
+        relationTo: 'webhook_events';
+        value: number | WebhookEvent;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -739,6 +906,14 @@ export interface ProductsSelect<T extends boolean = true> {
   originalPrice?: T;
   priceLabel?: T;
   discountUntil?: T;
+  priceSchedule?:
+    | T
+    | {
+        startAt?: T;
+        price?: T;
+        label?: T;
+        id?: T;
+      };
   actions?:
     | T
     | {
@@ -769,6 +944,7 @@ export interface ProductsSelect<T extends boolean = true> {
         id?: T;
       };
   classroomSlug?: T;
+  ebookFile?: T;
   downloadUrl?: T;
   downloadNote?: T;
   requiresShipping?: T;
@@ -897,6 +1073,7 @@ export interface OrdersSelect<T extends boolean = true> {
   originalAmount?: T;
   payMethod?: T;
   status?: T;
+  paidAt?: T;
   impUid?: T;
   merchantUid?: T;
   pgProvider?: T;
@@ -904,9 +1081,19 @@ export interface OrdersSelect<T extends boolean = true> {
   vbankName?: T;
   vbankNum?: T;
   vbankDate?: T;
+  depositorName?: T;
+  referredByCode?: T;
+  referrerUser?: T;
+  referralRewardKrw?: T;
+  referralPaidOutAt?: T;
+  couponCode?: T;
+  couponDiscountKrw?: T;
   refundReason?: T;
   refundedAt?: T;
   refundAmount?: T;
+  refundBank?: T;
+  refundAccountNum?: T;
+  refundAccountHolder?: T;
   cashReceiptType?: T;
   cashReceiptNumber?: T;
   shippingRecipient?: T;
@@ -971,6 +1158,79 @@ export interface ClassroomsSelect<T extends boolean = true> {
       };
   status?: T;
   order?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ebooks_select".
+ */
+export interface EbooksSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "referrals_select".
+ */
+export interface ReferralsSelect<T extends boolean = true> {
+  code?: T;
+  user?: T;
+  status?: T;
+  payoutBank?: T;
+  payoutAccountNum?: T;
+  payoutHolder?: T;
+  memo?: T;
+  totalReferrals?: T;
+  totalRewardKrw?: T;
+  paidOutKrw?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "coupons_select".
+ */
+export interface CouponsSelect<T extends boolean = true> {
+  code?: T;
+  user?: T;
+  discountType?: T;
+  discountPercent?: T;
+  discountAmount?: T;
+  source?: T;
+  referralCode?: T;
+  status?: T;
+  expiresAt?: T;
+  redeemedAt?: T;
+  redeemedOrderNumber?: T;
+  memo?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "webhook_events_select".
+ */
+export interface WebhookEventsSelect<T extends boolean = true> {
+  webhookId?: T;
+  source?: T;
+  eventType?: T;
+  paymentId?: T;
+  status?: T;
+  attempts?: T;
+  lastError?: T;
+  processedAt?: T;
+  rawPayload?: T;
   updatedAt?: T;
   createdAt?: T;
 }

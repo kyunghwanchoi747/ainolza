@@ -10,6 +10,7 @@ import * as migration_20260508_000000_products_price_schedule from './20260508_0
 import * as migration_20260512_000000_orders_depositor_name from './20260512_000000_orders_depositor_name';
 import * as migration_20260512_010000_orders_refund_account from './20260512_010000_orders_refund_account';
 import * as migration_20260512_020000_referrals_coupons from './20260512_020000_referrals_coupons';
+import * as migration_20260513_000000_webhook_events from './20260513_000000_webhook_events';
 
 export const migrations = [
   {
@@ -71,5 +72,10 @@ export const migrations = [
     up: migration_20260512_020000_referrals_coupons.up,
     down: migration_20260512_020000_referrals_coupons.down,
     name: '20260512_020000_referrals_coupons'
+  },
+  {
+    up: migration_20260513_000000_webhook_events.up,
+    down: migration_20260513_000000_webhook_events.down,
+    name: '20260513_000000_webhook_events'
   },
 ];
