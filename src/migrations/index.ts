@@ -9,6 +9,7 @@ import * as migration_20260507_000000_orders_paid_at from './20260507_000000_ord
 import * as migration_20260508_000000_products_price_schedule from './20260508_000000_products_price_schedule';
 import * as migration_20260512_000000_orders_depositor_name from './20260512_000000_orders_depositor_name';
 import * as migration_20260512_010000_orders_refund_account from './20260512_010000_orders_refund_account';
+import * as migration_20260512_020000_referrals_coupons from './20260512_020000_referrals_coupons';
 
 export const migrations = [
   {
@@ -65,5 +66,10 @@ export const migrations = [
     up: migration_20260512_010000_orders_refund_account.up,
     down: migration_20260512_010000_orders_refund_account.down,
     name: '20260512_010000_orders_refund_account'
+  },
+  {
+    up: migration_20260512_020000_referrals_coupons.up,
+    down: migration_20260512_020000_referrals_coupons.down,
+    name: '20260512_020000_referrals_coupons'
   },
 ];

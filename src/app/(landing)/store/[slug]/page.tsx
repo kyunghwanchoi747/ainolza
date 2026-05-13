@@ -9,6 +9,7 @@ import { V3Header } from '@/components/landing/v3-header'
 import { EligibilityGatedCta } from '@/components/store/eligibility-gated-cta'
 import { PriceStageCountdown } from '@/components/store/price-stage-countdown'
 import { PrimaryButtonCard, KakaoButton, OutlineButton } from '@/components/design-system/buttons'
+import { ReferralTracker } from '@/components/referrals/referral-tracker'
 
 export const dynamic = 'force-dynamic'
 
@@ -93,6 +94,7 @@ export default async function ProductDetailPage({
   return (
     <div className="min-h-screen bg-white">
       <V3Header />
+      <ReferralTracker />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
       {/* 헤더 — 좌측 썸네일 큰 이미지 + 우측 정보 */}

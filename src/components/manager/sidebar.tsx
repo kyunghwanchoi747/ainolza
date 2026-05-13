@@ -21,6 +21,7 @@ import {
   Users,
   Video,
   GraduationCap,
+  Share2,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -53,6 +54,7 @@ const mainNavItems: NavItem[] = [
   { href: '/manager/reviews', label: '후기 관리', icon: MessageSquare },
   { href: '/manager/classrooms', label: '강의실', icon: GraduationCap },
   { href: '/manager/access', label: '강의실 권한', icon: KeyRound },
+  { href: '/manager/referrals', label: '파트너스', icon: Share2 },
   { href: '/manager/enrollments', label: '수강신청', icon: ClipboardList, shortcut: 'G N' },
   { href: '/manager/seo', label: 'SEO', icon: Search, shortcut: 'G S' },
   { href: '/manager/analytics', label: '통계', icon: BarChart3, shortcut: 'G A', disabled: true },

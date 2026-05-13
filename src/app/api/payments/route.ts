@@ -25,6 +25,8 @@ export async function POST(request: NextRequest) {
       payMethod?: string
       cashReceiptType?: 'income' | 'expense' | 'none'
       cashReceiptNumber?: string
+      couponCode?: string
+      referredByCode?: string
       shippingRecipient?: string
       shippingPhone?: string
       shippingZipcode?: string
@@ -44,6 +46,8 @@ export async function POST(request: NextRequest) {
       payMethod,
       cashReceiptType,
       cashReceiptNumber,
+      couponCode,
+      referredByCode,
       shippingRecipient,
       shippingPhone,
       shippingZipcode,
@@ -77,11 +81,60 @@ export async function POST(request: NextRequest) {
       originalPrice: productDoc.originalPrice ?? null,
       priceSchedule: productDoc.priceSchedule || [],
     })
-    const authoritativeAmount = resolved.price
-    const authoritativeOriginal = resolved.originalPrice ?? authoritativeAmount
-    if (!authoritativeAmount || authoritativeAmount <= 0) {
+    const baseAmount = resolved.price // 권위적 기준가 (priceSchedule 적용)
+    const authoritativeOriginal = resolved.originalPrice ?? baseAmount
+    if (!baseAmount || baseAmount <= 0) {
       return NextResponse.json({ error: '가격이 설정되지 않은 상품입니다.' }, { status: 400 })
     }
+
+    // 쿠폰 검증 — 코드가 들어왔을 때만. 검증 실패하면 무시(쿠폰 없는 것처럼 동작).
+    // 결제 시스템 코어 로직(기존 가격 검증)은 그대로, 쿠폰 할인은 외부 함수처럼 적용.
+    let couponDiscount = 0
+    let validatedCouponCode: string | undefined
+    if (couponCode && couponCode.trim()) {
+      try {
+        const couponRes = await payloadEarly.find({
+          collection: 'coupons' as any,
+          where: {
+            and: [
+              { code: { equals: couponCode.trim().toUpperCase() } },
+              { status: { equals: 'active' } },
+            ],
+          },
+          limit: 1,
+          depth: 0,
+          overrideAccess: true,
+        })
+        const coupon = couponRes.docs[0] as any
+        if (coupon) {
+          // 본인 쿠폰인지 확인 (auth 정보는 아직 잡기 전이므로 여기서 user 조회)
+          let currentUserId: number | string | null = null
+          try {
+            const { user } = await payloadEarly.auth({ headers: request.headers })
+            if (user) currentUserId = user.id
+          } catch { /* 비로그인 */ }
+
+          const couponOwnerId = typeof coupon.user === 'object' ? coupon.user?.id : coupon.user
+          const ownerOk = currentUserId && String(currentUserId) === String(couponOwnerId)
+          const notExpired = !coupon.expiresAt || new Date(coupon.expiresAt).getTime() > Date.now()
+
+          if (ownerOk && notExpired) {
+            if (coupon.discountType === 'percent' && coupon.discountPercent) {
+              couponDiscount = Math.floor((baseAmount * coupon.discountPercent) / 100)
+            } else if (coupon.discountType === 'amount' && coupon.discountAmount) {
+              couponDiscount = Math.min(coupon.discountAmount, baseAmount)
+            }
+            if (couponDiscount > 0) validatedCouponCode = coupon.code
+          }
+        }
+      } catch (e) {
+        console.error('[COUPON VALIDATE]', (e as Error).message)
+      }
+    }
+
+    // 최종 결제 금액 = 기준가 - 쿠폰 할인
+    const authoritativeAmount = baseAmount - couponDiscount
+
     // 클라이언트가 보낸 amount와 1원이라도 다르면 거부 → UI 결제버튼/서버 가격 일치 보장
     if (typeof amount === 'number' && amount !== authoritativeAmount) {
       return NextResponse.json(
@@ -125,6 +178,46 @@ export async function POST(request: NextRequest) {
       user: userId,
       status: 'pending',
       merchantUid: orderNumber,
+    }
+
+    // 쿠폰 사용 정보 기록
+    if (validatedCouponCode && couponDiscount > 0) {
+      orderData.couponCode = validatedCouponCode
+      orderData.couponDiscountKrw = couponDiscount
+    }
+
+    // 추천(파트너스) 정보 — referredByCode가 들어왔으면 유효성 확인 후 기록.
+    // 쿠폰의 referralCode와 일치하면 그것 사용, 아니면 클라이언트 전달 코드를 자체 검증.
+    let resolvedReferralCode: string | undefined
+    let resolvedReferrerUserId: number | string | undefined
+    if (referredByCode && referredByCode.trim()) {
+      const refCode = referredByCode.trim().toUpperCase()
+      try {
+        const refRes = await payload.find({
+          collection: 'referrals' as any,
+          where: { and: [{ code: { equals: refCode } }, { status: { equals: 'active' } }] },
+          limit: 1,
+          depth: 0,
+          overrideAccess: true,
+        })
+        const ref = refRes.docs[0] as any
+        if (ref) {
+          const referrerId = typeof ref.user === 'object' ? ref.user?.id : ref.user
+          // 본인 추천 차단
+          if (!userId || String(referrerId) !== String(userId)) {
+            resolvedReferralCode = ref.code
+            resolvedReferrerUserId = referrerId
+          }
+        }
+      } catch (e) {
+        console.error('[REFERRAL VALIDATE]', (e as Error).message)
+      }
+    }
+    if (resolvedReferralCode) {
+      orderData.referredByCode = resolvedReferralCode
+      if (resolvedReferrerUserId) orderData.referrerUser = resolvedReferrerUserId
+      // 보상액 = 최종 결제 금액의 20%
+      orderData.referralRewardKrw = Math.floor(authoritativeAmount * 0.2)
     }
 
     // 무통장 입금 — payMethod=trans, vbankDate에 24시간 마감 저장.
@@ -175,6 +268,34 @@ export async function POST(request: NextRequest) {
       collection: 'orders',
       data: orderData as any,
     })
+
+    // 쿠폰 사용 처리 — 사용 완료로 마킹 (결제 실패 시에도 그대로. 어드민에서 수동 복구).
+    if (validatedCouponCode && couponDiscount > 0) {
+      try {
+        const c = await payload.find({
+          collection: 'coupons' as any,
+          where: { code: { equals: validatedCouponCode } },
+          limit: 1,
+          depth: 0,
+          overrideAccess: true,
+        })
+        const coupon = c.docs[0] as any
+        if (coupon) {
+          await payload.update({
+            collection: 'coupons' as any,
+            id: coupon.id,
+            data: {
+              status: 'redeemed',
+              redeemedAt: new Date().toISOString(),
+              redeemedOrderNumber: orderNumber,
+            } as any,
+            overrideAccess: true,
+          })
+        }
+      } catch (e) {
+        console.error('[COUPON REDEEM]', (e as Error).message)
+      }
+    }
 
     return NextResponse.json({
       ok: true,

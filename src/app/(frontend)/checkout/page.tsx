@@ -55,6 +55,18 @@ function CheckoutContent() {
     number: string
   }>({ requested: false, type: 'income', number: '' })
 
+  // 본인 쿠폰 목록 + 선택된 쿠폰
+  type CouponDoc = {
+    id: number
+    code: string
+    discountType: 'percent' | 'amount'
+    discountPercent?: number
+    discountAmount?: number
+    referralCode?: string
+  }
+  const [coupons, setCoupons] = useState<CouponDoc[]>([])
+  const [selectedCouponCode, setSelectedCouponCode] = useState<string>('')
+
   // 배송지 정보 (종이책 등)
   const [shipping, setShipping] = useState({
     recipient: '',
@@ -68,9 +80,31 @@ function CheckoutContent() {
   // 폴백 표시값 — DB 로드 전에 사용
   const productName = dbProduct?.title || '강의'
   const productType = dbProduct?.productType || 'class'
-  const amount = dbProduct?.price ?? 0
-  const originalAmount = dbProduct?.originalPrice ?? amount
+  const baseAmount = dbProduct?.price ?? 0
+  const originalAmount = dbProduct?.originalPrice ?? baseAmount
   const requiresShipping = !!dbProduct?.requiresShipping
+
+  // 선택된 쿠폰에 따른 할인 계산
+  const selectedCoupon = coupons.find((c) => c.code === selectedCouponCode)
+  const couponDiscount = (() => {
+    if (!selectedCoupon || baseAmount <= 0) return 0
+    if (selectedCoupon.discountType === 'percent' && selectedCoupon.discountPercent) {
+      return Math.floor((baseAmount * selectedCoupon.discountPercent) / 100)
+    }
+    if (selectedCoupon.discountType === 'amount' && selectedCoupon.discountAmount) {
+      return Math.min(selectedCoupon.discountAmount, baseAmount)
+    }
+    return 0
+  })()
+  // 서버 검증과 동일 — 기준가에서 쿠폰 할인 차감한 최종 결제 금액
+  const amount = baseAmount - couponDiscount
+
+  // 추천 코드 — 쿠키에서 읽기 (ReferralTracker가 저장)
+  const referredByCode = (() => {
+    if (typeof document === 'undefined') return ''
+    const m = document.cookie.match(/(?:^|;\s*)ainolza_ref=([^;]+)/)
+    return m ? decodeURIComponent(m[1]) : ''
+  })()
 
   useEffect(() => {
     fetch('/api/users/me', { credentials: 'include' })
@@ -130,6 +164,17 @@ function CheckoutContent() {
       .catch(() => {})
       .finally(() => setProductLoading(false))
   }, [productSlug])
+
+  // 본인 보유 쿠폰 로드 (active만)
+  useEffect(() => {
+    if (!user?.id) return
+    fetch('/api/coupons/my', { credentials: 'include' })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data: any) => {
+        if (Array.isArray(data?.docs)) setCoupons(data.docs as CouponDoc[])
+      })
+      .catch(() => {})
+  }, [user?.id])
 
   // 결제 자격 사전 확인 — prerequisite 상품일 때만 차단됨, 그 외엔 무조건 eligible=true
   useEffect(() => {
@@ -217,6 +262,9 @@ function CheckoutContent() {
           buyerEmail: user?.email || '',
           buyerPhone: phoneNormalized,
           payMethod, // 'CARD' | 'TRANSFER' | 'DIRECT_BANK' | 'KAKAOPAY'
+          // 쿠폰·추천(파트너스) 정보
+          ...(selectedCouponCode ? { couponCode: selectedCouponCode } : {}),
+          ...(referredByCode ? { referredByCode } : {}),
           // 현금영수증 (계좌이체/무통장 신청 시에만 의미)
           ...(needsCashReceiptUi && cashReceipt.requested
             ? {
@@ -558,6 +606,12 @@ function CheckoutContent() {
                         <span className="text-brand">- {discount.toLocaleString()}원</span>
                       </div>
                     )}
+                    {couponDiscount > 0 && (
+                      <div className="flex justify-between">
+                        <span className="text-sub">쿠폰 할인</span>
+                        <span className="text-brand">- {couponDiscount.toLocaleString()}원</span>
+                      </div>
+                    )}
                   </div>
                   <hr className="my-4 border-line" />
                   <div className="flex justify-between items-baseline">
@@ -565,6 +619,51 @@ function CheckoutContent() {
                     <span className="text-2xl font-extrabold text-brand">{amount.toLocaleString()}원</span>
                   </div>
                 </div>
+
+                {/* 쿠폰 — 보유 쿠폰이 있을 때만 노출 */}
+                {coupons.length > 0 && (
+                  <div className="p-5 md:p-6 rounded-2xl bg-white border border-line">
+                    <h2 className="text-base font-bold text-ink mb-4">쿠폰 적용</h2>
+                    <div className="space-y-2">
+                      <label className="flex items-center gap-3 p-3 rounded-lg border border-line cursor-pointer hover:bg-surface">
+                        <input
+                          type="radio"
+                          name="coupon"
+                          checked={!selectedCouponCode}
+                          onChange={() => setSelectedCouponCode('')}
+                          className="accent-ink"
+                        />
+                        <span className="text-sm text-sub">사용 안 함</span>
+                      </label>
+                      {coupons.map((c) => (
+                        <label
+                          key={c.id}
+                          className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition ${
+                            selectedCouponCode === c.code
+                              ? 'border-ink bg-surface'
+                              : 'border-line hover:border-sub'
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name="coupon"
+                            checked={selectedCouponCode === c.code}
+                            onChange={() => setSelectedCouponCode(c.code)}
+                            className="accent-ink"
+                          />
+                          <span className="text-sm text-ink">
+                            {c.discountType === 'percent'
+                              ? `${c.discountPercent}% 할인`
+                              : `${(c.discountAmount || 0).toLocaleString()}원 할인`}
+                            {c.referralCode ? (
+                              <span className="ml-2 text-xs text-sub">(파트너 추천)</span>
+                            ) : null}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* 결제수단 */}
                 <div className="p-5 md:p-6 rounded-2xl bg-white border border-line">

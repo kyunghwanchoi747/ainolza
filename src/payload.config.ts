@@ -24,6 +24,8 @@ import { EmailLogs } from './collections/EmailLogs'
 import { Reviews } from './collections/Reviews'
 import { Classrooms } from './collections/Classrooms'
 import { Ebooks } from './collections/Ebooks'
+import { Referrals } from './collections/Referrals'
+import { Coupons } from './collections/Coupons'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -94,7 +96,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, DesignPages, Products, ProductCategories, Posts, Comments, Programs, SiteSettings, Enrollments, Orders, Reviews, Classrooms, Ebooks],
+  collections: [Users, Media, DesignPages, Products, ProductCategories, Posts, Comments, Programs, SiteSettings, Enrollments, Orders, Reviews, Classrooms, Ebooks, Referrals, Coupons],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || 'dev-secret-change-in-production',
   db: dbAdapter,

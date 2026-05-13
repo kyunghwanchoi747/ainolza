@@ -167,6 +167,15 @@ export const Orders: CollectionConfig = {
     // 입금자명 — 무통장(direct-bank) 결제 시 회원이 토스뱅크에 입금할 이름.
     // 기본값은 회원 이름, 회원이 결제 후 안내 화면에서 수정 가능. 수정 시 관리자 알림.
     { name: 'depositorName', type: 'text', label: '입금자명' },
+    // 추천(파트너스) 정보 — 추천 링크로 진입한 회원이 자동 발급된 쿠폰을 사용하면
+    // 결제 시 할인 적용 + 결제 완료 후 추천인에게 결제액의 20% 보상.
+    { name: 'referredByCode', type: 'text', label: '추천 코드', index: true },
+    { name: 'referrerUser', type: 'relationship', relationTo: 'users', label: '추천인 (회원)' },
+    { name: 'referralRewardKrw', type: 'number', label: '추천 보상액 (원)' },
+    { name: 'referralPaidOutAt', type: 'date', label: '추천 보상 지급일' },
+    // 쿠폰 사용 정보 — 결제 시 쿠폰 1장 사용한 경우 기록.
+    { name: 'couponCode', type: 'text', label: '사용 쿠폰 코드' },
+    { name: 'couponDiscountKrw', type: 'number', label: '쿠폰 할인액 (원)' },
     // 환불
     { name: 'refundReason', type: 'textarea', label: '환불 사유' },
     { name: 'refundedAt', type: 'date', label: '환불일' },
