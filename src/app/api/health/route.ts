@@ -4,11 +4,13 @@ import { getPayloadClient } from '@/lib/payload'
 export const dynamic = 'force-dynamic'
 
 /**
- * 핵심 API 헬스체크 엔드포인트
- * GET /api/health → 모든 핵심 기능 점검 후 결과 반환
+ * 핵심 API 헬스체크 엔드포인트.
+ * GET /api/health → 핵심 기능 점검 후 200/503 반환.
  *
- * 외부 모니터링(UptimeRobot 등)이나 Cloudflare Cron으로 5분마다 호출.
- * 하나라도 실패하면 관리자에게 자동 알림.
+ * 정책:
+ *  - 이 엔드포인트는 "상태"만 돌려준다. 알림은 외부 모니터(UptimeRobot, PortOne 등)에 위임.
+ *  - 과거에는 실패 시 관리자 메일을 직접 보냈으나, throttle이 없어 1분 폴링 × 503이면
+ *    분당 메일 1통 폭주가 발생함 → 메일 발송 로직 제거. 책임 분리.
  */
 export async function GET() {
   const results: Record<string, { ok: boolean; ms: number; error?: string }> = {}
@@ -26,7 +28,7 @@ export async function GET() {
       results.dbRead = { ok: false, ms: Date.now() - t1, error: (e as Error).message }
     }
 
-    // 2. DB WRITE 테스트 (email_logs는 제거됐으니 orders로 가벼운 read/count)
+    // 2. count 쿼리
     const t2 = Date.now()
     try {
       await payload.count({ collection: 'orders' })
@@ -44,10 +46,9 @@ export async function GET() {
       results.products = { ok: false, ms: Date.now() - t3, error: (e as Error).message }
     }
 
-    // 4. DB WRITE 테스트 (실제 update — 자기 자신 meta 업데이트)
+    // 4. DB WRITE 테스트 (실제 update — adminMemo 갱신, 무해)
     const t4 = Date.now()
     try {
-      // 첫 번째 주문의 adminMemo만 업데이트 (무해)
       const orders = await payload.find({ collection: 'orders', limit: 1, depth: 0 })
       if (orders.docs[0]) {
         await payload.update({
@@ -57,7 +58,7 @@ export async function GET() {
         })
         results.dbWrite = { ok: true, ms: Date.now() - t4 }
       } else {
-        results.dbWrite = { ok: true, ms: Date.now() - t4 } // 주문 0건이면 write 스킵
+        results.dbWrite = { ok: true, ms: Date.now() - t4 }
       }
     } catch (e) {
       results.dbWrite = { ok: false, ms: Date.now() - t4, error: (e as Error).message }
@@ -74,24 +75,6 @@ export async function GET() {
 
   const allOk = Object.values(results).every((r) => r.ok)
   const totalMs = Date.now() - start
-
-  // 실패 항목이 있으면 관리자에게 알림 (5분에 1번만 오도록 밖에서 제어)
-  if (!allOk) {
-    const failedItems = Object.entries(results)
-      .filter(([, v]) => !v.ok)
-      .map(([k, v]) => `${k}: ${v.error || 'FAIL'}`)
-
-    try {
-      const payload = await getPayloadClient()
-      await payload.sendEmail({
-        to: process.env.ADMIN_EMAIL || 'rex39@naver.com',
-        subject: `[AI놀자 긴급] 🚨 헬스체크 실패 — ${failedItems.length}건`,
-        html: `<h2>헬스체크 실패</h2><pre>${JSON.stringify(results, null, 2)}</pre><p>시각: ${new Date().toISOString()}</p>`,
-      })
-    } catch {
-      // 이메일도 안 되면 그냥 응답에만 포함
-    }
-  }
 
   return NextResponse.json(
     { status: allOk ? 'healthy' : 'unhealthy', totalMs, results },
