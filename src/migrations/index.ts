@@ -12,6 +12,7 @@ import * as migration_20260512_010000_orders_refund_account from './20260512_010
 import * as migration_20260512_020000_referrals_coupons from './20260512_020000_referrals_coupons';
 import * as migration_20260513_000000_webhook_events from './20260513_000000_webhook_events';
 import * as migration_20260513_010000_webhook_events_locked_rels from './20260513_010000_webhook_events_locked_rels';
+import * as migration_20260513_020000_referrals_coupons_locked_rels from './20260513_020000_referrals_coupons_locked_rels';
 
 export const migrations = [
   {
@@ -83,5 +84,10 @@ export const migrations = [
     up: migration_20260513_010000_webhook_events_locked_rels.up,
     down: migration_20260513_010000_webhook_events_locked_rels.down,
     name: '20260513_010000_webhook_events_locked_rels'
+  },
+  {
+    up: migration_20260513_020000_referrals_coupons_locked_rels.up,
+    down: migration_20260513_020000_referrals_coupons_locked_rels.down,
+    name: '20260513_020000_referrals_coupons_locked_rels'
   },
 ];
