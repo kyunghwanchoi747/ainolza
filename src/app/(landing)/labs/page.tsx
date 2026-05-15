@@ -5,7 +5,7 @@ import './labs-v3.css'
 
 export const metadata: Metadata = {
   title: 'AI 실험실 | AI놀자',
-  description: '놀면서 배우는 AI 체험 프로그램. 프롬프트 챌린지, AI 퀴즈, 직업 탐색기까지.',
+  description: '놀면서 배우는 AI 체험 프로그램. 프롬프트 챌린지, AI 퀴즈, 이키가이 찾기까지.',
 }
 
 const LABS = [
@@ -59,17 +59,18 @@ const LABS = [
     ),
   },
   {
-    href: '/labs/career-explorer.html',
-    tag: '맞춤 추천',
-    name: 'AI 직업 탐색기',
-    desc: '관심사 기반 미래 직업 추천',
-    cardBg: 'linear-gradient(160deg, #FFA751 0%, #FF6B6B 60%, #EE3D8A 100%)',
+    href: '/labs/ikigai',
+    tag: '4가지 질문',
+    name: '이키가이 찾기',
+    desc: '아침에 일어날 이유를 찾는 4단계 여정',
+    cardBg: 'linear-gradient(160deg, #E8C8B5 0%, #D4756E 60%, #B0524C 100%)',
     illu: (
-      <svg viewBox="0 0 120 120" fill="none" stroke="rgba(255,255,255,0.96)" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="20" y="40" width="80" height="62" rx="8" fill="rgba(255,255,255,0.22)" />
-        <path d="M48 40v-8a4 4 0 0 1 4-4h16a4 4 0 0 1 4 4v8" />
-        <line x1="20" y1="68" x2="100" y2="68" />
-        <rect x="54" y="64" width="12" height="10" rx="1.5" fill="rgba(255,255,255,0.4)" />
+      <svg viewBox="0 0 120 120" fill="none" stroke="rgba(255,255,255,0.96)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="46" cy="46" r="26" fill="rgba(255,255,255,0.18)" />
+        <circle cx="74" cy="46" r="26" fill="rgba(255,255,255,0.18)" />
+        <circle cx="46" cy="74" r="26" fill="rgba(255,255,255,0.18)" />
+        <circle cx="74" cy="74" r="26" fill="rgba(255,255,255,0.18)" />
+        <circle cx="60" cy="60" r="9" fill="rgba(255,255,255,0.96)" stroke="none" />
       </svg>
     ),
   },
