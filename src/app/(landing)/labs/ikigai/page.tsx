@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { V3Header } from '@/components/landing/v3-header'
 import { IkigaiClient } from './ikigai-client'
 
@@ -14,12 +15,12 @@ export default function IkigaiPage() {
       <V3Header />
       <main className="pt-24 pb-20">
         <div className="mb-12 text-center">
-          <a
+          <Link
             href="/labs"
             className="text-xs text-sub hover:text-ink transition-colors"
           >
             ← AI 실험실로
-          </a>
+          </Link>
         </div>
         <IkigaiClient />
       </main>

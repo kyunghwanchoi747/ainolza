@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useState, useMemo, useCallback } from 'react'
 import { AXES, type IkigaiAxis } from './data'
 import { IkigaiDiagram } from './ikigai-diagram'
@@ -343,12 +344,12 @@ function ResultView({
         >
           다시 해보기
         </button>
-        <a
+        <Link
           href="/programs/vibe-coding"
           className="px-6 py-3 rounded-full bg-ink text-white text-sm font-semibold hover:bg-black transition-colors text-center"
         >
           AI놀자 강의 둘러보기 →
-        </a>
+        </Link>
       </div>
     </div>
   )
