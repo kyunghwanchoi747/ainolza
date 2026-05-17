@@ -1060,6 +1060,8 @@
       .header { top: 14px; width: calc(100% - 24px); border-radius: 9999px; }
       .headerInner { padding: 0 14px; height: 52px; gap: 10px; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; }
       .headerInner::-webkit-scrollbar { display: none; }
+      /* WHY 카드는 모바일에서 1열로 — 2열로 두면 작은 폭에서 컨테이너를 밀어내 페이지 가로 스크롤 유발 */
+      .whyGrid { grid-template-columns: 1fr; }
       .logo { font-size: 15px; flex-shrink: 0; }
       .nav { display: flex; gap: 14px; font-size: 12px; flex-shrink: 0; }
       .nav a { white-space: nowrap; }
