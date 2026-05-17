@@ -33,5 +33,16 @@ export async function GET(request: NextRequest) {
     sameSite: 'lax',
     maxAge: 600, // 10분
   })
+  // 로그인 후 돌아갈 경로(next) — 내부 경로만 허용
+  const nextRaw = request.nextUrl.searchParams.get('next') || ''
+  const next = nextRaw.startsWith('/') && !nextRaw.startsWith('//') ? nextRaw : ''
+  if (next) {
+    response.cookies.set('oauth-next', next, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'lax',
+      maxAge: 600,
+    })
+  }
   return response
 }

@@ -147,7 +147,12 @@ export async function GET(request: NextRequest) {
       secure?: boolean
     }
 
-    const response = NextResponse.redirect(`${url.origin}/`)
+    // 로그인 시작 시 저장해둔 next 쿠키가 있으면 그 경로로, 없으면 홈으로.
+    // 내부 경로만 허용 (open redirect 방지).
+    const nextCookie = request.cookies.get('oauth-next')?.value || ''
+    const safeNext =
+      nextCookie.startsWith('/') && !nextCookie.startsWith('//') ? nextCookie : '/'
+    const response = NextResponse.redirect(`${url.origin}${safeNext}`)
     // NextResponse.cookies.set으로 설정 (raw header 설정은 Workers에서 무시될 수 있음)
     response.cookies.set({
       name: cookieObj.name,
@@ -160,6 +165,7 @@ export async function GET(request: NextRequest) {
       ...(cookieObj.expires ? { expires: new Date(cookieObj.expires) } : {}),
     })
     response.cookies.delete('oauth-state')
+    response.cookies.delete('oauth-next')
     return response
   } catch (err) {
     const e = err as Error

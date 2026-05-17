@@ -63,9 +63,10 @@ async function getConfig(request: NextRequest): Promise<SiteConfig> {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // /labs/*.html → 로그인 필수 (정적 HTML 실험 도구는 회원만 사용 가능)
-  // /labs (목록 페이지) 자체는 비로그인도 둘러볼 수 있음
-  if (pathname.startsWith('/labs/') && pathname.endsWith('.html')) {
+  // /labs/* → 로그인 필수 (실험 도구는 회원만 사용 가능).
+  //   - /labs 목록 페이지 자체는 비로그인도 둘러볼 수 있게 자유 접근.
+  //   - /labs/ 하위 모든 경로(.html 정적 도구, /labs/ikigai 같은 Next 페이지)는 로그인 요구.
+  if (pathname.startsWith('/labs/') && pathname !== '/labs/') {
     const token = request.cookies.get('payload-token')?.value
     if (!token) {
       return NextResponse.redirect(new URL('/login?next=' + pathname, request.url))

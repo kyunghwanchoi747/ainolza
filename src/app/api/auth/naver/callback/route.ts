@@ -140,7 +140,12 @@ export async function GET(request: NextRequest) {
       secure?: boolean
     }
 
-    const response = NextResponse.redirect(`${url.origin}/`)
+    // 로그인 시작 시 저장해둔 next 쿠키가 있으면 그 경로로, 없으면 홈으로.
+    // 내부 경로만 허용 (open redirect 방지).
+    const nextCookie = request.cookies.get('oauth-next')?.value || ''
+    const safeNext =
+      nextCookie.startsWith('/') && !nextCookie.startsWith('//') ? nextCookie : '/'
+    const response = NextResponse.redirect(`${url.origin}${safeNext}`)
     response.cookies.set({
       name: cookieObj.name,
       value: cookieObj.value,
@@ -152,6 +157,7 @@ export async function GET(request: NextRequest) {
       ...(cookieObj.expires ? { expires: new Date(cookieObj.expires) } : {}),
     })
     response.cookies.delete('oauth-state')
+    response.cookies.delete('oauth-next')
     return response
   } catch (err) {
     console.error('[NAVER_CALLBACK] 실패:', (err as Error)?.message, (err as Error)?.stack)
