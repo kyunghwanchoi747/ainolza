@@ -57,7 +57,10 @@ export function ReviewsSlider({ reviews }: { reviews: ReviewItem[] }) {
           <h2 className="h2">수강생들의 생생한 후기</h2>
         </div>
 
-        <div style={{ position: 'relative', marginTop: 40 }}>
+        {/* position:relative 만 있으면 자식 flex 트랙의 overflowX:auto 가 무효화되어
+            페이지 전체가 좌우로 흔들릴 수 있음 → overflow:hidden 으로 viewport 밖을 가둠.
+            트랙 자체의 가로 스크롤(키보드/터치)은 그대로 동작. */}
+        <div style={{ position: 'relative', marginTop: 40, overflow: 'hidden' }}>
           {/* 좌측 화살표 */}
           <button
             type="button"
