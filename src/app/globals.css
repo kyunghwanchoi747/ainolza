@@ -110,10 +110,18 @@
     @apply border-border;
   }
 
+  /* 가로 스크롤 잠금 — 모바일에서 자식 요소가 viewport를 넘어도 좌우로 흔들리지 않게.
+     overflow-x: clip 은 hidden과 달리 sticky 자식이 깨지지 않음. */
+  html, body {
+    overflow-x: clip;
+  }
+
   body {
     @apply bg-background text-foreground font-pretendard;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* 가로 너비를 명시해서 자식 요소가 일시적으로 폭을 넘겨도 윈도우 폭 유지 */
+    max-width: 100vw;
   }
 }
 

@@ -32,7 +32,8 @@ export default function OrderDetailPage() {
       .then(r => r.ok ? r.json() : null)
       .then(async (userData: any) => {
         if (!userData?.user || userData.user.role !== 'admin') {
-          router.push('/login')
+          const next = encodeURIComponent(window.location.pathname + window.location.search)
+          router.push('/login?next=' + next)
           return
         }
         // Payload REST API로 주문 조회
@@ -44,7 +45,10 @@ export default function OrderDetailPage() {
           setStatus(data.status || 'pending')
         }
       })
-      .catch(() => router.push('/login'))
+      .catch(() => {
+        const next = encodeURIComponent(window.location.pathname + window.location.search)
+        router.push('/login?next=' + next)
+      })
       .finally(() => setLoading(false))
   }, [params.id, router])
 

@@ -122,10 +122,14 @@ function CheckoutContent() {
             phone: s.phone || data.user.phone || '',
           }))
         } else {
-          router.push('/login')
+          const next = encodeURIComponent(window.location.pathname + window.location.search)
+          router.push('/login?next=' + next)
         }
       })
-      .catch(() => router.push('/login'))
+      .catch(() => {
+        const next = encodeURIComponent(window.location.pathname + window.location.search)
+        router.push('/login?next=' + next)
+      })
   }, [router])
 
   useEffect(() => {

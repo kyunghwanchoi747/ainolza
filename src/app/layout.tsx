@@ -1,4 +1,13 @@
+import type { Viewport } from 'next'
 import './globals.css'
+
+// 모바일 viewport 명시 — 미설정 시 일부 브라우저가 자체 기본값(예: 980px)을 적용해
+// 좌우 스크롤이 생긴다. width=device-width, initial-scale=1 가 표준.
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+}
 
 export const metadata = {
   title: {
