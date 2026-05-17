@@ -1,4 +1,5 @@
 // AI놀자 실험실 공통 모듈
+// (로그인 가드는 /labs/auth-gate.js 로 분리 — 모든 도구 HTML의 head에서 직접 로드)
 
 // 교육 전환 CTA 배너 생성
 function createCTABanner(container) {
