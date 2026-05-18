@@ -28,6 +28,12 @@ export const metadata = {
     index: true,
     follow: true,
   },
+  // 검색엔진 사이트 소유 확인용 — 발급 후 영구 유지(제거 시 등록 풀림)
+  verification: {
+    other: {
+      'naver-site-verification': 'd7ba6e6eafa19eab3e308e2e818b557c245ada9b',
+    },
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
