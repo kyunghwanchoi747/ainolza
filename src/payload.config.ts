@@ -27,6 +27,7 @@ import { Ebooks } from './collections/Ebooks'
 import { Referrals } from './collections/Referrals'
 import { Coupons } from './collections/Coupons'
 import { WebhookEvents } from './collections/WebhookEvents'
+import { Waitlists } from './collections/Waitlists'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -97,7 +98,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, DesignPages, Products, ProductCategories, Posts, Comments, Programs, SiteSettings, Enrollments, Orders, Reviews, Classrooms, Ebooks, Referrals, Coupons, WebhookEvents],
+  collections: [Users, Media, DesignPages, Products, ProductCategories, Posts, Comments, Programs, SiteSettings, Enrollments, Orders, Reviews, Classrooms, Ebooks, Referrals, Coupons, WebhookEvents, Waitlists],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || 'dev-secret-change-in-production',
   db: dbAdapter,

@@ -84,6 +84,7 @@ export interface Config {
     referrals: Referral;
     coupons: Coupon;
     webhook_events: WebhookEvent;
+    waitlists: Waitlist;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -108,6 +109,7 @@ export interface Config {
     referrals: ReferralsSelect<false> | ReferralsSelect<true>;
     coupons: CouponsSelect<false> | CouponsSelect<true>;
     webhook_events: WebhookEventsSelect<false> | WebhookEventsSelect<true>;
+    waitlists: WaitlistsSelect<false> | WaitlistsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -240,6 +242,14 @@ export interface Product {
    * 있으면 D-N 카운트다운이 카드/상세에 표시됨
    */
   discountUntil?: string | null;
+  /**
+   * 체크하면 결제 페이지/상품 상세 CTA가 대기 신청 폼으로 분기. 다음 기수 오픈 안내용 명단만 받음.
+   */
+  waitlistMode?: boolean | null;
+  /**
+   * 대기 신청 폼 상단에 표시. 예: "2기는 모집이 마감되었습니다. 3기 모집이 시작되면 가장 먼저 안내드립니다. 가격은 변동될 수 있습니다."
+   */
+  waitlistNotice?: string | null;
   /**
    * 예) 슈퍼얼리버드/얼리버드/정가 단계별 가격을 시작일시와 함께 등록. 시작일시가 되면 자동으로 해당 가격이 적용됩니다. 비워두면 위 "판매가"가 그대로 적용됩니다. 입력 순서는 자유 — 시스템이 시간순으로 자동 정렬합니다.
    */
@@ -703,6 +713,37 @@ export interface WebhookEvent {
   createdAt: string;
 }
 /**
+ * 모집 마감 후 대기 신청 명단. 다음 기수 오픈 시 일괄 안내.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "waitlists".
+ */
+export interface Waitlist {
+  id: number;
+  /**
+   * 예: vibe-coding-101 — 이 슬러그로 모집 알림 발송 대상 추출
+   */
+  productSlug: string;
+  productName?: string | null;
+  buyerName: string;
+  buyerEmail: string;
+  buyerPhone?: string | null;
+  motivation?: string | null;
+  /**
+   * 비로그인 신청은 비어있음
+   */
+  user?: (number | null) | User;
+  status: 'active' | 'notified' | 'converted' | 'cancelled';
+  notifiedAt?: string | null;
+  /**
+   * 예: 인스타·블로그·검색 등 — 추후 마케팅 분석용
+   */
+  source?: string | null;
+  adminMemo?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -793,6 +834,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'webhook_events';
         value: number | WebhookEvent;
+      } | null)
+    | ({
+        relationTo: 'waitlists';
+        value: number | Waitlist;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -906,6 +951,8 @@ export interface ProductsSelect<T extends boolean = true> {
   originalPrice?: T;
   priceLabel?: T;
   discountUntil?: T;
+  waitlistMode?: T;
+  waitlistNotice?: T;
   priceSchedule?:
     | T
     | {
@@ -1231,6 +1278,25 @@ export interface WebhookEventsSelect<T extends boolean = true> {
   lastError?: T;
   processedAt?: T;
   rawPayload?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "waitlists_select".
+ */
+export interface WaitlistsSelect<T extends boolean = true> {
+  productSlug?: T;
+  productName?: T;
+  buyerName?: T;
+  buyerEmail?: T;
+  buyerPhone?: T;
+  motivation?: T;
+  user?: T;
+  status?: T;
+  notifiedAt?: T;
+  source?: T;
+  adminMemo?: T;
   updatedAt?: T;
   createdAt?: T;
 }

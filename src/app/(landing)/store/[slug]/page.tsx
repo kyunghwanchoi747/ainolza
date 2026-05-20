@@ -21,11 +21,16 @@ function formatPrice(p: number): string {
  * 액션 URL을 결제 페이지(/checkout)로 변환.
  * - enroll 경로 → /checkout?slug=... 으로 자동 변경 (PortOne 결제 연동 후)
  * - 외부 링크 / 다른 내부 경로는 그대로
+ * - waitlistMode면 모든 결제 액션을 /waitlist/[slug] 로 강제 치환
  */
-function withSlug(url: string, slug: string): string {
+function withSlug(url: string, slug: string, waitlistMode = false): string {
   if (!url) return url
-  // 외부 링크는 그대로
+  // 외부 링크는 그대로 (오프라인/외부 신청 폼 등은 waitlist와 별개)
   if (/^https?:/.test(url)) return url
+  // 대기 신청 모드: 결제 관련 경로는 모두 대기 폼으로
+  if (waitlistMode && (url.includes('/enroll') || url.includes('/checkout'))) {
+    return `/waitlist/${encodeURIComponent(slug)}`
+  }
   // enroll 경로 → /checkout 경로로 변경 (PortOne 결제 연동 완료)
   if (url.includes('/enroll')) {
     return `/checkout?slug=${encodeURIComponent(slug)}`
@@ -243,7 +248,7 @@ export default async function ProductDetailPage({
                   fallbackLabel="입문 강의 보러가기 →"
                 >
                   {product.actions.map((a, i) => {
-                    const finalUrl = withSlug(a.url, product.slug)
+                    const finalUrl = withSlug(a.url, product.slug, !!product._dbWaitlistMode)
                     const label = `${a.label}${a.primary ? ' →' : ''}`
                     return a.primary ? (
                       <PrimaryButtonCard key={i} href={finalUrl} external={!!a.external}>

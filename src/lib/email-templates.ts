@@ -572,3 +572,91 @@ export async function sendVirtualAccountIssued(
     ),
   })
 }
+
+// ==========================================
+// 대기 신청 (Waitlist)
+// ==========================================
+
+/** 대기 신청 접수 — 신청자에게 발송 */
+export async function sendWaitlistReceived(
+  payload: Payload,
+  data: { buyerEmail: string; buyerName: string; productName: string },
+) {
+  const subject = `[AI놀자] ${data.productName} 대기 신청이 접수되었습니다`
+  try {
+    await payload.sendEmail({
+      to: data.buyerEmail,
+      subject,
+      html: wrap(
+        `${data.buyerName}님, 대기 신청이 접수되었습니다`,
+        `
+        <p style="color:#444444;font-size:15px;line-height:1.7;margin:0 0 16px;">
+          신청해주셔서 감사합니다. <strong style="color:#1a1a1a;">${data.productName}</strong>
+          다음 기수 모집이 시작되면 가장 먼저 안내드리겠습니다.
+        </p>
+        <p style="color:#444444;font-size:14px;line-height:1.7;margin:0 0 24px;">
+          모집 일정과 가격은 변동될 수 있습니다. 일정이 확정되는 즉시 이 이메일 주소로 안내 메일을 보내드립니다.
+        </p>
+
+        <div style="background:#fafafa;border-radius:10px;padding:14px 16px;margin:0 0 24px;font-size:13px;color:#666;line-height:1.8;">
+          • 대기 신청은 결제가 아니므로 결제 정보를 받지 않습니다.<br>
+          • 안내 메일을 받으신 후 본인이 직접 결제 페이지에서 결제하셔야 수강이 확정됩니다.<br>
+          • 대기 순번은 신청 순서를 우선하나, 다음 기수 모집 방식에 따라 달라질 수 있습니다.
+        </div>
+
+        <p style="color:#999;font-size:12px;line-height:1.6;margin:24px 0 0;">
+          궁금하신 점은 <a href="${KAKAO_OPEN_CHAT}" style="color:#D4756E;">카카오톡 오픈채팅</a>으로 문의해주세요.
+        </p>`,
+      ),
+    })
+    await logEmailSent(payload, { to: data.buyerEmail, subject, type: 'other', relatedId: data.productName })
+  } catch (e) {
+    await logEmailSent(payload, {
+      to: data.buyerEmail,
+      subject,
+      type: 'other',
+      status: 'failed',
+      error: (e as Error).message,
+    })
+    throw e
+  }
+}
+
+/** 대기 신청 접수 — 관리자에게 알림 */
+export async function sendWaitlistAdminAlert(
+  payload: Payload,
+  data: { buyerName: string; buyerEmail: string; buyerPhone?: string; productSlug: string; productName: string; motivation?: string },
+) {
+  const to = adminEmail()
+  const subject = `[AI놀자 운영] 대기 신청 — ${data.productName} (${data.buyerName})`
+  try {
+    await payload.sendEmail({
+      to,
+      subject,
+      html: wrap(
+        `대기 신청이 접수되었습니다`,
+        `
+        <table cellpadding="6" cellspacing="0" style="width:100%;font-size:14px;color:#444;border-collapse:collapse;margin:0 0 18px;">
+          <tr><td style="color:#888;font-weight:bold;width:90px;">상품</td><td>${data.productName} <span style="color:#bbb;">(${data.productSlug})</span></td></tr>
+          <tr><td style="color:#888;font-weight:bold;">이름</td><td>${data.buyerName}</td></tr>
+          <tr><td style="color:#888;font-weight:bold;">이메일</td><td>${data.buyerEmail}</td></tr>
+          ${data.buyerPhone ? `<tr><td style="color:#888;font-weight:bold;">휴대폰</td><td>${data.buyerPhone}</td></tr>` : ''}
+          ${data.motivation ? `<tr><td style="color:#888;font-weight:bold;vertical-align:top;">동기</td><td style="white-space:pre-wrap;">${data.motivation}</td></tr>` : ''}
+        </table>
+        <div style="text-align:center;margin:24px 0;">
+          <a href="${SITE_URL}/admin/collections/waitlists" style="display:inline-block;background:#D4756E;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:12px;font-size:14px;font-weight:bold;">어드민에서 대기 명단 보기</a>
+        </div>`,
+      ),
+    })
+    await logEmailSent(payload, { to, subject, type: 'other', relatedId: data.productSlug })
+  } catch (e) {
+    await logEmailSent(payload, {
+      to,
+      subject,
+      type: 'other',
+      status: 'failed',
+      error: (e as Error).message,
+    })
+    // 관리자 메일 실패는 throw 안 함 (사용자 응답 막지 않게)
+  }
+}

@@ -137,6 +137,11 @@ function CheckoutContent() {
       .then(res => res.ok ? res.json() : null)
       .then((data: any) => {
         const doc = data?.docs?.[0]
+        // 대기 신청 모드 상품은 결제 페이지로 들어오지 못하게 — 대기 신청 폼으로
+        if (doc?.waitlistMode) {
+          router.replace(`/waitlist/${encodeURIComponent(productSlug)}`)
+          return
+        }
         if (doc) {
           const thumb = doc.thumbnail
           let thumbnailUrl: string | undefined

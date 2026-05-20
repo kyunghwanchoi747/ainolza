@@ -46,6 +46,8 @@ type DbProduct = {
     price: number
     label?: string | null
   }> | null
+  waitlistMode?: boolean | null
+  waitlistNotice?: string | null
 }
 
 function dbToProduct(d: DbProduct): Product {
@@ -124,6 +126,8 @@ function dbToProduct(d: DbProduct): Product {
       ? { _dbFaq: d.faq.map((f) => ({ question: f.question, answer: f.answer })) }
       : {}),
     ...(d.featured ? { _dbFeatured: true } : {}),
+    ...(d.waitlistMode ? { _dbWaitlistMode: true } : {}),
+    ...(d.waitlistNotice ? { _dbWaitlistNotice: d.waitlistNotice } : {}),
     _dbId: d.id,
   } as Product & {
     _dbThumbnailUrl?: string
@@ -134,6 +138,8 @@ function dbToProduct(d: DbProduct): Product {
     _dbFeatured?: boolean
     _dbStageLabel?: string
     _dbNextChange?: { startAt: string; price: number; label?: string }
+    _dbWaitlistMode?: boolean
+    _dbWaitlistNotice?: string
   }
 }
 
@@ -147,6 +153,8 @@ export type ProductWithDbImages = Product & {
   _dbFeatured?: boolean
   _dbStageLabel?: string
   _dbNextChange?: { startAt: string; price: number; label?: string }
+  _dbWaitlistMode?: boolean
+  _dbWaitlistNotice?: string
 }
 
 /**

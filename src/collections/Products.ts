@@ -62,6 +62,27 @@ export const Products: CollectionConfig = {
       label: '할인 마감일',
       admin: { description: '있으면 D-N 카운트다운이 카드/상세에 표시됨' },
     },
+    // 모집 마감 후 대기 신청만 받는 모드
+    {
+      name: 'waitlistMode',
+      type: 'checkbox',
+      defaultValue: false,
+      label: '대기 신청 모드',
+      admin: {
+        description:
+          '체크하면 결제 페이지/상품 상세 CTA가 대기 신청 폼으로 분기. 다음 기수 오픈 안내용 명단만 받음.',
+      },
+    },
+    {
+      name: 'waitlistNotice',
+      type: 'textarea',
+      label: '대기 신청 안내 문구',
+      admin: {
+        condition: (_data, siblingData) => Boolean(siblingData?.waitlistMode),
+        description:
+          '대기 신청 폼 상단에 표시. 예: "2기는 모집이 마감되었습니다. 3기 모집이 시작되면 가장 먼저 안내드립니다. 가격은 변동될 수 있습니다."',
+      },
+    },
     // 단계별 자동 가격 인상 — 시작일시가 도래하면 해당 가격이 자동 적용됨.
     // 비어있으면 위 price 값이 그대로 사용됨. 항목들은 시작일시 오름차순으로 정렬해서 입력.
     {
