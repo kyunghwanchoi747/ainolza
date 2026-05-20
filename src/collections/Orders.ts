@@ -8,6 +8,7 @@ import {
   sendRefundCompletedToBuyer,
   sendAdvancedClassGroupChat,
 } from '../lib/email-templates'
+import { resolveGrantedClassrooms } from '../lib/classroom-grant'
 
 export const Orders: CollectionConfig = {
   slug: 'orders',
@@ -68,6 +69,43 @@ export const Orders: CollectionConfig = {
           if (prevStatus === newStatus) return
 
           if (newStatus === 'paid') {
+            // === 강의실 권한 자동 부여 ===
+            // 결제수단(카드·무통장·간편결제·매니저 수동) 무관하게 paid 전이 시 한 곳에서 처리.
+            // 이미 classrooms가 들어있으면 누락된 슬러그만 보충하므로 idempotent.
+            try {
+              const existing = Array.isArray(d.classrooms) ? [...d.classrooms] : []
+              let productGranted: unknown = null
+              if (d.productSlug) {
+                try {
+                  const productResult = await req.payload.find({
+                    collection: 'products',
+                    where: { slug: { equals: d.productSlug } },
+                    limit: 1,
+                    depth: 0,
+                    overrideAccess: true,
+                  })
+                  productGranted = (productResult.docs[0] as any)?.grantedClassroomSlugs
+                } catch (e) {
+                  console.error('[PAID GRANT product lookup]', (e as Error).message)
+                }
+              }
+              const resolved = resolveGrantedClassrooms(d.productSlug, productGranted, existing)
+              const added = resolved.filter((s) => !existing.includes(s))
+              if (added.length > 0) {
+                await req.payload.update({
+                  collection: 'orders',
+                  id: d.id,
+                  data: { classrooms: resolved } as any,
+                  overrideAccess: true,
+                  context: { skipNotify: true } as any, // 메일 재발송·재귀 방지
+                })
+                // 이후 로직(메일 발송 등)이 보는 doc에도 반영
+                d.classrooms = resolved
+              }
+            } catch (e) {
+              console.error('[PAID GRANT CLASSROOM]', (e as Error).message)
+            }
+
             try { await sendPaymentCompletedToAdmin(req.payload, d) } catch (e) { console.error('[PAID ADMIN]', (e as Error).message) }
         // try { await logEmailSent(req.payload, { to: 'admin', subject: `결제완료 ${oid}`, type: 'payment-admin', relatedId: oid }) } catch {}  // TODO: 로깅 재활성화
             try { await sendPaymentCompletedToBuyer(req.payload, d) } catch (e) { console.error('[PAID BUYER]', (e as Error).message) }
