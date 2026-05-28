@@ -272,6 +272,9 @@ export const Orders: CollectionConfig = {
         // 2기
         { label: '바이브 코딩 101 (입문) — 2기', value: 'vibe-coding-101-2' },
         { label: '바이브 코딩 심화 — 2기', value: 'vibe-coding-advanced-2' },
+        // 2.5기 (추가 모집)
+        { label: '바이브 코딩 101 (입문) — 2.5기', value: 'vibe-coding-101-2-5' },
+        { label: '바이브 코딩 심화 — 2.5기', value: 'vibe-coding-advanced-2-5' },
         // 3기
         { label: '바이브 코딩 101 (입문) — 3기', value: 'vibe-coding-101-3' },
         { label: '바이브 코딩 심화 — 3기', value: 'vibe-coding-advanced-3' },
