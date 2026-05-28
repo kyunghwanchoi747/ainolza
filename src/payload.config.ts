@@ -4,6 +4,7 @@ import { buildConfig } from 'payload'
 import { sqliteD1Adapter } from '@payloadcms/db-d1-sqlite'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { r2Storage } from '@payloadcms/storage-r2'
+import { importExportPlugin } from '@payloadcms/plugin-import-export'
 import { fileURLToPath } from 'url'
 import { CloudflareContext, getCloudflareContext } from '@opennextjs/cloudflare'
 import { GetPlatformProxyOptions } from 'wrangler'
@@ -103,17 +104,30 @@ export default buildConfig({
   secret: process.env.PAYLOAD_SECRET || 'dev-secret-change-in-production',
   db: dbAdapter,
   email: workerMailerAdapter,
-  plugins: r2Binding
-    ? [
-        r2Storage({
-          bucket: r2Binding,
-          collections: {
-            media: true,
-            ebooks: true,
-          } as any,
-        }),
-      ]
-    : [],
+  plugins: [
+    // 어드민 CSV/JSON 내보내기 — Users·Orders·Waitlists 목록에서 Export 버튼 제공.
+    // Cloudflare Workers 환경 안전 설정:
+    //  - export 는 jobs queue 대신 동기 처리(disableJobsQueue)
+    //  - import 는 비활성화(회원/주문을 CSV로 덮어쓰는 사고 방지)
+    importExportPlugin({
+      collections: [
+        { slug: 'users', export: { disableJobsQueue: true }, import: false },
+        { slug: 'orders', export: { disableJobsQueue: true }, import: false },
+        { slug: 'waitlists', export: { disableJobsQueue: true }, import: false },
+      ],
+    }),
+    ...(r2Binding
+      ? [
+          r2Storage({
+            bucket: r2Binding,
+            collections: {
+              media: true,
+              ebooks: true,
+            } as any,
+          }),
+        ]
+      : []),
+  ],
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
