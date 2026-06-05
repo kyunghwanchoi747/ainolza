@@ -195,16 +195,16 @@ export async function POST(request: NextRequest) {
   }
 
   // 2차 — Workers AI fallback (Llama 3.3 70B fp8-fast)
-  // 모델 선정 이력:
-  //  - Gemma 3 12B: 2026-05-30 단종.
-  //  - Gemma 4 26B: 카탈로그상 활성이지만 빈 응답(response="")만 반환 — 6/5 확인.
-  //  - Llama 3.3 70B fp8-fast: Cloudflare가 "유지" 명시한 빠른 모델. 한국어 OK.
-  //    트래픽 규모상 무료 한도(10,000 Neurons/일) 안에서 끝남.
+  let llamaDebug = 'not attempted'
+  let llamaTextPeek = ''
   try {
     const { getCloudflareContext } = await import('@opennextjs/cloudflare')
     const { env } = await getCloudflareContext({ async: true })
     const ai = (env as any).AI
-    if (ai) {
+    if (!ai) {
+      llamaDebug = 'no AI binding'
+    } else {
+      llamaDebug = 'calling llama'
       const aiResponse = (await ai.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', {
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
@@ -216,6 +216,8 @@ export async function POST(request: NextRequest) {
         max_tokens: 1500,
       })) as { response?: string }
       const text = aiResponse?.response || ''
+      llamaTextPeek = text.slice(0, 200)
+      llamaDebug = `llama text.length=${text.length} keys=${Object.keys(aiResponse || {}).join(',')}`
       if (text) {
         const json = extractJson(text)
         try {
@@ -223,20 +225,25 @@ export async function POST(request: NextRequest) {
           if (validatePayload(parsed)) {
             return NextResponse.json(parsed)
           }
+          llamaDebug = 'llama payload invalid'
           console.error('[ikigai] llama payload invalid', json.slice(0, 200))
         } catch (e) {
+          llamaDebug = `llama JSON parse fail: ${(e as Error).message}`
           console.error('[ikigai] llama JSON parse fail', (e as Error).message)
         }
       } else {
+        llamaDebug = `llama returned empty (full response keys: ${Object.keys(aiResponse || {}).join(',')})`
         console.error('[ikigai] llama returned empty')
       }
     }
   } catch (e) {
+    llamaDebug = `llama threw: ${(e as Error).message}`
     console.error('[ikigai] llama threw', (e as Error).message)
   }
 
+  // 진단용 debug 필드 임시 노출. 원인 확인 후 제거.
   return NextResponse.json(
-    { error: '결과를 생성하지 못했습니다. 잠시 후 다시 시도해주세요.' },
+    { error: '결과를 생성하지 못했습니다. 잠시 후 다시 시도해주세요.', debug: llamaDebug, peek: llamaTextPeek },
     { status: 502 },
   )
 }
