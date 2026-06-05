@@ -52,11 +52,15 @@
                 <p class="text-gray-400 text-xs sm:text-sm mt-1">AI 용어를 배우면서 두뇌도 훈련하세요!</p>
             </div>
             <div class="text-right">
-                <div class="flex items-center gap-3">
-                    <div class="text-sm"><i class="fa-solid fa-heart text-red-400"></i> <span id="lives">3</span></div>
-                    <div class="text-sm font-bold text-amber-400" id="score-display">0점</div>
+                <!-- 하트·점수 — 모바일에서 한눈에 보이도록 크게 (시니어 친화) -->
+                <div class="flex items-center justify-end gap-4">
+                    <div class="flex items-center gap-1.5">
+                        <i class="fa-solid fa-heart text-red-400 text-2xl sm:text-2xl"></i>
+                        <span id="lives" class="text-2xl sm:text-3xl font-extrabold text-white tabular-nums">3</span>
+                    </div>
+                    <div id="score-display" class="text-2xl sm:text-3xl font-extrabold text-amber-400 tabular-nums">0점</div>
                 </div>
-                <div class="text-xs text-gray-500 mt-1" id="progress">1 / 20</div>
+                <div class="text-sm text-gray-400 mt-1.5 font-medium" id="progress">1 / 20</div>
             </div>
         </div>
         <!-- 타이머 바 -->
@@ -75,8 +79,8 @@
                 <p class="text-lg sm:text-xl font-medium leading-relaxed break-keep" id="q-description">설명이 여기에 표시됩니다.</p>
             </div>
 
-            <!-- 보기 4개 -->
-            <div class="grid grid-cols-2 gap-3" id="options-grid"></div>
+            <!-- 보기 4개 — 모바일은 1열(긴 보기도 안 짤림), 태블릿 이상 2열 -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="options-grid"></div>
 
             <!-- 정답 해설 -->
             <div id="explanation" class="hidden mt-4 p-4 rounded-xl bg-gray-900 border border-gray-700 text-sm text-gray-300 leading-relaxed break-keep">
@@ -215,7 +219,7 @@
             elOptionsGrid.innerHTML = '';
             shuffledOptions.forEach(opt => {
                 const btn = document.createElement('button');
-                btn.className = 'option-btn p-4 rounded-xl bg-gray-900 border border-gray-700 text-sm sm:text-base font-medium hover:border-amber-400 hover:bg-amber-400/5 text-center break-keep';
+                btn.className = 'option-btn px-4 py-5 sm:py-4 rounded-xl bg-gray-900 border border-gray-700 text-base sm:text-base font-medium hover:border-amber-400 hover:bg-amber-400/5 text-center break-keep';
                 btn.textContent = opt;
                 btn.onclick = () => selectAnswer(btn, opt, q);
                 elOptionsGrid.appendChild(btn);
