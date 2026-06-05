@@ -142,22 +142,32 @@ export default function LabsPage() {
             </Link>
           ))}
 
-          {/* 곧 출시 예정 (확장 슬롯) */}
-          <div className="labCard coming">
+          {/* 오늘의 AI 퀴즈 — 매일 1문제 + 출석 도장 */}
+          <Link
+            href="/labs/daily-quiz.html"
+            className="labCard"
+            style={{ ['--cardBg' as string]: 'linear-gradient(160deg, #FCD34D 0%, #F59E0B 60%, #D97706 100%)' } as React.CSSProperties}
+          >
             <div className="labCard__top">
-              <span className="labTag">Coming Soon</span>
+              <span className="labTag">매일 1문제</span>
+              <svg className="extIcon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M14 4h6v6" /><path d="M10 14L20 4" /><path d="M19 13v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h6" />
+              </svg>
             </div>
             <div className="labIllu">
-              <svg viewBox="0 0 120 120" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="60" cy="60" r="36" strokeDasharray="4 6" />
-                <path d="M60 42v36M42 60h36" />
+              <svg viewBox="0 0 120 120" fill="none" stroke="rgba(255,255,255,0.96)" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="22" y="28" width="76" height="68" rx="8" fill="rgba(255,255,255,0.22)" />
+                <line x1="22" y1="48" x2="98" y2="48" />
+                <line x1="38" y1="20" x2="38" y2="36" />
+                <line x1="82" y1="20" x2="82" y2="36" />
+                <path d="M48 70l8 8 18-18" />
               </svg>
             </div>
             <div className="labCaption">
-              <h3 className="labName">새로운 실험 준비 중</h3>
-              <p className="labDesc">곧 만나보실 수 있어요!</p>
+              <h3 className="labName">오늘의 AI 퀴즈</h3>
+              <p className="labDesc">출석 도장 모으며 AI 상식 익히기</p>
             </div>
-          </div>
+          </Link>
         </div>
       </section>
     </div>
