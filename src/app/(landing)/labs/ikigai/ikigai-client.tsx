@@ -337,6 +337,9 @@ function ResultView({
         <p className="text-sm text-sub leading-relaxed break-keep">{result.closing}</p>
       </div>
 
+      {/* 공유 — 결과지 자체보다는 도구로 끌어오기 위한 입구 */}
+      <ShareRow summary={result.summary} keywords={result.keywords} />
+
       <div className="flex flex-col sm:flex-row gap-3 justify-center">
         <button
           onClick={onReset}
@@ -350,6 +353,57 @@ function ResultView({
         >
           AI놀자 강의 둘러보기 →
         </Link>
+      </div>
+    </div>
+  )
+}
+
+function ShareRow({ summary, keywords }: { summary: string; keywords: string[] }) {
+  const [copied, setCopied] = useState(false)
+  const shareTitle = '나의 이키가이 찾기 결과'
+  const shareText = `${summary}\n핵심 키워드: ${keywords.join(', ')}\n\nAI놀자 실험실에서 직접 해보세요`
+  const shareUrl = typeof window !== 'undefined' ? `${window.location.origin}/labs/ikigai` : ''
+
+  const onNativeShare = async () => {
+    // 모바일 네이티브 공유 시트 (카카오톡·메시지·메일 등 모두 선택 가능)
+    if (typeof navigator !== 'undefined' && (navigator as any).share) {
+      try {
+        await (navigator as any).share({ title: shareTitle, text: shareText, url: shareUrl })
+      } catch {
+        // 사용자가 취소한 경우는 무시
+      }
+    } else {
+      // 데스크톱 fallback — 링크 복사
+      onCopy()
+    }
+  }
+
+  const onCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(`${shareText}\n${shareUrl}`)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // 클립보드 권한 거부 등 무시
+    }
+  }
+
+  return (
+    <div className="border-t border-line pt-8 mb-10">
+      <p className="text-center text-xs text-sub mb-4">결과를 공유해 보세요</p>
+      <div className="flex justify-center gap-2">
+        <button
+          onClick={onNativeShare}
+          className="px-5 py-2.5 rounded-full bg-ink text-white text-sm font-medium hover:bg-black transition-colors"
+        >
+          공유하기
+        </button>
+        <button
+          onClick={onCopy}
+          className="px-5 py-2.5 rounded-full border border-line text-ink text-sm hover:border-ink transition-colors"
+        >
+          {copied ? '복사됨' : '링크 복사'}
+        </button>
       </div>
     </div>
   )
