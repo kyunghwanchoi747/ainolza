@@ -195,12 +195,16 @@ export async function POST(request: NextRequest) {
   }
 
   // 2차 — Workers AI Gemma fallback
+  let gemmaDebug = 'not attempted'
   try {
     const { getCloudflareContext } = await import('@opennextjs/cloudflare')
     const { env } = await getCloudflareContext({ async: true })
     const ai = (env as any).AI
-    if (ai) {
+    if (!ai) {
+      gemmaDebug = 'no AI binding'
+    } else {
       // Gemma 3 12B는 2026-05-30 단종. Gemma 4 26B(활성) 로 교체.
+      gemmaDebug = 'calling gemma-4'
       const aiResponse = (await ai.run('@cf/google/gemma-4-26b-a4b-it', {
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
@@ -212,6 +216,7 @@ export async function POST(request: NextRequest) {
         max_tokens: 1500,
       })) as { response?: string }
       const text = aiResponse?.response || ''
+      gemmaDebug = `gemma responded text.length=${text.length}`
       if (text) {
         const json = extractJson(text)
         try {
@@ -219,18 +224,25 @@ export async function POST(request: NextRequest) {
           if (validatePayload(parsed)) {
             return NextResponse.json(parsed)
           }
+          gemmaDebug = `gemma payload invalid: ${json.slice(0, 120)}`
           console.error('[ikigai] gemma payload invalid', json.slice(0, 200))
         } catch (e) {
+          gemmaDebug = `gemma JSON parse fail: ${(e as Error).message} text=${text.slice(0, 80)}`
           console.error('[ikigai] gemma JSON parse fail', (e as Error).message)
         }
+      } else {
+        gemmaDebug = 'gemma returned empty'
       }
     }
   } catch (e) {
+    gemmaDebug = `gemma threw: ${(e as Error).message}`
     console.error('[ikigai] gemma threw', (e as Error).message)
   }
 
+  // 디버그 정보를 응답에 임시 포함 (wrangler tail 메시지 잘림 우회).
+  // 원인 확인 후 다음 커밋에서 제거.
   return NextResponse.json(
-    { error: '결과를 생성하지 못했습니다. 잠시 후 다시 시도해주세요.' },
+    { error: '결과를 생성하지 못했습니다. 잠시 후 다시 시도해주세요.', debug: gemmaDebug },
     { status: 502 },
   )
 }
