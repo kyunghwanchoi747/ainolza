@@ -107,6 +107,7 @@
         </div>
     </main>
     <script src="/labs/shared.js"></script>
+    <script src="/labs/word-pool.js"></script>
 
     <!-- 마스코트 -->
     <div class="w-full max-w-2xl mt-6 flex items-center gap-4">
@@ -119,35 +120,9 @@
     </div>
 
     <script>
-        const allQuestions = [
-            // 기초
-            { category: "기초", description: "사람이 하는 일을 기계가 대신 할 수 있도록 만든 기술", answer: "인공지능", options: ["인공지능", "블록체인", "메타버스", "빅데이터"], explanation: "인공지능(AI)은 사람의 학습, 추론, 판단 능력을 컴퓨터로 구현한 기술이에요." },
-            { category: "기초", description: "AI에게 원하는 결과를 얻기 위해 입력하는 명령어나 지시문", answer: "프롬프트", options: ["프롬프트", "알고리즘", "데이터셋", "파라미터"], explanation: "프롬프트(Prompt)는 AI에게 내리는 명령어예요. 잘 쓰면 더 좋은 결과를 얻을 수 있어요!" },
-            { category: "기초", description: "텍스트로 대화할 수 있는 AI 서비스로, OpenAI가 만들었어요", answer: "ChatGPT", options: ["ChatGPT", "Midjourney", "Stable Diffusion", "DALL-E"], explanation: "ChatGPT는 OpenAI가 2022년에 공개한 대화형 AI로, 전 세계적으로 AI 열풍을 일으켰어요." },
-            { category: "기초", description: "AI가 텍스트 설명을 읽고 그에 맞는 그림을 만들어내는 기술", answer: "이미지 생성 AI", options: ["이미지 생성 AI", "음성 인식", "자연어 처리", "강화 학습"], explanation: "Midjourney, DALL-E, Stable Diffusion 등이 대표적인 이미지 생성 AI예요." },
-            { category: "기초", description: "사람의 말이나 글을 컴퓨터가 이해하고 처리하는 기술", answer: "자연어 처리", options: ["자연어 처리", "컴퓨터 비전", "로보틱스", "클라우드"], explanation: "NLP(Natural Language Processing)라고도 해요. 번역, 요약, 대화 등에 사용됩니다." },
-
-            // 중급
-            { category: "중급", description: "AI 모델을 원하는 용도에 맞게 추가 학습시키는 과정", answer: "파인튜닝", options: ["파인튜닝", "프롬프팅", "크롤링", "디버깅"], explanation: "파인튜닝(Fine-tuning)은 이미 학습된 AI를 특정 분야에 맞게 재학습시키는 거예요." },
-            { category: "중급", description: "AI가 만든 콘텐츠(글, 그림, 음악 등)를 통칭하는 말", answer: "생성형 AI", options: ["생성형 AI", "분석형 AI", "예측형 AI", "자율형 AI"], explanation: "Generative AI라고도 해요. ChatGPT, Midjourney 모두 생성형 AI입니다." },
-            { category: "중급", description: "AI가 실제와 구분하기 어려운 가짜 영상을 만드는 기술", answer: "딥페이크", options: ["딥페이크", "딥러닝", "메타데이터", "렌더링"], explanation: "딥페이크(Deepfake)는 딥러닝을 이용해 얼굴이나 목소리를 합성하는 기술이에요. 악용 주의!" },
-            { category: "중급", description: "방대한 텍스트 데이터로 학습된 거대한 AI 언어 모델", answer: "LLM", options: ["LLM", "CNN", "GAN", "API"], explanation: "LLM(Large Language Model)은 GPT-4, Claude, Gemini 같은 대규모 언어 모델을 말해요." },
-            { category: "중급", description: "AI에게 몇 가지 예시를 보여주고 패턴을 파악하게 하는 기법", answer: "퓨샷 학습", options: ["퓨샷 학습", "전이 학습", "비지도 학습", "강화 학습"], explanation: "Few-shot Learning은 적은 예시만으로 AI가 학습하는 방법이에요. 프롬프트에 예시를 넣는 것도 이에 해당해요." },
-
-            // 활용
-            { category: "활용", description: "코드를 직접 쓰지 않고 AI에게 설명해서 프로그램을 만드는 방식", answer: "바이브 코딩", options: ["바이브 코딩", "페어 코딩", "클린 코딩", "리팩토링"], explanation: "바이브 코딩(Vibe Coding)은 AI에게 원하는 것을 설명하면 AI가 코드를 작성해주는 새로운 개발 방식이에요!" },
-            { category: "활용", description: "AI를 활용해서 효과적인 명령어를 설계하는 직업/기술", answer: "프롬프트 엔지니어링", options: ["프롬프트 엔지니어링", "데이터 분석", "웹 개발", "UX 디자인"], explanation: "프롬프트 엔지니어링은 AI 시대의 핵심 역량! AI에게 정확한 지시를 내리는 기술이에요." },
-            { category: "활용", description: "반복적인 업무를 AI가 자동으로 처리하도록 설정하는 것", answer: "AI 자동화", options: ["AI 자동화", "AI 분석", "AI 진단", "AI 추천"], explanation: "메일 분류, 보고서 작성, 데이터 정리 등을 AI가 자동으로 처리할 수 있어요." },
-            { category: "활용", description: "여러 AI 도구를 연결해서 하나의 작업 흐름을 만드는 것", answer: "AI 워크플로우", options: ["AI 워크플로우", "AI 파이프라인", "AI 클러스터", "AI 앙상블"], explanation: "예: 이메일 수신 → AI가 요약 → 슬랙에 전달 → 자동 답장 같은 흐름이에요." },
-            { category: "활용", description: "웹사이트에 광고를 달아서 방문자 수에 따라 수익을 얻는 것", answer: "애드센스", options: ["애드센스", "애드워즈", "애널리틱스", "애드몹"], explanation: "구글 애드센스는 웹사이트에 광고를 게재하고 클릭/노출에 따라 수익을 얻는 서비스예요." },
-
-            // 트렌드
-            { category: "트렌드", description: "AI가 스스로 도구를 사용하고 계획을 세워 작업을 수행하는 AI", answer: "AI 에이전트", options: ["AI 에이전트", "AI 어시스턴트", "AI 봇", "AI 튜터"], explanation: "AI Agent는 단순 답변을 넘어 스스로 판단하고 행동하는 차세대 AI 기술이에요." },
-            { category: "트렌드", description: "텍스트, 이미지, 음성 등 여러 종류의 데이터를 동시에 이해하는 AI", answer: "멀티모달 AI", options: ["멀티모달 AI", "싱글모달 AI", "크로스모달 AI", "트랜스모달 AI"], explanation: "GPT-4V, Gemini 등이 멀티모달 AI예요. 사진을 보고 설명하거나, 음성을 듣고 답할 수 있어요." },
-            { category: "트렌드", description: "직접 서버를 구매하지 않고 인터넷을 통해 컴퓨팅 자원을 빌려 쓰는 것", answer: "클라우드", options: ["클라우드", "서버리스", "엣지", "온프레미스"], explanation: "AWS, Google Cloud, Cloudflare 등이 대표적인 클라우드 서비스예요." },
-            { category: "트렌드", description: "AI가 만든 콘텐츠에 '이것은 AI가 만들었다'라고 표시하는 것", answer: "AI 워터마크", options: ["AI 워터마크", "AI 필터", "AI 태그", "AI 라벨"], explanation: "AI 생성물의 진위를 구별하기 위해 보이지 않는 표시를 넣는 기술이에요." },
-            { category: "트렌드", description: "소스 코드를 누구나 볼 수 있고 자유롭게 사용할 수 있는 소프트웨어", answer: "오픈소스", options: ["오픈소스", "프리웨어", "쉐어웨어", "라이선스웨어"], explanation: "Llama, Stable Diffusion 등이 오픈소스 AI예요. 누구나 무료로 사용하고 수정할 수 있어요." },
-        ];
+        // 문제 풀은 /labs/word-pool.js 에서 로드 (120문제, 6 카테고리).
+        // 자료 출처는 word-pool.js 상단 주석 참조.
+        const allQuestions = (typeof window !== 'undefined' && window.wordPool) ? window.wordPool : [];
 
         let questions = [];
         let currentIndex = 0;
