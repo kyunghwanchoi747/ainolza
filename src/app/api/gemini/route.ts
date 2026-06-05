@@ -82,15 +82,18 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 2차 fallback: Cloudflare Workers AI (Gemma 4)
-    // Gemma 3 12B는 2026-05-30 단종. Gemma 4 26B(활성)로 교체.
+    // 2차 fallback: Cloudflare Workers AI (Llama 3.3 70B fp8-fast)
+    // 모델 선정 이력:
+    //  - Gemma 3 12B: 2026-05-30 단종.
+    //  - Gemma 4 26B: 카탈로그 활성이지만 빈 응답만 반환 (6/5 확인).
+    //  - Llama 3.3 70B fp8-fast: Cloudflare 유지 명시, 무료 한도 안 동작.
     try {
       const { getCloudflareContext } = await import('@opennextjs/cloudflare');
       const { env } = await getCloudflareContext({ async: true });
       const ai = (env as unknown as Record<string, unknown>).AI;
       if (ai) {
         const aiBinding = ai as { run: (model: string, input: Record<string, unknown>) => Promise<{ response: string }> };
-        const aiResponse = await aiBinding.run('@cf/google/gemma-4-26b-a4b-it', {
+        const aiResponse = await aiBinding.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', {
           messages: [
             { role: 'system', content: systemPrompt },
             { role: 'user', content: jsonMode
