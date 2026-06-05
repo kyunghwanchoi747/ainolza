@@ -194,17 +194,21 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  // 2차 — Workers AI fallback (Llama 3.3 70B fp8-fast)
-  let llamaDebug = 'not attempted'
-  let llamaTextPeek = ''
+  // 2차 — Workers AI fallback (Llama 3.1 8B fast)
+  // 모델 선정 이력:
+  //  - Gemma 3 12B: 2026-05-30 단종.
+  //  - Gemma 4 26B: 카탈로그 활성이지만 빈 응답만 반환 (6/5 확인).
+  //  - Llama 3.3 70B fp8-fast: 호출은 되지만 응답 추출 시 SDK 단 에러.
+  //  - Llama 3.1 8B fast: 안정적. 트래픽 규모상 무료 한도 안에서 끝남.
+  //
+  // 응답 형식: Cloudflare가 Llama 응답을 OpenAI 호환 형식으로 바꿨거나 혼용.
+  // response 필드는 빈 문자열이고 실제 텍스트는 choices[0].message.content 에 들어옴.
+  // 두 경로(+ 객체로 오는 경우 stringify) 모두 시도.
   try {
     const { getCloudflareContext } = await import('@opennextjs/cloudflare')
     const { env } = await getCloudflareContext({ async: true })
     const ai = (env as any).AI
-    if (!ai) {
-      llamaDebug = 'no AI binding'
-    } else {
-      llamaDebug = 'calling llama'
+    if (ai) {
       const aiResponse = (await ai.run('@cf/meta/llama-3.1-8b-instruct-fast', {
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
@@ -215,26 +219,16 @@ export async function POST(request: NextRequest) {
         ],
         max_tokens: 1500,
       })) as unknown
-      // Workers AI Llama 응답 — OpenAI 호환 형식(choices[].message.content)과
-      // 레거시(response: string) 둘 다 지원해야 함. response 필드가 객체로
-      // 오는 경우도 있어 stringify 처리.
       const respObj = (aiResponse ?? {}) as Record<string, unknown>
       const respField = respObj.response
       const choices = respObj.choices as Array<{ message?: { content?: unknown } }> | undefined
       const choiceContent = choices?.[0]?.message?.content
       let text = ''
-      if (typeof respField === 'string' && respField.length > 0) {
-        text = respField
-      } else if (typeof choiceContent === 'string' && choiceContent.length > 0) {
-        text = choiceContent
-      } else if (respField && typeof respField === 'object') {
-        // response 가 객체로 온 경우(이미 파싱된 JSON일 가능성) — 그대로 stringify해서 추출 로직 태움
-        text = JSON.stringify(respField)
-      } else if (choiceContent && typeof choiceContent === 'object') {
-        text = JSON.stringify(choiceContent)
-      }
-      llamaTextPeek = text.slice(0, 200)
-      llamaDebug = `llama text.length=${text.length} resp.type=${typeof respField} choice.type=${typeof choiceContent}`
+      if (typeof respField === 'string' && respField.length > 0) text = respField
+      else if (typeof choiceContent === 'string' && choiceContent.length > 0) text = choiceContent
+      else if (respField && typeof respField === 'object') text = JSON.stringify(respField)
+      else if (choiceContent && typeof choiceContent === 'object') text = JSON.stringify(choiceContent)
+
       if (text) {
         const json = extractJson(text)
         try {
@@ -242,25 +236,20 @@ export async function POST(request: NextRequest) {
           if (validatePayload(parsed)) {
             return NextResponse.json(parsed)
           }
-          llamaDebug = 'llama payload invalid'
           console.error('[ikigai] llama payload invalid', json.slice(0, 200))
         } catch (e) {
-          llamaDebug = `llama JSON parse fail: ${(e as Error).message}`
           console.error('[ikigai] llama JSON parse fail', (e as Error).message)
         }
       } else {
-        llamaDebug = `llama returned empty (full response keys: ${Object.keys(aiResponse || {}).join(',')})`
         console.error('[ikigai] llama returned empty')
       }
     }
   } catch (e) {
-    llamaDebug = `llama threw: ${(e as Error).message}`
     console.error('[ikigai] llama threw', (e as Error).message)
   }
 
-  // 진단용 debug 필드 임시 노출. 원인 확인 후 제거.
   return NextResponse.json(
-    { error: '결과를 생성하지 못했습니다. 잠시 후 다시 시도해주세요.', debug: llamaDebug, peek: llamaTextPeek },
+    { error: '결과를 생성하지 못했습니다. 잠시 후 다시 시도해주세요.' },
     { status: 502 },
   )
 }
