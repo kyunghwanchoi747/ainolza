@@ -52,68 +52,78 @@
 @media (max-width: 800px)  { .labGrid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 480px)  { .labGrid { grid-template-columns: 1fr; } }
 
-/* AI놀자 디자인 룰: AI스러운 그라데이션 금지. ink/sub/line/brand 팔레트만.
-   카드 = 흰 배경 + 옅은 보더 + ink 텍스트. 일러스트는 brand 코랄 한 톤. */
 .labCard {
   position: relative;
   aspect-ratio: 3 / 4;
   border-radius: 28px;
   overflow: hidden;
-  padding: 24px;
+  padding: 20px;
   display: flex; flex-direction: column;
-  color: var(--ink);
-  background: #ffffff;
-  border: 1px solid var(--line);
-  box-shadow: 0 4px 16px -8px rgba(0,0,0,0.08);
-  transition: transform .35s cubic-bezier(.4,0,.2,1), box-shadow .35s, border-color .25s;
+  color: #fff;
+  background: var(--cardBg);
+  box-shadow: 0 12px 32px -8px rgba(0,0,0,0.18);
+  transition: transform .35s cubic-bezier(.4,0,.2,1), box-shadow .35s;
   cursor: pointer;
   text-decoration: none;
 }
 .labCard:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 16px 32px -12px rgba(0,0,0,0.14);
-  border-color: var(--ink);
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 24px 48px -12px rgba(0,0,0,0.28);
+}
+.labCard::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 40%);
+  pointer-events: none;
+}
+.labCard::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(115deg, transparent 40%, rgba(255,255,255,0.22) 50%, transparent 62%);
+  mix-blend-mode: overlay; pointer-events: none;
 }
 .labCard__top {
+  position: relative; z-index: 1;
   display: flex; align-items: center; justify-content: space-between;
   margin-bottom: 12px;
 }
 .labTag {
-  padding: 4px 10px; border-radius: 9999px;
-  background: var(--brand-light); color: var(--brand-dark);
+  padding: 5px 11px; border-radius: 9999px;
+  background: rgba(255,255,255,0.85); color: #1a1a1a;
   font-size: 11px; font-weight: 700; letter-spacing: -0.005em;
 }
 .extIcon {
-  color: var(--sub); transition: color .2s, transform .2s;
+  color: rgba(255,255,255,0.7); transition: color .2s, transform .2s;
 }
-.labCard:hover .extIcon { color: var(--ink); transform: translate(2px, -2px); }
+.labCard:hover .extIcon { color: #fff; transform: translate(2px, -2px); }
 .labIllu {
+  position: relative; z-index: 1;
   flex: 1;
   display: flex; align-items: center; justify-content: center;
   padding: 20px 12px;
-  color: var(--brand);
 }
-.labIllu svg { width: 64%; height: auto; max-width: 160px; opacity: 0.9; }
+.labIllu svg { width: 70%; height: auto; max-width: 180px; opacity: 0.95; }
 .labCaption {
+  position: relative; z-index: 1;
   padding: 16px 4px 4px;
-  border-top: 1px solid var(--line);
 }
 .labName {
-  font-size: 18px; font-weight: 800; color: var(--ink);
+  font-size: 19px; font-weight: 800; color: #fff;
   margin: 0 0 6px; letter-spacing: -0.02em;
 }
 .labDesc {
-  font-size: 13px; color: var(--sub); line-height: 1.5;
+  font-size: 13px; color: rgba(255,255,255,0.85); line-height: 1.5;
   margin: 0;
 }
 
-/* "곧 출시 예정" — 점선 보더로 구분 */
+/* "곧 출시 예정" — 글래스 효과 */
 .labCard.coming {
-  background: var(--surface);
-  border: 2px dashed var(--line);
+  background: linear-gradient(135deg, rgba(255,255,255,0.7) 0%, rgba(245,245,247,0.55) 100%);
+  backdrop-filter: blur(20px);
+  border: 2px dashed rgba(0,0,0,0.15);
+  color: var(--ink);
   box-shadow: none;
 }
-.labCard.coming:hover { transform: none; box-shadow: none; border-color: var(--line); }
-.labCard.coming .labTag { background: var(--surface); color: var(--sub); border: 1px solid var(--line); }
-.labCard.coming .labIllu { color: var(--sub); }
-.labCard.coming .labName { color: var(--sub); }
+.labCard.coming::before, .labCard.coming::after { display: none; }
+.labCard.coming .labName { color: var(--ink); }
+.labCard.coming .labDesc { color: var(--sub); }
+.labCard.coming .labTag { background: var(--brand-light); color: var(--brand-dark); }
+.labCard.coming .labIllu { color: var(--brand); }

@@ -8,20 +8,18 @@ export const metadata: Metadata = {
   description: '놀면서 배우는 AI 체험 프로그램. 프롬프트 챌린지, AI 퀴즈, 이키가이 찾기까지.',
 }
 
-// 일러스트는 stroke="currentColor" 로 부모(.labIllu)의 brand 코랄을 상속.
-// 면 채움은 brand-light 옅은 톤으로 통일. AI놀자 디자인 룰(ink/sub/line/brand만) 준수.
-const FILL_SOFT = '#FFF1F0' // var(--brand-light) — JSX inline은 var() 못 받으니 hex 직접
 const LABS = [
   {
     href: '/labs/prompt-challenge.html',
     tag: '인기',
     name: '프롬프트 챌린지',
     desc: '이미지를 보고 AI처럼 묘사해보세요',
+    cardBg: 'linear-gradient(160deg, #B5C7F7 0%, #818CF8 60%, #6366F1 100%)',
     illu: (
-      <svg viewBox="0 0 120 120" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="20" y="32" width="80" height="60" rx="6" fill={FILL_SOFT} />
-        <circle cx="38" cy="52" r="5" />
-        <path d="M20 80l24-22 16 16 14-12 26 22v8H20z" />
+      <svg viewBox="0 0 120 120" fill="none" stroke="rgba(255,255,255,0.96)" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="20" y="32" width="80" height="60" rx="6" fill="rgba(255,255,255,0.18)" />
+        <circle cx="38" cy="52" r="5" fill="rgba(255,255,255,0.4)" />
+        <path d="M20 80l24-22 16 16 14-12 26 22v8H20z" fill="rgba(255,255,255,0.25)" />
       </svg>
     ),
   },
@@ -30,12 +28,13 @@ const LABS = [
     tag: '비교 게임',
     name: 'AI vs 나',
     desc: '같은 질문, 다른 시각으로 비교해보기',
+    cardBg: 'linear-gradient(160deg, #5BA9D9 0%, #38BDF8 60%, #6366F1 100%)',
     illu: (
-      <svg viewBox="0 0 120 120" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="42" cy="46" r="14" fill={FILL_SOFT} />
+      <svg viewBox="0 0 120 120" fill="none" stroke="rgba(255,255,255,0.96)" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="42" cy="46" r="14" fill="rgba(255,255,255,0.22)" />
         <path d="M22 90a20 20 0 0 1 40 0" />
-        <rect x="74" y="36" width="28" height="56" rx="6" fill={FILL_SOFT} />
-        <circle cx="88" cy="52" r="3" fill="currentColor" stroke="none" />
+        <rect x="74" y="36" width="28" height="56" rx="6" fill="rgba(255,255,255,0.22)" />
+        <circle cx="88" cy="52" r="3" fill="rgba(255,255,255,0.96)" />
         <line x1="60" y1="66" x2="74" y2="66" strokeDasharray="3 4" />
       </svg>
     ),
@@ -45,12 +44,13 @@ const LABS = [
     tag: '조립',
     name: '프롬프트 빌더',
     desc: '요소를 조합해서 프롬프트 만들기',
+    cardBg: 'linear-gradient(160deg, #6EE7B7 0%, #34D399 60%, #14B8A6 100%)',
     illu: (
-      <svg viewBox="0 0 120 120" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="18" y="22" width="38" height="32" rx="6" fill={FILL_SOFT} />
-        <rect x="64" y="22" width="38" height="32" rx="6" fill={FILL_SOFT} />
-        <rect x="18" y="66" width="38" height="32" rx="6" fill={FILL_SOFT} />
-        <rect x="64" y="66" width="38" height="32" rx="6" fill={FILL_SOFT} />
+      <svg viewBox="0 0 120 120" fill="none" stroke="rgba(255,255,255,0.96)" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="18" y="22" width="38" height="32" rx="6" fill="rgba(255,255,255,0.22)" />
+        <rect x="64" y="22" width="38" height="32" rx="6" fill="rgba(255,255,255,0.22)" />
+        <rect x="18" y="66" width="38" height="32" rx="6" fill="rgba(255,255,255,0.22)" />
+        <rect x="64" y="66" width="38" height="32" rx="6" fill="rgba(255,255,255,0.22)" />
         <line x1="56" y1="38" x2="64" y2="38" />
         <line x1="56" y1="82" x2="64" y2="82" />
         <line x1="37" y1="54" x2="37" y2="66" />
@@ -63,13 +63,14 @@ const LABS = [
     tag: '4가지 질문',
     name: '이키가이 찾기',
     desc: '아침에 일어날 이유를 찾는 4단계 여정',
+    cardBg: 'linear-gradient(160deg, #E8C8B5 0%, #D4756E 60%, #B0524C 100%)',
     illu: (
-      <svg viewBox="0 0 120 120" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="46" cy="46" r="26" fill={FILL_SOFT} />
-        <circle cx="74" cy="46" r="26" fill={FILL_SOFT} />
-        <circle cx="46" cy="74" r="26" fill={FILL_SOFT} />
-        <circle cx="74" cy="74" r="26" fill={FILL_SOFT} />
-        <circle cx="60" cy="60" r="9" fill="currentColor" stroke="none" />
+      <svg viewBox="0 0 120 120" fill="none" stroke="rgba(255,255,255,0.96)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="46" cy="46" r="26" fill="rgba(255,255,255,0.18)" />
+        <circle cx="74" cy="46" r="26" fill="rgba(255,255,255,0.18)" />
+        <circle cx="46" cy="74" r="26" fill="rgba(255,255,255,0.18)" />
+        <circle cx="74" cy="74" r="26" fill="rgba(255,255,255,0.18)" />
+        <circle cx="60" cy="60" r="9" fill="rgba(255,255,255,0.96)" stroke="none" />
       </svg>
     ),
   },
@@ -78,9 +79,10 @@ const LABS = [
     tag: '5문제',
     name: 'AI 단어 퀴즈',
     desc: '매일 5문제로 AI 어휘 익히기',
+    cardBg: 'linear-gradient(160deg, #C4B5FD 0%, #A78BFA 60%, #8B5CF6 100%)',
     illu: (
-      <svg viewBox="0 0 120 120" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M36 14H92a4 4 0 0 1 4 4v84a4 4 0 0 1-4 4H36A6 6 0 0 1 30 100V20a6 6 0 0 1 6-6z" fill={FILL_SOFT} />
+      <svg viewBox="0 0 120 120" fill="none" stroke="rgba(255,255,255,0.96)" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M36 14H92a4 4 0 0 1 4 4v84a4 4 0 0 1-4 4H36A6 6 0 0 1 30 100V20a6 6 0 0 1 6-6z" fill="rgba(255,255,255,0.22)" />
         <line x1="44" y1="36" x2="82" y2="36" />
         <line x1="44" y1="52" x2="76" y2="52" />
         <line x1="44" y1="68" x2="82" y2="68" />
@@ -93,11 +95,12 @@ const LABS = [
     tag: '2지 선택',
     name: 'AI일까? 사람일까?',
     desc: 'AI와 사람의 글 구별하기',
+    cardBg: 'linear-gradient(160deg, #FDA4AF 0%, #F43F5E 60%, #BE123C 100%)',
     illu: (
-      <svg viewBox="0 0 120 120" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="60" cy="60" r="40" fill={FILL_SOFT} />
-        <circle cx="48" cy="52" r="3" fill="currentColor" stroke="none" />
-        <circle cx="72" cy="52" r="3" fill="currentColor" stroke="none" />
+      <svg viewBox="0 0 120 120" fill="none" stroke="rgba(255,255,255,0.96)" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="60" cy="60" r="40" fill="rgba(255,255,255,0.22)" />
+        <circle cx="48" cy="52" r="3" fill="rgba(255,255,255,0.96)" />
+        <circle cx="72" cy="52" r="3" fill="rgba(255,255,255,0.96)" />
         <path d="M44 76c5-4 27-4 32 0" />
       </svg>
     ),
@@ -119,7 +122,12 @@ export default function LabsPage() {
       <section className="labsContainer">
         <div className="labGrid">
           {LABS.map((l, i) => (
-            <Link key={i} className="labCard" href={l.href}>
+            <Link
+              key={i}
+              className="labCard"
+              href={l.href}
+              style={{ ['--cardBg' as string]: l.cardBg } as React.CSSProperties}
+            >
               <div className="labCard__top">
                 <span className="labTag">{l.tag}</span>
                 <svg className="extIcon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
