@@ -214,10 +214,17 @@ export async function POST(request: NextRequest) {
           },
         ],
         max_tokens: 1500,
-      })) as { response?: string }
-      const text = aiResponse?.response || ''
-      llamaTextPeek = text.slice(0, 200)
-      llamaDebug = `llama text.length=${text.length} keys=${Object.keys(aiResponse || {}).join(',')}`
+      })) as unknown
+      // 응답 구조 안전하게 파싱 — { response: string } 가정이 깨지는 케이스 진단용
+      const respObj = aiResponse as Record<string, unknown> | null
+      const respKeys = respObj && typeof respObj === 'object' ? Object.keys(respObj).join(',') : 'null'
+      const rawResponse = respObj?.response
+      const responseType = typeof rawResponse
+      const text = typeof rawResponse === 'string' ? rawResponse : ''
+      llamaTextPeek = typeof rawResponse === 'string'
+        ? rawResponse.slice(0, 200)
+        : JSON.stringify(rawResponse ?? null).slice(0, 200)
+      llamaDebug = `llama keys=[${respKeys}] response type=${responseType} text.length=${text.length}`
       if (text) {
         const json = extractJson(text)
         try {
