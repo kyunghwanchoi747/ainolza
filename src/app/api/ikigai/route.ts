@@ -200,7 +200,8 @@ export async function POST(request: NextRequest) {
     const { env } = await getCloudflareContext({ async: true })
     const ai = (env as any).AI
     if (ai) {
-      const aiResponse = (await ai.run('@cf/google/gemma-3-12b-it', {
+      // Gemma 3 12B는 2026-05-30 단종. Gemma 4 26B(활성) 로 교체.
+      const aiResponse = (await ai.run('@cf/google/gemma-4-26b-a4b-it', {
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
           {
