@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
       const ai = (env as unknown as Record<string, unknown>).AI;
       if (ai) {
         const aiBinding = ai as { run: (model: string, input: Record<string, unknown>) => Promise<{ response: string }> };
-        const aiResponse = await aiBinding.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', {
+        const aiResponse = await aiBinding.run('@cf/meta/llama-3.1-8b-instruct-fast', {
           messages: [
             { role: 'system', content: systemPrompt },
             { role: 'user', content: jsonMode

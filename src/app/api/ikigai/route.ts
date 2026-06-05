@@ -205,7 +205,7 @@ export async function POST(request: NextRequest) {
       llamaDebug = 'no AI binding'
     } else {
       llamaDebug = 'calling llama'
-      const aiResponse = (await ai.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', {
+      const aiResponse = (await ai.run('@cf/meta/llama-3.1-8b-instruct-fast', {
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
           {
