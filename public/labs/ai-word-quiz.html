@@ -15,11 +15,28 @@
         @keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-10px)} 40%{transform:translateX(10px)} 60%{transform:translateX(-5px)} 80%{transform:translateX(5px)} }
         .pop-in { animation: popIn 0.4s cubic-bezier(0.175,0.885,0.32,1.275) forwards; }
         @keyframes popIn { 0%{transform:scale(0.9);opacity:0} 100%{transform:scale(1);opacity:1} }
-        .option-btn { transition: all 0.2s; }
+        .option-btn { transition: all 0.2s; position: relative; }
         .option-btn:hover { transform: scale(1.02); }
         .option-btn.correct { background: rgba(34,197,94,0.2) !important; border-color: rgba(34,197,94,0.7) !important; color: #22c55e !important; }
         .option-btn.wrong { background: rgba(239,68,68,0.2) !important; border-color: rgba(239,68,68,0.7) !important; color: #ef4444 !important; }
         .option-btn.disabled { pointer-events: none; opacity: 0.6; }
+        /* 정/오답 표시 — 텍스트 좌측에 큼지막한 O / X 마크 */
+        .option-btn.correct::before {
+            content: '✓'; position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+            font-size: 22px; font-weight: 900; color: #22c55e;
+        }
+        .option-btn.wrong::before {
+            content: '✗'; position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+            font-size: 22px; font-weight: 900; color: #ef4444;
+        }
+        .option-btn.correct, .option-btn.wrong { padding-left: 44px !important; }
+        /* "다시 생각해보세요" 안내 박스 */
+        .retry-hint {
+            background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.4);
+            color: #fbbf24; padding: 10px 14px; border-radius: 12px;
+            font-size: 14px; font-weight: 600; text-align: center; margin-top: 12px;
+            animation: popIn 0.3s cubic-bezier(0.175,0.885,0.32,1.275) forwards;
+        }
         .timer-bar { transition: width 0.1s linear; }
     </style>
 </head>
@@ -134,6 +151,8 @@
         let wrongCount = 0;
         let timerInterval = null;
         let timeLeft = 15;
+        // 현재 문제에서 1차 시도가 오답이었는지 — 2차 시도용 상태
+        let firstAttemptWrong = false;
 
         const elLives = document.getElementById('lives');
         const elScoreDisplay = document.getElementById('score-display');
@@ -186,6 +205,10 @@
             elQDescription.textContent = q.description;
             elExplanation.classList.add('hidden');
             elNextBtn.classList.add('hidden');
+            // 새 문제 시작 — 1차 오답 상태 리셋 + 이전 안내 박스 제거
+            firstAttemptWrong = false;
+            const oldHint = document.getElementById('retry-hint');
+            if (oldHint) oldHint.remove();
 
             // 보기 셔플
             const shuffledOptions = shuffle(q.options);
@@ -241,6 +264,10 @@
                 if (btn.textContent === q.answer) btn.classList.add('correct');
             });
 
+            // 1차 오답 후 시간 초과 시 안내 박스도 정리
+            const hint = document.getElementById('retry-hint');
+            if (hint) hint.remove();
+
             elMascotMsg.textContent = "시간 초과! 정답은 '" + q.answer + "'이에요.";
             elExplanationText.textContent = q.explanation;
             elExplanation.classList.remove('hidden');
@@ -248,33 +275,78 @@
         }
 
         function selectAnswer(btn, selected, q) {
-            clearInterval(timerInterval);
             const isCorrect = selected === q.answer;
 
-            // 모든 버튼 비활성화
+            // ─────── 정답 처리 ───────
+            if (isCorrect) {
+                clearInterval(timerInterval);
+                // 정답 보기 + 클릭 보기 모두 ✓ 표시 (같은 버튼). 나머지는 비활성화만.
+                document.querySelectorAll('.option-btn').forEach(b => {
+                    b.classList.add('disabled');
+                });
+                btn.classList.add('correct');
+
+                // 점수: 1차 정답이면 정상 점수, 2차 정답이면 절반
+                const baseScore = firstAttemptWrong ? 5 : 10;
+                const bonus = firstAttemptWrong ? 0 : Math.ceil(timeLeft) * 5;
+                score += baseScore + bonus;
+                correctCount++;
+                if (firstAttemptWrong) {
+                    // 재도전 정답은 연속 정답 streak 끊지도 잇지도 않음(현 streak 유지)
+                    elMascotMsg.textContent = "다시 풀어서 맞췄어요! 잘했어요.";
+                } else {
+                    streak++;
+                    if (streak > maxStreak) maxStreak = streak;
+                    elMascotMsg.textContent = streak >= 3 ? `${streak}연속 정답! 대단해요!` : "정답! 잘하고 있어요!";
+                    if (streak >= 5) confetti({ particleCount: 30, spread: 60, origin: { y: 0.7 } });
+                }
+
+                elScoreDisplay.textContent = score + '점';
+                elExplanationText.textContent = q.explanation;
+                elExplanation.classList.remove('hidden');
+                elNextBtn.classList.remove('hidden');
+                return;
+            }
+
+            // ─────── 오답 처리 ───────
+            // 1차 오답: 하트 안 깎임, 정답 미공개, 다른 보기 다시 선택 가능
+            if (!firstAttemptWrong) {
+                firstAttemptWrong = true;
+                btn.classList.add('wrong', 'disabled');
+                btn.parentElement.classList.add('shake');
+                setTimeout(() => btn.parentElement.classList.remove('shake'), 500);
+
+                // "다시 생각해보세요" 안내 박스 (보기 그리드 바로 아래)
+                let hint = document.getElementById('retry-hint');
+                if (!hint) {
+                    hint = document.createElement('div');
+                    hint.id = 'retry-hint';
+                    hint.className = 'retry-hint';
+                    hint.textContent = '다시 생각해보세요!';
+                    elOptionsGrid.parentNode.insertBefore(hint, elOptionsGrid.nextSibling);
+                }
+                elMascotMsg.textContent = "한 번 더 골라보세요. 설명을 다시 읽어보세요!";
+                return;
+            }
+
+            // 2차 오답: 하트 -1, 정답 공개, 해설 노출
+            clearInterval(timerInterval);
+            btn.classList.add('wrong', 'disabled');
+            btn.parentElement.classList.add('shake');
+            // 정답 보기에 ✓ 표시 + 전체 비활성화
             document.querySelectorAll('.option-btn').forEach(b => {
                 b.classList.add('disabled');
                 if (b.textContent === q.answer) b.classList.add('correct');
             });
+            lives--;
+            wrongCount++;
+            streak = 0;
+            elLives.textContent = lives;
+            elMascotMsg.textContent = "아쉬워요! 정답은 '" + q.answer + "'이에요.";
 
-            if (isCorrect) {
-                btn.classList.add('correct');
-                const bonus = Math.ceil(timeLeft) * 5;
-                score += 10 + bonus;
-                correctCount++;
-                streak++;
-                if (streak > maxStreak) maxStreak = streak;
-                elMascotMsg.textContent = streak >= 3 ? `${streak}연속 정답! 대단해요!` : "정답! 잘하고 있어요!";
-                if (streak >= 5) confetti({ particleCount: 30, spread: 60, origin: { y: 0.7 } });
-            } else {
-                btn.classList.add('wrong');
-                btn.parentElement.classList.add('shake');
-                lives--;
-                wrongCount++;
-                streak = 0;
-                elLives.textContent = lives;
-                elMascotMsg.textContent = "아쉬워요! 정답은 '" + q.answer + "'이에요.";
-            }
+            // 안내 박스 제거 (정답이 공개됐으니 더 이상 의미 없음)
+            const hint = document.getElementById('retry-hint');
+            if (hint) hint.remove();
 
             elScoreDisplay.textContent = score + '점';
             elExplanationText.textContent = q.explanation;
