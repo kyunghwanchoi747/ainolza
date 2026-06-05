@@ -215,16 +215,26 @@ export async function POST(request: NextRequest) {
         ],
         max_tokens: 1500,
       })) as unknown
-      // 응답 구조 안전하게 파싱 — { response: string } 가정이 깨지는 케이스 진단용
-      const respObj = aiResponse as Record<string, unknown> | null
-      const respKeys = respObj && typeof respObj === 'object' ? Object.keys(respObj).join(',') : 'null'
-      const rawResponse = respObj?.response
-      const responseType = typeof rawResponse
-      const text = typeof rawResponse === 'string' ? rawResponse : ''
-      llamaTextPeek = typeof rawResponse === 'string'
-        ? rawResponse.slice(0, 200)
-        : JSON.stringify(rawResponse ?? null).slice(0, 200)
-      llamaDebug = `llama keys=[${respKeys}] response type=${responseType} text.length=${text.length}`
+      // Workers AI Llama 응답 — OpenAI 호환 형식(choices[].message.content)과
+      // 레거시(response: string) 둘 다 지원해야 함. response 필드가 객체로
+      // 오는 경우도 있어 stringify 처리.
+      const respObj = (aiResponse ?? {}) as Record<string, unknown>
+      const respField = respObj.response
+      const choices = respObj.choices as Array<{ message?: { content?: unknown } }> | undefined
+      const choiceContent = choices?.[0]?.message?.content
+      let text = ''
+      if (typeof respField === 'string' && respField.length > 0) {
+        text = respField
+      } else if (typeof choiceContent === 'string' && choiceContent.length > 0) {
+        text = choiceContent
+      } else if (respField && typeof respField === 'object') {
+        // response 가 객체로 온 경우(이미 파싱된 JSON일 가능성) — 그대로 stringify해서 추출 로직 태움
+        text = JSON.stringify(respField)
+      } else if (choiceContent && typeof choiceContent === 'object') {
+        text = JSON.stringify(choiceContent)
+      }
+      llamaTextPeek = text.slice(0, 200)
+      llamaDebug = `llama text.length=${text.length} resp.type=${typeof respField} choice.type=${typeof choiceContent}`
       if (text) {
         const json = extractJson(text)
         try {

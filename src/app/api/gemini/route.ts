@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
       const { env } = await getCloudflareContext({ async: true });
       const ai = (env as unknown as Record<string, unknown>).AI;
       if (ai) {
-        const aiBinding = ai as { run: (model: string, input: Record<string, unknown>) => Promise<{ response: string }> };
+        const aiBinding = ai as { run: (model: string, input: Record<string, unknown>) => Promise<unknown> };
         const aiResponse = await aiBinding.run('@cf/meta/llama-3.1-8b-instruct-fast', {
           messages: [
             { role: 'system', content: systemPrompt },
@@ -104,7 +104,22 @@ export async function POST(request: NextRequest) {
           max_tokens: 1024,
         });
 
-        let resultText = aiResponse.response;
+        // Workers AI Llama 응답: OpenAI 호환(choices[].message.content) 또는 레거시(response: string).
+        // 둘 다 지원, 객체로 오면 stringify 후 extractJson 태움.
+        const respObj = (aiResponse ?? {}) as Record<string, unknown>;
+        const respField = respObj.response;
+        const choices = respObj.choices as Array<{ message?: { content?: unknown } }> | undefined;
+        const choiceContent = choices?.[0]?.message?.content;
+        let resultText = '';
+        if (typeof respField === 'string' && respField.length > 0) {
+          resultText = respField;
+        } else if (typeof choiceContent === 'string' && choiceContent.length > 0) {
+          resultText = choiceContent;
+        } else if (respField && typeof respField === 'object') {
+          resultText = JSON.stringify(respField);
+        } else if (choiceContent && typeof choiceContent === 'object') {
+          resultText = JSON.stringify(choiceContent);
+        }
         if (resultText) {
           // jsonMode일 때 마크다운 코드블록 등 불필요한 텍스트 제거
           if (jsonMode) {
