@@ -8,7 +8,7 @@ export const Products: CollectionConfig = {
   },
   admin: {
     useAsTitle: 'title',
-    defaultColumns: ['title', 'productType', 'price', 'status', 'order'],
+    defaultColumns: ['title', 'productType', 'price', 'bypassPrerequisite', 'status', 'order'],
     listSearchableFields: ['title', 'slug', 'subtitle', 'shortDescription'],
   },
   fields: [
