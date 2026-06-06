@@ -157,7 +157,8 @@
       "WebFetch(domain:www.ibm.com)",
       "WebFetch(domain:www.coursera.org)",
       "WebFetch(domain:www.digitalapplied.com)",
-      "WebFetch(domain:www.skax.co.kr)"
+      "WebFetch(domain:www.skax.co.kr)",
+      "Bash(curl -s http://localhost:3001/api/admin)"
     ],
     "additionalDirectories": [
       "c:\\Users\\USER\\Desktop\\_개발프로젝트\\AI놀자 홈페이지 이전\\src\\app\\api\\download"

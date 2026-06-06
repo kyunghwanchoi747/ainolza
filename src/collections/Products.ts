@@ -8,7 +8,7 @@ export const Products: CollectionConfig = {
   },
   admin: {
     useAsTitle: 'title',
-    defaultColumns: ['title', 'productType', 'price', 'bypassPrerequisite', 'status', 'order'],
+    defaultColumns: ['title', 'productType', 'price', 'status', 'order'],
     listSearchableFields: ['title', 'slug', 'subtitle', 'shortDescription'],
   },
   fields: [
@@ -81,17 +81,6 @@ export const Products: CollectionConfig = {
         condition: (_data, siblingData) => Boolean(siblingData?.waitlistMode),
         description:
           '대기 신청 폼 상단에 표시. 예: "2기는 모집이 마감되었습니다. 3기 모집이 시작되면 가장 먼저 안내드립니다. 가격은 변동될 수 있습니다."',
-      },
-    },
-    // 선수강 자격 검사 우회 — 심화 단독 결제 같은 prerequisite 정책을 임시로 풀 때 사용
-    {
-      name: 'bypassPrerequisite',
-      type: 'checkbox',
-      defaultValue: false,
-      label: '선수강 체크 끄기',
-      admin: {
-        description:
-          '체크하면 이 상품은 선수강(입문 결제) 조건 없이 누구나 결제 가능. 프로모션·예외 처리·외부 유입 대응 시 켜둠. 정책 복원하려면 다시 끄기.',
       },
     },
     // 단계별 자동 가격 인상 — 시작일시가 도래하면 해당 가격이 자동 적용됨.

@@ -55,11 +55,3 @@ export function resolveGrantedClassrooms(
   return result
 }
 
-/**
- * 심화 단독 결제 자격 — 같은 회원이 입문(vibe-coding-101) 결제완료 이력이 있는지.
- * 마이페이지/스토어 노출 차단 + 결제 API 양쪽에서 사용.
- */
-export const PREREQUISITE_MAP: Record<string, string[]> = {
-  // 심화 단독은 입문 결제완료자만 가능
-  'vibe-coding-advanced': ['vibe-coding-101'],
-}
