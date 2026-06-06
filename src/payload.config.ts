@@ -86,7 +86,9 @@ function getCloudflareContextFromWrangler(): Promise<CloudflareContext> {
     ({ getPlatformProxy }) =>
       getPlatformProxy({
         environment: process.env.CLOUDFLARE_ENV,
-        remoteBindings: isProduction,
+        // CI 환경: remoteBindings=false로 원격 프리뷰 세션 스킵.
+        // 로컬: remoteBindings=true로 실제 D1 접근.
+        remoteBindings: !process.env.CI && isProduction,
       } satisfies GetPlatformProxyOptions),
   )
 }
