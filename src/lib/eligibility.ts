@@ -31,6 +31,24 @@ export async function checkEligibility(
     return { eligible: true }
   }
 
+  // 어드민이 상품에 bypassPrerequisite=true 를 설정한 경우, 선수강 검사 우회.
+  // 프로모션·외부 유입 대응 등 한시적 정책 완화에 사용.
+  try {
+    const productRes = await payload.find({
+      collection: 'products',
+      where: { slug: { equals: productSlug } },
+      limit: 1,
+      depth: 0,
+      overrideAccess: true,
+    })
+    const product = productRes.docs[0] as { bypassPrerequisite?: boolean } | undefined
+    if (product?.bypassPrerequisite) {
+      return { eligible: true }
+    }
+  } catch {
+    // 상품 조회 실패 시 기존 정책 그대로 적용 (안전 fallback)
+  }
+
   if (!userId) {
     return {
       eligible: false,

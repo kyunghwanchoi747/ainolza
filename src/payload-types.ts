@@ -264,6 +264,10 @@ export interface Product {
    */
   waitlistNotice?: string | null;
   /**
+   * 체크하면 이 상품은 선수강(입문 결제) 조건 없이 누구나 결제 가능. 프로모션·예외 처리·외부 유입 대응 시 켜둠. 정책 복원하려면 다시 끄기.
+   */
+  bypassPrerequisite?: boolean | null;
+  /**
    * 예) 슈퍼얼리버드/얼리버드/정가 단계별 가격을 시작일시와 함께 등록. 시작일시가 되면 자동으로 해당 가격이 적용됩니다. 비워두면 위 "판매가"가 그대로 적용됩니다. 입력 순서는 자유 — 시스템이 시간순으로 자동 정렬합니다.
    */
   priceSchedule?:
@@ -552,6 +556,8 @@ export interface Order {
         | 'vibe-coding-advanced'
         | 'vibe-coding-101-2'
         | 'vibe-coding-advanced-2'
+        | 'vibe-coding-101-2-5'
+        | 'vibe-coding-advanced-2-5'
         | 'vibe-coding-101-3'
         | 'vibe-coding-advanced-3'
         | 'vibe-coding-101-4'
@@ -1132,6 +1138,7 @@ export interface ProductsSelect<T extends boolean = true> {
   discountUntil?: T;
   waitlistMode?: T;
   waitlistNotice?: T;
+  bypassPrerequisite?: T;
   priceSchedule?:
     | T
     | {

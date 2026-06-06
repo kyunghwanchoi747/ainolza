@@ -14,6 +14,7 @@ import * as migration_20260513_000000_webhook_events from './20260513_000000_web
 import * as migration_20260513_010000_webhook_events_locked_rels from './20260513_010000_webhook_events_locked_rels';
 import * as migration_20260513_020000_referrals_coupons_locked_rels from './20260513_020000_referrals_coupons_locked_rels';
 import * as migration_20260519_000000_waitlists from './20260519_000000_waitlists';
+import * as migration_20260606_000000_products_bypass_prereq from './20260606_000000_products_bypass_prereq';
 
 export const migrations = [
   {
@@ -95,5 +96,10 @@ export const migrations = [
     up: migration_20260519_000000_waitlists.up,
     down: migration_20260519_000000_waitlists.down,
     name: '20260519_000000_waitlists'
+  },
+  {
+    up: migration_20260606_000000_products_bypass_prereq.up,
+    down: migration_20260606_000000_products_bypass_prereq.down,
+    name: '20260606_000000_products_bypass_prereq'
   },
 ];
