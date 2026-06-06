@@ -6,7 +6,6 @@ import { getProductForStore } from '@/lib/products-db'
 import { ProductFaqList } from '@/components/store/product-faq-list'
 import { ReviewSection } from '@/components/store/review-section'
 import { V3Header } from '@/components/landing/v3-header'
-import { EligibilityGatedCta } from '@/components/store/eligibility-gated-cta'
 import { PriceStageCountdown } from '@/components/store/price-stage-countdown'
 import { PrimaryButtonCard, KakaoButton, OutlineButton } from '@/components/design-system/buttons'
 import { ReferralTracker } from '@/components/referrals/referral-tracker'
@@ -242,25 +241,19 @@ export default async function ProductDetailPage({
 
               {/* 액션 버튼들 — 디자인 시스템 컴포넌트 사용 */}
               <div className="space-y-3">
-                <EligibilityGatedCta
-                  productSlug={product.slug}
-                  fallbackHref="/store/vibe-coding-101"
-                  fallbackLabel="입문 강의 보러가기 →"
-                >
-                  {product.actions.map((a, i) => {
-                    const finalUrl = withSlug(a.url, product.slug, !!product._dbWaitlistMode)
-                    const label = `${a.label}${a.primary ? ' →' : ''}`
-                    return a.primary ? (
-                      <PrimaryButtonCard key={i} href={finalUrl} external={!!a.external}>
-                        {label}
-                      </PrimaryButtonCard>
-                    ) : (
-                      <OutlineButton key={i} href={finalUrl} external={!!a.external}>
-                        {label}
-                      </OutlineButton>
-                    )
-                  })}
-                </EligibilityGatedCta>
+                {product.actions.map((a, i) => {
+                  const finalUrl = withSlug(a.url, product.slug, !!product._dbWaitlistMode)
+                  const label = `${a.label}${a.primary ? ' →' : ''}`
+                  return a.primary ? (
+                    <PrimaryButtonCard key={i} href={finalUrl} external={!!a.external}>
+                      {label}
+                    </PrimaryButtonCard>
+                  ) : (
+                    <OutlineButton key={i} href={finalUrl} external={!!a.external}>
+                      {label}
+                    </OutlineButton>
+                  )
+                })}
 
                 <KakaoButton href="https://open.kakao.com/o/s7kkWTfh">
                   카카오톡으로 문의하기
@@ -321,25 +314,19 @@ export default async function ProductDetailPage({
           <p className="text-center text-body mb-6 text-base md:text-lg">
             궁금한 점이 있으시면 카카오톡으로 편하게 문의주세요.
           </p>
-          <EligibilityGatedCta
-            productSlug={product.slug}
-            fallbackHref="/store/vibe-coding-101"
-            fallbackLabel="입문 강의 보러가기 →"
-          >
-            {product.actions.map((a, i) => {
-              const finalUrl = withSlug(a.url, product.slug)
-              const label = `${a.label}${a.primary ? ' →' : ''}`
-              return a.primary ? (
-                <PrimaryButtonCard key={i} href={finalUrl} external={!!a.external}>
-                  {label}
-                </PrimaryButtonCard>
-              ) : (
-                <OutlineButton key={i} href={finalUrl} external={!!a.external}>
-                  {label}
-                </OutlineButton>
-              )
-            })}
-          </EligibilityGatedCta>
+          {product.actions.map((a, i) => {
+            const finalUrl = withSlug(a.url, product.slug)
+            const label = `${a.label}${a.primary ? ' →' : ''}`
+            return a.primary ? (
+              <PrimaryButtonCard key={i} href={finalUrl} external={!!a.external}>
+                {label}
+              </PrimaryButtonCard>
+            ) : (
+              <OutlineButton key={i} href={finalUrl} external={!!a.external}>
+                {label}
+              </OutlineButton>
+            )
+          })}
 
           <KakaoButton href="https://open.kakao.com/o/s7kkWTfh">
             카카오톡으로 문의하기
