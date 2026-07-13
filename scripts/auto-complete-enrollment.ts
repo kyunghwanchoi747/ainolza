@@ -11,6 +11,7 @@ interface Order {
   buyerName: string
   buyerEmail: string
   status: string
+  productType: string
   paidAt?: string
   createdAt?: string
 }
@@ -101,15 +102,15 @@ async function main() {
   console.log(`⏱️  수강 기간: ${SERVICE_DAYS}일\n`)
 
   try {
-    // 결제 완료(paid) 또는 이용중(active) 상태인 주문만 조회
+    // 강의(class) 주문 중 결제 완료(paid) 또는 이용중(active) 상태인 것만 조회
     const orders = await fetchFromD1(`
-      SELECT id, orderNumber, buyerName, buyerEmail, status, paidAt, createdAt
+      SELECT id, orderNumber, buyerName, buyerEmail, status, productType, paidAt, createdAt
       FROM orders
-      WHERE status IN ('paid', 'active')
+      WHERE status IN ('paid', 'active') AND productType = 'class'
       ORDER BY paidAt ASC
     `) as Order[]
 
-    console.log(`✅ 조회된 주문: ${orders.length}건\n`)
+    console.log(`✅ 조회된 강의 주문: ${orders.length}건 (전자책/종이책 제외)\n`)
 
     let completedCount = 0
     const now = new Date()
@@ -118,7 +119,7 @@ async function main() {
       // paidAt 또는 createdAt 중 존재하는 것 사용
       const paidDate = order.paidAt || order.createdAt
       if (!paidDate) {
-        console.log(`⚠️  [${order.orderNumber}] 결제일 정보 없음 - 스킵`)
+        console.log(`⚠️  [${order.orderNumber}] ${order.buyerName} - 결제일 정보 없음 (스킵)`)
         continue
       }
 
