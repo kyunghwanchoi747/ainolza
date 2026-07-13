@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { User, Mail, Phone, LogOut, ShoppingBag, ChevronDown, ChevronUp, GraduationCap, Star, MessageSquare } from 'lucide-react'
 import { RefundRequestModal } from '@/components/mypage/refund-request-modal'
+import { ClassroomCard } from '@/components/mypage/classroom-card'
 
 type ClassroomMeta = { slug: string; shortTitle: string; level: string; description?: string }
 
@@ -408,45 +409,15 @@ export default function MyPage() {
                 {ownedClassrooms.map((c) => {
                   const expiry = getExpiry(c.slug)
                   const expired = expiry?.expired ?? false
-                  return expired ? (
-                    <div
+                  return (
+                    <ClassroomCard
                       key={c.slug}
-                      className="block p-4 rounded-xl border border-line bg-[#fafafa] opacity-60"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="inline-block px-2 py-0.5 text-[10px] font-medium rounded-full bg-gray-100 text-gray-400 mb-1">
-                            {c.level}
-                          </div>
-                          <p className="font-medium text-sub text-sm line-through">{c.shortTitle}</p>
-                          <p className="text-[11px] text-red-400 font-medium mt-0.5">
-                            수강 기간 종료 ({expiry!.date.toLocaleDateString('ko-KR')} 만료)
-                          </p>
-                        </div>
-                        <span className="text-gray-300 text-sm">종료</span>
-                      </div>
-                    </div>
-                  ) : (
-                    <Link
-                      key={c.slug}
-                      href={`/classroom/${c.slug}`}
-                      className="block p-4 rounded-xl border border-line hover:border-[#D4756E] hover:bg-brand-light transition-all"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="inline-block px-2 py-0.5 text-[10px] font-medium rounded-full bg-brand-light text-brand mb-1">
-                            {c.level}
-                          </div>
-                          <p className="font-medium text-ink text-sm">{c.shortTitle}</p>
-                          {expiry && (
-                            <p className={`text-[11px] mt-0.5 font-medium ${expiry.daysLeft <= 14 ? 'text-orange-400' : 'text-sub'}`}>
-                              수강 기간 D-{expiry.daysLeft} ({expiry.date.toLocaleDateString('ko-KR')} 까지)
-                            </p>
-                          )}
-                        </div>
-                        <span className="text-brand text-sm">입장 →</span>
-                      </div>
-                    </Link>
+                      slug={c.slug}
+                      level={c.level}
+                      shortTitle={c.shortTitle}
+                      expired={expired}
+                      expiry={expiry || undefined}
+                    />
                   )
                 })}
               </div>
