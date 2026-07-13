@@ -232,6 +232,41 @@ export async function sendRefundCompletedToBuyer(
   })
 }
 
+/** 수강 기간 만료 → 사용자에게 안내 */
+export async function sendEnrollmentCompletedToBuyer(
+  payload: Payload,
+  order: { orderNumber: string; buyerName?: string | null; buyerEmail: string; productName: string; paidAt?: string | null },
+) {
+  const name = order.buyerName || order.buyerEmail.split('@')[0]
+  const paidDate = order.paidAt ? new Date(order.paidAt).toLocaleDateString('ko-KR') : '(날짜 정보 없음)'
+  await payload.sendEmail({
+    to: order.buyerEmail,
+    subject: '[AI놀자] 수강 기간이 만료되었습니다',
+    html: wrap(
+      `${name}님, 수강 기간이 만료되었습니다`,
+      `
+      <p style="color:#666;font-size:15px;line-height:1.7;margin:0 0 20px;">
+        100일간의 수강 기간이 만료되었습니다. 강의 시청 감사합니다.
+      </p>
+      <table cellpadding="6" cellspacing="0" style="width:100%;background:#fafafa;border-radius:10px;padding:8px;margin:0 0 24px;font-size:13px;color:#666;">
+        <tr><td style="width:90px;color:#999;">주문번호</td><td style="font-family:monospace;">${order.orderNumber}</td></tr>
+        <tr><td style="color:#999;">상품</td><td><strong style="color:#1a1a1a;">${order.productName}</strong></td></tr>
+        <tr><td style="color:#999;">결제일</td><td>${paidDate}</td></tr>
+      </table>
+      <p style="color:#666;font-size:14px;line-height:1.7;margin:0 0 24px;">
+        강의 영상과 자료에 더 이상 접근할 수 없습니다.<br>
+        다음 기수 모집이나 추가 자료 구매에 관심이 있으시면 문의해 주세요.
+      </p>
+      <div style="text-align:center;margin:28px 0;">
+        <a href="${SITE_URL}/store" style="display:inline-block;background:#D4756E;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:10px;font-size:14px;font-weight:bold;">다른 강의 보러가기</a>
+      </div>
+      <p style="color:#999;font-size:12px;line-height:1.6;margin:24px 0 0;">
+        문의사항은 <a href="${KAKAO_OPEN_CHAT}" style="color:#D4756E;">카카오톡 오픈채팅</a>으로 부탁드립니다.
+      </p>`,
+    ),
+  })
+}
+
 /** 심화반 결제 시 → 단톡방 안내 자동 발송 */
 export async function sendAdvancedClassGroupChat(
   payload: Payload,

@@ -7,6 +7,7 @@ import {
   sendRefundRequestedToAdmin,
   sendRefundCompletedToBuyer,
   sendAdvancedClassGroupChat,
+  sendEnrollmentCompletedToBuyer,
 } from '../lib/email-templates'
 import { resolveGrantedClassrooms } from '../lib/classroom-grant'
 
@@ -127,6 +128,10 @@ export const Orders: CollectionConfig = {
           if (newStatus === 'refunded') {
             try { await sendRefundCompletedToBuyer(req.payload, d) } catch (e) { console.error('[REFUNDED]', (e as Error).message) }
         // try { await logEmailSent(req.payload, { to: d.buyerEmail, subject: `환불완료`, type: 'refund-buyer', relatedId: oid }) } catch {}  // TODO: 로깅 재활성화
+          }
+
+          if (newStatus === 'completed') {
+            try { await sendEnrollmentCompletedToBuyer(req.payload, d) } catch (e) { console.error('[ENROLLMENT COMPLETED]', (e as Error).message) }
           }
         }
       },
