@@ -1,10 +1,15 @@
 import Link from 'next/link'
+import { ScrollRevealInit } from '@/components/ui/scroll-reveal'
 
 /**
  * 바이브 코딩 [입문] VOD 상세페이지 본문.
  * 기존 캔바 상세페이지(라이브 기수용)의 카피·후기·비용표를 코드로 재구성한 버전.
  * 시니어 타깃이라 글자 크게, 톤은 ink/sub/line/surface/brand만 사용.
  * 인증샷 이미지: public/store/vibe-coding-101-vod/proof-1~3.png (실제 수강생 카톡 캡처)
+ *
+ * 스크롤 등장 애니메이션: data-reveal (globals.css 정의).
+ * 레이아웃의 ScrollRevealInit은 클라이언트 내비게이션 시 재실행되지 않으므로
+ * 이 컴포넌트 안에 한 번 더 마운트한다 (중복 마운트 무해).
  */
 
 const CHECKOUT_URL = '/checkout?slug=vibe-coding-101-vod&pay=transfer'
@@ -90,24 +95,28 @@ const TOOL_COSTS = [
 
 export function VodDetailContent() {
   return (
-    <div className="border-t border-line">
+    <div className="border-t border-line overflow-hidden">
+      <ScrollRevealInit />
+
       {/* 1. 후킹 */}
       <section className="py-20 px-6">
         <div className="max-w-[900px] mx-auto text-center">
-          <p className="text-brand text-sm md:text-base font-bold mb-4 tracking-wide">
-            30~60대 왕초보를 위한 바이브 코딩 실전
-          </p>
-          <h2 className="text-3xl md:text-[40px] font-extrabold text-ink leading-[1.3] mb-6">
-            코딩 몰라도 괜찮아요.
-            <br />
-            처음부터 끝까지 따라만 하면 완성.
-          </h2>
-          <p className="text-body text-base md:text-lg leading-relaxed mb-8">
+          <div data-reveal>
+            <p className="text-brand text-sm md:text-base font-bold mb-4 tracking-wide">
+              30~60대 왕초보를 위한 바이브 코딩 실전
+            </p>
+            <h2 className="text-3xl md:text-[40px] font-extrabold text-ink leading-[1.3] mb-6">
+              코딩 몰라도 괜찮아요.
+              <br />
+              처음부터 끝까지 따라만 하면 완성.
+            </h2>
+          </div>
+          <p data-reveal data-reveal-delay="150" className="text-body text-base md:text-lg leading-relaxed mb-8">
             AI와 함께 내 웹서비스를 만들고, 광고 수익까지 연결합니다.
             <br className="hidden md:block" />
             HTML, CSS 같은 건 몰라도 됩니다 — AI가 다 써줍니다.
           </p>
-          <div className="flex flex-wrap justify-center gap-2">
+          <div data-reveal data-reveal-delay="300" className="flex flex-wrap justify-center gap-2">
             {['초보자도 OK', '실습 워크북 증정', '반복 시청'].map((tag) => (
               <span key={tag} className="px-4 py-1.5 rounded-full border border-line bg-surface text-sub text-sm font-medium">
                 {tag}
@@ -120,7 +129,7 @@ export function VodDetailContent() {
       {/* 2. 수강생 후기 + 인증샷 */}
       <section className="py-20 px-6 bg-surface border-t border-line">
         <div className="max-w-[720px] mx-auto">
-          <div className="text-center mb-12">
+          <div data-reveal className="text-center mb-12">
             <p className="text-brand text-sm font-bold mb-3 tracking-wide">수강생 전용방</p>
             <h2 className="text-2xl md:text-3xl font-extrabold text-ink">
               &ldquo;어쩌다 보니 성공&rdquo;
@@ -129,10 +138,10 @@ export function VodDetailContent() {
             </h2>
           </div>
 
-          {/* 핵심 후기 말풍선 */}
+          {/* 핵심 후기 말풍선 — 카톡처럼 왼쪽에서 등장 */}
           <div className="space-y-6 mb-12">
-            {REVIEWS.map((r) => (
-              <div key={r.quote}>
+            {REVIEWS.map((r, i) => (
+              <div key={r.quote} data-reveal="right" data-reveal-delay={String(i * 150)}>
                 <div className="bg-white border border-line rounded-2xl rounded-bl-md px-6 py-5">
                   <p className="text-ink text-base md:text-lg font-medium leading-relaxed">
                     {r.quote}
@@ -146,7 +155,7 @@ export function VodDetailContent() {
           {/* 실제 카톡 인증샷 */}
           <div className="space-y-4 mb-8">
             {[1, 2, 3].map((n) => (
-              <div key={n} className="rounded-2xl overflow-hidden border border-line bg-white">
+              <div key={n} data-reveal className="rounded-2xl overflow-hidden border border-line bg-white">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={`/store/vibe-coding-101-vod/proof-${n}.png`}
@@ -159,7 +168,7 @@ export function VodDetailContent() {
           </div>
 
           {/* 단톡방 반응 한 줄 모음 */}
-          <div className="flex flex-wrap justify-center gap-2">
+          <div data-reveal className="flex flex-wrap justify-center gap-2">
             {KAKAO_REACTIONS.map((t) => (
               <span key={t} className="px-4 py-1.5 rounded-full bg-white border border-line text-sub text-sm">
                 {t}
@@ -172,7 +181,7 @@ export function VodDetailContent() {
       {/* 3. 결과물 */}
       <section className="py-20 px-6 border-t border-line">
         <div className="max-w-[900px] mx-auto">
-          <div className="text-center mb-12">
+          <div data-reveal className="text-center mb-12">
             <h2 className="text-2xl md:text-3xl font-extrabold text-ink leading-snug">
               이 강의가 끝나면,
               <br className="md:hidden" /> 이런 웹사이트가 내 것이 됩니다
@@ -188,8 +197,13 @@ export function VodDetailContent() {
               { step: '1', title: '자동 수집', desc: '공공데이터를 매일 자동으로 가져옵니다' },
               { step: '2', title: 'AI가 글 작성', desc: 'AI가 수집한 정보로 블로그 글을 씁니다' },
               { step: '3', title: '자동 발행', desc: '완성된 글이 사이트에 자동으로 올라갑니다' },
-            ].map((s) => (
-              <div key={s.step} className="border border-line rounded-2xl p-6 text-center">
+            ].map((s, i) => (
+              <div
+                key={s.step}
+                data-reveal
+                data-reveal-delay={String(i * 150)}
+                className="border border-line rounded-2xl p-6 text-center bg-white hover:-translate-y-1 hover:shadow-md transition-all duration-300"
+              >
                 <p className="text-brand font-extrabold text-sm mb-2">STEP {s.step}</p>
                 <p className="text-ink font-bold text-lg mb-2">{s.title}</p>
                 <p className="text-sub text-sm leading-relaxed">{s.desc}</p>
@@ -202,7 +216,7 @@ export function VodDetailContent() {
       {/* 4. 비용 구조 — 정직한 도구 비용표 */}
       <section className="py-20 px-6 bg-surface border-t border-line">
         <div className="max-w-[720px] mx-auto">
-          <div className="text-center mb-10">
+          <div data-reveal className="text-center mb-10">
             <h2 className="text-2xl md:text-3xl font-extrabold text-ink mb-4">
               서버비 0원. 프로그램비 0원.
             </h2>
@@ -214,7 +228,7 @@ export function VodDetailContent() {
               <strong className="text-ink">손해 볼 수 없는 구조</strong>로 시작하세요.
             </p>
           </div>
-          <div className="border-t-2 border-ink">
+          <div data-reveal data-reveal-delay="150" className="border-t-2 border-ink">
             <div className="flex py-3 border-b border-line text-sm font-bold text-ink">
               <span className="w-32 shrink-0">도구</span>
               <span className="flex-1">용도</span>
@@ -236,7 +250,7 @@ export function VodDetailContent() {
       {/* 5. 커리큘럼 */}
       <section className="py-20 px-6 border-t border-line">
         <div className="max-w-[720px] mx-auto">
-          <div className="text-center mb-12">
+          <div data-reveal className="text-center mb-12">
             <p className="text-brand text-sm font-bold mb-3 tracking-wide">
               Antigravity + Cloudflare + GitHub + Google AdSense
             </p>
@@ -256,8 +270,8 @@ export function VodDetailContent() {
               { n: '01', t: '기초 환경 세팅', d: '계정 만들기, GitHub·Cloudflare 가입, Antigravity 설치' },
               { n: '02', t: '바이브 코딩', d: '기획, 설계, 코드 요청, 배포. 도메인 연결까지' },
               { n: '03', t: '애드센스 수익화', d: 'AdSense 가입, 사이트 연결, 승인 후 광고 게재' },
-            ].map((s) => (
-              <div key={s.n} className="border-t-2 border-ink pt-4">
+            ].map((s, i) => (
+              <div key={s.n} data-reveal data-reveal-delay={String(i * 150)} className="border-t-2 border-ink pt-4">
                 <p className="text-brand font-extrabold text-sm mb-1">{s.n}</p>
                 <p className="text-ink font-bold text-base mb-2">{s.t}</p>
                 <p className="text-sub text-sm leading-relaxed">{s.d}</p>
@@ -268,7 +282,7 @@ export function VodDetailContent() {
           {/* 27강 상세 */}
           <div className="space-y-10">
             {CURRICULUM_GROUPS.map((g) => (
-              <div key={g.name}>
+              <div key={g.name} data-reveal>
                 <div className="flex items-baseline justify-between border-b-2 border-ink pb-2 mb-4">
                   <h3 className="text-ink font-extrabold text-lg md:text-xl">{g.name}</h3>
                   <span className="text-brand font-bold text-sm shrink-0 ml-3">{g.count}</span>
@@ -291,7 +305,7 @@ export function VodDetailContent() {
       {/* 6. 성공은 우연이 아닙니다 */}
       <section className="py-20 px-6 bg-surface border-t border-line">
         <div className="max-w-[720px] mx-auto text-center">
-          <h2 className="text-2xl md:text-3xl font-extrabold text-ink mb-12">
+          <h2 data-reveal className="text-2xl md:text-3xl font-extrabold text-ink mb-12">
             성공은 우연이 아닙니다
           </h2>
           <div className="grid md:grid-cols-3 gap-4 mb-14 text-left">
@@ -299,30 +313,37 @@ export function VodDetailContent() {
               { t: '잘 짜여진 커리큘럼', d: '핵심만 쏙쏙, 단시간에 결과가 나오는 순서' },
               { t: '반복 시청 VOD', d: '이해될 때까지 몇 번이고 다시 볼 수 있습니다' },
               { t: '따라만 해도 완성되는 가이드북', d: '매 회차 노션 가이드북으로 그대로 따라 하기' },
-            ].map((p) => (
-              <div key={p.t} className="bg-white border border-line rounded-2xl p-6">
+            ].map((p, i) => (
+              <div
+                key={p.t}
+                data-reveal
+                data-reveal-delay={String(i * 150)}
+                className="bg-white border border-line rounded-2xl p-6 hover:-translate-y-1 hover:shadow-md transition-all duration-300"
+              >
                 <p className="text-ink font-bold text-base mb-2">{p.t}</p>
                 <p className="text-sub text-sm leading-relaxed">{p.d}</p>
               </div>
             ))}
           </div>
-          <p className="text-ink text-xl md:text-2xl font-extrabold mb-4">
-            하지만 여전히 &lsquo;딸깍&rsquo;은 없습니다.
-          </p>
-          <p className="text-body text-base leading-relaxed">
-            수강생들의 이야기처럼 차분함과 인내심을 가지면,
-            <br className="hidden md:block" />
-            어리둥절한 사이 어느새 성공해서 눈물이 그렁그렁해집니다.
-            <br />
-            <strong className="text-ink">&ldquo;이걸 내가 했다고?&rdquo;</strong>
-          </p>
+          <div data-reveal>
+            <p className="text-ink text-xl md:text-2xl font-extrabold mb-4">
+              하지만 여전히 &lsquo;딸깍&rsquo;은 없습니다.
+            </p>
+            <p className="text-body text-base leading-relaxed">
+              수강생들의 이야기처럼 차분함과 인내심을 가지면,
+              <br className="hidden md:block" />
+              어리둥절한 사이 어느새 성공해서 눈물이 그렁그렁해집니다.
+              <br />
+              <strong className="text-ink">&ldquo;이걸 내가 했다고?&rdquo;</strong>
+            </p>
+          </div>
         </div>
       </section>
 
       {/* 7. 이런 분께 추천 */}
       <section className="py-20 px-6 border-t border-line">
         <div className="max-w-[720px] mx-auto">
-          <h2 className="text-2xl md:text-3xl font-extrabold text-ink text-center mb-12">
+          <h2 data-reveal className="text-2xl md:text-3xl font-extrabold text-ink text-center mb-12">
             이런 분들께 추천 드려요
           </h2>
           <ul className="space-y-6">
@@ -330,8 +351,8 @@ export function VodDetailContent() {
               { t: '코딩을 한 번도 배운 적 없는 분', d: 'HTML, CSS, JS 몰라도 AI가 다 써줍니다' },
               { t: '부업·수익화를 원하는 분', d: '광고 수익형 웹사이트로 비용 부담 없는 부수입 구조' },
               { t: '내 아이디어를 빠르게 웹으로 만들고 싶은 분', d: '기획부터 개발, 배포까지 원스톱' },
-            ].map((row) => (
-              <li key={row.t} className="border-l-2 border-brand pl-5 py-1">
+            ].map((row, i) => (
+              <li key={row.t} data-reveal="right" data-reveal-delay={String(i * 150)} className="border-l-2 border-brand pl-5 py-1">
                 <p className="text-ink text-base md:text-lg font-bold leading-relaxed">{row.t}</p>
                 <p className="text-sub text-sm md:text-base mt-1">{row.d}</p>
               </li>
@@ -342,7 +363,7 @@ export function VodDetailContent() {
 
       {/* 8. 강사 한마디 */}
       <section className="py-20 px-6 bg-surface border-t border-line">
-        <div className="max-w-[720px] mx-auto text-center">
+        <div data-reveal className="max-w-[720px] mx-auto text-center">
           <p className="text-brand text-sm font-bold mb-8 tracking-wide">강사의 한마디</p>
           <p className="text-body text-base md:text-lg leading-loose mb-8">
             상상력이 곧 현실이 되는 시대입니다. 과거에는 꿈으로만 여겨졌던 아이디어들이
@@ -362,10 +383,10 @@ export function VodDetailContent() {
       {/* 9. 수강 방식 */}
       <section className="py-20 px-6 border-t border-line">
         <div className="max-w-[720px] mx-auto">
-          <h2 className="text-2xl md:text-3xl font-extrabold text-ink text-center mb-12">
+          <h2 data-reveal className="text-2xl md:text-3xl font-extrabold text-ink text-center mb-12">
             결제 즉시, 100일 동안
           </h2>
-          <div className="divide-y divide-line border-t border-b border-line">
+          <div data-reveal data-reveal-delay="150" className="divide-y divide-line border-t border-b border-line">
             {[
               { t: '즉시 시청', d: '결제 즉시 전 회차를 바로 볼 수 있습니다' },
               { t: '100일 수강', d: '결제일로부터 100일간 무제한 반복 시청' },
@@ -384,26 +405,30 @@ export function VodDetailContent() {
       {/* 10. 현금 할인 이벤트 CTA */}
       <section className="py-20 px-6 bg-brand-light border-t border-line">
         <div className="max-w-[720px] mx-auto text-center">
-          <p className="text-ink text-xl md:text-2xl font-extrabold mb-8">
+          <p data-reveal className="text-ink text-xl md:text-2xl font-extrabold mb-8">
             고민은 시작만 늦출 뿐
           </p>
-          <p className="text-brand text-sm md:text-base font-bold mb-3 tracking-wide">
-            VOD 런칭 기념 · 기간 한정
-          </p>
-          <h2 className="text-2xl md:text-3xl font-extrabold text-ink mb-6">
-            현금 할인 이벤트
-          </h2>
-          <div className="flex items-baseline justify-center gap-4 mb-3">
-            <span className="text-sub text-xl md:text-2xl line-through">119,000원</span>
-            <span className="text-brand text-4xl md:text-5xl font-extrabold">89,000원</span>
+          <div data-reveal data-reveal-delay="150">
+            <p className="text-brand text-sm md:text-base font-bold mb-3 tracking-wide">
+              VOD 런칭 기념 · 기간 한정
+            </p>
+            <h2 className="text-2xl md:text-3xl font-extrabold text-ink mb-6">
+              현금 할인 이벤트
+            </h2>
+            <div className="flex items-baseline justify-center gap-4 mb-3">
+              <span className="text-sub text-xl md:text-2xl line-through">119,000원</span>
+              <span className="text-brand text-4xl md:text-5xl font-extrabold">89,000원</span>
+            </div>
+            <p className="text-sub text-sm mb-10">계좌이체 · 무통장 입금 결제 시 적용됩니다</p>
           </div>
-          <p className="text-sub text-sm mb-10">계좌이체 · 무통장 입금 결제 시 적용됩니다</p>
-          <Link
-            href={CHECKOUT_URL}
-            className="inline-block px-12 py-4 bg-brand text-white font-bold text-lg rounded-xl hover:bg-brand-dark transition-colors"
-          >
-            할인가로 수강 신청하기 →
-          </Link>
+          <div data-reveal data-reveal-delay="300">
+            <Link
+              href={CHECKOUT_URL}
+              className="inline-block px-12 py-4 bg-brand text-white font-bold text-lg rounded-xl hover:bg-brand-dark hover:-translate-y-0.5 transition-all"
+            >
+              할인가로 수강 신청하기 →
+            </Link>
+          </div>
         </div>
       </section>
     </div>
