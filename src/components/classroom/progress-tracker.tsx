@@ -27,7 +27,7 @@ export function ProgressTracker({ classroomId, totalSessions }: ProgressTrackerP
     try {
       const res = await fetch('/api/classroom-progress', { credentials: 'include' })
       if (res.ok) {
-        const data = await res.json()
+        const data = await res.json() as { progress: any[] }
         const classroomProgress = data.progress.find(
           (p: any) => String(p.classroom) === String(classroomId) || (typeof p.classroom === 'object' && p.classroom?.id === classroomId),
         )
@@ -53,7 +53,7 @@ export function ProgressTracker({ classroomId, totalSessions }: ProgressTrackerP
       })
 
       if (res.ok) {
-        const updated = await res.json()
+        const updated = await res.json() as Progress
         setProgress({
           progressPercent: updated.progressPercent,
           completedSessions: updated.completedSessions,

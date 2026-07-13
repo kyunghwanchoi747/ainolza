@@ -30,7 +30,7 @@ export function ClassroomCard({ slug, level, shortTitle, expired, expiry }: Clas
       try {
         const res = await fetch('/api/classroom-progress', { credentials: 'include' })
         if (res.ok) {
-          const data = await res.json()
+          const data = await res.json() as { progress: any[] }
           const classroomProgress = data.progress.find((p: any) => {
             // slug 기반 매칭 (classroom이 객체일 수 있음)
             if (typeof p.classroom === 'object') {

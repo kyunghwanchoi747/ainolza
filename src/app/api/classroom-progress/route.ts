@@ -36,7 +36,7 @@ export async function POST(req: Request) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { classroomId, sessionNumber } = await req.json()
+    const { classroomId, sessionNumber } = await req.json() as { classroomId: number; sessionNumber: number }
 
     if (!classroomId || !sessionNumber) {
       return Response.json({ error: 'Missing classroomId or sessionNumber' }, { status: 400 })
