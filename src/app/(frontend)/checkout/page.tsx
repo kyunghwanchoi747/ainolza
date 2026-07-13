@@ -393,8 +393,8 @@ function CheckoutContent() {
             <div className="mb-6 p-4 md:p-5 rounded-2xl bg-brand-light border-2 border-brand cursor-pointer hover:shadow-lg transition-shadow" onClick={handleEventBannerClick}>
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <h3 className="font-bold text-brand text-base md:text-lg mb-1">🎁 VOD 런칭 기념 현금 할인 이벤트</h3>
-                  <p className="text-sm text-sub">선착순 50명 한정! 계좌이체 결제 시 최대 50,000원 현금 환급</p>
+                  <h3 className="font-bold text-brand text-base md:text-lg mb-1">VOD 런칭 기념 현금 할인 이벤트</h3>
+                  <p className="text-sm text-sub">계좌이체(현금) 결제 시 할인 혜택을 드립니다</p>
                 </div>
                 <div className="shrink-0 px-4 py-2 bg-brand text-white rounded-lg font-bold text-sm whitespace-nowrap hover:bg-brand-dark transition-colors">
                   자세히 보기 →

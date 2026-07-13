@@ -205,6 +205,16 @@ export default async function ProductDetailPage({
                 <p className="mb-6 text-base text-sub">가격 정보 준비 중</p>
               )}
 
+              {/* VOD 런칭 기념 이벤트 배너 */}
+              {product.slug === 'vibe-coding-101-vod' && (
+                <div className="mb-4 px-4 py-3 rounded-xl bg-brand-light border border-[#D4756E]">
+                  <p className="text-brand text-xs font-extrabold mb-1">VOD 런칭 기념 현금 할인 이벤트</p>
+                  <p className="text-sub text-xs leading-relaxed">
+                    계좌이체(현금) 결제 시 할인 혜택을 드립니다. 결제 페이지에서 계좌이체를 선택하세요.
+                  </p>
+                </div>
+              )}
+
               {/* 상품 유형별 안내 박스 — 무채색 톤으로 통일 */}
               {product.type === 'class' && (
                 <div className="mb-4 px-4 py-3 rounded-xl bg-surface border border-line">
