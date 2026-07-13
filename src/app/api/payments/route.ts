@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getPayloadClient } from '@/lib/payload'
 import { rateLimit, getClientIP } from '@/lib/rate-limit'
 import { resolveCurrentPrice } from '@/lib/price-schedule'
+import { cashEventAmount } from '@/lib/cash-discount'
 
 // 주문 생성 (결제 전)
 export async function POST(request: NextRequest) {
@@ -86,6 +87,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '가격이 설정되지 않은 상품입니다.' }, { status: 400 })
     }
 
+    // VOD 런칭 현금 할인 — 계좌이체/무통장일 때만 이벤트가 적용 (클라이언트와 동일 규칙)
+    const cashEvent = cashEventAmount(productSlug, payMethod, baseAmount)
+
     // 쿠폰 검증 — 코드가 들어왔을 때만. 검증 실패하면 무시(쿠폰 없는 것처럼 동작).
     // 결제 시스템 코어 로직(기존 가격 검증)은 그대로, 쿠폰 할인은 외부 함수처럼 적용.
     let couponDiscount = 0
@@ -119,9 +123,9 @@ export async function POST(request: NextRequest) {
 
           if (ownerOk && notExpired) {
             if (coupon.discountType === 'percent' && coupon.discountPercent) {
-              couponDiscount = Math.floor((baseAmount * coupon.discountPercent) / 100)
+              couponDiscount = Math.floor((cashEvent.amount * coupon.discountPercent) / 100)
             } else if (coupon.discountType === 'amount' && coupon.discountAmount) {
-              couponDiscount = Math.min(coupon.discountAmount, baseAmount)
+              couponDiscount = Math.min(coupon.discountAmount, cashEvent.amount)
             }
             if (couponDiscount > 0) validatedCouponCode = coupon.code
           }
@@ -131,8 +135,8 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 최종 결제 금액 = 기준가 - 쿠폰 할인
-    const authoritativeAmount = baseAmount - couponDiscount
+    // 최종 결제 금액 = 기준가 - 현금 할인 - 쿠폰 할인
+    const authoritativeAmount = cashEvent.amount - couponDiscount
 
     // 클라이언트가 보낸 amount와 1원이라도 다르면 거부 → UI 결제버튼/서버 가격 일치 보장
     if (typeof amount === 'number' && amount !== authoritativeAmount) {

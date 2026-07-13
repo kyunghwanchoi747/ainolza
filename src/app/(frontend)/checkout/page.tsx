@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
 import * as PortOne from '@portone/browser-sdk/v2'
 import { resolveCurrentPrice } from '@/lib/price-schedule'
+import { cashEventAmount } from '@/lib/cash-discount'
 import { BundleUpsell } from '@/components/checkout/bundle-upsell'
 
 const PORTONE_STORE_ID = process.env.NEXT_PUBLIC_PORTONE_STORE_ID || ''
@@ -79,20 +80,23 @@ function CheckoutContent() {
   const originalAmount = dbProduct?.originalPrice ?? baseAmount
   const requiresShipping = !!dbProduct?.requiresShipping
 
-  // 선택된 쿠폰에 따른 할인 계산
+  // VOD 런칭 현금 할인 — 계좌이체/무통장 선택 시 이벤트가 (서버와 동일 규칙)
+  const cashEvent = cashEventAmount(productSlug, payMethod, baseAmount)
+
+  // 선택된 쿠폰에 따른 할인 계산 — 현금 할인 적용 후 금액 기준
   const selectedCoupon = coupons.find((c) => c.code === selectedCouponCode)
   const couponDiscount = (() => {
-    if (!selectedCoupon || baseAmount <= 0) return 0
+    if (!selectedCoupon || cashEvent.amount <= 0) return 0
     if (selectedCoupon.discountType === 'percent' && selectedCoupon.discountPercent) {
-      return Math.floor((baseAmount * selectedCoupon.discountPercent) / 100)
+      return Math.floor((cashEvent.amount * selectedCoupon.discountPercent) / 100)
     }
     if (selectedCoupon.discountType === 'amount' && selectedCoupon.discountAmount) {
-      return Math.min(selectedCoupon.discountAmount, baseAmount)
+      return Math.min(selectedCoupon.discountAmount, cashEvent.amount)
     }
     return 0
   })()
-  // 서버 검증과 동일 — 기준가에서 쿠폰 할인 차감한 최종 결제 금액
-  const amount = baseAmount - couponDiscount
+  // 서버 검증과 동일 — 기준가에서 현금 할인·쿠폰 할인 차감한 최종 결제 금액
+  const amount = cashEvent.amount - couponDiscount
 
   // 추천 코드 — 쿠키에서 읽기 (ReferralTracker가 저장)
   const referredByCode = (() => {
@@ -384,7 +388,8 @@ function CheckoutContent() {
     productType === 'class' ? '온라인 강의' :
     productType === 'ebook' ? '전자책' :
     productType === 'book' ? '종이책' : '상품'
-  const discount = Math.max(0, originalAmount - amount)
+  // 상품 자체 할인(정가 대비) — 현금 할인·쿠폰은 별도 줄로 표시하므로 여기서 제외
+  const discount = Math.max(0, originalAmount - baseAmount)
 
   const handleEventBannerClick = () => {
     setPayMethod('TRANSFER')
@@ -405,7 +410,7 @@ function CheckoutContent() {
               <div className="flex items-center justify-between gap-4">
                 <div>
                   <h3 className="font-bold text-brand text-base md:text-lg mb-1">VOD 런칭 기념 현금 할인 이벤트</h3>
-                  <p className="text-sm text-sub">계좌이체(현금) 결제 시 할인 혜택을 드립니다</p>
+                  <p className="text-sm text-sub">계좌이체·무통장 입금 선택 시 25% 할인이 적용됩니다</p>
                 </div>
                 <div className="shrink-0 px-4 py-2 bg-brand text-white rounded-lg font-bold text-sm whitespace-nowrap hover:bg-brand-dark transition-colors">
                   자세히 보기 →
@@ -417,12 +422,15 @@ function CheckoutContent() {
           <div className="grid lg:grid-cols-[1fr_380px] gap-6">
             {/* ─── 좌측: 주문 상품 + 주문자 + 배송지 ─── */}
             <div className="space-y-6">
-              {/* 번들 업셀 — 입문 단독 슬러그일 때만 자동 표시 */}
-              <BundleUpsell
-                currentSlug={productSlug}
-                bundleSlug="vibe-coding-bundle-2"
-                currentPrice={amount}
-              />
+              {/* 번들 업셀 — 입문 단독 슬러그일 때만 자동 표시.
+                  VOD 상품은 제외 (심화반 VOD 미녹화로 6주 풀패키지 판매 불가) */}
+              {productSlug !== 'vibe-coding-101-vod' && (
+                <BundleUpsell
+                  currentSlug={productSlug}
+                  bundleSlug="vibe-coding-bundle-2"
+                  currentPrice={amount}
+                />
+              )}
 
               {/* 주문 상품 정보 */}
               <div className="p-5 md:p-6 rounded-2xl bg-white border border-line">
@@ -614,6 +622,12 @@ function CheckoutContent() {
                       <div className="flex justify-between">
                         <span className="text-sub">상품 할인금액</span>
                         <span className="text-brand">- {discount.toLocaleString()}원</span>
+                      </div>
+                    )}
+                    {cashEvent.discount > 0 && (
+                      <div className="flex justify-between">
+                        <span className="text-sub">VOD 런칭 현금 할인</span>
+                        <span className="text-brand">- {cashEvent.discount.toLocaleString()}원</span>
                       </div>
                     )}
                     {couponDiscount > 0 && (
