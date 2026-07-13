@@ -9,6 +9,7 @@ import { V3Header } from '@/components/landing/v3-header'
 import { PriceStageCountdown } from '@/components/store/price-stage-countdown'
 import { PrimaryButtonCard, KakaoButton, OutlineButton } from '@/components/design-system/buttons'
 import { ReferralTracker } from '@/components/referrals/referral-tracker'
+import { VodDetailContent } from '@/components/store/vod-detail-content'
 
 export const dynamic = 'force-dynamic'
 
@@ -273,6 +274,9 @@ export default async function ProductDetailPage({
           </div>
         </div>
       </section>
+
+      {/* VOD 상세 본문 — 코드로 구현한 상세페이지 (캔바 이미지 대체) */}
+      {product.slug === 'vibe-coding-101-vod' && <VodDetailContent />}
 
       {/* 상세 이미지 — public/store/{slug}/detail-1~N.{ext} */}
       {detailImages.length > 0 && (
