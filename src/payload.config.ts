@@ -24,6 +24,7 @@ import { Orders } from './collections/Orders'
 import { EmailLogs } from './collections/EmailLogs'
 import { Reviews } from './collections/Reviews'
 import { Classrooms } from './collections/Classrooms'
+import { ClassroomProgress } from './collections/ClassroomProgress'
 import { Ebooks } from './collections/Ebooks'
 import { Referrals } from './collections/Referrals'
 import { Coupons } from './collections/Coupons'
@@ -101,7 +102,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, DesignPages, Products, ProductCategories, Posts, Comments, Programs, SiteSettings, Enrollments, Orders, Reviews, Classrooms, Ebooks, Referrals, Coupons, WebhookEvents, Waitlists],
+  collections: [Users, Media, DesignPages, Products, ProductCategories, Posts, Comments, Programs, SiteSettings, Enrollments, Orders, Reviews, Classrooms, ClassroomProgress, Ebooks, Referrals, Coupons, WebhookEvents, Waitlists],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || 'dev-secret-change-in-production',
   db: dbAdapter,
