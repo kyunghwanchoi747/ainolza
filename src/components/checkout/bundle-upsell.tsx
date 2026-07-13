@@ -13,6 +13,8 @@ type Props = {
   currentPrice: number
   /** 입문 단독 슬러그 패턴 — 이 슬러그에서만 업셀 노출 */
   enabledSlugPattern?: RegExp
+  /** 제공 형태 고지 등 안내 문구 — 비교 카드 아래 작은 글씨로 표시 */
+  note?: string
 }
 
 /**
@@ -26,6 +28,7 @@ export function BundleUpsell({
   bundleSlug,
   currentPrice,
   enabledSlugPattern = /^vibe-coding-101/,
+  note,
 }: Props) {
   const router = useRouter()
   const [bundle, setBundle] = useState<{
@@ -126,6 +129,10 @@ export function BundleUpsell({
           <div className="text-xs text-blue-100 mt-1">입문 2주 + 심화 4주 = 풀코스</div>
         </div>
       </div>
+
+      {note && (
+        <p className="text-xs text-gray-500 leading-relaxed mb-3">{note}</p>
+      )}
 
       <button
         type="button"

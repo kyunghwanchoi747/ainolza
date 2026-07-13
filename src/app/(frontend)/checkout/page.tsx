@@ -422,15 +422,13 @@ function CheckoutContent() {
           <div className="grid lg:grid-cols-[1fr_380px] gap-6">
             {/* ─── 좌측: 주문 상품 + 주문자 + 배송지 ─── */}
             <div className="space-y-6">
-              {/* 번들 업셀 — 입문 단독 슬러그일 때만 자동 표시.
-                  VOD 상품은 제외 (심화반 VOD 미녹화로 6주 풀패키지 판매 불가) */}
-              {productSlug !== 'vibe-coding-101-vod' && (
-                <BundleUpsell
-                  currentSlug={productSlug}
-                  bundleSlug="vibe-coding-bundle-2"
-                  currentPrice={amount}
-                />
-              )}
+              {/* 번들 업셀 — 입문 단독 슬러그일 때만 자동 표시 */}
+              <BundleUpsell
+                currentSlug={productSlug}
+                bundleSlug="vibe-coding-bundle-2"
+                currentPrice={amount}
+                note="심화반 강의는 현재 라이브 녹화본으로 제공됩니다. 회차별로 분리된 VOD는 준비되는 대로 순차 업로드됩니다."
+              />
 
               {/* 주문 상품 정보 */}
               <div className="p-5 md:p-6 rounded-2xl bg-white border border-line">

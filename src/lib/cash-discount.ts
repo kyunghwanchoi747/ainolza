@@ -10,6 +10,10 @@
 export const CASH_EVENT_PRICES: Record<string, number> = {
   // 정상가 119,000원 → 현금 결제 89,000원 (약 25% 할인)
   'vibe-coding-101-vod': 89000,
+  // 6주 풀패키지: 카드 338,000원(입문 119,000 + 심화 패키지가 219,000)
+  // → 현금 결제 308,000원(입문 현금가 89,000 + 심화 패키지가 219,000)
+  // admin에서 번들 판매가를 338,000원으로 설정해야 적용됨 (기준가가 현금가보다 낮으면 미적용)
+  'vibe-coding-bundle-2': 308000,
 }
 
 const CASH_EVENT_METHODS = ['TRANSFER', 'DIRECT_BANK']
