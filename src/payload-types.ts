@@ -80,6 +80,7 @@ export interface Config {
     orders: Order;
     reviews: Review;
     classrooms: Classroom;
+    'classroom-progress': ClassroomProgress;
     ebooks: Ebook;
     referrals: Referral;
     coupons: Coupon;
@@ -108,6 +109,7 @@ export interface Config {
     orders: OrdersSelect<false> | OrdersSelect<true>;
     reviews: ReviewsSelect<false> | ReviewsSelect<true>;
     classrooms: ClassroomsSelect<false> | ClassroomsSelect<true>;
+    'classroom-progress': ClassroomProgressSelect<false> | ClassroomProgressSelect<true>;
     ebooks: EbooksSelect<false> | EbooksSelect<true>;
     referrals: ReferralsSelect<false> | ReferralsSelect<true>;
     coupons: CouponsSelect<false> | CouponsSelect<true>;
@@ -263,10 +265,6 @@ export interface Product {
    * 대기 신청 폼 상단에 표시. 예: "2기는 모집이 마감되었습니다. 3기 모집이 시작되면 가장 먼저 안내드립니다. 가격은 변동될 수 있습니다."
    */
   waitlistNotice?: string | null;
-  /**
-   * 체크하면 이 상품은 선수강(입문 결제) 조건 없이 누구나 결제 가능. 프로모션·예외 처리·외부 유입 대응 시 켜둠. 정책 복원하려면 다시 끄기.
-   */
-  bypassPrerequisite?: boolean | null;
   /**
    * 예) 슈퍼얼리버드/얼리버드/정가 단계별 가격을 시작일시와 함께 등록. 시작일시가 되면 자동으로 해당 가격이 적용됩니다. 비워두면 위 "판매가"가 그대로 적용됩니다. 입력 순서는 자유 — 시스템이 시간순으로 자동 정렬합니다.
    */
@@ -658,6 +656,30 @@ export interface Classroom {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "classroom-progress".
+ */
+export interface ClassroomProgress {
+  id: number;
+  user: number | User;
+  classroom: number | Classroom;
+  completedSessions?:
+    | {
+        sessionNumber: number;
+        completedAt: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * 완료한 회차 수 / 20 × 100 (자동 계산)
+   */
+  progressPercent: number;
+  lastAccessedAt?: string | null;
+  memo?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "referrals".
  */
 export interface Referral {
@@ -1005,6 +1027,10 @@ export interface PayloadLockedDocument {
         value: number | Classroom;
       } | null)
     | ({
+        relationTo: 'classroom-progress';
+        value: number | ClassroomProgress;
+      } | null)
+    | ({
         relationTo: 'ebooks';
         value: number | Ebook;
       } | null)
@@ -1138,7 +1164,6 @@ export interface ProductsSelect<T extends boolean = true> {
   discountUntil?: T;
   waitlistMode?: T;
   waitlistNotice?: T;
-  bypassPrerequisite?: T;
   priceSchedule?:
     | T
     | {
@@ -1391,6 +1416,26 @@ export interface ClassroomsSelect<T extends boolean = true> {
       };
   status?: T;
   order?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "classroom-progress_select".
+ */
+export interface ClassroomProgressSelect<T extends boolean = true> {
+  user?: T;
+  classroom?: T;
+  completedSessions?:
+    | T
+    | {
+        sessionNumber?: T;
+        completedAt?: T;
+        id?: T;
+      };
+  progressPercent?: T;
+  lastAccessedAt?: T;
+  memo?: T;
   updatedAt?: T;
   createdAt?: T;
 }
