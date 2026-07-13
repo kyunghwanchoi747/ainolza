@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import { getPayloadClient } from '@/lib/payload'
 import { getClassroomBySlug } from '@/lib/classrooms-db'
 import { SecretUnlock } from '@/components/classroom/secret-unlock'
+import { ProgressTracker } from '@/components/classroom/progress-tracker'
 
 export const dynamic = 'force-dynamic'
 
@@ -257,6 +258,13 @@ export default async function ClassroomDetailPage({
               자료 페이지 열기 →
             </a>
           </section>
+        )}
+
+        {/* 진도율 추적 */}
+        {classroom.sessions && classroom.sessions.length > 0 && (
+          <div className="mb-12 p-6 bg-brand-light rounded-2xl">
+            <ProgressTracker classroomId={(classroom as any).id} totalSessions={classroom.sessions.length} />
+          </div>
         )}
 
         {/* 회차별 영상 + 가이드북 */}
