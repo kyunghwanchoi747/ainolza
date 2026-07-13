@@ -90,54 +90,53 @@ export function BundleUpsell({
   }
 
   return (
-    <div className="rounded-2xl border-2 border-blue-300 bg-gradient-to-br from-blue-50 to-indigo-50 p-5 mb-4">
+    <div className="rounded-2xl border border-line bg-white p-5 mb-4">
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="flex-1">
-          <div className="flex items-center gap-2 text-blue-700 font-bold text-base mb-1">
-            <span aria-hidden>💡</span>
-            <span>잠깐! 심화까지 같이 들으면 더 이득입니다</span>
-          </div>
-          <div className="text-sm text-gray-700 leading-relaxed">
-            1기 입문 수강생 80명 중 <strong className="text-blue-700">절반인 40명이 심화까지 진행</strong>했습니다.
-            처음부터 6주 풀패키지로 신청하면 단독 합산 대비 <strong>최대 170,000원 절약</strong>됩니다.
-          </div>
+          <p className="text-ink font-bold text-base mb-1">
+            심화까지 같이 들으면 더 이득입니다
+          </p>
+          <p className="text-sm text-sub leading-relaxed">
+            1기 입문 수강생 80명 중 <strong className="text-ink">절반인 40명이 심화까지 진행</strong>했습니다.
+            처음부터 6주 풀패키지로 신청하면 단독 합산 대비 <strong className="text-ink">최대 170,000원 절약</strong>됩니다.
+          </p>
         </div>
         <button
           type="button"
           onClick={handleDismiss}
-          className="text-gray-400 hover:text-gray-600 text-sm shrink-0"
+          className="text-sub hover:text-ink text-xs shrink-0 underline underline-offset-2"
           aria-label="닫기"
         >
-          ✕
+          닫기
         </button>
       </div>
 
       <div className="grid sm:grid-cols-2 gap-3 mb-4">
-        <div className="rounded-lg bg-white border p-3">
-          <div className="text-xs text-gray-500 mb-1">현재 선택 — 입문만</div>
-          <div className="font-bold text-gray-700">{currentPrice.toLocaleString()}원</div>
-          <div className="text-xs text-gray-500 mt-1">2주 / 2회차</div>
+        <div className="rounded-lg border border-line bg-surface p-3">
+          <div className="text-xs text-sub mb-1">현재 선택 — 입문만</div>
+          <div className="font-bold text-ink">{currentPrice.toLocaleString()}원</div>
+          <div className="text-xs text-sub mt-1">입문 전 회차 VOD</div>
         </div>
-        <div className="rounded-lg bg-blue-600 text-white p-3 ring-2 ring-blue-300">
-          <div className="text-xs text-blue-100 mb-1">6주 풀패키지 ★</div>
-          <div className="font-extrabold">
+        <div className="rounded-lg border border-[#D4756E] bg-brand-light p-3">
+          <div className="text-xs text-brand font-bold mb-1">6주 풀패키지</div>
+          <div className="font-extrabold text-ink">
             {bundle.price.toLocaleString()}원
-            <span className="text-xs font-normal ml-1 text-blue-100">
+            <span className="text-xs font-normal ml-1 text-sub">
               (+{additionalForUpgrade.toLocaleString()}원)
             </span>
           </div>
-          <div className="text-xs text-blue-100 mt-1">입문 2주 + 심화 4주 = 풀코스</div>
+          <div className="text-xs text-sub mt-1">입문 + 심화 = 풀코스</div>
         </div>
       </div>
 
       {note && (
-        <p className="text-xs text-gray-500 leading-relaxed mb-3">{note}</p>
+        <p className="text-xs text-sub leading-relaxed mb-3 pt-3 border-t border-line">{note}</p>
       )}
 
       <button
         type="button"
         onClick={handleSwitch}
-        className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 transition text-white font-bold"
+        className="w-full py-3 rounded-xl bg-brand hover:bg-brand-dark transition-colors text-white font-bold"
       >
         6주 풀패키지로 변경하기 →
       </button>

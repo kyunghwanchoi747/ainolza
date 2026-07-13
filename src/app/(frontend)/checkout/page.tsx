@@ -406,7 +406,7 @@ function CheckoutContent() {
 
           {/* VOD 런칭 기념 이벤트 배너 */}
           {productSlug === 'vibe-coding-101-vod' && (
-            <div className="mb-6 p-4 md:p-5 rounded-2xl bg-brand-light border-2 border-brand cursor-pointer hover:shadow-lg transition-shadow" onClick={handleEventBannerClick}>
+            <div className="mb-6 p-4 md:p-5 rounded-2xl bg-brand-light border border-[#D4756E] cursor-pointer hover:shadow-md transition-shadow" onClick={handleEventBannerClick}>
               <div className="flex items-center justify-between gap-4">
                 <div>
                   <h3 className="font-bold text-brand text-base md:text-lg mb-1">VOD 런칭 기념 현금 할인 이벤트</h3>
@@ -478,12 +478,12 @@ function CheckoutContent() {
                       </span>
                       {phoneConfirmed ? (
                         // 확정 상태 — 표시 + 수정 버튼
-                        <div className="flex-1 flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-green-50 border border-green-200">
+                        <div className="flex-1 flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-surface border border-line">
                           <span className="text-ink font-medium">
                             {buyerPhone}
                           </span>
                           <span className="flex items-center gap-2 shrink-0">
-                            <span className="text-xs text-green-600 font-medium">✓ 확인됨</span>
+                            <span className="text-xs text-sub font-medium">확인됨</span>
                             <button
                               type="button"
                               onClick={() => setPhoneConfirmed(false)}
