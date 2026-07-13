@@ -1,0 +1,36 @@
+name: Auto Complete Enrollment (daily)
+
+on:
+  schedule:
+    # 매일 자정(UTC) = 한국시간 오전 9시
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: '테스트 모드 (실제 변경 안 함)'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  complete-enrollment:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      PAYLOAD_SECRET: ignore
+      NODE_ENV: production
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Run enrollment auto-complete
+        run: npx tsx scripts/auto-complete-enrollment.ts ${{ github.event.inputs.dry_run == 'true' && '--dry-run' || '' }}
