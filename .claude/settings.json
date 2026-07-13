@@ -158,7 +158,9 @@
       "WebFetch(domain:www.coursera.org)",
       "WebFetch(domain:www.digitalapplied.com)",
       "WebFetch(domain:www.skax.co.kr)",
-      "Bash(curl -s http://localhost:3001/api/admin)"
+      "Bash(curl -s http://localhost:3001/api/admin)",
+      "Bash(curl -s \"https://ainolza-web.stressoutcompany.workers.dev/api/orders?where[productSlug][equals]=vibe-coding-advanced&where[status][in]=paid,active,completed&limit=100&depth=2\")",
+      "Bash(git push *)"
     ],
     "additionalDirectories": [
       "c:\\Users\\USER\\Desktop\\_개발프로젝트\\AI놀자 홈페이지 이전\\src\\app\\api\\download"

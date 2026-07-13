@@ -239,6 +239,15 @@ export async function sendEnrollmentCompletedToBuyer(
 ) {
   const name = order.buyerName || order.buyerEmail.split('@')[0]
   const paidDate = order.paidAt ? new Date(order.paidAt).toLocaleDateString('ko-KR') : '(날짜 정보 없음)'
+
+  // paidAt + 100일 = 만료일
+  let expiryDate = '(날짜 정보 없음)'
+  if (order.paidAt) {
+    const expiry = new Date(order.paidAt)
+    expiry.setDate(expiry.getDate() + 100)
+    expiryDate = expiry.toLocaleDateString('ko-KR')
+  }
+
   await payload.sendEmail({
     to: order.buyerEmail,
     subject: '[AI놀자] 수강 기간이 만료되었습니다',
@@ -252,6 +261,7 @@ export async function sendEnrollmentCompletedToBuyer(
         <tr><td style="width:90px;color:#999;">주문번호</td><td style="font-family:monospace;">${order.orderNumber}</td></tr>
         <tr><td style="color:#999;">상품</td><td><strong style="color:#1a1a1a;">${order.productName}</strong></td></tr>
         <tr><td style="color:#999;">결제일</td><td>${paidDate}</td></tr>
+        <tr><td style="color:#999;">만료일</td><td><strong style="color:#D4756E;">${expiryDate}</strong></td></tr>
       </table>
       <p style="color:#666;font-size:14px;line-height:1.7;margin:0 0 24px;">
         강의 영상과 자료에 더 이상 접근할 수 없습니다.<br>

@@ -276,11 +276,11 @@ export default function MyPage() {
     return null
   }
 
-  // 보유한 강의실 (paid/active/completed인 주문에서 추출)
+  // 보유한 강의실 (paid/active인 주문만 — completed는 수강기간 만료로 접근 불가)
   const ownedClassrooms = useMemo(() => {
     const slugs = new Set<string>()
     for (const o of orders) {
-      if (!['paid', 'active', 'completed'].includes(o.status)) continue
+      if (!['paid', 'active'].includes(o.status)) continue
       const arr = (o as any).classrooms
       if (Array.isArray(arr)) {
         for (const s of arr) slugs.add(String(s))

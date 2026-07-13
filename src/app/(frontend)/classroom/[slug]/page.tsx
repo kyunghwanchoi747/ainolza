@@ -69,7 +69,7 @@ async function checkAccess(slug: string): Promise<AccessResult> {
       where: {
         and: [
           { user: { equals: (user as any).id } },
-          { status: { in: ['paid', 'active', 'completed'] } },
+          { status: { in: ['paid', 'active'] } },
         ],
       },
       limit: 200,
