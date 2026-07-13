@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
 import * as PortOne from '@portone/browser-sdk/v2'
@@ -20,6 +20,7 @@ type PayMethod = 'CARD' | 'TRANSFER' | 'DIRECT_BANK' | 'KAKAOPAY'
 function CheckoutContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const payMethodSectionRef = useRef<HTMLDivElement>(null)
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(false)
   const [agreed, setAgreed] = useState({ terms: false, refund: false, privacy: false })
@@ -374,11 +375,33 @@ function CheckoutContent() {
     productType === 'book' ? '종이책' : '상품'
   const discount = Math.max(0, originalAmount - amount)
 
+  const handleEventBannerClick = () => {
+    setPayMethod('TRANSFER')
+    setTimeout(() => {
+      payMethodSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 100)
+  }
+
   return (
     <div className="min-h-screen bg-[#fafafa]">
       <section className="pt-12 md:pt-16 pb-20 px-4 md:px-6">
         <div className="max-w-[1100px] mx-auto">
           <h1 className="text-2xl md:text-3xl font-bold text-ink mb-8 text-center">결제하기</h1>
+
+          {/* VOD 런칭 기념 이벤트 배너 */}
+          {productSlug === 'vibe-coding-101-vod' && (
+            <div className="mb-6 p-4 md:p-5 rounded-2xl bg-brand-light border-2 border-brand cursor-pointer hover:shadow-lg transition-shadow" onClick={handleEventBannerClick}>
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <h3 className="font-bold text-brand text-base md:text-lg mb-1">🎁 VOD 런칭 기념 현금 할인 이벤트</h3>
+                  <p className="text-sm text-sub">선착순 50명 한정! 계좌이체 결제 시 최대 50,000원 현금 환급</p>
+                </div>
+                <div className="shrink-0 px-4 py-2 bg-brand text-white rounded-lg font-bold text-sm whitespace-nowrap hover:bg-brand-dark transition-colors">
+                  자세히 보기 →
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="grid lg:grid-cols-[1fr_380px] gap-6">
             {/* ─── 좌측: 주문 상품 + 주문자 + 배송지 ─── */}
@@ -642,7 +665,7 @@ function CheckoutContent() {
                 )}
 
                 {/* 결제수단 */}
-                <div className="p-5 md:p-6 rounded-2xl bg-white border border-line">
+                <div ref={payMethodSectionRef} className="p-5 md:p-6 rounded-2xl bg-white border border-line">
                   <h2 className="text-base font-bold text-ink mb-4">결제수단</h2>
                   <div className="space-y-2">
                     {([

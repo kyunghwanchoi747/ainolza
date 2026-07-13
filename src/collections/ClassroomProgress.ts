@@ -73,6 +73,4 @@ export const ClassroomProgress: CollectionConfig = {
       label: '관리자 메모',
     },
   ],
-  // user + classroom 조합은 유니크 (중복 방지)
-  indexes: [['user', 'classroom']],
 }
