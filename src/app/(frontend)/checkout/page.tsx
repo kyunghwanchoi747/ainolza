@@ -169,6 +169,17 @@ function CheckoutContent() {
       .finally(() => setProductLoading(false))
   }, [productSlug])
 
+  // 이벤트 버튼 경유 진입(?pay=transfer) — 계좌이체 사전 선택 + 결제수단 섹션으로 스크롤
+  useEffect(() => {
+    if (searchParams.get('pay') === 'transfer' && !productLoading) {
+      setPayMethod('TRANSFER')
+      setTimeout(() => {
+        payMethodSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }, 400)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, productLoading])
+
   // 본인 보유 쿠폰 로드 (active만)
   useEffect(() => {
     if (!user?.id) return
