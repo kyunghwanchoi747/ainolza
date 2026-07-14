@@ -59,10 +59,13 @@ export async function POST(req: Request) {
     let result: any
 
     // 강의실 실제 회차 수 기준으로 진도율 계산 (강의실마다 회차 수가 다름)
-    const classroomDoc = await payload
-      .findByID({ collection: 'classrooms', id: classroomId, depth: 0 })
-      .catch(() => null)
-    const sessions = (classroomDoc as any)?.sessions
+    let classroomDoc: any = null
+    try {
+      classroomDoc = await payload.findByID({ collection: 'classrooms', id: classroomId, depth: 0 })
+    } catch {
+      // 강의실 조회 실패 시 기본값 20 사용
+    }
+    const sessions = classroomDoc?.sessions
     const totalSessions = Array.isArray(sessions) && sessions.length > 0 ? sessions.length : 20
 
     if (existing.docs.length > 0) {
