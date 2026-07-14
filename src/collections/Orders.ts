@@ -286,6 +286,9 @@ export const Orders: CollectionConfig = {
         // 4기
         { label: '바이브 코딩 101 (입문) — 4기', value: 'vibe-coding-101-4' },
         { label: '바이브 코딩 심화 — 4기', value: 'vibe-coding-advanced-4' },
+        // VOD (상시 판매) — 새 강의실을 만들면 여기에도 반드시 추가할 것.
+        // 누락 시 결제/권한부여가 'The following field is invalid: 강의실'로 실패함
+        { label: '바이브 코딩 입문 (VOD)', value: 'vibe-coding-101-vod' },
       ],
     },
     {

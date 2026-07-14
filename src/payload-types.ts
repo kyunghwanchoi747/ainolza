@@ -560,6 +560,7 @@ export interface Order {
         | 'vibe-coding-advanced-3'
         | 'vibe-coding-101-4'
         | 'vibe-coding-advanced-4'
+        | 'vibe-coding-101-vod'
       )[]
     | null;
   books?: ('personal-intelligence' | 'uncomfortable-ai' | 'prompt-15' | 'notebooklm-guide')[] | null;
