@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
 import * as PortOne from '@portone/browser-sdk/v2'
 import { resolveCurrentPrice } from '@/lib/price-schedule'
-import { cashEventAmount } from '@/lib/cash-discount'
+import { cashEventAmount, cashEventDdayLabel } from '@/lib/cash-discount'
 import { BundleUpsell } from '@/components/checkout/bundle-upsell'
 
 const PORTONE_STORE_ID = process.env.NEXT_PUBLIC_PORTONE_STORE_ID || ''
@@ -404,13 +404,18 @@ function CheckoutContent() {
         <div className="max-w-[1100px] mx-auto">
           <h1 className="text-2xl md:text-3xl font-bold text-ink mb-8 text-center">결제하기</h1>
 
-          {/* VOD 런칭 기념 이벤트 배너 */}
-          {productSlug === 'vibe-coding-101-vod' && (
+          {/* VOD 런칭 기념 이벤트 배너 — 7/31 마감 지나면 자동 숨김 */}
+          {productSlug === 'vibe-coding-101-vod' && cashEventDdayLabel() && (
             <div className="mb-6 p-4 md:p-5 rounded-2xl bg-brand-light border border-[#D4756E] cursor-pointer hover:shadow-md transition-shadow" onClick={handleEventBannerClick}>
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <h3 className="font-bold text-brand text-base md:text-lg mb-1">VOD 런칭 기념 현금 할인 이벤트</h3>
-                  <p className="text-sm text-sub">계좌이체·무통장 입금 선택 시 25% 할인이 적용됩니다</p>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="font-bold text-brand text-base md:text-lg">VOD 런칭 기념 현금 할인 이벤트</h3>
+                    <span className="px-2 py-0.5 rounded-full bg-brand text-white text-xs font-extrabold shrink-0">
+                      {cashEventDdayLabel()}
+                    </span>
+                  </div>
+                  <p className="text-sm text-sub">계좌이체·무통장 입금 선택 시 25% 할인 · 7월 31일 마감</p>
                 </div>
                 <div className="shrink-0 px-4 py-2 bg-brand text-white rounded-lg font-bold text-sm whitespace-nowrap hover:bg-brand-dark transition-colors">
                   자세히 보기 →

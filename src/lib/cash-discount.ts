@@ -18,6 +18,28 @@ export const CASH_EVENT_PRICES: Record<string, number> = {
 
 const CASH_EVENT_METHODS = ['TRANSFER', 'DIRECT_BANK']
 
+// 이벤트 마감일 — 한국시간 2026-07-31 하루가 끝나면 종료 (연/월-1/일)
+const CASH_EVENT_END = { year: 2026, monthIndex: 6, day: 31 }
+
+/**
+ * 마감까지 남은 일수 (한국시간 달력 기준).
+ *  - 0 = 마감 당일(D-DAY), 양수 = D-N, null = 마감 지남(이벤트 종료)
+ */
+export function cashEventDaysLeft(now: Date = new Date()): number | null {
+  const kst = new Date(now.getTime() + 9 * 60 * 60 * 1000)
+  const today = Date.UTC(kst.getUTCFullYear(), kst.getUTCMonth(), kst.getUTCDate())
+  const endDay = Date.UTC(CASH_EVENT_END.year, CASH_EVENT_END.monthIndex, CASH_EVENT_END.day)
+  const diff = Math.round((endDay - today) / 86400000)
+  return diff < 0 ? null : diff
+}
+
+/** D-day 표시 문자열. 마감 지남이면 null */
+export function cashEventDdayLabel(now: Date = new Date()): string | null {
+  const days = cashEventDaysLeft(now)
+  if (days === null) return null
+  return days === 0 ? 'D-DAY' : `D-${days}`
+}
+
 export function cashEventAmount(
   productSlug: string,
   payMethod: string | undefined | null,
@@ -28,7 +50,8 @@ export function cashEventAmount(
     !eventPrice ||
     !payMethod ||
     !CASH_EVENT_METHODS.includes(payMethod) ||
-    baseAmount <= eventPrice
+    baseAmount <= eventPrice ||
+    cashEventDaysLeft() === null // 마감 지나면 할인 자동 종료
   ) {
     return { amount: baseAmount, discount: 0 }
   }

@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { ScrollRevealInit } from '@/components/ui/scroll-reveal'
+import { cashEventDdayLabel } from '@/lib/cash-discount'
 
 /**
  * 바이브 코딩 [입문] VOD 상세페이지 본문.
@@ -94,6 +95,8 @@ const TOOL_COSTS = [
 ]
 
 export function VodDetailContent() {
+  const dday = cashEventDdayLabel() // null이면 이벤트 마감
+
   return (
     <div className="border-t border-line overflow-hidden">
       <ScrollRevealInit />
@@ -437,35 +440,42 @@ export function VodDetailContent() {
         </div>
       </section>
 
-      {/* 10. 현금 할인 이벤트 CTA — 브랜드 코랄 마감 */}
-      <section className="py-24 md:py-28 px-6 bg-brand">
-        <div className="max-w-[720px] mx-auto text-center">
-          <p data-reveal className="text-white text-2xl md:text-3xl font-extrabold mb-10">
-            고민은 시작만 늦출 뿐
-          </p>
-          <div data-reveal data-reveal-delay="150">
-            <p className="text-white/80 text-sm md:text-base font-bold mb-3 tracking-[0.15em]">
-              VOD 런칭 기념 · 기간 한정
+      {/* 10. 현금 할인 이벤트 CTA — 브랜드 코랄 마감 (이벤트 종료 시 자동 숨김) */}
+      {dday && (
+        <section className="py-24 md:py-28 px-6 bg-brand">
+          <div className="max-w-[720px] mx-auto text-center">
+            <p data-reveal className="text-white text-2xl md:text-3xl font-extrabold mb-10">
+              고민은 시작만 늦출 뿐
             </p>
-            <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-8">
-              현금 할인 이벤트
-            </h2>
-            <div className="flex items-baseline justify-center gap-4 mb-3">
-              <span className="text-white/50 text-xl md:text-2xl line-through">119,000원</span>
-              <span className="text-white text-5xl md:text-6xl font-extrabold">89,000원</span>
+            <div data-reveal data-reveal-delay="150">
+              <div className="flex items-center justify-center gap-3 mb-4">
+                <span className="text-white/80 text-sm md:text-base font-bold tracking-[0.15em]">
+                  VOD 런칭 기념 · 7월 31일 마감
+                </span>
+                <span className="px-3 py-1 rounded-full bg-white text-brand text-sm md:text-base font-extrabold">
+                  {dday}
+                </span>
+              </div>
+              <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-8">
+                현금 할인 이벤트
+              </h2>
+              <div className="flex items-baseline justify-center gap-4 mb-3">
+                <span className="text-white/50 text-xl md:text-2xl line-through">119,000원</span>
+                <span className="text-white text-5xl md:text-6xl font-extrabold">89,000원</span>
+              </div>
+              <p className="text-white/70 text-sm mb-12">계좌이체 · 무통장 입금 결제 시 적용됩니다</p>
             </div>
-            <p className="text-white/70 text-sm mb-12">계좌이체 · 무통장 입금 결제 시 적용됩니다</p>
+            <div data-reveal data-reveal-delay="300">
+              <Link
+                href={CHECKOUT_URL}
+                className="inline-block px-14 py-5 bg-white text-brand font-extrabold text-lg rounded-2xl hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(0,0,0,0.2)] transition-all"
+              >
+                할인가로 수강 신청하기 →
+              </Link>
+            </div>
           </div>
-          <div data-reveal data-reveal-delay="300">
-            <Link
-              href={CHECKOUT_URL}
-              className="inline-block px-14 py-5 bg-white text-brand font-extrabold text-lg rounded-2xl hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(0,0,0,0.2)] transition-all"
-            >
-              할인가로 수강 신청하기 →
-            </Link>
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
     </div>
   )
 }
