@@ -38,7 +38,6 @@ export const ClassroomProgress: CollectionConfig = {
           type: 'number',
           required: true,
           min: 1,
-          max: 20,
           label: '회차 번호',
         },
         {
@@ -59,7 +58,7 @@ export const ClassroomProgress: CollectionConfig = {
       label: '진도율 (%)',
       admin: {
         readOnly: true,
-        description: '완료한 회차 수 / 20 × 100 (자동 계산)',
+        description: '완료한 회차 수 / 강의실 전체 회차 수 × 100 (자동 계산)',
       },
     },
     {

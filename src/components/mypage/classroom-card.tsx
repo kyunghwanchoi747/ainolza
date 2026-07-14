@@ -17,6 +17,7 @@ interface ClassroomCardProps {
 interface Progress {
   progressPercent: number
   completedSessions: Array<{ sessionNumber: number }>
+  classroom?: { sessions?: unknown[] } | number | string
 }
 
 export function ClassroomCard({ slug, level, shortTitle, expired, expiry }: ClassroomCardProps) {
@@ -73,6 +74,11 @@ export function ClassroomCard({ slug, level, shortTitle, expired, expiry }: Clas
 
   const progressPercent = progress?.progressPercent ?? 0
   const completedCount = progress?.completedSessions?.length ?? 0
+  // 강의실 실제 회차 수 (depth 1 응답의 classroom 객체에서 추출)
+  const totalSessions =
+    typeof progress?.classroom === 'object' && Array.isArray(progress.classroom?.sessions)
+      ? progress.classroom.sessions.length
+      : null
 
   return (
     <Link
@@ -92,7 +98,7 @@ export function ClassroomCard({ slug, level, shortTitle, expired, expiry }: Clas
               <div className="flex items-baseline gap-2">
                 <span className="text-[11px] font-medium text-sub">진도율</span>
                 <span className="text-[11px] font-bold text-brand">
-                  {progressPercent}% ({completedCount}/20)
+                  {progressPercent}%{totalSessions ? ` (${completedCount}/${totalSessions})` : ` (${completedCount}회 완료)`}
                 </span>
               </div>
               <div className="w-full h-2 bg-line rounded-full overflow-hidden">

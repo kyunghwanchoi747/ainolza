@@ -58,6 +58,13 @@ export async function POST(req: Request) {
     const now = new Date().toISOString()
     let result: any
 
+    // 강의실 실제 회차 수 기준으로 진도율 계산 (강의실마다 회차 수가 다름)
+    const classroomDoc = await payload
+      .findByID({ collection: 'classrooms', id: classroomId, depth: 0 })
+      .catch(() => null)
+    const sessions = (classroomDoc as any)?.sessions
+    const totalSessions = Array.isArray(sessions) && sessions.length > 0 ? sessions.length : 20
+
     if (existing.docs.length > 0) {
       // 기존 기록 업데이트
       const doc = existing.docs[0] as any
@@ -69,8 +76,7 @@ export async function POST(req: Request) {
         completedSessions.push({ sessionNumber, completedAt: now })
       }
 
-      // progressPercent 계산 (20회차 기준)
-      const progressPercent = Math.round((completedSessions.length / 20) * 100)
+      const progressPercent = Math.min(100, Math.round((completedSessions.length / totalSessions) * 100))
 
       result = await payload.update({
         collection: 'classroom-progress',
@@ -83,7 +89,7 @@ export async function POST(req: Request) {
       })
     } else {
       // 새 기록 생성
-      const progressPercent = Math.round((1 / 20) * 100)
+      const progressPercent = Math.min(100, Math.round((1 / totalSessions) * 100))
       result = await payload.create({
         collection: 'classroom-progress',
         data: {
