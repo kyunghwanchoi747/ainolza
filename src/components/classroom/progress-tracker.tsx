@@ -1,134 +1,173 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { CheckCircle, Circle } from 'lucide-react'
+import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react'
 
-interface ProgressTrackerProps {
+/**
+ * VOD 진도율 추적.
+ *
+ * 환불 규정 산정의 근거가 되므로 시청 자동 감지가 아니라
+ * 수강생이 각 회차 아래의 완료 버튼을 "직접" 눌러 기록하는 방식을 유지한다.
+ *
+ * 구성:
+ *  - <ProgressProvider>  : 진도 데이터 1회 로드 + 완료 기록 API 호출 (페이지 전체를 감싼다)
+ *  - <ProgressBar>       : 상단 진도 요약 (바 + 퍼센트)
+ *  - <SessionCompleteButton> : 각 회차 영상 아래에 배치하는 수강 완료 버튼
+ */
+
+interface ProgressState {
+  completedNumbers: number[]
+  progressPercent: number
+  loading: boolean
+  marking: number | null
+  totalSessions: number
+  markComplete: (sessionNumber: number) => void
+}
+
+const ProgressContext = createContext<ProgressState | null>(null)
+
+export function ProgressProvider({
+  classroomId,
+  totalSessions,
+  children,
+}: {
   classroomId: string | number
   totalSessions: number
-}
-
-interface Progress {
-  progressPercent: number
-  completedSessions: Array<{ sessionNumber: number; completedAt: string }>
-}
-
-export function ProgressTracker({ classroomId, totalSessions }: ProgressTrackerProps) {
-  const [progress, setProgress] = useState<Progress | null>(null)
+  children: ReactNode
+}) {
+  const [completedNumbers, setCompletedNumbers] = useState<number[]>([])
+  const [progressPercent, setProgressPercent] = useState(0)
   const [loading, setLoading] = useState(true)
   const [marking, setMarking] = useState<number | null>(null)
 
-  // 초기 로드: 진도 데이터 조회
   useEffect(() => {
+    const fetchProgress = async () => {
+      try {
+        const res = await fetch('/api/classroom-progress', { credentials: 'include' })
+        if (res.ok) {
+          const data = await res.json() as { progress: any[] }
+          const mine = data.progress.find(
+            (p: any) =>
+              String(p.classroom) === String(classroomId) ||
+              (typeof p.classroom === 'object' && p.classroom?.id === classroomId),
+          )
+          if (mine) {
+            setCompletedNumbers((mine.completedSessions ?? []).map((s: any) => s.sessionNumber))
+            setProgressPercent(mine.progressPercent ?? 0)
+          }
+        }
+      } catch (error) {
+        console.error('진도 조회 실패:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
     fetchProgress()
   }, [classroomId])
 
-  const fetchProgress = async () => {
-    try {
-      const res = await fetch('/api/classroom-progress', { credentials: 'include' })
-      if (res.ok) {
-        const data = await res.json() as { progress: any[] }
-        const classroomProgress = data.progress.find(
-          (p: any) => String(p.classroom) === String(classroomId) || (typeof p.classroom === 'object' && p.classroom?.id === classroomId),
-        )
-        if (classroomProgress) {
-          setProgress(classroomProgress)
-        }
-      }
-    } catch (error) {
-      console.error('진도 조회 실패:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleMarkComplete = async (sessionNumber: number) => {
-    setMarking(sessionNumber)
-    try {
-      const res = await fetch('/api/classroom-progress', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ classroomId, sessionNumber }),
-      })
-
-      if (res.ok) {
-        const updated = await res.json() as Progress
-        setProgress({
-          progressPercent: updated.progressPercent,
-          completedSessions: updated.completedSessions,
+  const markComplete = useCallback(
+    async (sessionNumber: number) => {
+      setMarking(sessionNumber)
+      try {
+        const res = await fetch('/api/classroom-progress', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ classroomId, sessionNumber }),
         })
+        if (res.ok) {
+          const updated = await res.json() as {
+            progressPercent: number
+            completedSessions: Array<{ sessionNumber: number }>
+          }
+          setCompletedNumbers((updated.completedSessions ?? []).map((s) => s.sessionNumber))
+          setProgressPercent(updated.progressPercent ?? 0)
+        } else {
+          const err = await res.json().catch(() => null) as { error?: string } | null
+          alert(err?.error || '완료 기록에 실패했습니다. 잠시 후 다시 시도해주세요.')
+        }
+      } catch (error) {
+        console.error('회차 완료 기록 실패:', error)
+        alert('완료 기록에 실패했습니다. 네트워크를 확인해주세요.')
+      } finally {
+        setMarking(null)
       }
-    } catch (error) {
-      console.error('회차 완료 기록 실패:', error)
-    } finally {
-      setMarking(null)
-    }
-  }
+    },
+    [classroomId],
+  )
 
-  const progressPercent = progress?.progressPercent ?? 0
-  const completedCount = progress?.completedSessions?.length ?? 0
-  const completedSessionNumbers = new Set(progress?.completedSessions?.map((s) => s.sessionNumber) ?? [])
+  return (
+    <ProgressContext.Provider
+      value={{ completedNumbers, progressPercent, loading, marking, totalSessions, markComplete }}
+    >
+      {children}
+    </ProgressContext.Provider>
+  )
+}
 
-  if (loading) {
-    return <div className="h-16" /> // 로딩 중 공간 예약
+/** 상단 진도 요약 바 */
+export function ProgressBar() {
+  const ctx = useContext(ProgressContext)
+  if (!ctx || ctx.loading) return <div className="h-14" />
+
+  const { progressPercent, completedNumbers, totalSessions } = ctx
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-baseline justify-between">
+        <h3 className="text-sm font-bold text-ink">학습 진도</h3>
+        <span className="text-sm font-bold text-brand">
+          {progressPercent}% ({completedNumbers.length}/{totalSessions})
+        </span>
+      </div>
+      <div className="w-full h-3 bg-line rounded-full overflow-hidden">
+        <div
+          className="h-full bg-brand transition-all duration-300"
+          style={{ width: `${progressPercent}%` }}
+        />
+      </div>
+      <p className="text-xs text-sub pt-1">
+        진도율은 각 회차 아래의 &lsquo;수강 완료&rsquo; 버튼을 직접 눌러 기록됩니다.
+      </p>
+    </div>
+  )
+}
+
+/** 각 회차 영상 아래에 배치하는 수강 완료 버튼 */
+export function SessionCompleteButton({
+  sessionNumber,
+  weekLabel,
+}: {
+  sessionNumber: number
+  weekLabel?: string | number
+}) {
+  const ctx = useContext(ProgressContext)
+  if (!ctx || ctx.loading) return null
+
+  const { completedNumbers, marking, markComplete } = ctx
+  const isCompleted = completedNumbers.includes(sessionNumber)
+  const isMarking = marking === sessionNumber
+  const label = weekLabel !== undefined && weekLabel !== null ? `${weekLabel}회차` : '이 회차'
+
+  if (isCompleted) {
+    return (
+      <div className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-brand-light border border-[#D4756E] text-brand text-sm font-bold">
+        {label} 수강 완료
+      </div>
+    )
   }
 
   return (
-    <div className="space-y-4">
-      {/* 진도 바 + 텍스트 */}
-      <div className="space-y-2">
-        <div className="flex items-baseline justify-between">
-          <h3 className="text-sm font-bold text-ink">학습 진도</h3>
-          <span className="text-sm font-bold text-brand">
-            {progressPercent}% ({completedCount}/{totalSessions})
-          </span>
-        </div>
-        <div className="w-full h-3 bg-line rounded-full overflow-hidden">
-          <div
-            className="h-full bg-brand transition-all duration-300"
-            style={{ width: `${progressPercent}%` }}
-          />
-        </div>
-      </div>
-
-      {/* 회차별 완료 버튼 (세로 스택) */}
-      <div className="grid grid-cols-4 gap-2 sm:grid-cols-5 md:grid-cols-10">
-        {Array.from({ length: totalSessions }, (_, i) => i + 1).map((sessionNum) => {
-          const isCompleted = completedSessionNumbers.has(sessionNum)
-          const isMarking = marking === sessionNum
-
-          return (
-            <button
-              key={sessionNum}
-              onClick={() => handleMarkComplete(sessionNum)}
-              disabled={isMarking}
-              className={`
-                relative p-2 rounded-lg font-bold text-sm transition-all duration-200
-                ${
-                  isCompleted
-                    ? 'bg-brand text-white hover:bg-brand-dark'
-                    : 'bg-line text-sub hover:bg-[#ccc]'
-                }
-                ${isMarking ? 'opacity-50 cursor-wait' : 'cursor-pointer'}
-                flex items-center justify-center min-h-10
-              `}
-              title={isCompleted ? `${sessionNum}회차 완료됨` : `${sessionNum}회차 완료 표시`}
-            >
-              {isCompleted ? (
-                <CheckCircle className="w-4 h-4" />
-              ) : (
-                <span>{sessionNum}</span>
-              )}
-            </button>
-          )
-        })}
-      </div>
-
-      {/* 안내 텍스트 */}
-      <p className="text-xs text-sub pt-2">
-        각 회차를 시청한 후 위의 버튼을 클릭해 진도를 기록하세요.
-      </p>
-    </div>
+    <button
+      type="button"
+      onClick={() => markComplete(sessionNumber)}
+      disabled={isMarking}
+      className={`px-5 py-2.5 rounded-full border border-line text-sm font-bold transition-colors ${
+        isMarking
+          ? 'text-sub cursor-wait'
+          : 'text-body hover:border-[#D4756E] hover:text-brand cursor-pointer'
+      }`}
+    >
+      {isMarking ? '기록 중…' : `${label} 수강 완료 체크`}
+    </button>
   )
 }

@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation'
 import { getPayloadClient } from '@/lib/payload'
 import { getClassroomBySlug } from '@/lib/classrooms-db'
 import { SecretUnlock } from '@/components/classroom/secret-unlock'
-import { ProgressTracker } from '@/components/classroom/progress-tracker'
+import { ProgressProvider, ProgressBar, SessionCompleteButton } from '@/components/classroom/progress-tracker'
 
 export const dynamic = 'force-dynamic'
 
@@ -260,10 +260,11 @@ export default async function ClassroomDetailPage({
           </section>
         )}
 
-        {/* 진도율 추적 */}
+        {/* 진도율 추적 + 회차별 수강 완료 체크 (환불 규정 산정 근거 — 수강생이 직접 기록) */}
+        <ProgressProvider classroomId={(classroom as any).id} totalSessions={classroom.sessions?.length ?? 0}>
         {classroom.sessions && classroom.sessions.length > 0 && (
           <div className="mb-12 p-6 bg-brand-light rounded-2xl">
-            <ProgressTracker classroomId={(classroom as any).id} totalSessions={classroom.sessions.length} />
+            <ProgressBar />
           </div>
         )}
 
@@ -271,7 +272,7 @@ export default async function ClassroomDetailPage({
         {classroom.sessions && classroom.sessions.length > 0 && (
           <section className="space-y-12">
             <h2 className="text-2xl font-bold text-ink">회차별 강의</h2>
-            {classroom.sessions.map((s) => {
+            {classroom.sessions.map((s, i) => {
               // 우선순위: vimeoId(녹화본) > youtubeLiveUrl(라이브)
               const isVod = !!s.vimeoId
               const ytId = !isVod && s.youtubeLiveUrl ? extractYouTubeId(s.youtubeLiveUrl) : null
@@ -320,9 +321,9 @@ export default async function ClassroomDetailPage({
                     </div>
                   )}
 
-                  {/* 가이드북 버튼 */}
-                  {s.guidebookUrl && (
-                    <div className="flex justify-center pt-2">
+                  {/* 가이드북 버튼 + 수강 완료 체크 */}
+                  <div className="flex justify-center items-center gap-3 flex-wrap pt-2">
+                    {s.guidebookUrl && (
                       <a
                         href={s.guidebookUrl}
                         target="_blank"
@@ -331,8 +332,9 @@ export default async function ClassroomDetailPage({
                       >
                         {s.week}회차 가이드북
                       </a>
-                    </div>
-                  )}
+                    )}
+                    <SessionCompleteButton sessionNumber={i + 1} weekLabel={s.week} />
+                  </div>
 
                   {/* 비밀 공간 */}
                   {s.secret && (
@@ -347,6 +349,7 @@ export default async function ClassroomDetailPage({
             })}
           </section>
         )}
+        </ProgressProvider>
 
         {!classroom.liveUrl &&
           !classroom.resourceUrl &&
