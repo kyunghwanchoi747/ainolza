@@ -19,6 +19,22 @@ export const Orders: CollectionConfig = {
     listSearchableFields: ['orderNumber', 'buyerName', 'buyerEmail', 'buyerPhone', 'productName'],
   },
   hooks: {
+    beforeChange: [
+      ({ data, originalDoc }) => {
+        // paid 전이 시 결제일시 자동 기록.
+        // paidAt은 100일 수강기간·자동 종료 스크립트의 기산점 — 비어 있으면
+        // auto-complete-enrollment가 해당 주문을 영구 스킵하므로 반드시 채운다.
+        // (카드/계좌이체 verify, 무통장 admin 승인, 매니저 수동 처리 모든 경로 공통)
+        if (
+          data?.status === 'paid' &&
+          !data.paidAt &&
+          !(originalDoc as any)?.paidAt
+        ) {
+          data.paidAt = new Date().toISOString()
+        }
+        return data
+      },
+    ],
     afterChange: [
       async ({ doc, operation, previousDoc, req, context }): Promise<void> => {
         const d = doc as any
