@@ -313,11 +313,12 @@ export default async function ClassroomDetailPage({
                         />
                       )}
                     </div>
-                  ) : (
+                  ) : !s.guidebookUrl ? (
+                    // 영상도 가이드북도 없을 때만 준비 중 안내 (가이드북 전용 회차는 버튼만 표시)
                     <div className="rounded-2xl border border-dashed border-line bg-surface p-12 text-center">
                       <p className="text-sub text-sm">강의 시작 전입니다. 일정이 확정되면 안내드립니다.</p>
                     </div>
-                  )}
+                  ) : null}
 
                   {/* 가이드북 버튼 + 수강 완료 체크 */}
                   <div className="flex justify-center items-center gap-3 flex-wrap pt-2">
