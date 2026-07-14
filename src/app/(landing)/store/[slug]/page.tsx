@@ -10,7 +10,7 @@ import { PriceStageCountdown } from '@/components/store/price-stage-countdown'
 import { PrimaryButtonCard, KakaoButton, OutlineButton } from '@/components/design-system/buttons'
 import { ReferralTracker } from '@/components/referrals/referral-tracker'
 import { VodDetailContent } from '@/components/store/vod-detail-content'
-import { cashEventDdayLabel } from '@/lib/cash-discount'
+import { cashEventDdayLabel, CASH_EVENT_PRICES } from '@/lib/cash-discount'
 
 export const dynamic = 'force-dynamic'
 
@@ -207,6 +207,33 @@ export default async function ProductDetailPage({
                 <p className="mb-6 text-base text-sub">가격 정보 준비 중</p>
               )}
 
+              {/* VOD 런칭 현금 할인 — 이벤트가를 주인공으로 (마감 후 자동 숨김) */}
+              {product.slug === 'vibe-coding-101-vod' && cashEventDdayLabel() && CASH_EVENT_PRICES[product.slug] && (
+                <div className="mb-4 p-5 rounded-2xl bg-dark text-white">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-white/70 text-xs font-bold mb-1.5 tracking-wide">
+                        VOD 런칭 기념 현금 할인 · 7월 31일 마감
+                      </p>
+                      <div className="flex items-baseline gap-2.5 flex-wrap">
+                        {product.price && (
+                          <span className="text-white/40 text-base line-through">
+                            {formatPrice(product.price)}
+                          </span>
+                        )}
+                        <span className="text-3xl md:text-4xl font-extrabold">
+                          {formatPrice(CASH_EVENT_PRICES[product.slug])}
+                        </span>
+                      </div>
+                      <p className="text-white/60 text-xs mt-1.5">계좌이체 · 무통장 입금 결제 시</p>
+                    </div>
+                    <span className="shrink-0 px-3.5 py-1.5 rounded-full bg-brand text-white text-base md:text-lg font-extrabold">
+                      {cashEventDdayLabel()}
+                    </span>
+                  </div>
+                </div>
+              )}
+
               {/* 상품 유형별 안내 박스 — 무채색 톤으로 통일 */}
               {product.type === 'class' && (
                 <div className="mb-4 px-4 py-3 rounded-xl bg-surface border border-line">
@@ -259,12 +286,12 @@ export default async function ProductDetailPage({
 
                 {/* VOD 런칭 기념 이벤트 버튼 — 클릭 시 계좌이체가 선택된 결제 페이지로 이동.
                     7/31 마감 지나면 자동 숨김 */}
-                {product.slug === 'vibe-coding-101-vod' && cashEventDdayLabel() && (
+                {product.slug === 'vibe-coding-101-vod' && cashEventDdayLabel() && CASH_EVENT_PRICES[product.slug] && (
                   <Link
                     href={`/checkout?slug=${encodeURIComponent(product.slug)}&pay=transfer`}
-                    className="block w-full text-center px-6 py-4 bg-brand text-white font-bold rounded-xl hover:bg-brand-dark transition-colors"
+                    className="block w-full text-center px-6 py-5 bg-brand text-white font-extrabold text-lg rounded-xl hover:bg-brand-dark hover:-translate-y-0.5 transition-all shadow-[0_8px_24px_rgba(212,117,110,0.45)]"
                   >
-                    VOD 런칭 기념 현금 할인 이벤트 {cashEventDdayLabel()} →
+                    할인가 {formatPrice(CASH_EVENT_PRICES[product.slug])}에 수강 신청 →
                   </Link>
                 )}
 
