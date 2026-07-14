@@ -30,7 +30,7 @@ export const workerMailerAdapter: EmailAdapter = () => {
   const port = parseInt(process.env.SMTP_PORT || '587', 10)
   const username = process.env.SMTP_USER || ''
   const password = process.env.SMTP_PASS || ''
-  const fromEmail = process.env.SMTP_FROM || 'info@ainolza.kr'
+  const fromEmail = process.env.SMTP_FROM || 'ainolza@ainolza.kr'
   const fromName = process.env.SMTP_FROM_NAME || 'AI놀자'
 
   return {
@@ -43,7 +43,13 @@ export const workerMailerAdapter: EmailAdapter = () => {
           throw new Error('SMTP 자격증명이 설정되지 않았습니다 (SMTP_USER / SMTP_PASS)')
         }
 
-        const from = toUser(message.from as AddressLike) || { name: fromName, email: fromEmail }
+        // 발신자 이름이 비어 있으면 메일앱이 주소 앞부분(info 등)을 표시하므로
+        // 이름이 없을 때는 항상 기본 발신자명(AI놀자)을 붙인다
+        const parsed = toUser(message.from as AddressLike)
+        const from = {
+          name: parsed?.name || fromName,
+          email: parsed?.email || fromEmail,
+        }
         const to = toUsers(message.to)
         if (!to || to.length === 0) {
           throw new Error('수신자가 지정되지 않았습니다')

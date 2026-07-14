@@ -150,7 +150,7 @@ export const Users: CollectionConfig = {
             요청하지 않으셨다면 이 메일을 무시해주세요. 링크는 1시간 동안 유효합니다.
           </p>
           <p style="color:#ccc;font-size:11px;text-align:center;margin:24px 0 0;">
-            © AI놀자 · info@ainolza.kr
+            © AI놀자 · ainolza@ainolza.kr
           </p>
         </td></tr>
       </table>

@@ -58,7 +58,7 @@ const wrap = (title: string, bodyHtml: string) => `<!DOCTYPE html>
           <h2 style="color:#1a1a1a;font-size:22px;font-weight:bold;margin:0 0 20px;line-height:1.4;letter-spacing:-0.01em;">${title}</h2>
           ${bodyHtml}
           <hr style="border:none;border-top:1px solid #dddddd;margin:36px 0 16px;">
-          <p style="color:#888888;font-size:11px;margin:0;">AI놀자 · info@ainolza.kr</p>
+          <p style="color:#888888;font-size:11px;margin:0;">AI놀자 · ainolza@ainolza.kr</p>
         </td></tr>
       </table>
     </td></tr>
