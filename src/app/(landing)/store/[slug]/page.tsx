@@ -278,8 +278,9 @@ export default async function ProductDetailPage({
       {/* VOD 상세 본문 — 코드로 구현한 상세페이지 (캔바 이미지 대체) */}
       {product.slug === 'vibe-coding-101-vod' && <VodDetailContent />}
 
-      {/* 상세 이미지 — public/store/{slug}/detail-1~N.{ext} */}
-      {detailImages.length > 0 && (
+      {/* 상세 이미지 — public/store/{slug}/detail-1~N.{ext}
+          VOD 상품은 코드 상세(VodDetailContent)가 대체하므로 제외 */}
+      {product.slug !== 'vibe-coding-101-vod' && detailImages.length > 0 && (
         <section className="py-10 px-6">
           <div className="max-w-[900px] mx-auto flex flex-col gap-4">
             {detailImages.map((src, i) => (
