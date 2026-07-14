@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation'
 import { getPayloadClient } from '@/lib/payload'
 import { getClassroomBySlug } from '@/lib/classrooms-db'
 import { SecretUnlock } from '@/components/classroom/secret-unlock'
-import { ProgressProvider, ProgressBar, SessionCompleteButton } from '@/components/classroom/progress-tracker'
+import { ProgressProvider, ProgressBar, SessionCompleteButton, VimeoTrackedPlayer } from '@/components/classroom/progress-tracker'
 
 export const dynamic = 'force-dynamic'
 
@@ -296,13 +296,11 @@ export default async function ClassroomDetailPage({
                   {hasVideo ? (
                     <div className="relative w-full overflow-hidden rounded-2xl bg-black" style={{ paddingTop: '56.25%' }}>
                       {isVod ? (
-                        <iframe
-                          src={`https://player.vimeo.com/video/${s.vimeoId}?badge=0&autopause=0&player_id=0&app_id=58479`}
-                          frameBorder="0"
-                          allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
-                          referrerPolicy="strict-origin-when-cross-origin"
+                        // 90% 이상 시청 시 자동으로 수강 완료 기록
+                        <VimeoTrackedPlayer
+                          vimeoId={s.vimeoId!}
+                          sessionNumber={i + 1}
                           title={s.title}
-                          className="absolute inset-0 w-full h-full"
                         />
                       ) : (
                         <iframe
