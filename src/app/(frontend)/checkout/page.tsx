@@ -25,7 +25,7 @@ function CheckoutContent() {
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(false)
   const [agreed, setAgreed] = useState({ terms: false, refund: false, privacy: false })
-  const [payMethod, setPayMethod] = useState<PayMethod>('CARD')
+  const [payMethod, setPayMethod] = useState<PayMethod>('DIRECT_BANK')
   // 휴대폰 — KG이니시스 V2 일반결제는 phoneNumber 필수.
   // 회원 프로필에 있으면 자동 채움(자동 확정), 없으면 직접 입력 후 [확인] 눌러야 확정.
   const [buyerPhone, setBuyerPhone] = useState('')
