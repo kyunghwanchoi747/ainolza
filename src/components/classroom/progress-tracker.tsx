@@ -82,7 +82,12 @@ export function ProgressProvider({
           setCompletedNumbers((updated.completedSessions ?? []).map((s) => s.sessionNumber))
           setProgressPercent(updated.progressPercent ?? 0)
         } else {
-          const err = await res.json().catch(() => null) as { error?: string } | null
+          let err: { error?: string } | null = null
+          try {
+            err = await res.json()
+          } catch {
+            // 응답 본문이 JSON이 아니면 기본 문구 사용
+          }
           alert(err?.error || '완료 기록에 실패했습니다. 잠시 후 다시 시도해주세요.')
         }
       } catch (error) {
