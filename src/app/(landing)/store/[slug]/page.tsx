@@ -304,6 +304,30 @@ export default async function ProductDetailPage({
         </div>
       </section>
 
+      {/* 강사 인사말 영상 — 상세 본문 시작 전 */}
+      {product.slug === 'vibe-coding-101-vod' && (
+        <section className="pt-2 pb-10 px-6">
+          <div className="max-w-[900px] mx-auto">
+            <p className="text-center text-brand text-sm md:text-base font-bold mb-4 tracking-wide">
+              강사 인사말
+            </p>
+            <div
+              className="relative w-full overflow-hidden rounded-2xl bg-black shadow-[0_8px_40px_rgba(0,0,0,0.12)]"
+              style={{ paddingTop: '56.25%' }}
+            >
+              <iframe
+                src="https://player.vimeo.com/video/1210091658?badge=0&autopause=0&player_id=0&app_id=58479"
+                frameBorder="0"
+                allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
+                referrerPolicy="strict-origin-when-cross-origin"
+                title="AI놀자 강사 인사말"
+                className="absolute inset-0 w-full h-full"
+              />
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* VOD 상세 본문 — 코드로 구현한 상세페이지 (캔바 이미지 대체) */}
       {product.slug === 'vibe-coding-101-vod' && <VodDetailContent />}
 
