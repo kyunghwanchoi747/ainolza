@@ -2,6 +2,13 @@ import type { CollectionConfig } from 'payload'
 
 export const SiteSettings: CollectionConfig = {
   slug: 'site-settings',
+  // 사이트 설정: 읽기는 누구나(프론트 표시용), 쓰기는 admin만
+  access: {
+    read: () => true,
+    create: ({ req: { user } }) => (user as { role?: string })?.role === 'admin',
+    update: ({ req: { user } }) => (user as { role?: string })?.role === 'admin',
+    delete: ({ req: { user } }) => (user as { role?: string })?.role === 'admin',
+  },
   admin: {
     useAsTitle: 'siteName',
   },

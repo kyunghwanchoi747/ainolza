@@ -18,6 +18,7 @@ export async function GET() {
       where: { user: { equals: (user as any).id } },
       limit: 100,
       depth: 1,
+      overrideAccess: true,
     })
 
     return Response.json({ progress: progress.docs })
@@ -53,6 +54,7 @@ export async function POST(req: Request) {
       },
       limit: 1,
       depth: 0,
+      overrideAccess: true,
     })
 
     const now = new Date().toISOString()
@@ -89,6 +91,7 @@ export async function POST(req: Request) {
           progressPercent,
           lastAccessedAt: now,
         },
+        overrideAccess: true,
       })
     } else {
       // 새 기록 생성
@@ -102,6 +105,7 @@ export async function POST(req: Request) {
           progressPercent,
           lastAccessedAt: now,
         },
+        overrideAccess: true,
       })
     }
 

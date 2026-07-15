@@ -2,6 +2,13 @@ import type { CollectionConfig } from 'payload'
 
 export const DesignPages: CollectionConfig = {
   slug: 'design-pages',
+  // 빌더 내부 데이터: 읽기는 누구나(발행 페이지 렌더용), 쓰기는 admin만
+  access: {
+    read: () => true,
+    create: ({ req: { user } }) => (user as { role?: string })?.role === 'admin',
+    update: ({ req: { user } }) => (user as { role?: string })?.role === 'admin',
+    delete: ({ req: { user } }) => (user as { role?: string })?.role === 'admin',
+  },
   admin: {
     useAsTitle: 'title',
   },

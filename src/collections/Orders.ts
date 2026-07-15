@@ -13,6 +13,18 @@ import { resolveGrantedClassrooms } from '../lib/classroom-grant'
 
 export const Orders: CollectionConfig = {
   slug: 'orders',
+  // 개인정보·결제내역 보호: 본인 주문만 읽기, 생성/수정/삭제는 admin만.
+  // (실제 주문 생성은 API 라우트에서 overrideAccess로 처리하므로 create=admin만이어도 무방)
+  access: {
+    read: ({ req: { user } }) => {
+      if (!user) return false
+      if ((user as { role?: string }).role === 'admin') return true
+      return { user: { equals: user.id } }
+    },
+    create: ({ req: { user } }) => (user as { role?: string })?.role === 'admin',
+    update: ({ req: { user } }) => (user as { role?: string })?.role === 'admin',
+    delete: ({ req: { user } }) => (user as { role?: string })?.role === 'admin',
+  },
   admin: {
     useAsTitle: 'orderNumber',
     defaultColumns: ['orderNumber', 'buyerName', 'productName', 'amount', 'status', 'createdAt'],

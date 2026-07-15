@@ -2,6 +2,18 @@ import type { CollectionConfig } from 'payload'
 
 export const ClassroomProgress: CollectionConfig = {
   slug: 'classroom-progress',
+  // 진도 기록 보호: 본인 것만 읽기. 쓰기는 admin만
+  // (실제 기록은 /api/classroom-progress에서 overrideAccess로 처리)
+  access: {
+    read: ({ req: { user } }) => {
+      if (!user) return false
+      if ((user as { role?: string }).role === 'admin') return true
+      return { user: { equals: user.id } }
+    },
+    create: ({ req: { user } }) => (user as { role?: string })?.role === 'admin',
+    update: ({ req: { user } }) => (user as { role?: string })?.role === 'admin',
+    delete: ({ req: { user } }) => (user as { role?: string })?.role === 'admin',
+  },
   admin: {
     useAsTitle: 'id',
     defaultColumns: ['user', 'classroom', 'completedSessions', 'progressPercent', 'updatedAt'],

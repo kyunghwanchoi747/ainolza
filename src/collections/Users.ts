@@ -9,6 +9,9 @@ export const Users: CollectionConfig = {
     useAsTitle: 'email',
   },
   access: {
+    // 어드민 패널 진입 자체를 admin 역할로 제한.
+    // 이게 없으면 로그인한 일반 회원도 /admin에 들어와 컬렉션을 둘러볼 수 있음.
+    admin: ({ req: { user } }) => (user as { role?: string })?.role === 'admin',
     // 누구나 회원가입 가능
     create: () => true,
     // 본인 정보 또는 admin만 읽기

@@ -3,6 +3,14 @@ import { sendEnrollmentToAdmin, sendEnrollmentConfirmToBuyer } from '../lib/emai
 
 export const Enrollments: CollectionConfig = {
   slug: 'enrollments',
+  // 신청자 개인정보(이름·연락처) 보호: 읽기·수정·삭제는 admin만.
+  // 생성은 누구나(비로그인 신청 폼 허용).
+  access: {
+    read: ({ req: { user } }) => (user as { role?: string })?.role === 'admin',
+    create: () => true,
+    update: ({ req: { user } }) => (user as { role?: string })?.role === 'admin',
+    delete: ({ req: { user } }) => (user as { role?: string })?.role === 'admin',
+  },
   admin: {
     useAsTitle: 'name',
     defaultColumns: ['name', 'phone', 'email', 'program', 'status', 'createdAt'],

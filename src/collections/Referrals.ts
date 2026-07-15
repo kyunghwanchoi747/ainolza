@@ -14,6 +14,17 @@ import type { CollectionConfig } from 'payload'
  */
 export const Referrals: CollectionConfig = {
   slug: 'referrals',
+  // 추천인 정산 정보 보호: 본인 것만 읽기, 쓰기는 admin만
+  access: {
+    read: ({ req: { user } }) => {
+      if (!user) return false
+      if ((user as { role?: string }).role === 'admin') return true
+      return { user: { equals: user.id } }
+    },
+    create: ({ req: { user } }) => (user as { role?: string })?.role === 'admin',
+    update: ({ req: { user } }) => (user as { role?: string })?.role === 'admin',
+    delete: ({ req: { user } }) => (user as { role?: string })?.role === 'admin',
+  },
   admin: {
     useAsTitle: 'code',
     defaultColumns: ['code', 'user', 'status', 'totalReferrals', 'totalRewardKrw', 'createdAt'],
