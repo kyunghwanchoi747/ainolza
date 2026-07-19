@@ -116,6 +116,9 @@ export const Users: CollectionConfig = {
   },
   auth: {
     useSessions: false,
+    // 로그인 유지 기간 30일 (기본값 2시간 → 매번 재로그인 번거로움 해소).
+    // admin 접근은 role로 잠겨 있어 유지 기간을 늘려도 보안 위험 없음.
+    tokenExpiration: 60 * 60 * 24 * 30, // 30일 (초 단위)
     forgotPassword: {
       generateEmailSubject: () => 'AI놀자 비밀번호 재설정 안내',
       generateEmailHTML: (args) => {
