@@ -311,7 +311,7 @@ export default async function ProductDetailPage({
             href="https://docs.google.com/forms/d/e/1FAIpQLSftlaQSwbFl1Xyy12eFLBHNmFgkpmBUB9TFHEPrLXEfxXcFUg/viewform?usp=header"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sub underline underline-offset-4 hover:text-ink transition-colors"
+            className="text-ink font-bold text-lg md:text-xl underline underline-offset-4 hover:text-brand transition-colors"
           >
             결제가 망설여지신다면 → 무료 3편의 글 먼저 받기
           </a>
