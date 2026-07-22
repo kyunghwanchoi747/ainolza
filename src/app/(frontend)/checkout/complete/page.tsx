@@ -262,7 +262,7 @@ export default async function CompletePage({
   return (
     <div className="min-h-screen bg-white flex items-center justify-center px-6 py-20">
       {/* GA4 purchase 이벤트 — 결제 완료 화면일 때만, 주문당 1회 */}
-      <PurchaseTracker orderNumber={orderNumber} />
+      <PurchaseTracker orderNumber={orderNumber} amount={order?.amount ?? 0} />
       <div className="max-w-[500px] text-center">
         <div className="text-6xl mb-6">&#10003;</div>
         <h1 className="text-3xl font-bold text-ink mb-4">주문이 완료되었습니다</h1>

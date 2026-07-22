@@ -8,7 +8,13 @@ import { useEffect } from 'react'
  * - gtag 로드 여부를 확인한 뒤에만 실행.
  * - sessionStorage로 주문당 중복 전송 방지(새로고침해도 재전송 안 됨).
  */
-export function PurchaseTracker({ orderNumber }: { orderNumber: string }): null {
+export function PurchaseTracker({
+  orderNumber,
+  amount,
+}: {
+  orderNumber: string
+  amount: number
+}): null {
   useEffect(() => {
     if (!orderNumber) return
 
@@ -22,11 +28,20 @@ export function PurchaseTracker({ orderNumber }: { orderNumber: string }): null 
     const gtag = (window as unknown as { gtag?: (...args: unknown[]) => void }).gtag
     if (typeof gtag !== 'function') return
 
+    // GA4 purchase — 실제 결제 금액 사용
     gtag('event', 'purchase', {
       transaction_id: orderNumber,
-      value: 89000,
+      value: amount,
       currency: 'KRW',
       items: [{ item_name: '바이브코딩 입문 VOD' }],
+    })
+
+    // Google Ads 전환 이벤트
+    gtag('event', 'conversion', {
+      send_to: 'AW-17032214512/a-qyCIenx9QcEPDvy7k_',
+      value: amount,
+      currency: 'KRW',
+      transaction_id: orderNumber,
     })
 
     try {
@@ -34,7 +49,7 @@ export function PurchaseTracker({ orderNumber }: { orderNumber: string }): null 
     } catch {
       // 기록 실패해도 이벤트 자체는 전송됨
     }
-  }, [orderNumber])
+  }, [orderNumber, amount])
 
   return null
 }
