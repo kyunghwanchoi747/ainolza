@@ -311,6 +311,7 @@ export default async function ProductDetailPage({
           <LeadMagnetLink
             href="https://docs.google.com/forms/d/e/1FAIpQLSftlaQSwbFl1Xyy12eFLBHNmFgkpmBUB9TFHEPrLXEfxXcFUg/viewform?usp=header"
             source="vibe-coding-101-detail"
+            adsSendTo="AW-17032214512/_y1kCKH21NQcEPDvy7k_"
             className="text-ink font-bold text-lg md:text-xl underline underline-offset-4 hover:text-brand transition-colors"
           >
             결제가 망설여지신다면 → 무료 3편의 글 먼저 받기
