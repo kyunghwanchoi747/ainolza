@@ -304,6 +304,20 @@ export default async function ProductDetailPage({
         </div>
       </section>
 
+      {/* 무료 리드마그넷 텍스트 링크 — 카카오톡 문의와 강사 인사말 영상 사이 */}
+      {product.slug === 'vibe-coding-101-vod' && (
+        <div className="px-6 py-8 text-center">
+          <a
+            href="https://docs.google.com/forms/d/e/1FAIpQLSftlaQSwbFl1Xyy12eFLBHNmFgkpmBUB9TFHEPrLXEfxXcFUg/viewform?usp=header"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sub underline underline-offset-4 hover:text-ink transition-colors"
+          >
+            결제가 망설여지신다면 → 무료 3편의 글 먼저 받기
+          </a>
+        </div>
+      )}
+
       {/* 강사 인사말 영상 — 상세 본문 시작 전 */}
       {product.slug === 'vibe-coding-101-vod' && (
         <section className="pt-2 pb-10 px-6">
