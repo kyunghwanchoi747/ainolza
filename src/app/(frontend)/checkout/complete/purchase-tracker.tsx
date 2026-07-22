@@ -11,9 +11,14 @@ import { useEffect } from 'react'
 export function PurchaseTracker({
   orderNumber,
   amount,
+  productName,
+  productSlug,
 }: {
   orderNumber: string
   amount: number
+  /** 주문의 실제 상품명. 없으면 일반 라벨로 대체 — 상품별 매출 분석에 사용 */
+  productName?: string
+  productSlug?: string
 }): null {
   useEffect(() => {
     if (!orderNumber) return
@@ -28,12 +33,20 @@ export function PurchaseTracker({
     const gtag = (window as unknown as { gtag?: (...args: unknown[]) => void }).gtag
     if (typeof gtag !== 'function') return
 
-    // GA4 purchase — 실제 결제 금액 사용
+    // GA4 purchase — 실제 결제 금액 + 실제 상품명
+    // (하드코딩하면 심화반이 팔려도 입문으로 찍혀 상품별 분석이 불가능해진다)
     gtag('event', 'purchase', {
       transaction_id: orderNumber,
       value: amount,
       currency: 'KRW',
-      items: [{ item_name: '바이브코딩 입문 VOD' }],
+      items: [
+        {
+          item_id: productSlug || orderNumber,
+          item_name: productName || '바이브코딩 VOD',
+          price: amount,
+          quantity: 1,
+        },
+      ],
     })
 
     // Google Ads 전환 이벤트
@@ -49,7 +62,7 @@ export function PurchaseTracker({
     } catch {
       // 기록 실패해도 이벤트 자체는 전송됨
     }
-  }, [orderNumber, amount])
+  }, [orderNumber, amount, productName, productSlug])
 
   return null
 }

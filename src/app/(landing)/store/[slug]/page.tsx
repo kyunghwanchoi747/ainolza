@@ -4,6 +4,7 @@ import type { Metadata } from 'next'
 import { getDday, PRODUCTS } from '@/lib/products'
 import { getProductForStore } from '@/lib/products-db'
 import { ProductFaqList } from '@/components/store/product-faq-list'
+import { LeadMagnetLink } from '@/components/store/lead-magnet-link'
 import { ReviewSection } from '@/components/store/review-section'
 import { V3Header } from '@/components/landing/v3-header'
 import { PriceStageCountdown } from '@/components/store/price-stage-countdown'
@@ -307,14 +308,13 @@ export default async function ProductDetailPage({
       {/* 무료 리드마그넷 텍스트 링크 — 카카오톡 문의와 강사 인사말 영상 사이 */}
       {product.slug === 'vibe-coding-101-vod' && (
         <div className="px-6 py-8 text-center">
-          <a
+          <LeadMagnetLink
             href="https://docs.google.com/forms/d/e/1FAIpQLSftlaQSwbFl1Xyy12eFLBHNmFgkpmBUB9TFHEPrLXEfxXcFUg/viewform?usp=header"
-            target="_blank"
-            rel="noopener noreferrer"
+            source="vibe-coding-101-detail"
             className="text-ink font-bold text-lg md:text-xl underline underline-offset-4 hover:text-brand transition-colors"
           >
             결제가 망설여지신다면 → 무료 3편의 글 먼저 받기
-          </a>
+          </LeadMagnetLink>
         </div>
       )}
 
