@@ -53,10 +53,12 @@
 ## 📋 배포 현황 & 도메인 전환 계획
 
 ### 현재 상황
-- **도메인**: ainolja.com (아임웹에서 관리 중)
-- **기존 웹사이트**: 아임웹 호스팅 (운영 중)
-- **새 웹사이트**: Cloudflare Pages + Workers + D1에서 구축 중
-- **상태**: 기존 도메인 유지한 채로 새 웹 구축 → 완료 후 도메인 전환 예정
+- **도메인**: **ainolza.kr** (실서비스 중)
+- **웹사이트**: Cloudflare Pages + Workers + D1
+- **상태**: 도메인 전환 완료 — https://ainolza.kr 에서 서빙 중
+
+> ⚠️ 과거 이 문서에 `ainolja.com` 으로 잘못 적혀 있었음 (2026-07-22 정정).
+> 정확한 도메인은 **ainolza.kr** 입니다. `ainolja.com` / `ainolja.co.kr` 은 오기입니다.
 
 ### 배포 방법 (Windows에서 유효)
 1. **GitHub Actions 자동 배포** (권장)
@@ -71,12 +73,12 @@
    - `CLOUDFLARE_API_TOKEN`: Cloudflare API 토큰
    - `CLOUDFLARE_ACCOUNT_ID`: 500db49b960f4ab2be5ccca08de0fba1
 
-### 향후 도메인 전환 절차
+### 도메인 전환 절차 (완료됨 — 기록용)
 1. 새 웹사이트 완전히 검증 (모든 기능 테스트)
 2. Cloudflare에 도메인 추가 (https://dash.cloudflare.com)
 3. 아임웹에서 네임서버 변경
 4. DNS 전파 대기 (24-48시간)
-5. 새 웹사이트가 ainolja.com에서 서빙됨
+5. 새 웹사이트가 **ainolza.kr** 에서 서빙됨 ✅
 
 ## AI 도구 사용 전략
 - Gemini CLI: 80% (프로젝트 생성, 코드 뚝딱)

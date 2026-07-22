@@ -40,8 +40,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ko" suppressHydrationWarning>
       <head>
-        {/* Google tag (gtag.js) */}
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-B10TJEVQQ4"></script>
+        {/* Google tag (gtag.js) — GA4 + Google Ads 공용 로더.
+            ?id= 에는 하나만 넣을 수 있고, 나머지는 아래 config로 등록한다. */}
+        <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17032214512"></script>
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -50,6 +51,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               gtag('js', new Date());
 
               gtag('config', 'G-B10TJEVQQ4');
+              // Google Ads — 이 config가 없으면 send_to: 'AW-...' 전환이 기록되지 않는다.
+              // (에러가 나지 않으므로 누락돼도 조용히 실패함)
+              gtag('config', 'AW-17032214512');
             `,
           }}
         />
