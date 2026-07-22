@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { getPayloadClient } from '@/lib/payload'
 import { resolveGrantedClassrooms } from '@/lib/classroom-grant'
+import { PurchaseTracker } from './purchase-tracker'
 
 export const dynamic = 'force-dynamic'
 
@@ -260,6 +261,8 @@ export default async function CompletePage({
   // 카드/계좌이체/간편결제 등 즉시 결제 완료
   return (
     <div className="min-h-screen bg-white flex items-center justify-center px-6 py-20">
+      {/* GA4 purchase 이벤트 — 결제 완료 화면일 때만, 주문당 1회 */}
+      <PurchaseTracker orderNumber={orderNumber} />
       <div className="max-w-[500px] text-center">
         <div className="text-6xl mb-6">&#10003;</div>
         <h1 className="text-3xl font-bold text-ink mb-4">주문이 완료되었습니다</h1>
