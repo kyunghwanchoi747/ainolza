@@ -184,6 +184,39 @@ function CheckoutContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, productLoading])
 
+  // GA4 begin_checkout — 결제 페이지에서 상품 로드 완료 시 1회 전송.
+  // 광고 유입자가 결제 단계까지 도달했는지 측정(구매 여정 '결제 시작' 단계).
+  // sessionStorage로 슬러그당 중복 방지.
+  useEffect(() => {
+    if (productLoading || !productSlug) return
+    const key = `ga_begin_checkout_sent_${productSlug}`
+    try {
+      if (sessionStorage.getItem(key)) return
+    } catch {
+      // sessionStorage 접근 불가 시 그냥 진행
+    }
+    const gtag = (window as unknown as { gtag?: (...args: unknown[]) => void }).gtag
+    if (typeof gtag !== 'function') return
+    gtag('event', 'begin_checkout', {
+      currency: 'KRW',
+      value: baseAmount,
+      items: [
+        {
+          item_id: productSlug,
+          item_name: productName,
+          price: baseAmount,
+          quantity: 1,
+        },
+      ],
+    })
+    try {
+      sessionStorage.setItem(key, '1')
+    } catch {
+      // 기록 실패해도 이벤트는 전송됨
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [productLoading, productSlug])
+
   // 본인 보유 쿠폰 로드 (active만)
   useEffect(() => {
     if (!user?.id) return
