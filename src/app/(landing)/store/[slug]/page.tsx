@@ -146,6 +146,11 @@ export default async function ProductDetailPage({
               <h1 className="text-2xl md:text-[33px] font-extrabold text-ink leading-[1.2] mb-4 whitespace-pre-line tracking-tight">
                 {product.title}
               </h1>
+              {product.slug === 'vibe-coding-101-vod' && (
+                <p className="text-brand text-lg md:text-xl font-extrabold mb-4 leading-snug">
+                  3년의 시행착오, 이 강의 하나로 줄여드립니다.
+                </p>
+              )}
               {product.subtitle && (
                 <p className="text-ink text-base md:text-lg mb-1.5 font-semibold">
                   {product.subtitle}
@@ -320,7 +325,7 @@ export default async function ProductDetailPage({
             adsSendTo="AW-17032214512/_y1kCKH21NQcEPDvy7k_"
             className="text-ink font-bold text-lg md:text-xl underline underline-offset-4 hover:text-brand transition-colors"
           >
-            결제가 망설여지신다면 → 무료 3편의 글 먼저 받기
+            아직 망설여지신다면 → 실패를 수익으로 바꾼 비밀 노트 3편 무료로 읽어보기
           </LeadMagnetLink>
         </div>
       )}
