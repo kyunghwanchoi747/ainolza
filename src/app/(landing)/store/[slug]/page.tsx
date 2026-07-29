@@ -322,7 +322,7 @@ export default async function ProductDetailPage({
           <LeadMagnetLink
             href="https://docs.google.com/forms/d/e/1FAIpQLSftlaQSwbFl1Xyy12eFLBHNmFgkpmBUB9TFHEPrLXEfxXcFUg/viewform?usp=header"
             source="vibe-coding-101-detail"
-            adsSendTo="AW-17032214512/_y1kCKH21NQcEPDvy7k_"
+            adsSendTo="AW-17032214512/vQipCOCisNgcEPDvy7k_"
             className="text-ink font-bold text-lg md:text-xl underline underline-offset-4 hover:text-brand transition-colors"
           >
             아직 망설여지신다면 → 실패를 수익으로 바꾼 비밀 노트 3편 무료로 읽어보기
