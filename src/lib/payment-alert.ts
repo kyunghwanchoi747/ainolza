@@ -76,6 +76,34 @@ async function sendWebhook(text: string): Promise<void> {
 }
 
 /**
+ * 동일 오류 재발송 억제 (throttle).
+ *
+ * 과거 /api/health 가 throttle 없이 실패 시마다 메일을 보내다 폭주한 전례가 있음.
+ * 결제도 마찬가지 — DB가 죽으면 결제 시도마다 알림이 나가 메일함이 잠긴다.
+ * 같은 종류의 오류는 THROTTLE_MS 동안 1회만 발송한다.
+ *
+ * 주의: Worker 인스턴스 메모리 기반이라 전역 보장은 아니다. 인스턴스가 여러 개면
+ * 그만큼 나갈 수 있으나, 무제한 폭주는 확실히 막힌다. (완전한 억제가 필요해지면
+ * KV/D1로 옮길 것 — 다만 DB 장애 시에도 동작해야 하므로 KV가 적합)
+ */
+const THROTTLE_MS = 10 * 60 * 1000 // 10분
+const lastSentAt = new Map<string, number>()
+
+function shouldSend(key: string): boolean {
+  const now = Date.now()
+  const prev = lastSentAt.get(key)
+  if (prev && now - prev < THROTTLE_MS) return false
+  lastSentAt.set(key, now)
+  // 메모리 누수 방지 — 오래된 항목 정리
+  if (lastSentAt.size > 50) {
+    for (const [k, t] of lastSentAt) {
+      if (now - t > THROTTLE_MS) lastSentAt.delete(k)
+    }
+  }
+  return true
+}
+
+/**
  * 주문 생성 실패 알림. 메일 + 웹훅 동시 발송.
  * 절대 throw 하지 않는다 — 호출부는 await 만 하고 결과를 신경 쓰지 않아도 된다.
  */
@@ -88,7 +116,11 @@ export async function notifyPaymentFailure(
   const hint = schemaHint(msg)
 
   // 로그는 무조건 남긴다 (Cloudflare observability에서 검색 가능)
+  // — 알림이 throttle 되어도 로그는 항상 남으므로 전체 발생 건수는 로그로 확인 가능.
   console.error('[PAYMENT FAILURE]', ctx.stage, msg)
+
+  // 같은 단계 + 같은 오류 메시지는 10분에 1번만 알린다
+  if (!shouldSend(`${ctx.stage}|${msg}`)) return
 
   const plain = [
     '[AI놀자] 결제 오류 발생',
