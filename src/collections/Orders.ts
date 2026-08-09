@@ -235,6 +235,7 @@ export const Orders: CollectionConfig = {
     { name: 'vbankName', type: 'text', label: '입금 은행' },
     { name: 'vbankNum', type: 'text', label: '입금 계좌번호' },
     { name: 'vbankDate', type: 'date', label: '입금기한' },
+    { name: 'vbankReminderSent', type: 'checkbox', defaultValue: false, label: '입금 기한 임박 알림 발송 여부' },
     // 입금자명 — 무통장(direct-bank) 결제 시 회원이 토스뱅크에 입금할 이름.
     // 기본값은 회원 이름, 회원이 결제 후 안내 화면에서 수정 가능. 수정 시 관리자 알림.
     { name: 'depositorName', type: 'text', label: '입금자명' },

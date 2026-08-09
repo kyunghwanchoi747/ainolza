@@ -523,6 +523,7 @@ export interface Order {
   vbankName?: string | null;
   vbankNum?: string | null;
   vbankDate?: string | null;
+  vbankReminderSent?: boolean | null;
   depositorName?: string | null;
   referredByCode?: string | null;
   referrerUser?: (number | null) | User;
@@ -671,7 +672,7 @@ export interface ClassroomProgress {
       }[]
     | null;
   /**
-   * 완료한 회차 수 / 20 × 100 (자동 계산)
+   * 완료한 회차 수 / 강의실 전체 회차 수 × 100 (자동 계산)
    */
   progressPercent: number;
   lastAccessedAt?: string | null;
@@ -1340,6 +1341,7 @@ export interface OrdersSelect<T extends boolean = true> {
   vbankName?: T;
   vbankNum?: T;
   vbankDate?: T;
+  vbankReminderSent?: T;
   depositorName?: T;
   referredByCode?: T;
   referrerUser?: T;

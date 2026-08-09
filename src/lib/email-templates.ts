@@ -618,6 +618,66 @@ export async function sendVirtualAccountIssued(
   })
 }
 
+/** 가상계좌(무통장입금) 입금 기한 임박 알림 메일 */
+export async function sendVirtualAccountReminder(
+  payload: Payload,
+  order: {
+    orderNumber?: string
+    buyerName?: string
+    buyerEmail?: string
+    productName?: string
+    amount?: number | null
+    vbankName?: string | null
+    vbankNum?: string | null
+    vbankDate?: string | Date | null
+  },
+) {
+  if (!order.buyerEmail) return
+  const expiry = order.vbankDate
+    ? new Date(order.vbankDate).toLocaleString('ko-KR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    : ''
+  const name = order.buyerName || order.buyerEmail.split('@')[0]
+  await payload.sendEmail({
+    to: order.buyerEmail,
+    subject: `[AI놀자] 가상계좌 입금 기한 만료 안내 (약 3시간 전)`,
+    html: wrap(
+      `${name}님, 입금 기한이 얼마 남지 않았습니다`,
+      `
+      <p style="color:#666;font-size:15px;line-height:1.7;margin:0 0 16px;">
+        신청하신 <strong>${order.productName || '주문'}</strong>의 결제를 위한 가상계좌 입금 기한이 약 3시간 남았습니다.<br>
+        기한 내에 미입금 시 신청이 자동 취소되니 유의해 주세요.
+      </p>
+
+      <table cellpadding="8" cellspacing="0" style="width:100%;background:#FFF1F0;border:2px solid #D4756E;border-radius:12px;margin:0 0 20px;font-size:14px;color:#333;">
+        <tr><td style="width:90px;color:#888;font-weight:bold;">은행</td><td><strong>${order.vbankName || '-'}</strong></td></tr>
+        <tr><td style="color:#888;font-weight:bold;">계좌번호</td><td><strong style="font-size:18px;color:#1a1a1a;letter-spacing:0.5px;">${order.vbankNum || '-'}</strong></td></tr>
+        <tr><td style="color:#888;font-weight:bold;">입금금액</td><td><strong style="font-size:18px;color:#D4756E;">${priceKR(order.amount || 0)}</strong></td></tr>
+        ${expiry ? `<tr><td style="color:#888;font-weight:bold;">입금기한</td><td style="color:#D4756E;"><strong>${expiry}</strong> 까지</td></tr>` : ''}
+        ${order.orderNumber ? `<tr><td style="color:#888;font-weight:bold;">주문번호</td><td style="font-family:monospace;color:#666;">${order.orderNumber}</td></tr>` : ''}
+      </table>
+
+      <div style="background:#fafafa;border-radius:10px;padding:14px 16px;margin:0 0 24px;font-size:13px;color:#666;line-height:1.8;">
+        • 이미 입금하신 경우, 시스템 반영에 약간의 시간이 소요될 수 있으니 조금만 기다려 주시기 바랍니다.<br>
+        • 입금기한이 지나면 가상계좌가 자동으로 만료되어 입금되지 않으며 신청 내역도 취소됩니다.
+      </div>
+
+      <div style="text-align:center;margin:24px 0;">
+        <a href="${SITE_URL}/mypage" style="display:inline-block;background:#D4756E;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:12px;font-size:15px;font-weight:bold;">마이페이지에서 확인하기</a>
+      </div>
+
+      <p style="color:#999;font-size:12px;line-height:1.6;margin:24px 0 0;">
+        문의사항은 <a href="${KAKAO_OPEN_CHAT}" style="color:#D4756E;">카카오톡 오픈채팅</a>으로 부탁드립니다.
+      </p>`,
+    ),
+  })
+}
+
 // ==========================================
 // 대기 신청 (Waitlist)
 // ==========================================
