@@ -3,6 +3,7 @@ import { getPayloadClient } from '@/lib/payload'
 import { rateLimit, getClientIP } from '@/lib/rate-limit'
 import { resolveCurrentPrice } from '@/lib/price-schedule'
 import { cashEventAmount } from '@/lib/cash-discount'
+import { notifyPaymentFailure } from '@/lib/payment-alert'
 
 // 주문 생성 (결제 전)
 export async function POST(request: NextRequest) {
@@ -11,6 +12,17 @@ export async function POST(request: NextRequest) {
   if (!allowed) {
     return NextResponse.json({ error: '요청이 너무 많습니다.' }, { status: 429 })
   }
+
+  // 실패 알림에 담을 정보 — catch에서 접근해야 하므로 try 바깥에 둔다
+  let alerted = false // 중복 발송 방지 (내부 catch에서 이미 보냈는지)
+  const alertCtx: {
+    orderNumber?: string
+    buyerName?: string
+    buyerEmail?: string
+    productName?: string
+    amount?: number
+    payMethod?: string
+  } = {}
 
   try {
     const body = await request.json() as {
@@ -55,6 +67,11 @@ export async function POST(request: NextRequest) {
       shippingAddressDetail,
       shippingMessage,
     } = body
+
+    alertCtx.buyerName = buyerName
+    alertCtx.buyerEmail = buyerEmail
+    alertCtx.productName = productName
+    alertCtx.payMethod = payMethod
 
     if (!productName || !buyerName || !buyerEmail) {
       return NextResponse.json({ error: '필수 항목을 입력해주세요.' }, { status: 400 })
@@ -149,6 +166,9 @@ export async function POST(request: NextRequest) {
     // 주문번호 생성
     const now = new Date()
     const orderNumber = `ORD${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}_${Date.now().toString(36).toUpperCase()}`
+
+    alertCtx.orderNumber = orderNumber
+    alertCtx.amount = authoritativeAmount
 
     const payload = payloadEarly
 
@@ -258,10 +278,23 @@ export async function POST(request: NextRequest) {
       orderData.shippingStatus = 'pending'
     }
 
-    const order = await payload.create({
-      collection: 'orders',
-      data: orderData as any,
-    })
+    // DB INSERT — 2026-08-09 사고 지점. 스키마 불일치 시 여기서 터진다.
+    let order: { id: number | string }
+    try {
+      order = await payload.create({
+        collection: 'orders',
+        data: orderData as any,
+      })
+    } catch (e) {
+      // 알림 실패가 응답을 막지 않도록 격리 (notifyPaymentFailure는 throw하지 않음)
+      await notifyPaymentFailure(payload, {
+        stage: '주문 DB 저장 실패',
+        error: e,
+        ...alertCtx,
+      })
+      alerted = true
+      throw e
+    }
 
     // 쿠폰 사용 처리 — 사용 완료로 마킹 (결제 실패 시에도 그대로. 어드민에서 수동 복구).
     if (validatedCouponCode && couponDiscount > 0) {
@@ -299,6 +332,20 @@ export async function POST(request: NextRequest) {
     })
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : 'Unknown error'
+    // 주문 생성 경로의 예기치 못한 실패 — DB 저장 단계에서 이미 보냈으면 중복 발송하지 않는다.
+    if (!alerted) {
+      let payloadForAlert: Awaited<ReturnType<typeof getPayloadClient>> | null = null
+      try {
+        payloadForAlert = await getPayloadClient()
+      } catch {
+        // payload 자체를 못 얻으면 웹훅만으로 알린다
+      }
+      await notifyPaymentFailure(payloadForAlert, {
+        stage: '주문 생성 실패',
+        error,
+        ...alertCtx,
+      })
+    }
     return NextResponse.json({ error: msg }, { status: 500 })
   }
 }
