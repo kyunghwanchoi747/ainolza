@@ -52,6 +52,41 @@
   - `<KakaoButton>` — 카카오 노랑 + K 마크. 카카오톡 문의
   - `<OutlineButton>` — 회색 보더. 보조 액션
 
+## 새 상품 등록 절차 (반드시 이 순서로만 진행)
+
+> 상품 상세페이지에 커스텀 디자인(스크롤 연출 등)이 필요할 때의 표준 절차.
+> 이 섹션에 없는 방식(예: `store/[slug]/page.tsx`에 새 `product.slug === '...'` 분기 직접 추가)은 **금지**.
+> 이유: 그 파일은 모든 상품이 공유하는 공용 라우트라, 상품마다 조건문을 추가하면
+> 다른 상품 렌더링까지 깨뜨릴 위험이 계속 누적됨. 반드시 아래 레지스트리 방식만 사용할 것.
+
+### 0. 선행 조건 확인
+`src/components/store/custom-detail-registry.tsx` 파일이 있는지 먼저 확인.
+- **없으면**: 먼저 이 파일을 만들고, `store/[slug]/page.tsx`에 흩어진 상품별 하드코딩 분기(현재 `vibe-coding-101-vod` 조건들)를 레지스트리 참조로 교체하는 1회성 리팩터링부터 수행. 완료 후 기존 상품(VOD 등) 페이지가 리팩터링 전과 동일하게 뜨는지 브라우저로 반드시 확인.
+- **있으면**: 아래 1~2단계만 수행.
+
+### 커스텀 디자인이 필요한 경우 (코드 작업)
+1. `src/components/store/{상품명}-detail-content.tsx` 새 컴포넌트 작성 (디자인 이식)
+2. `custom-detail-registry.tsx`에 `slug → 컴포넌트` 한 줄 추가
+3. 로컬 서버로 새 상품 페이지만 브라우저 확인 (다른 상품 페이지는 안 건드렸으므로 재확인 불필요)
+4. git 커밋 (사용자 승인 후) → 배포
+
+### 표준 템플릿으로 충분한 경우
+admin의 이미지 나열 + 버튼 템플릿으로 충분하면 코드 작업 자체가 불필요 — 바로 아래 admin 단계로.
+
+### admin에서 사용자가 할 일 (코드 배포 후, 매 상품 공통)
+5. **Products 컬렉션**에 상품 row 추가
+   - `slug`, `title`, `price`, `productType`(class/ebook/book/bundle) 필수
+   - 가격 옵션이 여러 개면(정본/기본형 등) **옵션별로 row를 각각 등록** (한 상품 row = 가격 1개)
+   - 실물 배송이 있으면 `requiresShipping: true` (결제 페이지에 배송지 입력 폼 자동 노출)
+   - 강의실 입장 권한이 필요 없으면 `grantedClassroomSlugs`는 비워둠 (자동 스킵, 별도 처리 불필요)
+   - `actions` 버튼에 `/checkout?slug={상품slug}` 연결
+6. **`/store` 목록 노출 여부 결정** — 커스텀 코드 페이지로 연결하려면 `store/page.tsx`의 `EXTERNAL_LINK_OVERRIDE`에 매핑 한 줄 추가 (기존 `online-business-class` 패턴과 동일)
+7. **테스트 결제 1건**으로 이메일 문구(배송/강의실 안내가 `productType` 기준으로 자동 분기됨)와 배송지 폼이 맞게 뜨는지 확인
+
+### 절대 하지 말 것
+- `store/[slug]/page.tsx`, `checkout/page.tsx`, `Orders.ts` 훅에 상품별 `if (slug === ...)` 분기를 직접 추가하는 것 — 레지스트리로만 확장
+- `payload generate:importmap` 로컬 재생성 (R2 핸들러 누락으로 운영 admin 깨짐, 과거 2회 실사고)
+
 ## 주의사항
 - 로컬 개발: `@payloadcms/db-sqlite` + `file:./dev.db` 사용
 - 프로덕션 배포: `@payloadcms/db-d1-sqlite`로 전환 필요

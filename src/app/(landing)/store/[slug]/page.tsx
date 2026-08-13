@@ -10,8 +10,8 @@ import { V3Header } from '@/components/landing/v3-header'
 import { PriceStageCountdown } from '@/components/store/price-stage-countdown'
 import { PrimaryButtonCard, KakaoButton, OutlineButton } from '@/components/design-system/buttons'
 import { ReferralTracker } from '@/components/referrals/referral-tracker'
-import { VodDetailContent } from '@/components/store/vod-detail-content'
 import { ViewItemTracker } from '@/components/store/view-item-tracker'
+import { CUSTOM_DETAIL_COMPONENTS } from '@/components/store/custom-detail-registry'
 import { cashEventDdayLabel, CASH_EVENT_PRICES } from '@/lib/cash-discount'
 
 export const dynamic = 'force-dynamic'
@@ -354,12 +354,16 @@ export default async function ProductDetailPage({
         </section>
       )}
 
-      {/* VOD 상세 본문 — 코드로 구현한 상세페이지 (캔바 이미지 대체) */}
-      {product.slug === 'vibe-coding-101-vod' && <VodDetailContent />}
+      {/* 커스텀 상세 본문 — 상품별로 코드 이식된 디자인이 있으면 표준 이미지 나열 대신 렌더링.
+          등록: src/components/store/custom-detail-registry.tsx */}
+      {(() => {
+        const CustomDetail = CUSTOM_DETAIL_COMPONENTS[product.slug]
+        return CustomDetail ? <CustomDetail /> : null
+      })()}
 
       {/* 상세 이미지 — public/store/{slug}/detail-1~N.{ext}
-          VOD 상품은 코드 상세(VodDetailContent)가 대체하므로 제외 */}
-      {product.slug !== 'vibe-coding-101-vod' && detailImages.length > 0 && (
+          커스텀 상세 본문이 있는 상품은 제외 */}
+      {!CUSTOM_DETAIL_COMPONENTS[product.slug] && detailImages.length > 0 && (
         <section className="py-10 px-6">
           <div className="max-w-[900px] mx-auto flex flex-col gap-4">
             {detailImages.map((src, i) => (
