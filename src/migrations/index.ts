@@ -16,6 +16,7 @@ import * as migration_20260513_020000_referrals_coupons_locked_rels from './2026
 import * as migration_20260519_000000_waitlists from './20260519_000000_waitlists';
 import * as migration_20260714_000000_classroom_progress from './20260714_000000_classroom_progress';
 import * as migration_20260809_061500_add_vbank_reminder_sent from './20260809_061500_add_vbank_reminder_sent';
+import * as migration_20260813_090000_products_display_category from './20260813_090000_products_display_category';
 
 export const migrations = [
   {
@@ -107,5 +108,10 @@ export const migrations = [
     up: migration_20260809_061500_add_vbank_reminder_sent.up,
     down: migration_20260809_061500_add_vbank_reminder_sent.down,
     name: '20260809_061500_add_vbank_reminder_sent'
+  },
+  {
+    up: migration_20260813_090000_products_display_category.up,
+    down: migration_20260813_090000_products_display_category.down,
+    name: '20260813_090000_products_display_category'
   },
 ];

@@ -37,7 +37,7 @@ export function V3Header() {
         <div className="headerInner">
           <Link className="logo" href="/">AI놀자</Link>
           <nav className="nav">
-            <Link href="/store">상품</Link>
+            <Link href="/store">콘텐츠</Link>
             <Link href="/labs">AI실험실</Link>
             <Link href="/tools">도구</Link>
             <Link href="/contact">문의</Link>
