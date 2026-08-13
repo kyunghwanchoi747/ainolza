@@ -15,6 +15,7 @@ type DbProduct = {
   shortDescription?: string | null
   productType?: 'class' | 'book' | 'ebook' | 'bundle' | null
   category?: string | null
+  displayCategory?: 'class' | 'ebook' | 'publishing' | null
   price?: number | null
   originalPrice?: number | null
   priceLabel?: string | null
@@ -128,6 +129,8 @@ function dbToProduct(d: DbProduct): Product {
     ...(d.featured ? { _dbFeatured: true } : {}),
     ...(d.waitlistMode ? { _dbWaitlistMode: true } : {}),
     ...(d.waitlistNotice ? { _dbWaitlistNotice: d.waitlistNotice } : {}),
+    // 표시 탭 분류 — 없으면 상품 유형(productType)으로 대체 (기존 상품 값 미입력 대비)
+    _dbDisplayCategory: d.displayCategory || d.productType || 'class',
     _dbId: d.id,
   } as Product & {
     _dbThumbnailUrl?: string
@@ -140,6 +143,7 @@ function dbToProduct(d: DbProduct): Product {
     _dbNextChange?: { startAt: string; price: number; label?: string }
     _dbWaitlistMode?: boolean
     _dbWaitlistNotice?: string
+    _dbDisplayCategory?: string
   }
 }
 
@@ -155,6 +159,7 @@ export type ProductWithDbImages = Product & {
   _dbNextChange?: { startAt: string; price: number; label?: string }
   _dbWaitlistMode?: boolean
   _dbWaitlistNotice?: string
+  _dbDisplayCategory?: string
 }
 
 /**

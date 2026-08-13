@@ -46,6 +46,21 @@ export const Products: CollectionConfig = {
       label: '카테고리 라벨',
       admin: { description: '카드 상단에 표시. 예: "강의" / "전자책 / 종이책"' },
     },
+    {
+      name: 'displayCategory',
+      type: 'select',
+      label: '상품 목록 탭 분류',
+      defaultValue: 'class',
+      options: [
+        { label: '강의', value: 'class' },
+        { label: '전자책', value: 'ebook' },
+        { label: '출판', value: 'publishing' },
+      ],
+      admin: {
+        description:
+          '/store 페이지 상단 탭(전체/강의/전자책/출판) 필터 기준. 결제·배송 로직에 쓰이는 "상품 유형"과 별개 — 예: 자서전은 상품 유형은 종이책(배송용)이지만 이 값은 출판으로 설정.',
+      },
+    },
 
     // 가격
     { name: 'price', type: 'number', label: '판매가 (원)', min: 0 },
