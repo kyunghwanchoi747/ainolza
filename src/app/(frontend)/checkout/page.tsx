@@ -364,6 +364,11 @@ function CheckoutContent() {
       if (payMethod === 'KAKAOPAY') {
         portoneArgs.easyPay = { easyPayProvider: 'KAKAOPAY' }
       }
+      if (payMethod === 'CARD') {
+        portoneArgs.card = {
+          installment: { monthOption: { availableMonthList: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] } },
+        }
+      }
       const paymentResponse = await PortOne.requestPayment(portoneArgs)
 
       if (paymentResponse?.code !== undefined) {
