@@ -566,6 +566,7 @@ export interface Order {
         | 'vibe-coding-101-4'
         | 'vibe-coding-advanced-4'
         | 'vibe-coding-101-vod'
+        | 'ebook-publishing-class-1'
       )[]
     | null;
   books?: ('personal-intelligence' | 'uncomfortable-ai' | 'prompt-15' | 'notebooklm-guide')[] | null;

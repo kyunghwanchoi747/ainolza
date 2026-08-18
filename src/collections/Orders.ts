@@ -318,6 +318,8 @@ export const Orders: CollectionConfig = {
         // VOD (상시 판매) — 새 강의실을 만들면 여기에도 반드시 추가할 것.
         // 누락 시 결제/권한부여가 'The following field is invalid: 강의실'로 실패함
         { label: '바이브 코딩 입문 (VOD)', value: 'vibe-coding-101-vod' },
+        // 전자책 출간 과정
+        { label: '전자책 출간 과정 — 1기', value: 'ebook-publishing-class-1' },
       ],
     },
     {
