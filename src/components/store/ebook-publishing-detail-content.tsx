@@ -331,7 +331,6 @@ export function EbookPublishingDetailContent() {
                   <li>딥리서치로 자료 긁어모으기</li>
                   <li>녹음·메모·자료를 <b>NotebookLM</b>에 모두 넣기</li>
                   <li>목차대로 초고 뽑아내기</li>
-                  <li><b>AI 티 없애는 법</b> — 이 강의의 핵심</li>
                 </ul>
               </div>
             </div>
@@ -340,7 +339,6 @@ export function EbookPublishingDetailContent() {
               <div>
                 <span className="week-t">책의 형태로 만들기</span>
                 <ul>
-                  <li>교정교열 — <b>전용 프로그램 제공</b></li>
                   <li>제목 정하기 · 표지 만들기 (캔바)</li>
                   <li>소리 내어 읽으며 다듬기</li>
                   <li>원고 최종본 제출</li>
@@ -403,19 +401,6 @@ export function EbookPublishingDetailContent() {
           </div>
           <p className="beat" style={{ marginTop: '.6rem' }}>8월 31일 마감까지<br /><span className="pop">매일 가격이 오릅니다.</span></p>
           <p className="note">ISBN 발급과 국립중앙도서관 등록 비용이 포함된 가격입니다.<br /><br />종이책 출간과 대형 서점 유통은 AI놀자 출판사 이름으로 나가고<br />판매 수익이 발생하기 때문에 별도 계약이 필요합니다.<br />이건 선택 사항입니다.</p>
-        </div>
-      </section>
-
-      <section className="scene scene--deep">
-        <div className="inner">
-          <p className="kicker">일정</p>
-          <div className="spec" style={{ borderTopColor: 'rgba(255,255,255,.15)' }}>
-            <div style={{ borderBottomColor: 'rgba(255,255,255,.15)' }}><b>8월 18일</b><span>슈퍼 얼리버드 시작</span></div>
-            <div style={{ borderBottomColor: 'rgba(255,255,255,.15)' }}><b>8월 31일</b><span>모집 마감</span></div>
-            <div style={{ borderBottomColor: 'rgba(255,255,255,.15)' }}><b>9월 1일</b><span>강의 시작 (예정)</span></div>
-            <div style={{ borderBottomColor: 'rgba(255,255,255,.15)' }}><b>4주 과정 종료</b><span></span></div>
-          </div>
-          <p className="sub">추석 연휴가 마지막 주에 걸립니다.<br />그 주는 원고를 마무리하는 기간으로 두었습니다.</p>
         </div>
       </section>
 
