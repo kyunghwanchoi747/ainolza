@@ -247,6 +247,10 @@ export interface Product {
    * 카드 상단에 표시. 예: "강의" / "전자책 / 종이책"
    */
   category?: string | null;
+  /**
+   * /store 페이지 상단 탭(전체/강의/전자책/출판) 필터 기준. 결제·배송 로직에 쓰이는 "상품 유형"과 별개 — 예: 자서전은 상품 유형은 종이책(배송용)이지만 이 값은 출판으로 설정.
+   */
+  displayCategory?: ('class' | 'ebook' | 'publishing') | null;
   price?: number | null;
   originalPrice?: number | null;
   /**
@@ -1160,6 +1164,7 @@ export interface ProductsSelect<T extends boolean = true> {
   shortDescription?: T;
   productType?: T;
   category?: T;
+  displayCategory?: T;
   price?: T;
   originalPrice?: T;
   priceLabel?: T;

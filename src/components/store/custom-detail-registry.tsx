@@ -1,6 +1,7 @@
 import type { ComponentType } from 'react'
 import { VodDetailContent } from '@/components/store/vod-detail-content'
 import { MemoirDetailContent } from '@/components/store/memoir-detail-content'
+import { EbookPublishingDetailContent } from '@/components/store/ebook-publishing-detail-content'
 
 /**
  * 상품 slug → 커스텀 상세 본문 컴포넌트.
@@ -12,4 +13,5 @@ export const CUSTOM_DETAIL_COMPONENTS: Record<string, ComponentType> = {
   'vibe-coding-101-vod': VodDetailContent,
   'memoir-full': MemoirDetailContent,
   'memoir-basic': MemoirDetailContent,
+  'ebook-publishing-class': EbookPublishingDetailContent,
 }
