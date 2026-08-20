@@ -229,9 +229,10 @@ function CheckoutContent() {
   }, [user?.id])
 
   const allAgreed = agreed.terms && agreed.refund && agreed.privacy
-  // 휴대폰 형식 검증: 010(또는 011/016/017/018/019)-3~4자리-4자리
+  // 휴대폰 형식 검증: 국내 010(또는 011/016/017/018/019)-3~4자리-4자리, 또는 해외 번호(국가번호 포함 숫자 8~15자리)
   const phoneNormalized = buyerPhone.replace(/[^0-9]/g, '')
-  const phoneValid = /^01[016789]\d{7,8}$/.test(phoneNormalized)
+  const phoneValid =
+    /^01[016789]\d{7,8}$/.test(phoneNormalized) || /^\d{8,15}$/.test(phoneNormalized)
   const shippingValid =
     !requiresShipping ||
     (shipping.recipient.trim() &&
@@ -544,7 +545,7 @@ function CheckoutContent() {
                             inputMode="numeric"
                             value={buyerPhone}
                             onChange={(e) => setBuyerPhone(e.target.value)}
-                            placeholder="010-1234-5678"
+                            placeholder="010-1234-5678 (해외는 숫자만)"
                             className={`flex-1 px-3 py-2 border rounded-lg text-ink focus:outline-none ${
                               buyerPhone && !phoneValid
                                 ? 'border-red-300 focus:border-red-500'
