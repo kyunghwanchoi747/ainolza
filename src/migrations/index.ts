@@ -17,6 +17,7 @@ import * as migration_20260519_000000_waitlists from './20260519_000000_waitlist
 import * as migration_20260714_000000_classroom_progress from './20260714_000000_classroom_progress';
 import * as migration_20260809_061500_add_vbank_reminder_sent from './20260809_061500_add_vbank_reminder_sent';
 import * as migration_20260813_090000_products_display_category from './20260813_090000_products_display_category';
+import * as migration_20260828_000000_email_templates_and_logs from './20260828_000000_email_templates_and_logs';
 
 export const migrations = [
   {
@@ -113,5 +114,10 @@ export const migrations = [
     up: migration_20260813_090000_products_display_category.up,
     down: migration_20260813_090000_products_display_category.down,
     name: '20260813_090000_products_display_category'
+  },
+  {
+    up: migration_20260828_000000_email_templates_and_logs.up,
+    down: migration_20260828_000000_email_templates_and_logs.down,
+    name: '20260828_000000_email_templates_and_logs'
   },
 ];

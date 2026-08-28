@@ -86,6 +86,7 @@ export interface Config {
     coupons: Coupon;
     webhook_events: WebhookEvent;
     waitlists: Waitlist;
+    email_templates: EmailTemplate;
     exports: Export;
     imports: Import;
     'payload-kv': PayloadKv;
@@ -115,6 +116,7 @@ export interface Config {
     coupons: CouponsSelect<false> | CouponsSelect<true>;
     webhook_events: WebhookEventsSelect<false> | WebhookEventsSelect<true>;
     waitlists: WaitlistsSelect<false> | WaitlistsSelect<true>;
+    email_templates: EmailTemplatesSelect<false> | EmailTemplatesSelect<true>;
     exports: ExportsSelect<false> | ExportsSelect<true>;
     imports: ImportsSelect<false> | ImportsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -792,6 +794,42 @@ export interface Waitlist {
   createdAt: string;
 }
 /**
+ * 수강신청·결제 시 자동 발송되는 메일의 제목과 주요 문구입니다. 비워두면 기본 문구로 발송됩니다. 표·버튼 등 나머지 구조는 여기서 바꿀 수 없습니다.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "email_templates".
+ */
+export interface EmailTemplate {
+  id: number;
+  key:
+    | 'welcome'
+    | 'payment-completed-buyer'
+    | 'refund-completed-buyer'
+    | 'enrollment-completed-buyer'
+    | 'enrollment-confirm-buyer'
+    | 'advanced-class-groupchat'
+    | 'vaccount-issued'
+    | 'vaccount-reminder';
+  /**
+   * 비워두면 기본 제목으로 발송됩니다.
+   */
+  subject?: string | null;
+  /**
+   * 이름은 {{name}}, 상품명은 {{productName}} 으로 표시하면 자동 치환됩니다.
+   */
+  greeting?: string | null;
+  /**
+   * 문의 안내 등 하단 문구. {{name}} / {{productName}} 치환 가능.
+   */
+  closing?: string | null;
+  /**
+   * 단톡방 안내·가상계좌 안내처럼 전체 문단을 바꾸는 메일용. 줄바꿈은 그대로 반영됩니다. {{name}} / {{productName}} 치환 가능.
+   */
+  body?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "exports".
  */
@@ -1056,6 +1094,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'waitlists';
         value: number | Waitlist;
+      } | null)
+    | ({
+        relationTo: 'email_templates';
+        value: number | EmailTemplate;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1537,6 +1579,19 @@ export interface WaitlistsSelect<T extends boolean = true> {
   notifiedAt?: T;
   source?: T;
   adminMemo?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "email_templates_select".
+ */
+export interface EmailTemplatesSelect<T extends boolean = true> {
+  key?: T;
+  subject?: T;
+  greeting?: T;
+  closing?: T;
+  body?: T;
   updatedAt?: T;
   createdAt?: T;
 }

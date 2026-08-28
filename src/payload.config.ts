@@ -22,6 +22,7 @@ import { SiteSettings } from './collections/SiteSettings'
 import { Enrollments } from './collections/Enrollments'
 import { Orders } from './collections/Orders'
 import { EmailLogs } from './collections/EmailLogs'
+import { EmailTemplates } from './collections/EmailTemplates'
 import { Reviews } from './collections/Reviews'
 import { Classrooms } from './collections/Classrooms'
 import { ClassroomProgress } from './collections/ClassroomProgress'
@@ -102,7 +103,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, DesignPages, Products, ProductCategories, Posts, Comments, Programs, SiteSettings, Enrollments, Orders, Reviews, Classrooms, ClassroomProgress, Ebooks, Referrals, Coupons, WebhookEvents, Waitlists],
+  collections: [Users, Media, DesignPages, Products, ProductCategories, Posts, Comments, Programs, SiteSettings, Enrollments, Orders, Reviews, Classrooms, ClassroomProgress, Ebooks, Referrals, Coupons, WebhookEvents, Waitlists, EmailLogs, EmailTemplates],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || 'dev-secret-change-in-production',
   db: dbAdapter,

@@ -37,6 +37,42 @@ function priceKR(amount?: number): string {
   return amount.toLocaleString('ko-KR') + '원'
 }
 
+/**
+ * 어드민 "메일 템플릿" 컬렉션에서 문구 override 조회.
+ * 등록/입력 안 되어 있으면 undefined 필드 그대로 반환 → 호출부에서 기본 문구로 fallback.
+ */
+async function getTemplateOverride(
+  payload: Payload,
+  key: string,
+): Promise<{ subject?: string; greeting?: string; closing?: string; body?: string } | undefined> {
+  try {
+    const result = await payload.find({
+      collection: 'email_templates' as any,
+      where: { key: { equals: key } },
+      limit: 1,
+      depth: 0,
+      overrideAccess: true,
+    })
+    const doc = result.docs[0] as any
+    if (!doc) return undefined
+    return { subject: doc.subject || undefined, greeting: doc.greeting || undefined, closing: doc.closing || undefined, body: doc.body || undefined }
+  } catch {
+    return undefined
+  }
+}
+
+function fillVars(text: string, vars: Record<string, string>): string {
+  return text.replace(/\{\{\s*(\w+)\s*\}\}/g, (_, k) => vars[k] ?? '')
+}
+
+// 줄바꿈이 있는 사용자 입력 문구를 <p> 단락으로 변환 (간단한 개행 → HTML)
+function toParagraphs(text: string, style: string): string {
+  return text
+    .split(/\n{2,}/)
+    .map((para) => `<p style="${style}">${para.replace(/\n/g, '<br>')}</p>`)
+    .join('')
+}
+
 // AI놀자 디자인 시스템 톤을 그대로 메일에 적용.
 //  ink #1a1a1a (제목/강조 텍스트)
 //  sub #888888 (보조 텍스트)
@@ -73,25 +109,35 @@ const wrap = (title: string, bodyHtml: string) => `<!DOCTYPE html>
 /** 회원가입 환영 메일 */
 export async function sendWelcomeEmail(payload: Payload, user: { email: string; name?: string | null }) {
   const name = user.name || user.email.split('@')[0]
-  await payload.sendEmail({
-    to: user.email,
-    subject: '[AI놀자] 가입을 환영합니다',
-    html: wrap(
-      `${name}님, 환영합니다`,
-      `
+  const vars = { name, productName: '' }
+  const t = await getTemplateOverride(payload, 'welcome')
+  const greeting = t?.greeting
+    ? toParagraphs(fillVars(t.greeting, vars), 'color:#888888;font-size:15px;line-height:1.7;margin:0 0 16px;')
+    : `
       <p style="color:#888888;font-size:15px;line-height:1.7;margin:0 0 16px;">
         AI놀자에 가입해 주셔서 감사합니다.
       </p>
       <p style="color:#888888;font-size:14px;line-height:1.7;margin:0 0 24px;">
         AI놀자는 평범한 사람을 위한 AI 활용 강의와 도구를 만드는 공간입니다.
         강의·전자책 구매부터 AI 도구 활용까지 다양한 콘텐츠를 만나보세요.
-      </p>
+      </p>`
+  const closing = t?.closing
+    ? toParagraphs(fillVars(t.closing, vars), 'color:#888888;font-size:12px;line-height:1.6;margin:28px 0 0;')
+    : `
+      <p style="color:#888888;font-size:12px;line-height:1.6;margin:28px 0 0;">
+        궁금한 점이 있으시면 <a href="${KAKAO_OPEN_CHAT}" style="color:#D4756E;text-decoration:none;font-weight:bold;">카카오톡 문의</a>로 연락주세요.
+      </p>`
+  await payload.sendEmail({
+    to: user.email,
+    subject: t?.subject ? fillVars(t.subject, vars) : '[AI놀자] 가입을 환영합니다',
+    html: wrap(
+      `${name}님, 환영합니다`,
+      `
+      ${greeting}
       <div style="text-align:center;margin:32px 0;">
         <a href="${SITE_URL}/store" style="display:inline-block;background:#D4756E;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:10px;font-size:14px;font-weight:bold;">강의/책 보러가기</a>
       </div>
-      <p style="color:#888888;font-size:12px;line-height:1.6;margin:28px 0 0;">
-        궁금한 점이 있으시면 <a href="${KAKAO_OPEN_CHAT}" style="color:#D4756E;text-decoration:none;font-weight:bold;">카카오톡 문의</a>로 연락주세요.
-      </p>`,
+      ${closing}`,
     ),
   })
 }
@@ -179,15 +225,22 @@ export async function sendPaymentCompletedToBuyer(
       <a href="${SITE_URL}/mypage" style="display:inline-block;background:#D4756E;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:10px;font-size:14px;font-weight:bold;">마이페이지</a>
     </div>`
 
+  const vars = { name, productName: order.productName }
+  const t = await getTemplateOverride(payload, 'payment-completed-buyer')
+  const greeting = t?.greeting
+    ? toParagraphs(fillVars(t.greeting, vars), 'color:#888888;font-size:15px;line-height:1.7;margin:0 0 20px;')
+    : `
+      <p style="color:#888888;font-size:15px;line-height:1.7;margin:0 0 20px;">
+        주문해 주셔서 감사합니다. 결제가 정상 처리되었습니다.
+      </p>`
+
   await payload.sendEmail({
     to: order.buyerEmail,
-    subject: '[AI놀자] 결제가 완료되었습니다',
+    subject: t?.subject ? fillVars(t.subject, vars) : '[AI놀자] 결제가 완료되었습니다',
     html: wrap(
       `${name}님, 결제가 완료되었습니다`,
       `
-      <p style="color:#888888;font-size:15px;line-height:1.7;margin:0 0 20px;">
-        주문해 주셔서 감사합니다. 결제가 정상 처리되었습니다.
-      </p>
+      ${greeting}
       <table cellpadding="6" cellspacing="0" style="width:100%;background:#fafafa;border-radius:10px;padding:8px;margin:0 0 24px;font-size:13px;color:#888888;">
         <tr><td style="width:90px;color:#888888;">주문번호</td><td style="color:#1a1a1a;font-family:monospace;">${order.orderNumber}</td></tr>
         <tr><td style="color:#888888;">상품</td><td><strong style="color:#1a1a1a;">${order.productName}</strong></td></tr>
@@ -207,24 +260,34 @@ export async function sendRefundCompletedToBuyer(
   order: { orderNumber: string; buyerName?: string | null; buyerEmail: string; productName: string; amount?: number | null },
 ) {
   const name = order.buyerName || order.buyerEmail.split('@')[0]
+  const vars = { name, productName: order.productName }
+  const t = await getTemplateOverride(payload, 'refund-completed-buyer')
+  const greeting = t?.greeting
+    ? toParagraphs(fillVars(t.greeting, vars), 'color:#666;font-size:15px;line-height:1.7;margin:0 0 16px;')
+    : `
+      <p style="color:#666;font-size:15px;line-height:1.7;margin:0 0 16px;">
+        요청하신 환불이 정상 처리되었습니다.
+      </p>`
+  const closing = t?.closing
+    ? toParagraphs(fillVars(t.closing, vars), 'color:#666;font-size:14px;line-height:1.7;margin:0 0 16px;')
+    : `
+      <p style="color:#666;font-size:14px;line-height:1.7;margin:0 0 16px;">
+        환불 금액은 결제 수단에 따라 영업일 기준 3~7일 내 입금됩니다.
+        문의사항이 있으시면 언제든 연락주세요.
+      </p>`
   await payload.sendEmail({
     to: order.buyerEmail,
-    subject: '[AI놀자] 환불이 완료되었습니다',
+    subject: t?.subject ? fillVars(t.subject, vars) : '[AI놀자] 환불이 완료되었습니다',
     html: wrap(
       `${name}님, 환불이 완료되었습니다`,
       `
-      <p style="color:#666;font-size:15px;line-height:1.7;margin:0 0 16px;">
-        요청하신 환불이 정상 처리되었습니다.
-      </p>
+      ${greeting}
       <table cellpadding="6" cellspacing="0" style="width:100%;background:#fafafa;border-radius:10px;padding:8px;margin:0 0 24px;font-size:13px;color:#666;">
         <tr><td style="width:90px;color:#999;">주문번호</td><td>${order.orderNumber}</td></tr>
         <tr><td style="color:#999;">상품</td><td>${order.productName}</td></tr>
         <tr><td style="color:#999;">환불금액</td><td><strong style="color:#D4756E;">${priceKR(order.amount || 0)}</strong></td></tr>
       </table>
-      <p style="color:#666;font-size:14px;line-height:1.7;margin:0 0 16px;">
-        환불 금액은 결제 수단에 따라 영업일 기준 3~7일 내 입금됩니다.
-        문의사항이 있으시면 언제든 연락주세요.
-      </p>
+      ${closing}
       <p style="color:#999;font-size:12px;line-height:1.6;margin:24px 0 0;">
         문의: <a href="${KAKAO_OPEN_CHAT}" style="color:#D4756E;">카카오톡 오픈채팅</a>
       </p>`,
@@ -248,25 +311,35 @@ export async function sendEnrollmentCompletedToBuyer(
     expiryDate = expiry.toLocaleDateString('ko-KR')
   }
 
+  const vars = { name, productName: order.productName }
+  const t = await getTemplateOverride(payload, 'enrollment-completed-buyer')
+  const greeting = t?.greeting
+    ? toParagraphs(fillVars(t.greeting, vars), 'color:#666;font-size:15px;line-height:1.7;margin:0 0 20px;')
+    : `
+      <p style="color:#666;font-size:15px;line-height:1.7;margin:0 0 20px;">
+        100일간의 수강 기간이 만료되었습니다. 강의 시청 감사합니다.
+      </p>`
+  const closing = t?.closing
+    ? toParagraphs(fillVars(t.closing, vars), 'color:#666;font-size:14px;line-height:1.7;margin:0 0 24px;')
+    : `
+      <p style="color:#666;font-size:14px;line-height:1.7;margin:0 0 24px;">
+        강의 영상과 자료에 더 이상 접근할 수 없습니다.<br>
+        다음 기수 모집이나 추가 자료 구매에 관심이 있으시면 문의해 주세요.
+      </p>`
   await payload.sendEmail({
     to: order.buyerEmail,
-    subject: '[AI놀자] 수강 기간이 만료되었습니다',
+    subject: t?.subject ? fillVars(t.subject, vars) : '[AI놀자] 수강 기간이 만료되었습니다',
     html: wrap(
       `${name}님, 수강 기간이 만료되었습니다`,
       `
-      <p style="color:#666;font-size:15px;line-height:1.7;margin:0 0 20px;">
-        100일간의 수강 기간이 만료되었습니다. 강의 시청 감사합니다.
-      </p>
+      ${greeting}
       <table cellpadding="6" cellspacing="0" style="width:100%;background:#fafafa;border-radius:10px;padding:8px;margin:0 0 24px;font-size:13px;color:#666;">
         <tr><td style="width:90px;color:#999;">주문번호</td><td style="font-family:monospace;">${order.orderNumber}</td></tr>
         <tr><td style="color:#999;">상품</td><td><strong style="color:#1a1a1a;">${order.productName}</strong></td></tr>
         <tr><td style="color:#999;">결제일</td><td>${paidDate}</td></tr>
         <tr><td style="color:#999;">만료일</td><td><strong style="color:#D4756E;">${expiryDate}</strong></td></tr>
       </table>
-      <p style="color:#666;font-size:14px;line-height:1.7;margin:0 0 24px;">
-        강의 영상과 자료에 더 이상 접근할 수 없습니다.<br>
-        다음 기수 모집이나 추가 자료 구매에 관심이 있으시면 문의해 주세요.
-      </p>
+      ${closing}
       <div style="text-align:center;margin:28px 0;">
         <a href="${SITE_URL}/store" style="display:inline-block;background:#D4756E;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:10px;font-size:14px;font-weight:bold;">다른 강의 보러가기</a>
       </div>
@@ -283,12 +356,11 @@ export async function sendAdvancedClassGroupChat(
   order: { buyerName?: string | null; buyerEmail: string },
 ) {
   const name = order.buyerName || order.buyerEmail.split('@')[0]
-  await payload.sendEmail({
-    to: order.buyerEmail,
-    subject: '[AI놀자] 바이브코딩 심화반 전용 단톡방 초대 및 입장 안내',
-    html: wrap(
-      `[바이브코딩 심화반] 전용 단톡방 초대 및 입장 안내`,
-      `
+  const vars = { name, productName: '' }
+  const t = await getTemplateOverride(payload, 'advanced-class-groupchat')
+  const body = t?.body
+    ? toParagraphs(fillVars(t.body, vars), 'color:#444;font-size:15px;line-height:1.8;margin:0 0 16px;')
+    : `
       <p style="color:#444;font-size:15px;line-height:1.8;margin:0 0 16px;">
         안녕하세요, ${name}님.<br>
         바이브코딩 심화반에 합류하신 것을 진심으로 환영합니다.
@@ -300,7 +372,14 @@ export async function sendAdvancedClassGroupChat(
         지난 입문자반 진행 당시, 안내된 링크를 찾지 못해 입장이 지연되거나 오류를 겪으신 분들이 많았습니다.
         원활한 소통과 공지 전달을 위해, 반드시 결제 시 기재하신 이메일함(스팸함 포함)과 문자 메시지를 꼼꼼히 확인해 주시고
         아래 링크를 통해 오류 없이 입장해 주시기 바랍니다.
-      </p>
+      </p>`
+  await payload.sendEmail({
+    to: order.buyerEmail,
+    subject: t?.subject ? fillVars(t.subject, vars) : '[AI놀자] 바이브코딩 심화반 전용 단톡방 초대 및 입장 안내',
+    html: wrap(
+      `[바이브코딩 심화반] 전용 단톡방 초대 및 입장 안내`,
+      `
+      ${body}
       <table cellpadding="12" cellspacing="0" style="width:100%;background:#FFF1F0;border:2px solid #D4756E;border-radius:12px;margin:0 0 24px;font-size:15px;color:#1a1a1a;">
         <tr><td style="color:#888888;font-weight:bold;width:160px;">단톡방 입장 링크</td><td><a href="https://open.kakao.com/o/gbmc0ppi" style="color:#D4756E;font-weight:bold;text-decoration:none;">https://open.kakao.com/o/gbmc0ppi</a></td></tr>
         <tr><td style="color:#888888;font-weight:bold;">참여 코드(비밀번호)</td><td><strong style="font-size:18px;color:#1a1a1a;">nolza232</strong></td></tr>
@@ -356,19 +435,25 @@ export async function sendEnrollmentConfirmToBuyer(
 ) {
   const name = enrollment.name || enrollment.email.split('@')[0]
   const programTitle = product?.title || enrollment.program || '강의'
-  await payload.sendEmail({
-    to: enrollment.email,
-    subject: '[AI놀자] 신청이 접수되었습니다 — 결제 후 신청이 확정됩니다',
-    html: wrap(
-      `${name}님, 신청이 접수되었습니다`,
-      `
+  const vars = { name, productName: programTitle }
+  const t = await getTemplateOverride(payload, 'enrollment-confirm-buyer')
+  const greeting = t?.greeting
+    ? toParagraphs(fillVars(t.greeting, vars), 'color:#666;font-size:15px;line-height:1.7;margin:0 0 16px;')
+    : `
       <p style="color:#666;font-size:15px;line-height:1.7;margin:0 0 16px;">
         <strong>${programTitle}</strong> 신청이 정상 접수되었습니다.
       </p>
 
       <p style="color:#666;font-size:15px;line-height:1.7;margin:0 0 20px;">
         <strong style="color:#D4756E;">결제를 완료해야 신청이 확정됩니다.</strong> 아직 결제 전이시라면 사이트에서 결제를 진행해 주세요.
-      </p>
+      </p>`
+  await payload.sendEmail({
+    to: enrollment.email,
+    subject: t?.subject ? fillVars(t.subject, vars) : '[AI놀자] 신청이 접수되었습니다 — 결제 후 신청이 확정됩니다',
+    html: wrap(
+      `${name}님, 신청이 접수되었습니다`,
+      `
+      ${greeting}
 
       <div style="text-align:center;margin:24px 0;">
         <a href="${SITE_URL}/mypage" style="display:inline-block;background:#D4756E;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:12px;font-size:15px;font-weight:bold;">마이페이지에서 확인하기</a>
@@ -582,16 +667,22 @@ export async function sendVirtualAccountIssued(
       })
     : ''
   const name = order.buyerName || order.buyerEmail.split('@')[0]
-  await payload.sendEmail({
-    to: order.buyerEmail,
-    subject: `[AI놀자] 가상계좌 발급 완료 — 입금 후 신청이 확정됩니다`,
-    html: wrap(
-      `${name}님, 가상계좌가 발급되었습니다`,
-      `
+  const vars = { name, productName: order.productName || '주문' }
+  const t = await getTemplateOverride(payload, 'vaccount-issued')
+  const body = t?.body
+    ? toParagraphs(fillVars(t.body, vars), 'color:#666;font-size:15px;line-height:1.7;margin:0 0 16px;')
+    : `
       <p style="color:#666;font-size:15px;line-height:1.7;margin:0 0 16px;">
         <strong>${order.productName || '주문'}</strong> 결제를 위한 가상계좌가 발급되었습니다.<br>
         아래 계좌로 입금해 주시면 자동으로 결제가 완료되어 신청이 확정됩니다.
-      </p>
+      </p>`
+  await payload.sendEmail({
+    to: order.buyerEmail,
+    subject: t?.subject ? fillVars(t.subject, vars) : `[AI놀자] 가상계좌 발급 완료 — 입금 후 신청이 확정됩니다`,
+    html: wrap(
+      `${name}님, 가상계좌가 발급되었습니다`,
+      `
+      ${body}
 
       <table cellpadding="8" cellspacing="0" style="width:100%;background:#FFF1F0;border:2px solid #D4756E;border-radius:12px;margin:0 0 20px;font-size:14px;color:#333;">
         <tr><td style="width:90px;color:#888;font-weight:bold;">은행</td><td><strong>${order.vbankName || '-'}</strong></td></tr>
@@ -643,16 +734,22 @@ export async function sendVirtualAccountReminder(
       })
     : ''
   const name = order.buyerName || order.buyerEmail.split('@')[0]
-  await payload.sendEmail({
-    to: order.buyerEmail,
-    subject: `[AI놀자] 가상계좌 입금 기한 만료 안내 (약 3시간 전)`,
-    html: wrap(
-      `${name}님, 입금 기한이 얼마 남지 않았습니다`,
-      `
+  const vars = { name, productName: order.productName || '주문' }
+  const t = await getTemplateOverride(payload, 'vaccount-reminder')
+  const body = t?.body
+    ? toParagraphs(fillVars(t.body, vars), 'color:#666;font-size:15px;line-height:1.7;margin:0 0 16px;')
+    : `
       <p style="color:#666;font-size:15px;line-height:1.7;margin:0 0 16px;">
         신청하신 <strong>${order.productName || '주문'}</strong>의 결제를 위한 가상계좌 입금 기한이 약 3시간 남았습니다.<br>
         기한 내에 미입금 시 신청이 자동 취소되니 유의해 주세요.
-      </p>
+      </p>`
+  await payload.sendEmail({
+    to: order.buyerEmail,
+    subject: t?.subject ? fillVars(t.subject, vars) : `[AI놀자] 가상계좌 입금 기한 만료 안내 (약 3시간 전)`,
+    html: wrap(
+      `${name}님, 입금 기한이 얼마 남지 않았습니다`,
+      `
+      ${body}
 
       <table cellpadding="8" cellspacing="0" style="width:100%;background:#FFF1F0;border:2px solid #D4756E;border-radius:12px;margin:0 0 20px;font-size:14px;color:#333;">
         <tr><td style="width:90px;color:#888;font-weight:bold;">은행</td><td><strong>${order.vbankName || '-'}</strong></td></tr>
