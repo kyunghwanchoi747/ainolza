@@ -451,7 +451,7 @@ export function MemoirDetailContent() {
           <div className="rule"></div>
           <p className="lead">저희가 기획한 자서전은<br />앞서 말씀드린 그대로입니다.</p>
           <p className="sub">종이책과 원본 디지털 파일, 오디오북,<br />그리고 영상으로 만들어지는 다큐멘터리까지.</p>
-          <p className="sub">하지만 시간은 아무리 줄여도 <b>8주</b>는 걸리더군요.<br />이번 추석 전, 다큐멘터리까지는 받아보실 수 있습니다.<br />다만 실물 종이책은 출력소 스케줄을 고려해야 하기 때문에<br />그 이후에 발송됩니다.</p>
+          <p className="sub">하지만 시간은 아무리 줄여도 <b>8주</b>는 걸리더군요.<br />완성된 다큐멘터리와 오디오북부터 먼저 전해드리고,<br />실물 종이책은 출력소 스케줄을 고려해<br />그 이후 순차적으로 발송됩니다.</p>
         </div>
       </section>
 
@@ -511,24 +511,9 @@ export function MemoirDetailContent() {
 
       <section className="scene scene--deep">
         <div className="inner">
-          <p className="beat">지금 신청한 뒤 추석 상영은<br /><em>딱 10분까지만</em> 가능합니다</p>
-          <div className="rule"></div>
-          <p className="lead">모든 아웃풋에 대비해<br />적자까지 고려해가며<br />정말 최저 가격, 최고 퀄리티로<br />준비했습니다</p>
+          <p className="beat">모든 아웃풋에 대비해<br />적자까지 고려해가며<br />정말 최저 가격, 최고 퀄리티로<br />준비했습니다</p>
           <div className="rule"></div>
           <p className="sub">그렇기 때문에 이후,<br />가격이 인상될 수 있습니다</p>
-        </div>
-      </section>
-
-      <section className="scene scene--dense">
-        <div className="inner inner--wide">
-          <p className="kicker">9월 25일 추석에 맞추려면</p>
-          <div className="sched">
-            <div className="sched-row"><span className="sched-when">8월 중</span><span className="sched-what">상담 · 계약</span></div>
-            <div className="sched-row"><span className="sched-when">8월 말</span><span className="sched-what">이야기 수집</span></div>
-            <div className="sched-row"><span className="sched-when">9월 중순</span><span className="sched-what">다큐멘터리 · 오디오북 완성</span></div>
-            <div className="sched-row"><span className="sched-when">9월 25일</span><span className="sched-what">가족과 함께 상영</span></div>
-          </div>
-          <p className="note">종이책은 이후 순차적으로 발송해 드립니다.</p>
         </div>
       </section>
 
