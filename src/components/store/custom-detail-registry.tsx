@@ -2,6 +2,7 @@ import type { ComponentType } from 'react'
 import { VodDetailContent } from '@/components/store/vod-detail-content'
 import { MemoirDetailContent } from '@/components/store/memoir-detail-content'
 import { EbookPublishingDetailContent } from '@/components/store/ebook-publishing-detail-content'
+import { DdalkkakDetailContent } from '@/components/store/ddalkkak-detail-content'
 
 /**
  * 상품 slug → 커스텀 상세 본문 컴포넌트.
@@ -14,4 +15,5 @@ export const CUSTOM_DETAIL_COMPONENTS: Record<string, ComponentType> = {
   'memoir-full': MemoirDetailContent,
   'memoir-basic': MemoirDetailContent,
   'ebook-publishing-class': EbookPublishingDetailContent,
+  'ddalkkak-era': DdalkkakDetailContent,
 }
