@@ -189,8 +189,8 @@ export function DdalkkakDetailContent() {
 
       {/* 6. 대상 */}
       <section className="px-6 py-16 md:py-24 bg-surface border-y border-line">
-        <div className="max-w-[820px] mx-auto grid md:grid-cols-2 gap-12">
-          <div>
+        <div className="max-w-[820px] mx-auto grid md:grid-cols-2">
+          <div className="pb-14 md:pb-0 md:pr-14">
             <SectionLabel>이런 분께 권합니다</SectionLabel>
             <ul className="border-t border-line">
               {FOR_WHO.map((t) => (
@@ -200,7 +200,7 @@ export function DdalkkakDetailContent() {
               ))}
             </ul>
           </div>
-          <div>
+          <div className="pt-14 md:pt-0 md:pl-14 border-t md:border-t-0 md:border-l border-line">
             <SectionLabel>이런 분께는 맞지 않습니다</SectionLabel>
             <ul className="border-t border-line">
               {NOT_FOR.map((t) => (
