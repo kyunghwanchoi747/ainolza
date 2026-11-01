@@ -220,8 +220,9 @@ export function ClassroomEditClient({ initial }: { initial: Initial }) {
             <div>
               <CardTitle>회차별 강의</CardTitle>
               <CardDescription>
-                Vimeo ID(녹화본) 또는 YouTube 라이브 URL 중 하나를 입력하세요. 둘 다 있으면 Vimeo가
-                우선 표시됩니다.
+                YouTube URL(일부 공개 라이브/녹화본) 또는 Vimeo ID(기존 녹화본) 중 하나를 입력하세요.
+                둘 다 있으면 Vimeo가 우선 표시됩니다. YouTube는 &quot;비공개&quot;가 아니라 &quot;일부 공개&quot;로 설정해야
+                수강생에게 재생됩니다.
               </CardDescription>
             </div>
             <Button onClick={addSession} variant="outline" size="sm">
@@ -293,7 +294,7 @@ export function ClassroomEditClient({ initial }: { initial: Initial }) {
                   </div>
                   <div>
                     <label className="block text-[10px] font-medium mb-1 text-muted-foreground">
-                      YouTube 라이브 URL
+                      YouTube URL (일부 공개)
                     </label>
                     <Input
                       value={s.youtubeLiveUrl}

@@ -115,8 +115,8 @@ export const Classrooms: CollectionConfig = {
         {
           name: 'youtubeLiveUrl',
           type: 'text',
-          label: 'YouTube 라이브 URL',
-          admin: { description: 'vimeoId 없을 때만 표시. 라이브 종료 후엔 vimeoId로 교체' },
+          label: 'YouTube URL (일부 공개 라이브/녹화본)',
+          admin: { description: 'vimeoId 없을 때만 표시. 반드시 "일부 공개"로 설정 (비공개는 수강생에게 재생 안 됨). 90% 시청 시 수강 완료 자동 기록' },
         },
         {
           name: 'guidebookUrl',

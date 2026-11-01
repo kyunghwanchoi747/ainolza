@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation'
 import { getPayloadClient } from '@/lib/payload'
 import { getClassroomBySlug } from '@/lib/classrooms-db'
 import { SecretUnlock } from '@/components/classroom/secret-unlock'
-import { ProgressProvider, ProgressBar, SessionCompleteButton, VimeoTrackedPlayer } from '@/components/classroom/progress-tracker'
+import { ProgressProvider, ProgressBar, SessionCompleteButton, VimeoTrackedPlayer, YouTubeTrackedPlayer } from '@/components/classroom/progress-tracker'
 
 export const dynamic = 'force-dynamic'
 
@@ -284,12 +284,6 @@ export default async function ClassroomDetailPage({
                     <span className="text-sm font-medium text-brand">{s.week}회차</span>
                     <h3 className="text-lg font-bold text-ink">{s.title}</h3>
                     {s.date && <span className="text-xs text-sub">{s.date}</span>}
-                    {isLive && (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-500 text-white text-xs font-bold">
-                        <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                        LIVE
-                      </span>
-                    )}
                   </div>
 
                   {/* 영상 임베드 (16:9 반응형) */}
@@ -303,13 +297,10 @@ export default async function ClassroomDetailPage({
                           title={s.title}
                         />
                       ) : (
-                        <iframe
-                          src={`https://www.youtube.com/embed/${ytId}?autoplay=0&rel=0`}
-                          frameBorder="0"
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                          allowFullScreen
+                        <YouTubeTrackedPlayer
+                          videoId={ytId!}
+                          sessionNumber={i + 1}
                           title={s.title}
-                          className="absolute inset-0 w-full h-full"
                         />
                       )}
                     </div>

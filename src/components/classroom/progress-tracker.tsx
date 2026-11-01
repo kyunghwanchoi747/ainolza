@@ -218,6 +218,111 @@ export function VimeoTrackedPlayer({
   )
 }
 
+let ytApiPromise: Promise<any> | null = null
+function loadYouTubeApi(): Promise<any> {
+  if (typeof window === 'undefined') return Promise.reject(new Error('no window'))
+  const w = window as any
+  if (w.YT?.Player) return Promise.resolve(w.YT)
+  if (!ytApiPromise) {
+    ytApiPromise = new Promise((resolve) => {
+      const prev = w.onYouTubeIframeAPIReady
+      w.onYouTubeIframeAPIReady = () => {
+        prev?.()
+        resolve(w.YT)
+      }
+      const s = document.createElement('script')
+      s.src = 'https://www.youtube.com/iframe_api'
+      document.head.appendChild(s)
+    })
+  }
+  return ytApiPromise
+}
+
+/**
+ * 시청 진행률 자동 감지 YouTube 플레이어 (일부 공개 영상용).
+ * 90% 이상 시청(또는 끝까지 재생) 시 자동으로 수강 완료를 기록한다.
+ */
+export function YouTubeTrackedPlayer({
+  videoId,
+  sessionNumber,
+  title,
+}: {
+  videoId: string
+  sessionNumber: number
+  title: string
+}) {
+  const ctx = useContext(ProgressContext)
+  const iframeRef = useRef<HTMLIFrameElement>(null)
+  const firedRef = useRef(false)
+  const ctxRef = useRef(ctx)
+  ctxRef.current = ctx
+
+  useEffect(() => {
+    let player: any = null
+    let timer: ReturnType<typeof setInterval> | null = null
+    let cancelled = false
+
+    const complete = async () => {
+      const c = ctxRef.current
+      if (firedRef.current || !c) return
+      if (c.completedNumbers.includes(sessionNumber)) return
+      firedRef.current = true
+      const ok = await c.markComplete(sessionNumber, true)
+      if (!ok) firedRef.current = false
+    }
+
+    const stopPolling = () => {
+      if (timer) clearInterval(timer)
+      timer = null
+    }
+
+    loadYouTubeApi().then((YT) => {
+      if (cancelled || !iframeRef.current) return
+      player = new YT.Player(iframeRef.current, {
+        events: {
+          onStateChange: (e: { data: number }) => {
+            if (e.data === YT.PlayerState.PLAYING) {
+              stopPolling()
+              timer = setInterval(() => {
+                const d = player?.getDuration?.()
+                const t = player?.getCurrentTime?.()
+                if (d > 0 && t / d >= 0.9) complete()
+              }, 2000)
+            } else {
+              stopPolling()
+              if (e.data === YT.PlayerState.ENDED) complete()
+            }
+          },
+        },
+      })
+    }).catch((err: unknown) => {
+      console.error('YouTube 플레이어 초기화 실패:', err)
+    })
+
+    return () => {
+      cancelled = true
+      stopPolling()
+      try {
+        player?.destroy?.()
+      } catch {
+        // 이미 해제된 경우 무시
+      }
+    }
+  }, [sessionNumber])
+
+  return (
+    <iframe
+      ref={iframeRef}
+      src={`https://www.youtube.com/embed/${videoId}?enablejsapi=1&rel=0&playsinline=1`}
+      frameBorder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      allowFullScreen
+      title={title}
+      className="absolute inset-0 w-full h-full"
+    />
+  )
+}
+
 /** 각 회차 영상 아래에 배치하는 수강 완료 버튼 */
 export function SessionCompleteButton({
   sessionNumber,
