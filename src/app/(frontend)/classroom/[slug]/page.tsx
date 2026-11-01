@@ -273,11 +273,10 @@ export default async function ClassroomDetailPage({
           <section className="space-y-12">
             <h2 className="text-2xl font-bold text-ink">회차별 강의</h2>
             {classroom.sessions.map((s, i) => {
-              // 우선순위: vimeoId(녹화본) > youtubeLiveUrl(라이브)
-              const isVod = !!s.vimeoId
-              const ytId = !isVod && s.youtubeLiveUrl ? extractYouTubeId(s.youtubeLiveUrl) : null
-              const isLive = !isVod && !!ytId
-              const hasVideo = isVod || isLive
+              // 우선순위: YouTube(일부 공개) > vimeoId(기존 녹화본, Vimeo 종료 전 호환용)
+              const ytId = s.youtubeLiveUrl ? extractYouTubeId(s.youtubeLiveUrl) : null
+              const isVod = !ytId && !!s.vimeoId
+              const hasVideo = !!ytId || isVod
               return (
                 <div key={s.week} className="space-y-4">
                   <div className="flex items-baseline gap-3 flex-wrap">

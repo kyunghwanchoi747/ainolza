@@ -110,13 +110,13 @@ export const Classrooms: CollectionConfig = {
           name: 'vimeoId',
           type: 'text',
           label: 'Vimeo 영상 ID (녹화본)',
-          admin: { description: '있으면 우선 표시. 예: 1186484969' },
+          admin: { description: '(구) Vimeo 종료 예정. YouTube URL이 있으면 YouTube가 우선 표시됨. 예: 1186484969' },
         },
         {
           name: 'youtubeLiveUrl',
           type: 'text',
           label: 'YouTube URL (일부 공개 라이브/녹화본)',
-          admin: { description: 'vimeoId 없을 때만 표시. 반드시 "일부 공개"로 설정 (비공개는 수강생에게 재생 안 됨). 90% 시청 시 수강 완료 자동 기록' },
+          admin: { description: '있으면 Vimeo보다 우선 표시. 반드시 "일부 공개"로 설정 (비공개는 수강생에게 재생 안 됨). 90% 시청 시 수강 완료 자동 기록' },
         },
         {
           name: 'guidebookUrl',

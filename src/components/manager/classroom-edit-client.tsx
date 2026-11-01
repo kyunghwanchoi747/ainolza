@@ -221,7 +221,7 @@ export function ClassroomEditClient({ initial }: { initial: Initial }) {
               <CardTitle>회차별 강의</CardTitle>
               <CardDescription>
                 YouTube URL(일부 공개 라이브/녹화본) 또는 Vimeo ID(기존 녹화본) 중 하나를 입력하세요.
-                둘 다 있으면 Vimeo가 우선 표시됩니다. YouTube는 &quot;비공개&quot;가 아니라 &quot;일부 공개&quot;로 설정해야
+                둘 다 있으면 YouTube가 우선 표시됩니다. YouTube는 &quot;비공개&quot;가 아니라 &quot;일부 공개&quot;로 설정해야
                 수강생에게 재생됩니다.
               </CardDescription>
             </div>
