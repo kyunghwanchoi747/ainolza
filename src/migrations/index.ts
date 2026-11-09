@@ -19,6 +19,7 @@ import * as migration_20260809_061500_add_vbank_reminder_sent from './20260809_0
 import * as migration_20260813_090000_products_display_category from './20260813_090000_products_display_category';
 import * as migration_20260828_000000_email_templates_and_logs from './20260828_000000_email_templates_and_logs';
 import * as migration_20261101_000000_users_reset_password_requested_at from './20261101_000000_users_reset_password_requested_at';
+import * as migration_20261109_000000_storage_object_key from './20261109_000000_storage_object_key';
 
 export const migrations = [
   {
@@ -125,5 +126,10 @@ export const migrations = [
     up: migration_20261101_000000_users_reset_password_requested_at.up,
     down: migration_20261101_000000_users_reset_password_requested_at.down,
     name: '20261101_000000_users_reset_password_requested_at'
+  },
+  {
+    up: migration_20261109_000000_storage_object_key.up,
+    down: migration_20261109_000000_storage_object_key.down,
+    name: '20261109_000000_storage_object_key'
   },
 ];

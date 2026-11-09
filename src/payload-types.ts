@@ -86,6 +86,7 @@ export interface Config {
     coupons: Coupon;
     webhook_events: WebhookEvent;
     waitlists: Waitlist;
+    email_logs: EmailLog;
     email_templates: EmailTemplate;
     exports: Export;
     imports: Import;
@@ -116,6 +117,7 @@ export interface Config {
     coupons: CouponsSelect<false> | CouponsSelect<true>;
     webhook_events: WebhookEventsSelect<false> | WebhookEventsSelect<true>;
     waitlists: WaitlistsSelect<false> | WaitlistsSelect<true>;
+    email_logs: EmailLogsSelect<false> | EmailLogsSelect<true>;
     email_templates: EmailTemplatesSelect<false> | EmailTemplatesSelect<true>;
     exports: ExportsSelect<false> | ExportsSelect<true>;
     imports: ImportsSelect<false> | ImportsSelect<true>;
@@ -132,6 +134,9 @@ export interface Config {
   globals: {};
   globalsSelect: {};
   locale: null;
+  widgets: {
+    collections: CollectionsWidget;
+  };
   user: User;
   jobs: {
     tasks: {
@@ -184,6 +189,7 @@ export interface User {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   password?: string | null;
@@ -196,6 +202,7 @@ export interface User {
 export interface Media {
   id: number;
   alt?: string | null;
+  _objectKey?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -373,6 +380,7 @@ export interface Ebook {
    * 예: 불편한 AI 전자책 v1.0
    */
   title: string;
+  _objectKey?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -644,7 +652,7 @@ export interface Classroom {
          */
         vimeoId?: string | null;
         /**
-         * vimeoId 없을 때만 표시. 라이브 종료 후엔 vimeoId로 교체
+         * vimeoId 없을 때만 표시. 반드시 "일부 공개"로 설정 (비공개는 수강생에게 재생 안 됨). 90% 시청 시 수강 완료 자동 기록
          */
         youtubeLiveUrl?: string | null;
         guidebookUrl?: string | null;
@@ -794,6 +802,34 @@ export interface Waitlist {
   createdAt: string;
 }
 /**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "email_logs".
+ */
+export interface EmailLog {
+  id: number;
+  recipient: string;
+  subject: string;
+  type?:
+    | (
+        | 'welcome'
+        | 'signup-admin'
+        | 'enrollment-admin'
+        | 'enrollment-buyer'
+        | 'order-admin'
+        | 'payment-admin'
+        | 'payment-buyer'
+        | 'refund-request-admin'
+        | 'refund-buyer'
+        | 'other'
+      )
+    | null;
+  status?: ('sent' | 'failed') | null;
+  error?: string | null;
+  relatedId?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * 수강신청·결제 시 자동 발송되는 메일의 제목과 주요 문구입니다. 비워두면 기본 문구로 발송됩니다. 표·버튼 등 나머지 구조는 여기서 바꿀 수 없습니다.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -872,7 +908,7 @@ export interface Export {
  */
 export interface Import {
   id: number;
-  collectionSlug: 'users' | 'orders' | 'waitlists';
+  collectionSlug: string;
   importMode?: ('create' | 'update' | 'upsert') | null;
   matchField?: string | null;
   status?: ('pending' | 'completed' | 'partial' | 'failed') | null;
@@ -1096,6 +1132,10 @@ export interface PayloadLockedDocument {
         value: number | Waitlist;
       } | null)
     | ({
+        relationTo: 'email_logs';
+        value: number | EmailLog;
+      } | null)
+    | ({
         relationTo: 'email_templates';
         value: number | EmailTemplate;
       } | null);
@@ -1161,6 +1201,7 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
 }
@@ -1170,6 +1211,7 @@ export interface UsersSelect<T extends boolean = true> {
  */
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
+  _objectKey?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -1496,6 +1538,7 @@ export interface ClassroomProgressSelect<T extends boolean = true> {
  */
 export interface EbooksSelect<T extends boolean = true> {
   title?: T;
+  _objectKey?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -1579,6 +1622,20 @@ export interface WaitlistsSelect<T extends boolean = true> {
   notifiedAt?: T;
   source?: T;
   adminMemo?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "email_logs_select".
+ */
+export interface EmailLogsSelect<T extends boolean = true> {
+  recipient?: T;
+  subject?: T;
+  type?: T;
+  status?: T;
+  error?: T;
+  relatedId?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1726,20 +1783,58 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "TaskCreateCollectionExport".
  */
 export interface TaskCreateCollectionExport {
   input: {
-    name?: string | null;
+    id: string;
+    name: string;
+    batchSize?: number | null;
+    collectionSlug:
+      | 'users'
+      | 'media'
+      | 'design-pages'
+      | 'products'
+      | 'product-categories'
+      | 'posts'
+      | 'comments'
+      | 'programs'
+      | 'site-settings'
+      | 'enrollments'
+      | 'orders'
+      | 'reviews'
+      | 'classrooms'
+      | 'classroom-progress'
+      | 'ebooks'
+      | 'referrals'
+      | 'coupons'
+      | 'webhook_events'
+      | 'waitlists'
+      | 'email_logs'
+      | 'email_templates'
+      | 'exports'
+      | 'imports';
+    drafts?: ('yes' | 'no') | null;
+    exportCollection: string;
+    fields?: string[] | null;
     format: 'csv' | 'json';
     limit?: number | null;
+    locale?: string | null;
+    maxLimit?: number | null;
     page?: number | null;
     sort?: string | null;
-    sortOrder?: ('asc' | 'desc') | null;
-    drafts?: ('yes' | 'no') | null;
-    selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
-    fields?: string[] | null;
-    collectionSlug: string;
+    userCollection?: string | null;
+    userID?: string | null;
     where?:
       | {
           [k: string]: unknown;
@@ -1749,10 +1844,6 @@ export interface TaskCreateCollectionExport {
       | number
       | boolean
       | null;
-    userID?: string | null;
-    userCollection?: string | null;
-    exportCollection?: string | null;
-    maxLimit?: number | null;
   };
   output?: unknown;
 }
